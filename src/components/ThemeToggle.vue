@@ -17,10 +17,6 @@ export default {
   methods: {
     toggleTheme() {
       this.darkMode = !this.darkMode;
-      document.documentElement.classList.remove(this.darkMode ? 'theme--light' : 'theme--dark')
-      document.documentElement.classList.add(this.darkMode ? 'theme--dark' : 'theme--light')
-      localStorage.setItem('VIEW_THEME', this.darkMode ? 'DARK' : 'LIGHT')
-      localStorage.setItem('PA_VIEW_THEME', this.darkMode ? 'DARK' : 'LIGHT')
       this.themeService.emitThemeChange(this.darkMode ? 'DARK' : 'LIGHT');
     },
   },

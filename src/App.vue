@@ -82,10 +82,11 @@
       <div class="top-bar">
         <div class="top-bar__left-part">
           <a href="https://deltaprime.io/">
-            <img src="src/assets/icons/deltaprime.svg" class="logo">
+            <img src="src/assets/icons/degenprime.svg" class="logo degen-only">
+            <img src="src/assets/icons/deltaprime.svg" class="logo delta-only">
           </a>
           <AppToggle v-if="!isClaimPage" class="top-bar__app-toggle"></AppToggle>
-          <ThemeToggle v-if="!isClaimPage" class="top-bar__theme-toggle"></ThemeToggle>
+          <ThemeToggle v-if="!isClaimPage" class="top-bar__theme-toggle delta-only"></ThemeToggle>
           <div v-if="isSavingsPage" class="protocol-insurance">
             <span>Reserve Fund:</span>
             <span class="insurance-value">$800,000</span>
@@ -254,6 +255,13 @@ export default {
       this.checkWallet();
     }, 500)
     this.getCountry();
+    this.watchDegenChange();
+    this.watchThemeChange();
+
+    // todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ONLY FOR TESTING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    window.letsSetDegen = (degen) => {
+      this.themeService.changeDegenMode(degen)
+    }
   },
   computed: {
     ...mapState('network', ['account', 'provider']),
@@ -267,6 +275,7 @@ export default {
       'globalActionsDisableService',
       'paWithdrawQueueService',
       'bullScoreService',
+      'themeService',
     ]),
     ...mapState('poolStore', ['pools'])
   },
@@ -374,6 +383,29 @@ export default {
     watchCloseModal() {
       this.modalService.watchCloseModal().subscribe(() => {
         this.closeModal();
+      })
+    },
+
+    watchDegenChange() {
+      this.themeService.observeDegenMode().subscribe(isDegen => {
+        if (isDegen) {
+          this.themeService.emitThemeChange('DARK')
+        }
+        if (isDegen) {
+          document.documentElement.classList.add('theme--degen')
+        } else {
+          document.documentElement.classList.remove('theme--degen')
+        }
+        localStorage.setItem('DEGEN', isDegen)
+      })
+    },
+
+    watchThemeChange() {
+      this.themeService.observeThemeChange().subscribe(theme => {
+        document.documentElement.classList.remove(theme === 'DARK' ? 'theme--light' : 'theme--dark')
+        document.documentElement.classList.add(theme === 'DARK' ? 'theme--dark' : 'theme--light')
+        localStorage.setItem('VIEW_THEME', theme === 'DARK' ? 'DARK' : 'LIGHT')
+        localStorage.setItem('PA_VIEW_THEME', theme === 'DARK' ? 'DARK' : 'LIGHT')
       })
     },
 
@@ -623,7 +655,9 @@ export default {
 
 <style lang="scss">
 @import "~@/styles/themes/theme-dark";
+@import "~@/styles/themes/theme-dark-degen";
 @import "~@/styles/themes/theme-light";
+@import "~@/styles/themes/theme-utils";
 
 html {
   color: var(--default-text-color);

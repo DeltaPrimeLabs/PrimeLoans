@@ -1,0 +1,714 @@
+@import "src/styles/colors";
+
+:root.theme--dark.theme--degen {
+  color-scheme: dark;
+  --default-text-color: #{$degen-light-1};
+  --default-input-placeholder-color: #{$degen-light-3};
+
+  --show-dark-opacity: 1;
+  --show-light-opacity: 0;
+
+  // region App
+  --app-page-content__background: linear-gradient(140deg, #{$degen-dark-9} 11%, #{$degen-dark-10} 49%, #{$degen-dark-11} 89%);
+  --app-page-content__background--opacity: 1;
+  // endregion
+
+  // region labels
+  --label-color: #{$degen-light-3};
+  // endregion
+
+  // region AccountAprWidget
+  --account-apr-widget-component__background: #{$degen-dark-4}80;
+  --account-apr-widget-component__box-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
+  --account-apr-widget-component__widget-title-color: #{$degen-light-3};
+  --account-apr-widget-component__no-smart-loan-dash-color: #{$degen-light-4};
+  --account-apr-widget-component__widget-comment-color: #{$degen-light-4};
+  // endregion
+
+  // region Wallet
+  --wallet-a-color: #{$degen-light-3};
+  --wallet-separator-color: #{$degen-light-7};
+  // endregion
+
+  // region StatsBarBeta
+  --stats-bar-beta__background: #{$degen-dark-4}80;
+  --stats-bar-beta__box-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
+  --stats-bar-beta__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
+  // endregion
+
+  // region LTIPStatsBar
+  --ltip-stats-bar__background: #{$degen-dark-4}80;
+  --ltip-stats-bar__box-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
+  --ltip-stats-bar__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
+  --ltip-stats-bar-text__color: #{$degen-light-3};
+  --ltip-stats-bar-value__color: #{$degen-light-1};
+  --ltip-stats-bar-value-icon: url("/src/assets/icons/shine_dark.svg");
+  // endregion
+
+  // region StatsBarElementBeta
+  --stats-bar-element-beta__stat-label-color: #{$degen-light-3};
+  // endregion
+
+  // region Block
+  --block__background-color: #{$degen-dark-4};
+  --block__box-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
+  --block__border-image: linear-gradient(144deg, #{$degen-stroke-1} 14%, #{$degen-stroke-2} 56%, #{$degen-stroke-3} 98%);
+  // endregion
+
+  // region BarGaugeBeta
+  --bar__background-color: #{$cloud-navy};
+  --bar__box-shadow: inset 0 1px 3px 0 #{$washed-fuchsia};
+  --bar__value-background-image: linear-gradient(to left, #{$deep-blue} 9%, #{$deep-lilac} 83%);
+  --bar__value-background-image--completion: linear-gradient(to right, #{$lime-green} 0%, #{$pale-green} 100%);
+  --bar__value-background-image--error: #{$pale-red};
+  // endregion
+
+  // region NameValueBadgeBeta
+  --name-value-badge-beta__background: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --name-value-badge-beta__content-background: var(--block__background-color);
+  // endregion
+
+  // region TableHeader
+  --table-header__border-color: #{$degen-dark-6};
+  --table-header__background-color: #{$degen-dark-5};
+  --table-header__cell-color: #{$degen-light-3};
+  // endregion
+
+  // region IconButtonMenuBeta
+  --icon-button-menu-beta__icon-color--default: #{$pale-lilac};
+  --icon-button-menu-beta__icon-color--disabled: #{$degen-light-7};
+  --icon-button-menu-beta__icon-color-hover--default: #{$light-purple};
+  --icon-button-menu-beta__menu-background-color: #{$degen-dark-2};
+  --icon-button-menu-beta__menu-border-color: #{$degen-light-7};
+  --icon-button-menu-beta__menu-box-shadow: 2px 2px 8px 0 #{$degen-dark-8}CC;
+  --icon-button-menu-beta__menu-color: #{$degen-light-2};
+  --icon-button-menu-beta__menu-color--hover: #{$violet-mist}; // TODO to change
+  --icon-button-menu-beta__menu-option-border: 1px solid #{$degen-dark-6};
+  // endregion
+
+  // region IconButton
+  --icon-button__icon-color--default: #{$pale-lilac};
+  --icon-button__icon-color--disabled: #{$degen-light-7};
+  --icon-button__icon-color-hover--default: #{$light-purple};
+  // endregion
+
+  // region AssetsTableRow / LpTableRow / PoolsTableRow
+  --asset-table-row__icon-opacity: 0.95;
+  --asset-table-row__border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --asset-table-row__asset-loan-color: #{$degen-light-4};
+  --asset-table-row__double-value-color: #{$degen-light-4};
+  --asset-table-row__no-value-dash-color: #{$degen-light-4};
+  --asset-table-row__apy-color: #{$pale-green};
+  --asset-table-row__action-button-background--default: #{$pale-lilac};
+  --asset-table-row__action-button-background--disabled: #{$degen-light-7};
+  --asset-table-row__action-button-background-hover--default: #{$light-purple};
+  // endregion
+
+  // region SmallChartBeta
+  --small-chart-beta__line-color--positive: #{$pale-green};
+  --small-chart-beta__line-color--negative: #{$pale-red};
+  // endregion
+
+  // region Chart
+  --chart__line-color--positive: #{$pale-green};
+  --chart__line-color--negative: #{$pale-red};
+  --chart__tooltip-background: #{$pale-fuchsia};
+  --chart__tooltip-color: #{$degen-light-1};
+  --chart__grid-lines-color: #{$degen-light-7};
+  --chart__scales-ticks-color: #{$degen-light-4};
+  --chart__active-point-label-color: #{$degen-light-4};
+  --chart__active-point-line-color: #{$degen-light-6};
+  --chart__active-point-point-color: #{$pale-fuchsia};
+  // endregion
+
+  // region AssetFilter
+  --asset-filter__filter-separator-color: #{$degen-light-7};
+  --asset-filter__filter-option-background-color: #{$degen-light-2};
+  --asset-filter__filter-option-box-shadow: 1px 2px 5px 0 #{$degen-dark-8}E5;
+  --asset-filter__clear-text-color: #{$pale-lilac};
+  // endregion
+
+  // region DexFilter
+  --dex-filter__filter-option-background-color: #{$degen-light-2};
+  --dex-filter__filter-option-box-shadow: 1px 2px 5px 0 #{$degen-dark-8}E5;
+  // endregion
+
+  // region Tabs
+  --tabs__header-background-color: #{$degen-dark-5};
+  --tabs__header-box-shadow: inset 1px 1px 7px 0 #{$degen-dark-8}99;
+  --tabs__tab-button-color: #{$degen-light-4};
+  --tabs__tab-button-color--hover: #{$degen-light-1}; // TODO to change
+  --tabs__tab-button-color--selected: #{$degen-light-1};
+  --tabs__tab-icon-icon-background: linear-gradient(#{$degen-light-6} 0%, #{$degen-light-6} 100%);
+  --tabs__tab-icon-icon-background--hover: linear-gradient(#{$degen-light-3} 0%, #{$degen-light-3} 100%);
+  --tabs__tab-icon-icon-background--selected: linear-gradient(to left, #{$cloud-purple} 9%, #{$smoke-blue} 83%);
+  --tabs__tab-icon-shadow--selected: opacity(0.25) drop-shadow(2px 2px 4px #{$degen-dark-8});
+  --tabs__highlight-background-color: #{$degen-dark-3};
+  --tabs__highlight-box-shadow: 2px 2px 7px 0 #{$degen-dark-8}99;
+  // endregion
+
+  // region Modal
+  --modal__background-color: #{$degen-dark-4};
+  --modal__border: linear-gradient(145deg, #{$degen-stroke-1} 13%, #{$degen-stroke-2} 56%, #{$degen-stroke-3} 98%);
+  --modal__box-shadow: 4px 4px 20px 0 #{$degen-dark-8}66;
+  --modal__top-info-color: #{$degen-light-3};
+  --modal__top-info-warning-color: #{$mist-orange};
+  --modal__top-info-divider-color: #{$mist-space};
+  --modal__top-info-bar-color: #{$degen-light-2};
+  --modal__top-info-bar-background-color: #{$degen-dark-1};
+  --modal__close-button-container-color: #{$pale-lilac};
+  --modal__backdrop-backdrop-filter: blur(45px);
+  --modal__backdrop-background: #{$degen-dark-8}4c;
+  --modal__pool-name-color: #{$degen-light-1};
+  --modal__scroll-bar-background: #{$degen-dark-7};
+  --modal__scroll-bar-hover-background: #{$degen-dark-8};
+  // endregion
+
+  // region CurrencyInput
+  --currency-input__background: linear-gradient(to right, #{$deep-navy} 9%, #{$degen-dark-10} 50%, #{$degen-dark-11} 92%);
+  --currency-input__box-shadow: inset 3px 3px 8px 0 #{$degen-dark-8}7f;
+  --currency-input__converted-color: #{$degen-light-3};
+  --currency-input__input-color: #{$degen-light-1};
+  --currency-input__max-border: solid 1px #{$dark-lilac};
+  --currency-input__max-border--hover: solid 1px #{$cloud-purple};
+  --currency-input__max-color: #{$pale-lilac};
+  --currency-input__max-color--hover: #{$light-purple};
+  --currency-input__max-background: transparent;
+  --currency-input__max-background--hover: transparent;
+  --currency-input__error-info-warngin-color: #{$degen-light-1};
+  --currency-input__warning-color: #{$mist-orange};
+  --currency-input__error-color: #{$pale-red};
+  // endregion
+
+  // region CurrencyComboInput TODO
+  --currency-combo-input__box-shadow: inset 3px 3px 8px 0 #{$degen-dark-8}7f;
+  --currency-combo-input__background: linear-gradient(to right, #{$deep-navy} 9%, #{$degen-dark-10} 50%, #{$degen-dark-11} 92%);
+  --currency-combo-input__divider-color: #{$mist-space};
+  --currency-combo-input__chevron-color: #{$pale-lilac};
+  --currency-combo-input__select-dropdown-input-border: 2px solid #{$degen-dark-6};
+  --currency-combo-input__select-dropdown-option-background--hover: #{$cloud-navy};
+  --currency-combo-input__select-dropdown-option-icon-opacity: 0.95;
+  --currency-combo-input__select-dropdown-option-name-color: #{$degen-light-4};
+  --currency-combo-input__select-dropdown-border-color: #{$degen-light-7};
+  --currency-combo-input__select-dropdown-background: #{$degen-dark-2};
+  --currency-combo-input__select-dropdown-select-title-color: #{$degen-light-1};
+  --currency-combo-input__select-dropdown-chains-border: 2px solid #{$degen-dark-6};
+  --currency-combo-input__select-dropdown-chain-item-border: 1px solid transparent;
+  --currency-combo-input__select-dropdown-chain-item-border-active: 2px solid #{$dark-lilac};
+  --currency-combo-input__select-dropdown-placeholder-font-color: #{$degen-light-1};
+  // endregion
+
+  // region AssetDropdown
+  --asset-dropdown__box-shadow: inset 3px 3px 8px 0 #{$degen-dark-8}7f;
+  --asset-dropdown__background: linear-gradient(to right, #{$deep-navy} 9%, #{$degen-dark-10} 50%, #{$degen-dark-11} 92%);
+  --asset-dropdown__divider-color: #{$mist-space};
+  --asset-dropdown__chevron-color: #{$pale-lilac};
+  --asset-dropdown__select-dropdown-input-border: 2px solid #{$degen-dark-6};
+  --asset-dropdown__select-dropdown-option-background--hover: #{$cloud-navy};
+  --asset-dropdown__select-dropdown-option-icon-opacity: 0.95;
+  --asset-dropdown__select-dropdown-option-name-color: #{$degen-light-4};
+  --asset-dropdown__select-dropdown-border-color: #{$degen-light-7};
+  --asset-dropdown__select-dropdown-background: #{$degen-dark-2};
+  --asset-dropdown__select-dropdown-select-title-color: #{$degen-light-1};
+  --asset-dropdown__select-dropdown-chains-border: 2px solid #{$degen-dark-6};
+  --asset-dropdown__select-dropdown-chain-item-border: 1px solid transparent;
+  --asset-dropdown__select-dropdown-chain-item-border-active: 2px solid #{$dark-lilac};
+  --asset-dropdown__select-dropdown-placeholder-font-color: #{$degen-light-1};
+  // endregion
+
+  // region Bubble
+  --bubble__solid-block-wrapper-background: #{$pale-fuchsia};
+  --bubble__solid-block-wrapper-color: #{$degen-light-1};
+  // endregion
+
+  // region InfoBubble
+  --info-bubble__info-bubble: #{$degen-dark-4};
+  --info-bubble__info-bubble-stroke: linear-gradient(72deg, #{$degen-stroke-1} 17%, #{$degen-stroke-2} 48%, #{$degen-stroke-3} 99%);
+  --info-bubble__color: #{$degen-light-1};
+  // endregion
+
+  // region StakingAssetBeta
+  --staking-asset-beta__header-background: #{$degen-dark-3};
+  --staking-asset-beta__header-cell-label-color: #{$degen-light-3};
+  --staking-asset-beta__border-color: #{$degen-dark-6};
+  --staking-asset-beta__compounding-divider-background: #{$degen-dark-5};
+  --staking-asset-beta__divider-title-color: #{$degen-light-5};
+  --staking-asset-beta__table-header-cell-color: #{$degen-light-3};
+  --staking-asset-beta__asset-dex-color: #{$degen-light-3};
+  --staking-asset-beta__protocol-icon-opacity: 0.95;
+  --staking-asset-beta__cell-action-chevron-color: #{$pale-lilac};
+  --staking-asset-beta__cell-action-chevron-color--hover: #{$pale-lilac}; // TODO to change
+  // endregion
+
+  // region StakingProtocolTableRow
+  --staking-protocol-table-row__border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --staking-protocol-table-row__secondary-text-color: #{$degen-light-4};
+  --staking-protocol-table-row__protocol-icon-opacity: 0.95;
+  // endregion
+
+  // region FlatButton
+  --flat-button__border-color: #{$dark-lilac};
+  --flat-button__color: #{$pale-lilac};
+  --flat-button__color--hover: #{$pale-lilac}; // TODO to change
+  --flat-button__background-color--hover: #{$white}10; // TODO to change
+  // endregion
+
+  // region TransactionResultSummaryBeta
+  --transaction-result-summary-beta__border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --transaction-result-summary-beta__background: #{$degen-dark-4};
+  --transaction-result-summary-beta__title-color: #{$degen-light-4};
+  --transaction-result-summary-beta__horizontal-divider-background: #{$mist-space};
+  --transaction-result-summary-beta__values-color: #{$degen-light-1};
+  --transaction-result-summary-beta__label-color--error: #{$pale-red};
+  --transaction-result-summary-beta__divider-background: #{$mist-space};
+  --transaction-result-summary-beta__divider-background--light: #{$mist-space};
+  --transaction-result-summary-beta__value--error: #{$pale-red};
+  // endregion
+
+  // region Button
+  --button__purple-color: #{$off-white-blue};
+  --button__purple-color--disabled: #{$degen-light-5};
+  --button__purple-background: linear-gradient(100deg, #{$shallow-fuchsia} -17%, #{$space-lilac} 37%, #{$dim-lilac} 80%);
+  --button__purple-box-shadow: 4px 4px 6px 0 #{$degen-dark-8}66;
+  --button__purple-background--hover: linear-gradient(100deg, #{$delta-space} -17%, #{$awesome-lilac} 37%, #{$purple} 80%);
+  --button__purple-background--disabled: linear-gradient(#{$degen-dark-2} 0%, #{$degen-dark-2} 100%);
+  // endregion
+
+  // region Toggle
+  --toggle__pointer-box-shadow: 1px 1px 6px 0 #{$degen-dark-8}cc;
+  --toggle__pointer-border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --toggle__pointer-background: #{$degen-dark-2};
+  --toggle__options-color: #{$degen-light-4};
+  --toggle__options-color--selected: #{$degen-light-1};
+  --toggle__options-color--hover: #{$degen-light-1};
+  --toggle__background: #{$degen-dark-5};
+  --toggle__border: 1px solid #{$degen-dark-8};
+  // endregion
+
+  // region SwapModal
+  --swap-modal__reverse-swap-icon-color: #{$pale-lilac};
+  --swap-modal__reverse-swap-button-border: solid 2px #{$degen-dark-6};
+  --swap-modal__reverse-swap-button-background: #{$degen-dark-4};
+  --swap-modal__reverse-swap-button-box-shadow: 2px 2px 6px 0 #{$black}3d;
+  --swap-modal__asset-info-color: #{$degen-light-3};
+  --swap-modal__usd-info-color: #{$degen-light-3};
+  --swap-modal__received-amount-color: #{$degen-light-3};
+  --swap-modal__slippage-bar-border: solid 2px #{$mist-space};
+  --swap-modal__slippage-bar-color: #{$degen-light-3};
+  --swap-modal__slippage-divider-color: #{$mist-space};
+  --swap-modal__slippage-warning-color: #{$pale-red};
+  --swap-modal__slippage-advanced-color: #{$degen-light-3};
+  --swap-modal__slippage-option-pill-color: #{$degen-light-4};
+  --swap-modal__slippage-option-pill-color--active: #{$degen-light-1};
+  --swap-modal__label-with-separator: #{$degen-light-3};
+  --swap-modal__label-with-separator-background: #{$mist-space};
+  --swap-modal__liquidity-shape-border: solid 1px #{$degen-light-7};
+  --swap-modal__liquidity-shape-border-active: solid 2px #{$degen-light-6};
+  --swap-modal__liquidity-shape-border-hover: #{$degen-light-6};
+  --swap-modal__liquidity-shape-box-shadow: 2px 2px 4px 0 #{$degen-dark-8}80;
+  --swap-modal__liquidity-shape-background: #{$degen-dark-1};
+  // endregion
+
+  // region SimpleInput
+  --simple-input__wrapper-border: solid 1px #{$degen-light-7};
+  --simple-input__converted-color: #{$degen-light-3};
+  --simple-input__error-info-warngin-color: #{$degen-light-1};
+  --simple-input__warning-color: #{$pale-red};
+  --simple-input__error-color: #{$pale-red};
+  // endregion
+
+  // region ThemeToggle
+  --theme-toggle__background: #{$space-fuchsia};
+  --theme-toggle__switch-box-shadow: 1px 1px 4px 0 #{$degen-dark-8}99;
+  --theme-toggle__switch-background: linear-gradient(to left, #{$washed-purple} 9%, #{$awesome-blue} 83%);
+  // endregion
+
+  // region InfoIcon
+  --info-icon__background: linear-gradient(to bottom, #{$pale-purple} 10%, #{$pink} 50%, #{$aqua} 85%);
+  // endregion
+
+  // region ColoredValueBeta
+  --colored-value-beta__color--positive: #{$pale-green};
+  --colored-value-beta__color--negative: #{$pale-red};
+  // endregion
+
+  // region SmallBlock
+  --small-block__small-block-wrapper-background: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --small-block__small-block-wrapper-box-shadow: 7px 7px 30px 0 #{$degen-dark-8}4c;
+  --small-block__small-block-background: #{$degen-dark-4};
+  --small-block__cross-color: #{$pale-lilac};
+  --small-block__cross-color--hover: #{$light-purple};
+  // endregion
+
+  // region Banner
+  --banner__banner-background: #{$brown};
+  --banner__banner-background--green: #{$pale-green};
+  --banner__banner-background--green-accent: #{$pale-green--accent};
+  --banner__banner-color: #{$off-white-blue};
+  --banner__banner-color--green: #{$degen-dark-6};
+  --banner__banner-color--link: #{$off-white-blue};
+  // endregion
+
+  // region ProgressBar
+  --progress-bar__background: linear-gradient(to right, #{$light-plum} 8%, #{$real-fuchsia} 52%, #{$light-teal} 87%);
+  --progress-bar__background--success: #{$pale-green};
+  --progress-bar__background--error: #{$pale-red};
+  --progress-bar__background--cancelled: #{$mist-orange};
+  --progress-bar__value-overlay-background: #{$void-space};
+  --progress-bar__text-overlay-background: #{$degen-dark-8}7f;
+  --progress-bar__text-overlay-color: #{$degen-light-4};
+  --progress-bar__text-overlay-color--finished: #{$degen-dark-6};
+  // endregion
+
+  // region StatsSectionHeader
+  --stats-section-header__color: #{$degen-light-4};
+  // endregion
+
+  // region StatsSection
+  --stats-section__border-image: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --stats-section__background: #{$degen-dark-4};
+  // endregion
+
+  // region StatsSharesSection
+  --stats-shares-section__legend-entry-color: #{$degen-light-3};
+  --stats-shares-section__legend-entry-subtitle-color: #{$degen-light-4};
+  --stats-shares-section__chart-box-shadow: 0 3px 15px 0 #{$lapis}26;
+  // endregion
+
+  // region tooltip
+  --tooltip__box-shadow: 2px 2px 4px 0 #{$degen-dark-8}cc;
+  --tooltip__border: solid 1px #{$degen-light-7};
+  --tooltip__background: #{$degen-dark-2};
+  --tooltip__color: #{$degen-light-2};
+  --tooltip__button-tooltip-background: #{$pale-fuchsia};
+  --tooltip__button-tooltip-color: #{$degen-light-1};
+  --tooltip__button-tooltip-border: #{$pale-fuchsia};
+  // endregion
+
+  // region filters
+  --filters__filter-label-color: #{$degen-light-4};
+  --filters__clear-text-color: #{$pale-lilac};
+  // endregion
+
+  // region TransactionHistory
+  --transaction-history__transaction-token-color: #{$degen-light-4};
+  // endregion
+
+  // region Paginator
+  --paginator__text-color: #{$degen-light-4};
+  // endregion
+
+  // region StatsSharesSection
+  --stats-shares-section__no-data-text-color: #{$degen-light-4};
+  // endregion
+
+  // region StatsChartSection
+  --stats-chart-section__tick-color: #{$degen-light-7};
+  --stats-chart-section__axes-text-color: #{$degen-light-4};
+  --stats-chart-section__point-color: #{$degen-light-1};
+  --stats-chart-section__toggle-metadata-separator-color: #{$degen-light-7};
+  --stats-chart-section__no-data-color: #{$degen-light-4};
+  // endregion
+
+  // region NotifiModal
+  --notifi-modal__container-box-shadow: 2px 2px 8px 0 #{$degen-dark-8}7F;
+  --notifi-modal__container-border: solid 2px #{$degen-light-7};
+  --notifi-modal__container-background-color: #{$degen-dark-4};
+  --notifi-modal__container-info-color: #{$degen-light-3};
+  --notifi-modal__container-footer-font-color: #{$degen-light-3};
+  --notifi-modal__container-inner-border-color: #{$degen-dark-6};
+  --notifi-modal__container-separator: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --notifi-modal__container-common-color: #{$degen-light-1};
+  --notifi-modal__container-text-small: #{$degen-light-4};
+  --notifi-modal__container-notification-box-hover-color: #{$degen-dark-2};
+  --notifi-modal__container-header-box-shadow: 0 2px 6px 0 #{$degen-dark-8}4d;
+  --notifi-modal__container-footer-box-shadow: 0 -2px 6px 0 #{$degen-dark-8}4d;
+  --notifi-modal__scroll-bar-background: #{$degen-dark-7};
+  --notifi-modal__scroll-bar-hover-background: #{$degen-dark-8};
+  // endregion
+
+  // region FromInput
+  --form-input__border: solid 2px #{$degen-dark-6};
+  --form-input__background-color: #{$degen-dark-5};
+  --form-input__error-color: #{$pale-red};
+  // endregion
+
+  // region EditContact
+  --edit-contact__border: solid 2px #{$degen-dark-6};
+  --edit-contact__background-color: #{$degen-dark-5};
+  --edit-contact__contact-info-color: #{$degen-light-4};
+  --edit-contact__contact-verify-color: #{$light-purple};
+  --edit-contact__contact-box-top-border: 1px solid #{$degen-dark-6};
+  --edit-contact__edit-container-box-shadow: 1px 1px 8px 0 #{$degen-dark-8}cc;
+  --edit-contact__edit-container-background-color: #{$degen-dark-4};
+  // endregion
+
+  // region ToggleButton
+  --toggle-button__background: #{$degen-dark-2};
+  --toggle-button__toggle-on-background: #{$dark-lilac};
+  --toggle-button__switch-box-shadow: 1px 1px 4px 0 #{$degen-dark-8}99;
+  --toggle-button__switch-background: #{$degen-light-5};
+  --toggle-button__switch-on-background: #{$delta-secondary};
+  // endregion
+
+  // region HealthRateButton
+  --health-rate-button__border-color: #{$degen-light-7};
+  --health-rate-button__background-color: #{$degen-dark-4};
+  --health-rate-button__rate-inactive-color: #{$degen-light-3};
+  --health-rate-button__active-border-color: #{$degen-light-6};
+  --health-rate-button__active-background-color: #{$degen-dark-1};
+  // endregion
+
+  // region Settings (Notifi)
+  --notifi-settings__borrow-rate-border: 1px solid #{$degen-dark-7};
+  --notifi-settings__box-shadow: 2px 2px 4px 0 #{$degen-dark-8}cc;
+  --notifi-settings__active-option-font-color: #{$degen-light-1};
+  // endregion
+
+  // region AddInterestRate
+  --add-borrow-rate__container-box-shadow: 1px 1px 8px 0 #{$degen-dark-8}cc;
+  --add-borrow-rate__container-background-color: #{$degen-dark-4};
+  // endregion
+
+  // region Dropdown (Notifi)
+  --notifi-dropdown__border-color: #{$degen-light-7};
+  --notifi-dropdown__background-color: #{$degen-dark-4};
+  --notifi-dropdown__hover-background-color: #{$degen-dark-2};
+  --notifi-dropdown__chevron-color: #{$pale-lilac};
+  --notifi-dropdown__select-font-color: #{$degen-light-1};
+  --notifi-dropdown__dropdown-box-shadow: 2px 2px 8px 0 #{$degen-dark-8}80;
+  // endregion
+
+  // region RoundToggle (Notifi)
+  --notifi-round-toggle__pointer-background-color: #{$degen-dark-1};
+  --notifi-round-toggle__pointer-border: solid 2px #{$pale-fuchsia};
+  --notifi-round-toggle__background-border: solid 2px #{$degen-dark-6};
+  --notifi-round-toggle__background-color: #{$degen-dark-5};
+  // endregion
+
+  // region ApyInput
+  --apy-input__font-color: #{$degen-light-1};
+  --apy-input__unit-font-color: #{$degen-light-3};
+  --apy-input__background-image: linear-gradient(to right, #{$deep-navy} 9%, #{$degen-dark-10} 50%, #{$degen-dark-11} 92%);
+  --apy-input__box-shadow: inset 3px 3px 8px 0 #{$degen-dark-8}80;
+  // endregion
+
+  // region RealYield
+  --real-yield__header-text-color: #{$degen-light-4};
+  --real-yield__token-name-color: #{$degen-light-1};
+  --real-yield__token-logo-opacity: 0.95;
+  --real-yield__label-part-name-color: #{$degen-light-1};
+  --real-yield__label-part-value-color: #{$degen-light-4};
+  --real-yield__toggle-row-divider-background: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --real-yield__real-yield-section-content-border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --real-yield__real-yield-section-content-background: #{$degen-dark-3};
+  // endregion
+
+  // region SlideSwitch
+  --slide-switch__background-color--on: #{$dark-lilac};
+  --slide-switch__background-color--off: #{$degen-dark-2};
+  --slide-switch__indicator-color--on: #{$delta-secondary};
+  --slide-switch__indicator-color--off: #{$degen-light-5};
+  --slide-switch__indicator-box-shadow: 1px 1px 3px 0 #{$dark-lapis}7f;
+  // endregion
+
+  // region BridgeModal
+  --bridge-modal__slippage-bar-border: solid 2px #{$mist-space};
+  --bridge-modal__slippage-bar-color: #{$degen-light-3};
+  // endregion
+
+  // region NetworkSelect
+  --network-select__indicator-network-color: #{$degen-light-3};
+  --network-select__chevron-color: #{$pale-lilac};
+  --network-select__dropdown-header-color: #{$degen-light-4};
+  --network-select__dropdown-background: #{$degen-dark-4};
+  --network-select__dropdown-border-color: #{$degen-light-7};
+  --network-select__dropdown-shadow: 2px 2px 8px 0 #{$degen-dark-8}7F;
+  --network-select__option-background--selected: #{$degen-dark-1};
+  --network-select__option-border--hover: #{$degen-dark-2};
+  --network-select__option-name-color: #{$degen-light-4};
+  --network-select__option-name-color--selected: #{$degen-light-1};
+  // endregion
+
+  // region TraderJoeAddLiquidityModal
+  --traderjoe-add-liquidity-modal__liquidity-shape-border: solid 2px #{$mist-space};
+  --traderjoe-add-liquidity-modal__liquidity-shape-border-active: solid 2px #{$degen-light-6};
+  --traderjoe-add-liquidity-modal__liquidity-shape-border-hover: #{$degen-light-6};
+  --traderjoe-add-liquidity-modal__liquidity-shape-box-shadow: 2px 2px 4px 0 #{$degen-dark-8}80;
+  --traderjoe-add-liquidity-modal__liquidity-shape-background: #{$degen-dark-5};
+  --traderjoe-add-liquidity-modal__price-slider-input-color: #{$degen-light-3};
+  --traderjoe-add-liquidity-modal__label-with-separator: #{$degen-light-4};
+  --traderjoe-add-liquidity-modal__label-with-separator-background: #{$mist-space};
+  --traderjoe-add-liquidity-modal__batch-row-color: #{$degen-light-3};
+  // endregion
+
+  // region TraderJoeRemoveLiquidityModal
+  --traderjoe-remove-liquidity-modal__liquidity-shape-border: solid 2px #{$mist-space};
+  --traderjoe-remove-liquidity-modal__liquidity-shape-border-active: solid 2px #{$degen-light-6};
+  --traderjoe-remove-liquidity-modal__liquidity-shape-border-hover: #{$degen-light-6};
+  --traderjoe-remove-liquidity-modal__liquidity-shape-box-shadow: 2px 2px 4px 0 #{$degen-dark-8}80;
+  --traderjoe-remove-liquidity-modal__liquidity-shape-background: #{$degen-dark-5};
+  --traderjoe-remove-liquidity-modal__price-slider-input-color: #{$degen-light-3};
+  --traderjoe-remove-liquidity-modal__label-with-separator: #{$degen-light-4};
+  --traderjoe-remove-liquidity-modal__label-with-separator-background: #{$mist-space};
+  // endregion
+
+  // region RangeSlider
+  --range-slider__container-box-shadow: inset 0 1px 3px 0 #{$degen-dark-8}b3;
+  --range-slider__container-box-background: #{$degen-dark-8}33;
+  --range-slider__slider-track: #{$dark-lilac};
+  --range-slider__slider-thumb-box-shadow: -1px 1px 4px 0 #{$light-purple}80;
+  --range-slider__slider-thumb-border: solid 3px #{$dark-lilac};
+  --range-slider__slider-thumb-background: #{$degen-dark-4};
+  --range-slider__indicator-background: #{$off-white-lilac};
+  // endregion
+
+  // region Slider
+  --slider__box-shadow: inset 0 1px 3px 0 #{$degen-dark-8}b3;
+  --slider__slider-background-color: #{$degen-dark-8}33;
+  --slider__slider-background-gradient: linear-gradient(to left, #{$deep-blue} 9%, #{$deep-lilac} 83%);
+  --slider__slider-background--error: #{$pale-red};
+  --slider__slider-thumb-background: #{$degen-dark-4};
+  --slider__slider-thumb-border: solid 3px #{$dark-lilac};
+  --slider__slider-thumb-border--error: #{$pale-red};
+  --slider__labels-color: #{$degen-light-3};
+  --slider__color--error: #{$pale-red};
+  // endregion
+
+  // region Zaps
+  --zaps__header-color: #{$degen-light-3};
+  // endregion
+
+  // region ZapTile
+  --zap-tile__background-color: #{$dark-navy}19;
+  --zap-tile__background-color--hover: #{$dark-navy};
+  --zap-tile__border--hover: linear-gradient(326deg, #{$light-plum} 23%, #{$real-fuchsia} 53%, #{$light-teal} 85%);
+  --zap-tile__border-background--hover: linear-gradient(to bottom, #{$dark-navy}, #{$dark-navy}), linear-gradient(326deg, #{$light-plum} 23%, #{$real-fuchsia} 53%, #{$light-teal} 85%);
+  --zap-tile__label-color: #{$degen-light-2};
+  --zap-tile__label-background-color: linear-gradient(to right, #{$awesome-fuchsia} 8%, #{$washed-teal} 87%);
+  --zap-tile__header-color: #{$degen-light-1};
+  --zap-tile__header-color--hover: #{$degen-light-1};
+  --zap-tile__more-label-color: #{$degen-light-3};
+  --zap-tile__zap-tile-shadow: 4px 4px 20px 0 #{$degen-dark-8}8c;
+  --zap-tile__zap-tile-shadow--hover: 4px 4px 25px 0 #{$degen-dark-8}cc;
+  // endregion
+
+  // region LiquidityChart
+  --liquidity-chart__active-price-bar-color: #{$pale-green--accent};
+  --liquidity-chart__active-price-bar-color--hover: #{$pale-green};
+  --liquidity-chart__ghost-bar-color: #{$degen-dark-4};
+  --liquidity-chart__ghost-bar-border-color: #{$degen-light-3};
+  --liquidity-chart__main-token-color: #{$awesome-lilac};
+  --liquidity-chart__main-token-color--hover: #{$pale-lilac};
+  --liquidity-chart__secondary-token-color: #{$bright-teal};
+  --liquidity-chart__secondary-token-color--hover: #{$off-white-teal};
+  --liquidity-chart__tooltip-background-color: #{$pale-fuchsia};
+  --liquidity-chart__tooltip-color: #{$degen-light-1};
+  --liquidity-chart__tooltip-box-shadow: 2px 2px 4px 0 #{$degen-dark-8}cc;
+  --liquidity-chart__axis-label-color: #{$degen-light-4};
+  --liquidity-chart__boundary-color: #{$degen-light-7};
+  // endregion
+
+  // region CurrencyComboInput
+  --checkbox: #{$degen-light-3};
+  // endregion
+
+  // region PartnerInfoModal
+  --partner-info-modal__partner-name-color: #{$degen-light-1};
+  --partner-info-modal__launch-date-color: #{$degen-light-3};
+  --partner-info-modal__description-section-color: #{$degen-light-1};
+  --partner-info-modal__measure-color: #{$degen-light-1};
+  --partner-info-modal__measure-background-color: #{$degen-dark-2};
+  --partner-info-modal__measure-border: 1px solid #{$degen-dark-1};
+  --partner-info-modal__measure-state-indicator-color--disabled: #{$pale-red};
+  --partner-info-modal__measure-state-indicator-color--enabled: #{$pale-green};
+  // endregion
+
+  // region AppToggle
+  --app-toggle__background: #{$space-fuchsia};
+  --app-toggle__switch-background: linear-gradient(to left, #{$washed-purple} 17%, #{$awesome-blue} 91%);
+  --app-toggle__switch-color: #{$degen-dark-7};
+  --app-toggle__switch-box-shadow: 1px 1px 4px 0 #{$degen-dark-8}99;
+  // endregion
+
+  // region ProtectedByBar
+  --bar__background: #{$degen-dark-7};
+  --bar__text-color: #{$degen-light-6};
+  --bar__divider-background: #{$degen-dark-2};
+  --bar__logo-peck-shield: url("/src/assets/icons/securityLogos/peckShield--dark.svg");
+  --bar__logo-chainalysis: url("/src/assets/icons/securityLogos/chainalysis--dark.svg");
+  --bar__logo-fc-shield: url("/src/assets/icons/securityLogos/fcShield--dark.svg");
+  --bar__logo-hexagate: url("/src/assets/icons/securityLogos/hexagate--dark.png");
+  --bar__logo-atomica: url("/src/assets/icons/securityLogos/atomica--dark.svg");
+  --bar__logo-salus: url("/src/assets/icons/securityLogos/salus--dark.svg");
+  --bar__logo--hover-peck-shield: url("/src/assets/icons/securityLogos/peckShield--dark--hover.svg");
+  --bar__logo--hover-chainalysis: url("/src/assets/icons/securityLogos/chainalysis--dark--hover.svg");
+  --bar__logo--hover-fc-shield: url("/src/assets/icons/securityLogos/fcShield--dark--hover.svg");
+  --bar__logo--hover-hexagate: url("/src/assets/icons/securityLogos/hexagate--dark--hover.png");
+  --bar__logo--hover-atomica: url("/src/assets/icons/securityLogos/atomica--dark--hover.svg");
+  --bar__logo--hover-salus: url("/src/assets/icons/securityLogos/salus--dark--hover.svg");
+  --bar__link-color: #{$degen-light-6};
+  --bar__link-color--hover: #{$degen-light-4};
+  // endregion
+
+  // region ProtocolInsurance
+  --protocol-insurance-text: #{$degen-light-3};
+  --protocol-insurance-value: #{$violet-mist};
+  --protocol-insurance-border: #{$cloud-navy};
+  --protocol-insurance-background: #{$degen-dark-4};
+  // endregion
+
+  // region ClaimGLPModal
+  --claim-glp-modal__rewards-label-color: #{$degen-light-3};
+  // endregion
+
+  // region WombatPoolRow
+  --wombat-pool-row__header-color: #{$degen-light-4};
+  --wombat-pool-row__header-border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  // endregion
+
+  // region DistributionChart
+  --distribution-chart__bar-color--negative: #{$pale-red};
+  --distribution-chart__bar-color--positive: #{$pale-lilac};
+  --distribution-chart__line-background--1: #{$dark-fuchsia};
+  --distribution-chart__line-background--2: #{$pale-plum};
+  --distribution-chart__line-background--3: #{$teal};
+  --distribution-chart__ticks-color: #{$degen-light-4};
+  // endregion
+
+  // region SPrimePanel
+  --s-prime-panel__sprime-color: #{$degen-light-1};
+  --s-prime-panel__panel-background-color: #{$degen-dark-4}80;
+  --s-prime-panel__panel-box-shadow: 7px 7px 30px 0px #{$degen-dark-8}66;
+  --s-prime-panel__divider-background: linear-gradient(to right, #{$degen-stroke-4} 18.79%, #{$degen-stroke-5} 56.56%, #{$degen-stroke-6} 87.71%);
+  --s-prime-panel__chevron-color: #{$pale-lilac};
+  --s-prime-panel__chevron-color--hover: #{$light-purple};
+  --s-prime-panel__main-text-color: #{$degen-light-3};
+  --s-prime-panel__secondary-text-color: #{$degen-light-1};
+  --s-prime-panel__gauge-border: linear-gradient(to right, #{$degen-stroke-4} 18.79%, #{$degen-stroke-5} 56.56%, #{$degen-stroke-6} 87.71%);
+  --s-prime-panel__gauge-box-shadow: 2px 2px 10px 0px #{$degen-dark-8}CC;
+  --s-prime-panel__gauge-text-color: #{$pale-lilac};
+  --s-prime-panel__actions-info-divider-background: #{$mist-space};
+  // endregion
+
+  // region PriceRangeChart
+  --price-range-chart__border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --price-range-chart__range-background: #{$pale-green};
+  --price-range-chart__range-background--neutral: #{$mist-orange};
+  --price-range-chart__range-background--negative: #{$pale-red};
+  --price-range-chart__tick-color: #{$degen-light-4};
+  --price-range-chart__active-line-color: #{$degen-light-6};
+  // endregion
+
+  // region ClaimPage
+  --claim-page__content-background: #{$white};
+  --claim-page__content-box-shadow: 7px 17px 55px 0 #{$pale-raspberry}91;
+  --claim-page__logo-box-shadow: drop-shadow(7px 17px 55px rgba(255, 211, 224, 0.57));
+  --claim-page__label-color: #{$dark-gray};
+  --claim-page__amount-text-color: #{$black};
+  // endregion
+
+  // region SprimeModal
+  --sprime-modal__text-color: #{$light-purple}
+  // endregion
+}

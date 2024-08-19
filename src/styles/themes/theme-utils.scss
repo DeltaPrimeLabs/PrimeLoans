@@ -1,0 +1,15 @@
+.degen-only {
+  display: none !important;
+}
+
+:root.theme--degen .degen-only {
+  display: block !important;
+}
+
+.delta-only {
+  display: block !important;
+}
+
+:root.theme--degen .delta-only {
+  display: none !important;
+}
