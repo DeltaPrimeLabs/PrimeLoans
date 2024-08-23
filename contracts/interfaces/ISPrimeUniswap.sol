@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.17;
 
-import "./ISPrime.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-interface ISPrimeUniswap is ISPrime {
+interface ISPrimeUniswap {
   /**
    * @dev Struct representing the information for the nft position.
    * @param tokenId NFT Position Token Id.
@@ -50,4 +50,22 @@ interface ISPrimeUniswap is ISPrime {
         uint256 amountXMin,
         uint256 amountYMin
     ) external;
+
+    /**
+      * @dev Struct representing details of a locked amount.
+      * @param lockPeriod The duration for which the amount is locked.
+      * @param amount The amount that is locked.
+      * @param unlockTime The timestamp when the locked amount will be able to released.
+      */
+    struct LockDetails {
+      uint256 lockPeriod;
+      uint256 amount;
+      uint256 unlockTime;
+    }
+
+    function getTokenX() external view returns(IERC20);
+    function getTokenY() external view returns(IERC20);
+    function getPoolPrice() external view returns(uint256);
+    function getUserValueInTokenY(address user, uint256 poolPrice) external view returns (uint256);
+    function getFullyVestedLockedBalance(address account) external view returns(uint256);
 }
