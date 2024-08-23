@@ -38,4 +38,16 @@ interface ISPrimeUniswap is ISPrime {
     bool isRebalance,
     uint256 swapSlippage
   ) external;
+
+    /**
+     * @dev Users can use withdraw function for withdrawing their share.
+     * @param shareWithdraw The amount of share to withdraw.
+     * @param amountXMin The minimum amount of token X to receive.
+     * @param amountYMin The minimum amount of token Y to receive.
+     */
+    function withdraw(
+        uint256 shareWithdraw,
+        uint256 amountXMin,
+        uint256 amountYMin
+    ) external;
 }
