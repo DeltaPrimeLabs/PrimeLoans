@@ -86,7 +86,7 @@
             <img src="src/assets/icons/deltaprime.svg" class="logo delta-only">
           </a>
           <AppToggle v-if="!isClaimPage" class="top-bar__app-toggle"></AppToggle>
-          <ThemeToggle v-if="!isClaimPage" class="top-bar__theme-toggle delta-only"></ThemeToggle>
+          <ThemeToggle v-if="!isClaimPage && !isDegen" class="top-bar__theme-toggle delta-only"></ThemeToggle>
           <div v-if="isSavingsPage" class="protocol-insurance">
             <span>Reserve Fund:</span>
             <span class="insurance-value">$800,000</span>
@@ -174,6 +174,7 @@ export default {
       restrictModalOpen: false,
       buySPrimeModalOpened: false,
       showWarningBanner: false,
+      isDegen: config.isDegen,
     };
   },
   async created() {
@@ -255,13 +256,7 @@ export default {
       this.checkWallet();
     }, 500)
     this.getCountry();
-    this.watchDegenChange();
     this.watchThemeChange();
-
-    // todo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ONLY FOR TESTING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    window.letsSetDegen = (degen) => {
-      this.themeService.changeDegenMode(degen)
-    }
   },
   computed: {
     ...mapState('network', ['account', 'provider']),
@@ -386,27 +381,15 @@ export default {
       })
     },
 
-    watchDegenChange() {
-      this.themeService.observeDegenMode().subscribe(isDegen => {
-        if (isDegen) {
-          this.themeService.emitThemeChange('DARK')
-        }
-        if (isDegen) {
-          document.documentElement.classList.add('theme--degen')
-        } else {
-          document.documentElement.classList.remove('theme--degen')
-        }
-        localStorage.setItem('DEGEN', isDegen)
-      })
-    },
-
     watchThemeChange() {
-      this.themeService.observeThemeChange().subscribe(theme => {
-        document.documentElement.classList.remove(theme === 'DARK' ? 'theme--light' : 'theme--dark')
-        document.documentElement.classList.add(theme === 'DARK' ? 'theme--dark' : 'theme--light')
-        localStorage.setItem('VIEW_THEME', theme === 'DARK' ? 'DARK' : 'LIGHT')
-        localStorage.setItem('PA_VIEW_THEME', theme === 'DARK' ? 'DARK' : 'LIGHT')
-      })
+      if (!config.isDegen) {
+        this.themeService.observeThemeChange().subscribe(theme => {
+          document.documentElement.classList.remove(theme === 'DARK' ? 'theme--light' : 'theme--dark')
+          document.documentElement.classList.add(theme === 'DARK' ? 'theme--dark' : 'theme--light')
+          localStorage.setItem('VIEW_THEME', theme === 'DARK' ? 'DARK' : 'LIGHT')
+          localStorage.setItem('PA_VIEW_THEME', theme === 'DARK' ? 'DARK' : 'LIGHT')
+        })
+      }
     },
 
     watchPrimeAccountLoaded() {
@@ -614,14 +597,16 @@ export default {
     },
 
     checkClaimTheme(path) {
-      this.isClaimPage = path === '/claim'
-      if (this.isClaimPage) {
-        document.documentElement.classList.remove('theme--dark')
-        document.documentElement.classList.add('theme--light')
-      } else {
-        const wasDark = localStorage.getItem('PA_VIEW_THEME') === 'DARK'
-        document.documentElement.classList.remove(wasDark ? 'theme--light' : 'theme--dark')
-        document.documentElement.classList.add(wasDark ? 'theme--dark' : 'theme--light')
+      if (!config.isDegen) {
+        this.isClaimPage = path === '/claim'
+        if (this.isClaimPage) {
+          document.documentElement.classList.remove('theme--dark')
+          document.documentElement.classList.add('theme--light')
+        } else {
+          const wasDark = localStorage.getItem('PA_VIEW_THEME') === 'DARK'
+          document.documentElement.classList.remove(wasDark ? 'theme--light' : 'theme--dark')
+          document.documentElement.classList.add(wasDark ? 'theme--dark' : 'theme--light')
+        }
       }
     },
 

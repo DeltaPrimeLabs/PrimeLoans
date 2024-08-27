@@ -15,6 +15,8 @@ import './styles/overrides.scss';
 import VTooltip from 'v-tooltip';
 import config from './config';
 import ConfigAvalanche from './configAvalanche';
+import ConfigAvalancheDegen from './configAvalancheDegen';
+import ConfigArbitrumDegen from './configArbitrumDegen';
 import ConfigArbitrum from './configArbitrum';
 import {BehaviorSubject} from 'rxjs';
 const RPC_ERROR_FALLBACK_DURATION_MINS = 15
@@ -23,11 +25,16 @@ if (window.ethereum) {
   window.chain$ = new BehaviorSubject({});
   window.ethereum.request({method: 'eth_chainId'}).then((id) => {
     const chainId = parseInt(id, 16);
+    if (process.env.DEGEN_MODE) {
+      document.documentElement.classList.add('theme--dark')
+      document.documentElement.classList.add('theme--degen')
+    }
     switch (chainId) {
       case 43114: {
         window.chain = 'avalanche';
         window.chain$.next('avalanche');
         Object.assign(config, ConfigAvalanche);
+        Object.assign(config, process.env.DEGEN_MODE ? ConfigAvalancheDegen : ConfigAvalanche);
         setupRpc();
         break;
       }
@@ -35,6 +42,7 @@ if (window.ethereum) {
         window.chain = 'arbitrum';
         window.chain$.next('arbitrum');
         Object.assign(config, ConfigArbitrum);
+        Object.assign(config, process.env.DEGEN_MODE ? ConfigArbitrumDegen : ConfigArbitrum);
         break;
       }
     }

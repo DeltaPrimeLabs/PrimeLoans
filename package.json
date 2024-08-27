@@ -6,7 +6,9 @@
   "scripts": {
     "start": "yarn migrate:local && yarn serve",
     "serve": "webpack serve --config config/webpack.dev.js --progress",
+    "serve:degen": "webpack serve --config config/webpack.degen.dev.js --progress",
     "build": "webpack --config config/webpack.prod.js",
+    "build:degen": "webpack --config config/webpack.prod.js",
     "test:local": "yarn hardhat test test/local/*",
     "test:local:all": "yarn hardhat test test/local/* test/deprecated/*/*",
     "test:integration": "yarn hardhat test test/integration/*/* --network localhost",

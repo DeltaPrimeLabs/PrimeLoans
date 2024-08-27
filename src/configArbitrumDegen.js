@@ -13,7 +13,7 @@ import {yieldYakBalance} from './utils/calculate';
 import subgraphConfig from '../.secrets/subgraph.json';
 
 export default {
-    isDegen: false,
+    isDegen: true,
     MIN_ALLOWED_HEALTH: 0.0182,
     DECIMALS_PRECISION: 8,
     MAX_BUTTON_MULTIPLIER: 1.01,
@@ -21,7 +21,6 @@ export default {
     disableAWSData: false,
     chainId: 42161,
     chainSlug: 'arbitrum',
-    notifiEnabled: true,
     primeAccountsBlocked: true,
     pendleApiBaseUrl: 'https://api-v2.pendle.finance/sdk/api',
     //update leverage after every change in contracts
@@ -49,8 +48,6 @@ export default {
       "rsETH": {name: "rsETH", symbol: "rsETH", logoExt: "png", decimals: 18, address: addresses.rsETH, debtCoverage: 0.83333333333},
       // "SOL": {name: "SOL", symbol: "SOL", decimals: 18, address: addresses.SOL, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:SOLUSDT"},
     },
-    RTKN_ADDRESS: "0xF3EaA614dAb459FD4E9f4BC5460BD9b965ed6c76",
-    RTKN_2_ADDRESS: "0x47f655e3B4D0b686D26FBAD9C6378f66D6388af7",
     PRIME: {hide: true, name: "PRIME", symbol: "PRIME", decimals: 18, address: addresses.PRIME},
     SPRIME_CONFIG: {
         default: "UNISWAP",
@@ -74,21 +71,26 @@ export default {
         "PNP": {name: "PNP", symbol: "PNP", logoExt: "png", decimals: 18, address: addresses.PNP},
         "SILO": {name: "SILO", symbol: "SILO", logoExt: "png", decimals: 18, address: addresses.SILO},
     },
+    AVAILABLE_ASSETS_PER_DEX: {
+        YakSwap: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'GLP', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'WOO', 'GRAIL', 'JOE'],
+        ParaSwap: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'WOO', 'GRAIL', 'JOE']
+    },
+
     SWAP_DEXS_CONFIG: {
-        // ParaSwapV2: {
-        //     displayName: 'ParaSwap',
-        //         availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
-        //     slippageMargin: 0.05
-        // },
+        ParaSwapV2: {
+            displayName: 'ParaSwap',
+            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
+            slippageMargin: 0.05
+        },
         YakSwap: {
             displayName: 'YakSwap',
-            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
+            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'GLP', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'rsETH'],
             slippageMargin: 0.02
         },
-        // Level: {
-        //     availableAssets: [],
-        //     slippageMargin: 0.1
-        // },
+        Level: {
+            availableAssets: [],
+            slippageMargin: 0.1
+        },
         GmxV2: {
             availableAssets: [],
             slippageMargin: 0.1
@@ -112,25 +114,40 @@ export default {
     WRAPPED_TOKEN_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     POOLS_CONFIG: {
         USDC: {
-            address: '0x8Ac9Dc27a6174a1CC30873B367A60AcdFAb965cc',
+            address: USDC_POOL_TUP.address,
             tokenAddress: addresses.USDC
         },
         ETH: {
-            address: '0x788A8324943beb1a7A47B76959E6C1e6B87eD360',
+            address: WETH_POOL_TUP.address,
             tokenAddress: addresses.ETH
         },
         ARB: {
-            address: '0xC629E8889350F1BBBf6eD1955095C2198dDC41c2',
+            address: ARB_POOL_TUP.address,
             tokenAddress: addresses.ARB
         },
         BTC: {
-            address: '0x0ed7B42B74F039eda928E1AE6F44Eed5EF195Fb5',
+            address: BTC_POOL_TUP.address,
             tokenAddress: addresses.BTC
         },
         DAI: {
-            address: '0xFA354E4289db87bEB81034A3ABD6D465328378f1',
+            address: DAI_POOL_TUP.address,
             tokenAddress: addresses.DAI,
         },
+        USDT: {
+            address: USDT_POOL_TUP.address,
+            tokenAddress: addresses.USDT,
+            disabled: true
+        },
+        FRAX: {
+            address: FRAX_POOL_TUP.address,
+            tokenAddress: addresses.FRAX,
+            disabled: true
+        },
+        LINK: {
+            address: LINK_POOL_TUP.address,
+            tokenAddress: addresses.LINK,
+            disabled: true
+        }
     },
     poolsUnlocking: true,
     TRADERJOEV2_LP_ASSETS_CONFIG: {
@@ -368,11 +385,11 @@ export default {
         "arbSnrLLP": {name: "Senior", symbol: "arbSnrLLP", pid: 0, short: "Snr", decimals: 18, address: addresses.arbSnrLLP, debtCoverage: 0.83333333333, balanceMethod: "levelSnrBalance", groupIdentifier: 'STKD_SNR_LLP_GROUP', underlyingAssets: ['BTC', 'ETH', 'USDT', 'USDC'], link: 'https://app.level.finance/liquidity/senior-tranche/buy'},
     },
     GMX_V2_ASSETS_CONFIG: {
-        "GM_ETH_WETH": {isGMXPlus: true, name: "ETH+", symbol: "GM_ETH_WETH", short: "GM", decimals: 18, address: addresses.GM_ETH_WETH, debtCoverage: 0.83333333333, longToken: 'ETH', shortToken: 'ETH', indexTokenAddress: addresses.ETH, link: 'https://app.gmx.io/#/stats', addMethod: 'depositEthGmxV2Plus', removeMethod: 'withdrawEthGmxV2Plus'},
-        "GM_BTC_WBTC": {isGMXPlus: true, name: "BTC+", symbol: "GM_BTC_WBTC", short: "GM", logoExt: "png", decimals: 18, address: addresses.GM_BTC_WBTC, debtCoverage: 0.83333333333, longToken: 'BTC', shortToken: 'BTC', indexTokenAddress: addresses.BTC, link: 'https://app.gmx.io/#/stats', addMethod: 'depositBtcGmxV2Plus', removeMethod: 'withdrawBtcGmxV2Plus'},
-        "GM_NEAR_WETH_USDC": {name: "NEAR-USDC", symbol: "GM_NEAR_WETH_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_NEAR_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'NEAR', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x1FF7F3EFBb9481Cbd7db4F932cBCD4467144237C", link: 'https://app.gmx.io/#/stats', addMethod: 'depositNearUsdcGmxV2', removeMethod: 'withdrawNearUsdcGmxV2'},
-        "GM_ATOM_WETH_USDC": {name: "ATOM-USDC", symbol: "GM_ATOM_WETH_USDC", short: "GM", logoExt: 'svg', price: 1, decimals: 18, address: addresses.GM_ATOM_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'ATOM', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x7D7F1765aCbaF847b9A1f7137FE8Ed4931FbfEbA", link: 'https://app.gmx.io/#/stats', addMethod: 'depositAtomUsdcGmxV2', removeMethod: 'withdrawAtomUsdcGmxV2'},
-        "GM_GMX_GMX_USDC": {name: "GMX-USDC", symbol: "GM_GMX_GMX_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_GMX_GMX_USDC, debtCoverage: 0.83333333333, longToken: 'GMX', shortToken: 'USDC', indexTokenAddress: addresses.GMX, link: 'https://app.gmx.io/#/stats'},
+        "GM_ETH_WETH": {minSPrimeToUnlock: 100, isGMXPlus: true, name: "ETH+", symbol: "GM_ETH_WETH", short: "GM", decimals: 18, address: addresses.GM_ETH_WETH, debtCoverage: 0.83333333333, longToken: 'ETH', shortToken: 'ETH', indexTokenAddress: addresses.ETH, link: 'https://app.gmx.io/#/stats', addMethod: 'depositEthGmxV2Plus', removeMethod: 'withdrawEthGmxV2Plus'},
+        "GM_BTC_WBTC": {minSPrimeToUnlock: 100, isGMXPlus: true, name: "BTC+", symbol: "GM_BTC_WBTC", short: "GM", logoExt: "png", decimals: 18, address: addresses.GM_BTC_WBTC, debtCoverage: 0.83333333333, longToken: 'BTC', shortToken: 'BTC', indexTokenAddress: addresses.BTC, link: 'https://app.gmx.io/#/stats', addMethod: 'depositBtcGmxV2Plus', removeMethod: 'withdrawBtcGmxV2Plus'},
+        "GM_NEAR_WETH_USDC": {minSPrimeToUnlock: 100, name: "NEAR-WETH", symbol: "GM_NEAR_WETH_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_NEAR_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'NEAR', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x1FF7F3EFBb9481Cbd7db4F932cBCD4467144237C", link: 'https://app.gmx.io/#/stats', addMethod: 'depositNearUsdcGmxV2', removeMethod: 'withdrawNearUsdcGmxV2'},
+        "GM_ATOM_WETH_USDC": {minSPrimeToUnlock: 100, name: "ATOM-WETH", symbol: "GM_ATOM_WETH_USDC", short: "GM", logoExt: 'svg', price: 1, decimals: 18, address: addresses.GM_ATOM_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'ATOM', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x7D7F1765aCbaF847b9A1f7137FE8Ed4931FbfEbA", link: 'https://app.gmx.io/#/stats', addMethod: 'depositAtomUsdcGmxV2', removeMethod: 'withdrawAtomUsdcGmxV2'},
+        "GM_GMX_GMX_USDC": {minSPrimeToUnlock: 100, name: "GMX-USDC", symbol: "GM_GMX_GMX_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_GMX_GMX_USDC, debtCoverage: 0.83333333333, longToken: 'GMX', shortToken: 'USDC', indexTokenAddress: addresses.GMX, link: 'https://app.gmx.io/#/stats'},
         "GM_ETH_WETH_USDC": {name: "ETH-USDC", symbol: "GM_ETH_WETH_USDC", short: "GM", decimals: 18, address: addresses.GM_ETH_WETH_USDC, debtCoverage: 0.83333333333, longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: addresses.ETH, link: 'https://app.gmx.io/#/stats'},
         "GM_BTC_WBTC_USDC": {name: "BTC-USDC", symbol: "GM_BTC_WBTC_USDC", short: "GM", logoExt: "png", price: 1, decimals: 18, address: addresses.GM_BTC_WBTC_USDC, debtCoverage: 0.83333333333, longToken: 'BTC', shortToken: 'USDC', indexTokenAddress: addresses.BTC, link: 'https://app.gmx.io/#/stats'},
         "GM_ARB_ARB_USDC": {name: "ARB-USDC", symbol: "GM_ARB_ARB_USDC", short: "GM", logoExt: "png", decimals: 18, address: addresses.GM_ARB_ARB_USDC, debtCoverage: 0.83333333333, longToken: 'ARB', shortToken: 'USDC', indexTokenAddress: addresses.ARB, link: 'https://app.gmx.io/#/stats'},
@@ -441,8 +458,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['USDC.e'],
                 strategy: 'Wombex',
-                refreshDelay: 60000,
-                enableUnstakeOverride: true
+                refreshDelay: 60000
             }
         ],
         "USDT": [
@@ -464,8 +480,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['USDT'],
                 strategy: 'Wombex',
-                refreshDelay: 60000,
-                enableUnstakeOverride: true
+                refreshDelay: 60000
             }
         ],
         "DAI": [
@@ -487,8 +502,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['DAI'],
                 strategy: 'Wombex',
-                refreshDelay: 60000,
-                enableUnstakeOverride: true
+                refreshDelay: 60000
             }
         ],
         "GMX": [
@@ -532,9 +546,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['GLP'],
                 strategy: 'GMX',
-                refreshDelay: 60000,
-                enableStakeOverride: true,
-                enableUnstakeOverride: true
+                refreshDelay: 60000
             }
         ],
     },
@@ -555,13 +567,6 @@ export default {
             imgSrc: "src/assets/icons/liquidity_shape_bid-ask_on.svg",
             distributionMethod: "getBidAskDistributionFromBinRange"
         },
-    },
-    fusionEventIds: {
-        announcement: '8wwbhggwzord7a1n842d3h853ltobrcy',
-        liquidation: '0c4d89ff2a3e4c7fb5745629bb9f6593',
-        loanHealth: 'e4579eb840444c6d861ca150b0b96e57',
-        borrowRate: '0d3997ffa82d4690a7c78574fe392769',
-        lendingRate: '480cce24ab174f31b29ce1eb5f11e512'
     },
     yakRouterAddress: '0xb32C79a25291265eF240Eb32E9faBbc6DcEE3cE3',
     yakWrapRouterAddress: '0x16f90031000d48ce2bc6577788282c232060c547',
@@ -586,7 +591,7 @@ export default {
     readRpcUrl: "https://arbitrum-mainnet.core.chainstack.com/9a30fb13b2159a76c8e143c52d5579bf",
     multicallAddress: "0x0674ee727f74752ea9dc630bd5c5d8a374187e7b",
     EMAIL_REGEX: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/,
-    refreshDelay: 6000,
+    refreshDelay: 2000,
     gmxV2RefreshDelay: 4000,
     penpieRefreshDelay: 4000,
     gmxV2IncentivesMilestone: 9000000,
@@ -602,6 +607,6 @@ export default {
     ltipLastDistributionTimestamp: 1719234231,
     ltipProgramStart: 1717432200,
     lastMilestoneHit: 1721293803,
-    geolocationServiceUrl: "https://geo-service-r9helgya1-deltaprimelabs.vercel.app",
+    geolocationServiceUrl: "https://geo-service-p19wbkdp8-deltaprimelabs.vercel.app/api/geolocation",
     restrictedCountries: ['US', 'AS', 'GU', 'PR', 'MP', 'VI', 'BY', 'CU', 'KP', 'SY', 'CI', 'LR', 'SD', 'ZW', 'IQ']
 }

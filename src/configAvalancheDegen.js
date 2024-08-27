@@ -13,7 +13,7 @@ import TRADERJOE_INTERMEDIARY_TUP from '/deployments/avalanche/TraderJoeIntermed
 import subgraphConfig from '../.secrets/subgraph.json';
 
 export default {
-    isDegen: false,
+    isDegen: true,
     MIN_ALLOWED_HEALTH: 0.0182,
     COMPETITION_START_BLOCK: 14858534,
     DECIMALS_PRECISION: 8,
@@ -38,6 +38,7 @@ export default {
       "yyAVAX": {name: "yyAVAX", symbol: "yyAVAX", logoExt: "png", decimals: 18, address: addresses.yyAVAX, debtCoverage: 0.83333333333, apy: 4.86, tradingViewSymbol: "TRADERJOE:YYAVAXUSDC_0512AB.USD", warning: "This token will be sunsetted soon. Swap to ggAVAX for a Gogopool airdrop."},
       "ggAVAX": {name: "ggAVAX", symbol: "ggAVAX", logoExt: "png", decimals: 18, address: addresses.ggAVAX, debtCoverage: 0.83333333333, apy: 5.04, useParaSwapV2: true },
       "GMX": {name: "GMX", symbol: "GMX", logoExt: "png", decimals: 18, address: addresses.GMX, debtCoverage: 0.83333333333, groupIdentifier: "GMX_GROUP", tradingViewSymbol: "BINANCE:GMXUSDT"},
+      "CAI": {name: "CAI", symbol: "CAI", logoExt: "png", decimals: 18, address: addresses.CAI, debtCoverage: 0.83333333333, apy: 5.57, tradingViewSymbol: "BITMART:CAIUSDT"},
       "JOE": {name: "JOE", symbol: "JOE", logoExt: "png", decimals: 18, address: addresses.JOE, debtCoverage: 0.8, groupIdentifier: "JOE_GROUP", tradingViewSymbol: "BINANCE:JOEUSDT"},
       "QI": {name: "QI", symbol: "QI", logoExt: "svg", decimals: 18, address: addresses.QI, debtCoverage: 0, tradingViewSymbol: "BINANCE:QIUSDT"},
       "PNG": {name: "PNG", symbol: "PNG", logoExt: "png", decimals: 18, address: addresses.PNG, debtCoverage: 0, tradingViewSymbol: "COINBASE:PNGUSD"},
@@ -46,7 +47,6 @@ export default {
       "GGP": {unsupported: true, name: "GGP", symbol: "GGP", logoExt: "png", decimals: 18, address: addresses.GGP, debtCoverage: 0, tradingViewSymbol: "TRADERJOE:GGPWAVAX_AE671E.USD", fetchPrice: true, priceEndpoint: "https://api.gogopool.com/prices", priceJsonField: "ggpInUSD"},
       "WOM": {unsupported: true, name: "WOM", symbol: "WOM", logoExt: "png", decimals: 18, address: addresses.WOM, debtCoverage: 0, tradingViewSymbol: "TRADERJOE:GGPWAVAX_AE671E.USD"},
     },
-    RTKN_2_ADDRESS: "0x0E31136cD6742B4656eD46E28306080620eD70a7",
     PRIME: {hide: true, name: "PRIME", symbol: "PRIME", decimals: 18, address: addresses.PRIME},
     SPRIME_CONFIG: {
         default: "TRADERJOEV2",
@@ -71,26 +71,22 @@ export default {
     },
     AVALANCHE_BOOST_CONFIG: {
         AVAX: {
-            depositRewarderAddress: "0x6373122eD8Eda8ECA439415709318DCB6ddC1af3",
-            depositRewarderOldAddress: "0x6d149Fcc150A3B097D7647408345898fe9db1ded",
+            depositRewarderAddress: "0x6d149Fcc150A3B097D7647408345898fe9db1ded",
             rewardToken: "sAVAX",
             duration: 1209600
         },
         USDC: {
-            depositRewarderAddress: "0x596f6EFD98daF650CF98A1E62A53AB2a44e7E875",
-            depositRewarderOldAddress: "0xB913aC229910d705297DEB1c168af3dA1416B227",
+            depositRewarderAddress: "0xB913aC229910d705297DEB1c168af3dA1416B227",
             rewardToken: "ggAVAX",
             duration: 1209600
         },
         USDT: {
-            depositRewarderAddress: "0xBC6Ef309f2eC71698eA310D62FF2E0543472D965",
-            depositRewarderOldAddress: "0x3750F8d6Df82699ada6bBd1463C4E91fCf37005D",
+            depositRewarderAddress: "0x3750F8d6Df82699ada6bBd1463C4E91fCf37005D",
             rewardToken: "sAVAX",
             duration: 1209600
         },
         BTC: {
-            depositRewarderAddress: "0x3FE9BE379eD15962AFAbE01c002B8c433C6Af4ec",
-            depositRewarderOldAddress: "0x50b0b59f14bA882BD511Fe08d1cdc975807a94A4",
+            depositRewarderAddress: "0x50b0b59f14bA882BD511Fe08d1cdc975807a94A4",
             rewardToken: "ggAVAX",
             duration: 1209600
         }
@@ -100,20 +96,14 @@ export default {
     },
 
     SWAP_DEXS_CONFIG: {
-        // ParaSwapV2: {
-        //     displayName: 'ParaSwap',
-        //     availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
-        //     slippageMargin: 0.05
-        // },
+        ParaSwapV2: {
+            displayName: 'ParaSwap',
+            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX', 'CAI', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
+            slippageMargin: 0.05
+        },
         YakSwap: {
             displayName: 'YakSwap',
-            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'sAVAX', 'GMX', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
-            slippageMargin: 0.02
-        },
-        GLP_DIRECT: {
-            displayName: 'Direct',
-            availableAssets: ['GLP', 'ETH', 'AVAX', 'USDC', 'BTC'],
-            coreAsset: 'GLP',
+            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'GLP', 'sAVAX', 'GMX', 'CAI', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
             slippageMargin: 0.02
         },
         GmxV2: {
@@ -133,6 +123,8 @@ export default {
         extreme: {value: 5, name: 'Extreme', imgSrc: 'src/assets/icons/error.svg', tooltip: 'Significant price variation expected. Recommended for use during more volatile market conditions.'},
     },
 
+    CAI_MINT_SOURCE_ASSETS: ['JOE', 'sAVAX', 'AVAX', 'QI'],
+    CAI_BURN_TARGET_ASSETS: ['JOE', 'sAVAX', 'AVAX', 'QI'],
     paraSwapDefaultSlippage: 1,
     showParaSwapWarning: true,
     ASSET_FILTER_TOKENS_OPTIONS: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX'],
@@ -141,27 +133,27 @@ export default {
     WRAPPED_TOKEN_ADDRESS: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
     POOLS_CONFIG: {
         AVAX: {
-            address: '0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4',
+            address: WAVAX_POOL_TUP.address,
             tokenAddress: addresses.AVAX,
             hasAvalancheBoost: true
         },
         USDC: {
-            address: '0x8027e004d80274FB320e9b8f882C92196d779CE8',
+            address: USDC_POOL_TUP.address,
             tokenAddress: addresses.USDC,
             hasAvalancheBoost: true
         },
         USDT: {
-            address: '0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e',
+            address: USDT_POOL_TUP.address,
             tokenAddress: addresses.USDT,
             hasAvalancheBoost: true
         },
         BTC: {
-            address: '0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738',
+            address: BTC_POOL_TUP.address,
             tokenAddress: addresses.BTC,
             hasAvalancheBoost: true
         },
         ETH: {
-            address: '0x2A84c101F3d45610595050a622684d5412bdf510',
+            address: ETH_POOL_TUP.address,
             tokenAddress: addresses.ETH
         }
     },
@@ -246,7 +238,7 @@ export default {
           apyKey: 'WOM_ggAVAX_ggAVAX',
           boostGGP: false,
           addTokenApy: true,
-          aprWarning: false
+          aprWarning: 'This pool’s APY is overvalued. This will be resolved soon.'
         },
         {
           name: 'AVAX',
@@ -341,8 +333,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['AVAX'],
                 strategy: 'AAVE',
-                refreshDelay: 60000,
-                enableUnstakeOverride: true
+                refreshDelay: 60000
             },
             {
                 protocol: 'VECTOR_FINANCE',
@@ -409,7 +400,6 @@ export default {
                 strategy: 'Platypus',
                 banner: 'Due to the recent Platypus exploit, deposits in their farms have been disabled.',
                 refreshDelay: 60000,
-                enableUnstakeOverride: true
             },
             {
                 protocol: 'VECTOR_FINANCE',
@@ -532,9 +522,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'GMX',
                 rewardTokens: ['GLP'],
-                refreshDelay: 60000,
-                enableStakeOverride: true,
-                enableUnstakeOverride: true
+                refreshDelay: 60000
             },
         ],
         PNG_AVAX_USDC_LP: [
@@ -555,7 +543,6 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'Pangolin',
                 refreshDelay: 60000,
-                enableUnstakeOverride: true
             }
         ],
         PNG_AVAX_ETH_LP: [
@@ -576,7 +563,6 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'Pangolin',
                 refreshDelay: 60000,
-                enableUnstakeOverride: true
             }
         ],
         // TJ_AVAX_USDC_LP: [
@@ -655,7 +641,6 @@ export default {
             lpTokenLogo: 'wombat_lp.png',
             YRTTokenLogo: 'yak.svg',
             apyKey: 'YY_WOM_sAVAX_AVAX_LP_sAVAX',
-            apyToAdd: 'sAVAX',
             yrtKey: 'sAVAX_AVAX_YY_sAVAX',
             protocol: 'YIELD_YAK',
             balanceMethod: 'sAvaxBalanceAvaxSavaxYY',
@@ -670,7 +655,7 @@ export default {
             debtCoverage: 0.83333333333,
             strategyContract: '0x9B5d890d563EE4c9255bB500a790Ca6B1FB9dB6b',
             apy: 7.46,
-            aprWarning: false
+            aprWarning: true
         },
         {
             name: 'AVAX LP',
@@ -696,7 +681,7 @@ export default {
             debtCoverage: 0.83333333333,
             strategyContract: '0xa84D83787eA216F616C6Bd02C6edC6D6d63f042f',
             apy: 14.5,
-            aprWarning: false
+            aprWarning: true
         },
         {
             name: 'ggAVAX LP',
@@ -708,7 +693,6 @@ export default {
             lpTokenLogo: 'wombat_lp.png',
             YRTTokenLogo: 'yak.svg',
             apyKey: 'YY_WOM_ggAVAX_AVAX_LP_ggAVAX',
-            apyToAdd: 'ggAVAX',
             yrtKey: 'ggAVAX_AVAX_YY_ggAVAX',
             protocol: 'YIELD_YAK',
             balanceMethod: 'ggAvaxBalanceAvaxGgavaxYY',
@@ -724,7 +708,7 @@ export default {
             strategyContract: '0x13404B1C715aF60869fc658d6D99c117e3543592',
             apy: 8.34,
             boostGGP: true,
-            aprWarning: false
+            aprWarning: true
         },
         {
             name: 'AVAX LP',
@@ -750,7 +734,7 @@ export default {
             debtCoverage: 0.83333333333,
             strategyContract: '0x7f0eB376eabF4b2B4290D09EFb2f4da99B3ea311',
             apy: 0.4,
-            aprWarning: false
+            aprWarning: true
         },
     ],
     liquidityShapes: {
@@ -769,13 +753,6 @@ export default {
             imgSrc: "src/assets/icons/liquidity_shape_bid-ask_on.svg",
             distributionMethod: "getBidAskDistributionFromBinRange"
         },
-    },
-    fusionEventIds: {
-        announcement: '8wwbhggwzord7a1n842d3h853ltobrcy',
-        liquidation: 'f028438ad4f04bf4a39b255f58a39db8',
-        loanHealth: '6bfd41237b134c1089dd33fe248bee5d',
-        borrowRate: '2bc94bb1b957400a83c4ea7da093a335',
-        lendingRate: '086961666c2a4234a6700721cf55848f'
     },
     yakRouterAddress: '0xC4729E56b831d74bBc18797e0e17A295fA77488c',
     yakWrapRouterAddress: '0x949B99c21B0B62B20cAADf912109929c78049112',
@@ -818,6 +795,6 @@ export default {
         boostApy: 'https://2t8c1g5jra.execute-api.us-east-1.amazonaws.com/ggp-yy-boost-apy',
         collectedGGP: 'https://2t8c1g5jra.execute-api.us-east-1.amazonaws.com/ggp-incentives-yy-for'
     },
-    geolocationServiceUrl: "https://geo-service-r9helgya1-deltaprimelabs.vercel.app",
+    geolocationServiceUrl: "https://geo-service-p19wbkdp8-deltaprimelabs.vercel.app/api/geolocation",
     restrictedCountries: ['US', 'AS', 'GU', 'PR', 'MP', 'VI', 'BY', 'CU', 'KP', 'SY', 'CI', 'LR', 'SD', 'ZW', 'IQ']
 }
