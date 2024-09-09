@@ -42,10 +42,10 @@ contract TraderJoeV2ArbitrumFacet is TraderJoeV2Facet {
         pools[14] = ILBPair(0x055f2cF6da90F14598D35C1184ED535C908dE737);
 
         // TJLB_wstETH_ETH_v2.2
-        pools[15] = ILBPair(0x71bc33f539f83b99674d71acfeb2ce0373376512);
+        pools[15] = ILBPair(0x71bc33F539f83b99674D71AcFeb2ce0373376512);
         // TJLB_ezETH_ETH_v2.2
-        pools[16] = ILBPair(0x8c0635ad0afd7aa9444af07da6c104dd79b58d82);
+        pools[16] = ILBPair(0x8C0635aD0AfD7aa9444AF07Da6C104DD79b58D82);
         // TJLB_weETH_ETH_v2.2
-        pools[17] = ILBPair(0x2088eb5e23f24458e241430ef155d4ec05bbc9e8);
+        pools[17] = ILBPair(0x2088eB5E23F24458e241430eF155d4EC05BBc9e8);
     }
 }
