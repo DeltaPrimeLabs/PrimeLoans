@@ -19,7 +19,7 @@ contract GLPFacetArbi is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     using TransferHelper for address;
 
     // Used to claim GLP fees
-    address private constant REWARD_ROUTER_ADDRESS = 0x159854e14A862Df9E39E1D128b8e5F70B4A3cE9B;
+    address private constant REWARD_ROUTER_ADDRESS = 0x5E4766F932ce00aA4a1A82d3Da85adf15C5694A1;
     // Used to mint/redeem GLP
     address private constant GLP_REWARD_ROUTER_ADDRESS = 0xB95DB5B167D75e6d04227CfFFA61069348d271F5;
     // Used to approve tokens to mint GLP with
