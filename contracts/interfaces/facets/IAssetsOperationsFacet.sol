@@ -13,6 +13,8 @@ interface IAssetsOperationsFacet {
 
     function removeUnsupportedOwnedAsset(bytes32 _asset, address _address) external;
 
+    function removeUnsupportedStakedPosition(bytes32 _identifier) external;
+
     function withdrawGLP(uint256 _amount) external;
 
     function swapDebt(bytes32 _fromAsset, bytes32 _toAsset, uint256 _repayAmount, uint256 _borrowAmount, address[] calldata _path, address[] calldata _adapters) external;
