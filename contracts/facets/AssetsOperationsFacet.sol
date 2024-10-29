@@ -33,24 +33,60 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     * @param _address address of the asset
     **/
     function removeUnsupportedOwnedAsset(bytes32 _asset, address _address) external onlyWhitelistedLiquidators nonReentrant {
-    ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
-    // Check if the asset exists in the TokenManager
-    require(tokenManager.tokenToStatus(_address) == 0, "Asset is still supported");
-    require(tokenManager.tokenAddressToSymbol(_address) == bytes32(0), "Asset address to symbol not empty");
-    require(tokenManager.debtCoverage(_address) == 0, "Asset still has debt coverage");
-    require(tokenManager.identifierToExposureGroup(_asset) == bytes32(0), "Asset still has exposure group");
+        // Check if the asset exists in the TokenManager
+        require(tokenManager.tokenToStatus(_address) == 0, "Asset is still supported");
+        require(tokenManager.tokenAddressToSymbol(_address) == bytes32(0), "Asset address to symbol not empty");
+        require(tokenManager.debtCoverage(_address) == 0, "Asset still has debt coverage");
+        require(tokenManager.identifierToExposureGroup(_asset) == bytes32(0), "Asset still has exposure group");
 
-    bytes32[] memory allAssets = tokenManager.getAllTokenAssets();
-    // Loop through all assets and check if the asset exists
-    for (uint i = 0; i < allAssets.length; i++) {
-        require(allAssets[i] != _asset, "Asset exists in TokenManager");
+        bytes32[] memory allAssets = tokenManager.getAllTokenAssets();
+        // Loop through all assets and check if the asset exists
+        for (uint i = 0; i < allAssets.length; i++) {
+            require(allAssets[i] != _asset, "Asset exists in TokenManager");
+        }
+
+        // Remove the asset from the ownedAssets array
+        DiamondStorageLib.removeOwnedAsset(_asset);
+
+        emit RemovedAsset(_asset, _address, block.timestamp);
     }
 
+    function removeUnsupportedStakedPosition(bytes32 _identifier) external onlyWhitelistedLiquidators nonReentrant {
+        IStakingPositions.StakedPosition[] storage positions = DiamondStorageLib.stakedPositions();
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
-    // Remove the asset from the ownedAssets array
-    DiamondStorageLib.removeOwnedAsset(_asset);
-}
+        bool found = false;
+        IStakingPositions.StakedPosition memory stakedPosition;
+        for (uint i = 0; i < positions.length; i++) {
+            if (positions[i].identifier == _identifier) {
+                found = true;
+                stakedPosition = positions[i];
+                break;
+            }
+        }
+        require(found, "Position not found");
+
+        address _address = stakedPosition.asset;
+        bytes32 _symbol = stakedPosition.symbol;
+
+        // Check if the asset exists in the TokenManager
+        require(tokenManager.tokenToStatus(_address) == 0, "Asset is still supported");
+        require(tokenManager.tokenAddressToSymbol(_address) == bytes32(0), "Asset address to symbol not empty");
+        require(tokenManager.debtCoverage(_address) == 0, "Asset still has debt coverage");
+        require(tokenManager.identifierToExposureGroup(_symbol) == bytes32(0), "Asset still has exposure group");
+
+        bytes32[] memory allAssets = tokenManager.getAllTokenAssets();
+        // Loop through all assets and check if the asset exists
+        for (uint i = 0; i < allAssets.length; i++) {
+            require(allAssets[i] != _symbol, "Asset exists in TokenManager");
+        }
+
+        DiamondStorageLib.removeStakedPosition(_identifier);
+
+        emit RemovedStakedPosition(_identifier, _address,_symbol, block.timestamp);
+    }
 
     /**
     * Funds the loan with a specified amount of a defined token
@@ -357,6 +393,22 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     }
 
     /* ========== EVENTS ========== */
+
+    /**
+     * @dev emitted after an asset is removed
+     * @param asset the asset that was removed
+     * @param _address the address of the asset
+     * @param timestamp time of removal
+     **/
+    event RemovedAsset(bytes32 indexed asset, address indexed _address, uint256 timestamp);
+
+    /**
+     * @dev emitted after a staked position is removed
+     * @param identifier the identifier of the staked position
+     * @param _address the address of the asset
+     * @param timestamp time of removal
+     **/
+    event RemovedStakedPosition(bytes32 indexed identifier, address indexed _address, bytes32 indexed _symbol, uint256 timestamp);
 
     /**
      * @dev emitted after a debt swap
