@@ -29,6 +29,7 @@
     "@babel/plugin-proposal-optional-chaining": "^7.16.7",
     "@chainlink/contracts": "0.8.0",
     "@growthbunker/vuetimeline": "^0.1.17",
+    "@layerzerolabs/solidity-examples": "^1.1.0",
     "@lifi/sdk": "^2.1.1",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
     "@nomiclabs/hardhat-etherscan": "^3.0.1",
