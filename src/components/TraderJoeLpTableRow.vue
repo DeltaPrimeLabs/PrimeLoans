@@ -158,6 +158,7 @@ import FlatButton from "./FlatButton.vue";
 import SmallBlock from "./SmallBlock.vue";
 import LB_TOKEN from '/artifacts/contracts/interfaces/joe-v2/ILBToken.sol/ILBToken.json'
 import {ActionSection} from "../services/globalActionsDisableService";
+import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
 const toBytes32 = require('ethers').utils.formatBytes32String;
 
@@ -259,7 +260,8 @@ export default {
       'priceService',
       'ltipService',
       'globalActionsDisableService',
-      'sPrimeService'
+      'sPrimeService',
+      'bullScoreService',
     ]),
 
     hasSmartLoanContract() {
@@ -388,6 +390,13 @@ export default {
 
     calculateUserValue() {
       this.userValue = this.lpToken.primaryBalance * this.firstAsset.price + this.lpToken.secondaryBalance * this.secondAsset.price;
+      this.bullScoreService.setToken(TokenType.TJV2, new AssetsEntry(
+        this.lpToken.symbol,
+        0.5,
+        { symbol: this.lpToken.primary, value: this.lpToken.primaryBalance * this.firstAsset.price },
+        { symbol: this.lpToken.secondary, value: this.lpToken.secondaryBalance * this.secondAsset.price }
+        )
+      )
     },
 
     setupButtonConfigs(hasAccess) {
