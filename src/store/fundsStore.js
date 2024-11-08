@@ -1168,7 +1168,7 @@ export default {
           'PENPIE_SUM',
           0.5,
           { symbol: 'ETH', value: allPenpieAssetsValueSum },
-          { symbol: 'ETH', amount: 0 },
+          { symbol: 'ETH', value: 0 },
         ))
       }
 

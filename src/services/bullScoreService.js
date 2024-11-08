@@ -45,7 +45,7 @@ export default class BullScoreService{
     TokenType.GMXV2,
     TokenType.TJV2,
   ]
-  STABLES_ARB = ['USDC', 'DAI']
+  STABLES_ARB = ['USDC', 'USDT', 'DAI']
   ASSETS_ARB = ['ARB', 'BTC', 'ETH']
   chain$ = new BehaviorSubject(undefined)
   stablesToCalculate$ = this.chain$.pipe(filter(Boolean), map(chain => chain === 'avalanche' ? this.STABLES_AVAX : this.STABLES_ARB))
@@ -71,7 +71,8 @@ export default class BullScoreService{
       })
 
       result.STABLES = stablesToCalculate.reduce((previousValue, currentValue) => {
-        previousValue += (debtsPerAsset[currentValue].debt - assetsBalances[currentValue]) * assets[currentValue].price;
+        const assetDebt = debtsPerAsset[currentValue] ? debtsPerAsset[currentValue].debt : 0
+        previousValue += (assetDebt - assetsBalances[currentValue]) * assets[currentValue].price;
         return previousValue
       }, 0) + collateral
       return result
