@@ -53,20 +53,20 @@ export default {
   }
 
   .ltip-leaderboard-section {
-    grid-area: 1 / 1 / 2 / 4;
+    grid-area: 2 / 1 / 3 / 4;
   }
 
   .stats-chart-section {
-    grid-area: 2 / 1 / 3 / 4;
+    grid-area: 3 / 1 / 4 / 4;
     height: 424px;
   }
 
   .stats-shares-section {
-    grid-area: 3 / 1 / 4 / 4;
+    grid-area: 4 / 1 / 5 / 4;
   }
 
   .transaction-history {
-    grid-area: 4 / 1 / 5 / 4;
+    grid-area: 5 / 1 / 6 / 4;
   }
 }
 
