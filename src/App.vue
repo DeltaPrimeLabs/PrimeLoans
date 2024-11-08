@@ -241,6 +241,7 @@ export default {
         this.closeModal();
       }
     });
+    this.bullScoreService.setChain(window.chain)
     const url = document.location.href;
     const lastUrlPart = url.split('/').reverse()[0];
     this.checkClaimTheme(`/${lastUrlPart}`)
@@ -265,6 +266,7 @@ export default {
       'deprecatedAssetsService',
       'globalActionsDisableService',
       'paWithdrawQueueService',
+      'bullScoreService',
     ]),
     ...mapState('poolStore', ['pools'])
   },

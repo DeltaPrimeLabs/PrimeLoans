@@ -30,7 +30,8 @@ import YAK_ROUTER_ABI from '../../test/abis/YakRouter.json';
 import {getSwapData} from '../utils/paraSwapUtils';
 import {getBurnData} from '../utils/caiUtils';
 import {combineLatest, from, map, tap} from 'rxjs';
-import ABI_YY_WOMBAT_STRATEGY from '../abis/YYWombatStrategy.json';
+import ABI_YY_WOMBAT_STRATEGY from "../abis/YYWombatStrategy.json";
+import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
 const toBytes32 = require('ethers').utils.formatBytes32String;
 const fromBytes32 = require('ethers').utils.parseBytes32String;
@@ -447,6 +448,7 @@ export default {
         }
       });
 
+      rootState.serviceRegistry.bullScoreService.setAssets(assets)
     },
 
     async setupAssetExposures({state, rootState, commit}) {
@@ -997,6 +999,15 @@ export default {
           }
           if (config.LP_ASSETS_CONFIG[symbol]) {
             lpBalances[symbol] = formatUnits(asset.balance.toString(), config.LP_ASSETS_CONFIG[symbol].decimals);
+            const singleAssetValue = Number(lpBalances[symbol]) * state.lpAssets[symbol].price / 2
+            const lpTokenConfig = config.LP_ASSETS_CONFIG[symbol]
+            rootState.serviceRegistry.bullScoreService.setToken(TokenType.PANGOLIN, new AssetsEntry(
+              symbol,
+              0.5,
+              { symbol: lpTokenConfig.primary, value: singleAssetValue },
+              { symbol: lpTokenConfig.secondary, value: singleAssetValue },
+            ))
+
             if (config.LP_ASSETS_CONFIG[symbol].droppingSupport && balances[symbol] > 0) {
               console.warn('Has depracated asset' + symbol);
               hasDeprecatedAssets = true;
@@ -1021,15 +1032,25 @@ export default {
         }
       );
 
+      rootState.serviceRegistry.bullScoreService.setAssetsBalances(balances)
+
       const wombatAssets = Object.keys(config.WOMBAT_LP_ASSETS);
       if (wombatAssets.length) {
+        let allAssetsValueSum = 0
         const balanceArray = await Promise.all(wombatAssets.map(asset =>
           state.readSmartLoanContract[config.WOMBAT_LP_ASSETS[asset].balanceMethod]()
         ))
         balanceArray.forEach((balance, index) => {
           const asset = wombatAssets[index]
           wombatLpBalances[asset] = formatUnits(balance.toString(), config.WOMBAT_LP_ASSETS[asset].decimals)
+          allAssetsValueSum += Number(wombatLpBalances[asset]) * state.wombatLpAssets[asset].price
         })
+        rootState.serviceRegistry.bullScoreService.setToken(TokenType.WOMBAT, new AssetsEntry(
+          'WOM_SUM',
+          0.5,
+          { symbol: 'AVAX', value: allAssetsValueSum },
+          { symbol: 'AVAX', value: 0 },
+          ))
       }
 
       const wombatFarms = config.WOMBAT_YY_FARMS;
@@ -1083,12 +1104,19 @@ export default {
               }
             })
         );
-
+        let allAssetsValueSum = 0
         Object.keys(config.BALANCER_LP_ASSETS_CONFIG).forEach(
           (key, index) => {
             balancerLpBalances[key] = fromWei(result.returnData[index]);
+            allAssetsValueSum += fromWei(result.returnData[index]) * state.balancerLpAssets[key].price
           }
         )
+        rootState.serviceRegistry.bullScoreService.setToken(TokenType.BALANCER, new AssetsEntry(
+          'BALANCER',
+          0.5,
+          { symbol: 'AVAX', value: allAssetsValueSum },
+          { symbol: 'AVAX', value: 0 },
+        ))
 
 
         //TODO: optimize
@@ -1129,6 +1157,19 @@ export default {
             delete state.assets[asset.symbol];
           }
         }
+      }
+
+      if (Object.keys(penpieLpBalances).length > 0) {
+        let allPenpieAssetsValueSum = 0
+        Object.values(state.penpieLpAssets).forEach(lpAsset => {
+          allPenpieAssetsValueSum += Number(penpieLpBalances[lpAsset.symbol]) * lpAsset.price
+        })
+        rootState.serviceRegistry.bullScoreService.setToken(TokenType.PENPIE, new AssetsEntry(
+          'PENPIE_SUM',
+          0.5,
+          { symbol: 'ETH', value: allPenpieAssetsValueSum },
+          { symbol: 'ETH', amount: 0 },
+        ))
       }
 
       await commit('setAssets', state.assets);
@@ -1478,6 +1519,7 @@ export default {
         }
       });
       await commit('setDebtsPerAsset', debtsPerAsset);
+      rootState.serviceRegistry.bullScoreService.setDebtsPerAsset(debtsPerAsset)
       dataRefreshNotificationService.emitDebtsPerAssetDataRefreshEvent(debtsPerAsset);
       rootState.serviceRegistry.healthService.emitRefreshHealth();
     },

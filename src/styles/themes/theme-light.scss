@@ -760,4 +760,13 @@
   --checkbox__background--disabled: #{$mist-gray};
   --checkbox__border--disabled: #{$pearly-gray};
   // endregion
+
+  // region PercentageGauge
+  --percentage-gauge__gradient: conic-gradient(from -0.33turn, #{$red}, #{$lighter-raspberry} 0.13turn, #{$vivid-pink} 0.26turn, #{$smooth-pink} 0.37turn, #{$darker-pink} 0.5turn, #{$just-blue} 0.63turn, #{$red});
+  --percentage-gauge__shadow: drop-shadow(1px 1px 8px #{$delta-steel}66);
+  --percentage-gauge__number-color: #{$lighter-raspberry};
+  --percentage-gauge__indicator-color: #{$persian-blue};
+  --percentage-gauge__indicator-shadow: 0.7px 0.7px 4.1px 0 #{$black}26;
+  --percentage-gauge__labels-color: #{$steel-gray};
+  // endregion
 }

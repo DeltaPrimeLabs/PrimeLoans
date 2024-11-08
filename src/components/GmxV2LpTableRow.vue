@@ -194,6 +194,7 @@ import zapLong from './zaps-tiles/ZapLong.vue';
 import {calculateGmxV2ExecutionFee, capitalize, hashData} from '../utils/blockchain';
 import Dropdown from './notifi/settings/Dropdown.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
+import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
 export default {
   name: 'GmxV2LpTableRow',
@@ -308,6 +309,7 @@ export default {
       'ltipService',
       'globalActionsDisableService',
       'sPrimeService',
+      'bullScoreService',
     ]),
     ...mapState('stakeStore', ['farms']),
 
@@ -466,6 +468,12 @@ export default {
 
       this.longTokenAmount = this.lpToken.isGMXPlus ?  2 * formatUnits(longTokenOut, longToken.decimals) : formatUnits(longTokenOut, longToken.decimals);
       this.shortTokenAmount = formatUnits(shortTokenOut, shortToken.decimals);
+      this.bullScoreService.setToken(TokenType.GMXV2, new AssetsEntry(
+          this.lpToken.symbol,
+          this.openInterestData ? (this.openInterestData[this.openInterestData.length - 1].y / 100) : 0.5,
+          { symbol: this.lpToken.longToken, value: Number(this.longTokenAmount) * this.assets[this.lpToken.longToken].price },
+          { symbol: this.lpToken.shortToken, value: this.lpToken.isGMXPlus ? 0 : Number(this.shortTokenAmount) * this.assets[this.lpToken.shortToken].price },
+      ))
     },
 
     toggleChart() {

@@ -34,6 +34,7 @@ import RtknService from '../services/rtknService';
 import PoolWithdrawQueueService from '../services/poolWithdrawQueueService';
 import PAWithdrawQueueService from '../services/paWithdrawQueueService';
 import FundsService from '../services/fundsService';
+import BullScoreService from "../services/bullScoreService";
 
 const providerService = new ProviderService();
 const accountService = new AccountService();
@@ -80,6 +81,7 @@ export default {
     rtknService: new RtknService(providerService, accountService, progressBarService, modalService),
     poolWithdrawQueueService: new PoolWithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
     paWithdrawQueueService: new PAWithdrawQueueService(providerService, accountService, progressBarService, modalService, fundsService),
-    fundsService: fundsService
+    fundsService: fundsService,
+    bullScoreService: new BullScoreService(),
   },
 };
