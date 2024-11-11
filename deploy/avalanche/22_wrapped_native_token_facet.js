@@ -13,7 +13,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let smartLoanWrappedNativeTokenFacet = await deploy("SmartLoanWrappedNativeTokenFacet", {
         from: deployer,
         contract: "contracts/facets/SmartLoanWrappedNativeTokenFacet.sol:SmartLoanWrappedNativeTokenFacet",
-        gasLimit: 15000000,
         args: [],
     });
 

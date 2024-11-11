@@ -8,22 +8,21 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer, admin } = await getNamedAccounts();
 
-    embedCommitHash("PenpieFacet", "./contracts/facets/arbitrum");
-
-    let PenpieFacet = await deploy("PenpieFacet", {
-        from: deployer,
-        gasLimit: 100000000,
-        args: [],
-    });
-
-
-    console.log(
-        `PenpieFacet implementation deployed at address: ${PenpieFacet.address}`
-    );
+    // embedCommitHash("PenpieFacet", "./contracts/facets/arbitrum");
+    //
+    // let PenpieFacet = await deploy("PenpieFacet", {
+    //     from: deployer,
+    //     args: [],
+    // });
+    //
+    //
+    // console.log(
+    //     `PenpieFacet implementation deployed at address: ${PenpieFacet.address}`
+    // );
 
     await verifyContract(hre,
         {
-            address: PenpieFacet.address,
+            address: "0x130c975A189024CDFe4A4B38706a431463AD0aCf",
             contract: `contracts/facets/arbitrum/PenpieFacet.sol:PenpieFacet`,
             constructorArguments: []
         });

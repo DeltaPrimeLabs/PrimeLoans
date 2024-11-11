@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 6f7f4cd9481c319d118ca12f8d2a3f8688dcf371;
+// Last deployed from commit: 84d5aeadfd8810a47f09f0adc4cfdaadd6025092;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -344,7 +344,7 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
         );
     }
 
-    function claimRewardsBalancerV2(bytes32 poolId) external nonReentrant onlyOwner remainsSolvent {
+    function claimRewardsBalancerV2(bytes32 poolId) external nonReentrant noOwnershipTransferInLast24hrs onlyOwner remainsSolvent {
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
         (address pool,) = IVault(MASTER_VAULT_ADDRESS).getPool(poolId);

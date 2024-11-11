@@ -293,6 +293,12 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
         require(_isSolvent(), "The action may cause an account to become insolvent");
     }
 
+    modifier noOwnershipTransferInLast24hrs() {
+        DiamondStorageLib.SmartLoanStorage storage sls = DiamondStorageLib.smartLoanStorage();
+        require(block.timestamp - sls.lastOwnershipTransferTimestamp > 1 days, "Ownership was transferred in the last 24 hours");
+        _;
+    }
+
     modifier canRepayDebtFully() {
         _;
         require(_canRepayDebtFully(), "Insufficient assets to fully repay the debt");

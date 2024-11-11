@@ -13,9 +13,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let TraderJoeV2ArbitrumFacet = await deploy("TraderJoeV2ArbitrumFacet", {
         from: deployer,
-        gasLimit: 50000000,
-        maxFeePerGas: 202351000,
-        maxPriorityFeePerGas: 202351000,
         args: [],
     });
 

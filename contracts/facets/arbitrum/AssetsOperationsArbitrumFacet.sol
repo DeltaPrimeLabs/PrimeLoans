@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 48436f168cf40ebb8f1ff77f4a20c807a2b11f28;
+// Last deployed from commit: 84d5aeadfd8810a47f09f0adc4cfdaadd6025092;
 pragma solidity 0.8.17;
 
 import "../AssetsOperationsFacet.sol";
@@ -35,7 +35,7 @@ contract AssetsOperationsArbitrumFacet is AssetsOperationsFacet {
         * Withdraws specified amount of a GLP
         * @param _amount to be withdrawn
     **/
-    function withdrawGLP(uint256 _amount) public override onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
+    function withdrawGLP(uint256 _amount) public override noOwnershipTransferInLast24hrs onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
         IERC20Metadata token = getERC20TokenInstance("GLP", true);
         IERC20Metadata stakedGlpToken = IERC20Metadata(0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf);
         _amount = Math.min(token.balanceOf(address(this)), _amount);

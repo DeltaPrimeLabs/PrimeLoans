@@ -11,7 +11,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let AssetsOperationsArbitrumFacet = await deploy("AssetsOperationsArbitrumFacet", {
         from: deployer,
-        gasLimit: 80000000,
         args: [],
     });
 

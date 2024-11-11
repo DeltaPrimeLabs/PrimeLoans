@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 45f62a9cb0dbaab64877c33c5a5f9324e08e6a40;
+// Last deployed from commit: 84d5aeadfd8810a47f09f0adc4cfdaadd6025092;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -200,6 +200,7 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 amount
     )
         external
+        noOwnershipTransferInLast24hrs
         onlyOwner
         canRepayDebtFully
         nonReentrant
@@ -305,7 +306,7 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 pendingPenpie,
         address[] memory bonusTokenAddresses,
         uint256[] memory pendingBonusRewards
-    ) internal {
+    ) internal noOwnershipTransferInLast24hrs {
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         address owner = DiamondStorageLib.contractOwner();
 

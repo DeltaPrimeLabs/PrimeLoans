@@ -149,7 +149,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     * @param _withdrawnAsset asset to be withdrawn
     * @param _amount to be withdrawn
     **/
-    function withdraw(bytes32 _withdrawnAsset, uint256 _amount) public virtual onlyOwner nonReentrant canRepayDebtFully remainsSolvent {
+    function withdraw(bytes32 _withdrawnAsset, uint256 _amount) public virtual noOwnershipTransferInLast24hrs onlyOwner nonReentrant canRepayDebtFully remainsSolvent {
         IERC20Metadata token = getERC20TokenInstance(_withdrawnAsset, true);
         _amount = Math.min(_amount, token.balanceOf(address(this)));
 
@@ -165,7 +165,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         * Withdraws specified amount of a GLP
         * @param _amount to be withdrawn
     **/
-    function withdrawGLP(uint256 _amount) public virtual onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
+    function withdrawGLP(uint256 _amount) public virtual noOwnershipTransferInLast24hrs onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
         IERC20Metadata token = getERC20TokenInstance("GLP", true);
         IERC20Metadata stakedGlpToken = IERC20Metadata(0xaE64d55a6f09E4263421737397D1fdFA71896a69);
         _amount = Math.min(token.balanceOf(address(this)), _amount);
@@ -230,7 +230,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         notifyVPrimeController(DiamondStorageLib.contractOwner(), tokenManager);
     }
 
-    function withdrawUnsupportedToken(address token) external nonReentrant onlyOwner remainsSolvent {
+    function withdrawUnsupportedToken(address token) external nonReentrant noOwnershipTransferInLast24hrs onlyOwner remainsSolvent {
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
         // _NOT_SUPPORTED = 0

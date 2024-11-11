@@ -68,7 +68,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         return (amountX, amountY);
     }
 
-    function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant onlyOwner {
+    function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant noOwnershipTransferInLast24hrs onlyOwner {
         uint256 length = merkleEntries.length;
         IERC20[] memory tokens = new IERC20[](length);
         uint256[] memory beforeBalances = new uint256[](length);
@@ -88,7 +88,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         }
     }
 
-    function claimReward(ILBPair pair, uint256[] calldata ids) external nonReentrant onlyOwner {
+    function claimReward(ILBPair pair, uint256[] calldata ids) external nonReentrant noOwnershipTransferInLast24hrs onlyOwner {
         ILBHookLens lbHookLens = ILBHookLens(getJoeV2LBHookLens());
         ILBHookLens.Parameters memory hookLens = lbHookLens.getHooks(address(pair));
         address baseRewarder = hookLens.hooks;
@@ -138,7 +138,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         emit FundedLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
     }
 
-    function withdrawLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant onlyOwner canRepayDebtFully noBorrowInTheSameBlock remainsSolvent {
+    function withdrawLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external noOwnershipTransferInLast24hrs nonReentrant onlyOwner canRepayDebtFully noBorrowInTheSameBlock remainsSolvent {
         if (!isPairWhitelisted(address(pair))) revert TraderJoeV2PoolNotWhitelisted();
 
         pair.batchTransferFrom(address(this), msg.sender, ids, amounts);

@@ -620,6 +620,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 amount
     )
         internal
+        noOwnershipTransferInLast24hrs
         onlyOwner
         nonReentrant
         remainsSolvent

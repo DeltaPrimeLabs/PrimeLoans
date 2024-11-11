@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let BalancerV2Facet = await deploy("BalancerV2Facet", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
