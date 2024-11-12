@@ -6,14 +6,15 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "../interfaces/IWrappedNativeToken.sol";
 import "../OnlyOwnerOrInsolvent.sol";
+import "../ReentrancyGuardKeccak.sol";
 
 //This path is updated during deployment
 import "../lib/local/DeploymentConstants.sol";
 
-contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent {
+contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent, ReentrancyGuardKeccak {
     using TransferHelper for address payable;
 
-    function wrapNativeToken(uint256 amount) onlyOwnerOrInsolvent public {
+    function wrapNativeToken(uint256 amount) onlyOwnerOrInsolvent nonReentrant public {
         require(amount <= address(this).balance, "Not enough native token to wrap");
         require(amount > 0, "Cannot wrap 0 tokens");
         IWrappedNativeToken wrapped = IWrappedNativeToken(DeploymentConstants.getNativeToken());
