@@ -89,6 +89,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
     }
 
     function claimReward(ILBPair pair, uint256[] calldata ids) external nonReentrant onlyOwner {
+        require(isPairWhitelisted(address(pair)), "TraderJoeV2PoolNotWhitelisted");
         ILBHookLens lbHookLens = ILBHookLens(getJoeV2LBHookLens());
         ILBHookLens.Parameters memory hookLens = lbHookLens.getHooks(address(pair));
         address baseRewarder = hookLens.hooks;
