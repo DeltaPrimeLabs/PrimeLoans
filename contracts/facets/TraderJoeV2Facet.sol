@@ -69,11 +69,13 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
     }
 
     function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant onlyOwner remainsSolvent {
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         uint256 length = merkleEntries.length;
         IERC20[] memory tokens = new IERC20[](length);
         uint256[] memory beforeBalances = new uint256[](length);
         for (uint256 i; i != length; ++i) {
             tokens[i] = merkleEntries[i].token;
+            require(tokenManager.isTokenAssetActive(address(tokens[i])), "TokenNotWhitelisted");
             beforeBalances[i] = tokens[i].balanceOf(address(this));
         }
 
