@@ -81,13 +81,12 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
 
     function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant onlyOwner remainsSolvent {
         wrapNativeToken();
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+
         uint256 length = merkleEntries.length;
         IERC20[] memory tokens = new IERC20[](length);
         uint256[] memory beforeBalances = new uint256[](length);
         for (uint256 i; i != length; ++i) {
             tokens[i] = merkleEntries[i].token;
-            require(tokenManager.isTokenAssetActive(address(tokens[i])), "TokenNotWhitelisted");
             beforeBalances[i] = tokens[i].balanceOf(address(this));
         }
 
@@ -97,7 +96,10 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         for (uint256 i; i != length; ++i) {
             uint256 newBalance = tokens[i].balanceOf(address(this));
             if (newBalance > beforeBalances[i]) {
-                address(tokens[i]).safeTransfer(msg.sender, newBalance - beforeBalances[i]);
+                ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+                if(tokenManager.isTokenAssetActive(address(tokens[i]))){
+                    _increaseExposure(tokenManager, address(tokens[i]), newBalance - beforeBalances[i]);
+                }
             }
         }
     }
@@ -114,13 +116,19 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         address rewardToken = address(ILBHooksBaseRewarder(baseRewarder).getRewardToken());
         bool isNative = (rewardToken == address(0));
         uint256 beforeBalance = isNative ? address(this).balance : IERC20(rewardToken).balanceOf(address(this));
+
         ILBHooksBaseRewarder(baseRewarder).claim(address(this), ids);
+
         uint256 reward = isNative ? address(this).balance - beforeBalance : IERC20(rewardToken).balanceOf(address(this)) - beforeBalance;
+
         if(reward > 0) {
             if(isNative) {
-                payable(msg.sender).safeTransferETH(reward);
+                wrapNativeToken();
             } else {
-                rewardToken.safeTransfer(msg.sender, reward);
+                ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+                if(tokenManager.isTokenAssetActive(rewardToken)){
+                    _increaseExposure(tokenManager, rewardToken, reward);
+                }
             }
         }
     }
