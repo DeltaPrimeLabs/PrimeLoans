@@ -68,7 +68,18 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         return (amountX, amountY);
     }
 
+    function wrapNativeToken() internal {
+        uint256 balance = address(this).balance;
+        if(balance > 0){
+            IWrappedNativeToken nativeToken = IWrappedNativeToken(DeploymentConstants.getNativeToken());
+            nativeToken.deposit{value : balance}();
+            ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+            _increaseExposure(tokenManager, address(nativeToken), balance);
+        }
+    }
+
     function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant onlyOwner remainsSolvent {
+        wrapNativeToken();
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         uint256 length = merkleEntries.length;
         IERC20[] memory tokens = new IERC20[](length);
@@ -91,6 +102,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
     }
 
     function claimReward(ILBPair pair, uint256[] calldata ids) external nonReentrant onlyOwner remainsSolvent{
+        wrapNativeToken();
         require(isPairWhitelisted(address(pair)), "TraderJoeV2PoolNotWhitelisted");
         ILBHookLens lbHookLens = ILBHookLens(getJoeV2LBHookLens());
         ILBHookLens.Parameters memory hookLens = lbHookLens.getHooks(address(pair));
