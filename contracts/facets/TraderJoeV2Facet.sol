@@ -242,6 +242,9 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
     function removeLiquidityTraderJoeV2(ILBRouter traderJoeV2Router, RemoveLiquidityParameters memory parameters) external nonReentrant onlyOwnerOrInsolvent noBorrowInTheSameBlock {
         if (!isRouterWhitelisted(address(traderJoeV2Router))) revert TraderJoeV2RouterNotWhitelisted();
         ILBPair lbPair = ILBPair(traderJoeV2Router.getFactory().getLBPairInformation(parameters.tokenX, parameters.tokenY, parameters.binStep).LBPair);
+
+        if (!isPairWhitelisted(address(lbPair))) revert TraderJoeV2PoolNotWhitelisted();
+
         lbPair.approveForAll(address(traderJoeV2Router), true);
 
         (uint256 amountXReceived, uint256 amountYReceived) = _removeLiquidity(traderJoeV2Router, parameters);
