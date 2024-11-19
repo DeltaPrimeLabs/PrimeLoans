@@ -192,7 +192,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
 
     function addLiquidityTraderJoeV2(ILBRouter traderJoeV2Router, ILBRouter.LiquidityParameters memory liquidityParameters) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
         if (!isRouterWhitelisted(address(traderJoeV2Router))) revert TraderJoeV2RouterNotWhitelisted();
-        TraderJoeV2Bin[] storage ownedBins = getOwnedTraderJoeV2Bins();
+        TraderJoeV2Bin[] storage ownedBins = getOwnedTraderJoeV2BinsStorage();
         ILBFactory lbFactory = traderJoeV2Router.getFactory();
         ILBFactory.LBPairInformation memory pairInfo = lbFactory.getLBPairInformation(liquidityParameters.tokenX, liquidityParameters.tokenY, liquidityParameters.binStep);
 
