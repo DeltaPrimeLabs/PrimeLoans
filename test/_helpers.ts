@@ -1404,7 +1404,7 @@ export async function deployAndInitializeLendingPool(owner: any, tokenName: stri
             case 'AVAX':
                 tokenContract = new ethers.Contract(AVAX_TOKEN_ADDRESSES['AVAX'], wavaxAbi, provider);
                 for (const user of tokenAirdropList) {
-                    await tokenContract.connect(user).deposit({value: toWei("5000")});
+                    await tokenContract.connect(user).deposit({value: toWei("100")});
                 }
                 break;
             case 'ETH':
