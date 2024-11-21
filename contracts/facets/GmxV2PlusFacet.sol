@@ -70,20 +70,19 @@ abstract contract GmxV2PlusFacet is GmxV2FacetCommon {
             bytes32[] memory dataFeedIds = new bytes32[](2);
             dataFeedIds[0] = tokenManager.tokenAddressToSymbol(gmToken);
             dataFeedIds[1] = tokenManager.tokenAddressToSymbol(depositedToken);
+            uint256[] memory tokenPrices = getPrices(dataFeedIds);
 
-            uint256 gmTokenUsdPrice = SolvencyMethods.getPrices(dataFeedIds)[0];
-            uint256 depositTokenUsdPrice = SolvencyMethods.getPrices(dataFeedIds)[1];
             require(
                 isWithinBounds(
-                    (depositTokenUsdPrice * tokenAmount) /
+                    (tokenPrices[1] * tokenAmount) /
                         10 ** IERC20Metadata(depositedToken).decimals(), // Deposit Amount In USD
-                    (minGmAmount * gmTokenUsdPrice) /
+                    (minGmAmount * tokenPrices[0]) /
                         10 ** IERC20Metadata(gmToken).decimals()
                 ), // Output Amount In USD
                 "Invalid min output value"
             );
 
-            uint256 gmTokensWeightedUsdValue = (gmTokenUsdPrice *
+            uint256 gmTokensWeightedUsdValue = (tokenPrices[0] *
                 minGmAmount *
                 tokenManager.debtCoverage(gmToken)) /
                 (10 ** IERC20Metadata(gmToken).decimals() * 1e8);
