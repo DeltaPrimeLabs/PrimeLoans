@@ -15,7 +15,7 @@ contract GmxV2FacetArbitrum is GmxV2Facet {
     }
 
     function getGmxV2ExchangeRouter() internal pure override returns (address) {
-        return 0x69C527fC77291722b52649E45c838e41be8Bf5d5;
+        return 0x900173A66dbD345006C51fA35fA3aB760FcD843b;
     }
 
     function getGmxV2DepositVault() internal pure override returns (address) {
