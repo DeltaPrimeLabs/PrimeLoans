@@ -1,0 +1,22 @@
+@import "./variables.scss";
+
+.clickable-icon {
+  height: 22px;
+  width: 22px;
+  cursor: pointer;
+  transition: transform .1s ease-in-out;
+
+  @media screen and (max-width: $md) {
+    height: 30px;
+    width: 30px;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.info__icon {
+  width: 16px;
+  height: 16px;
+}

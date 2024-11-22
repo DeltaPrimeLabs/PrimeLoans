@@ -1,0 +1,44 @@
+[
+  {
+    "walletAddress": "0xC152Cd87af2b3774e93ed2ad2523c90C576db5fA",
+    "cliffInSeconds": 0,
+    "vestingInSeconds": 15458400,
+    "primeAmount": 103.2389676,
+    "grantClaimRightTo": null
+  },
+  {
+    "walletAddress": "0xBAF6610405Bd8C60432fBd329885DAE617E647CA",
+    "cliffInSeconds": 0,
+    "vestingInSeconds": 15458400,
+    "primeAmount": 538.7119192,
+    "grantClaimRightTo": null
+  },
+  {
+    "walletAddress": "0x5E1DDBF30651D056d744BA2124a1aB9183Cb74C9",
+    "cliffInSeconds": 0,
+    "vestingInSeconds": 15458400,
+    "primeAmount": 86.89630712,
+    "grantClaimRightTo": null
+  },
+  {
+    "walletAddress": "0x85DbF8E8788050b82E25d144C188AD72A12E9245",
+    "cliffInSeconds": 0,
+    "vestingInSeconds": 15458400,
+    "primeAmount": 211.6143106,
+    "grantClaimRightTo": null
+  },
+  {
+    "walletAddress": "0x7a58A92DE0aE212cA6981f6e1228c8DE91E2f8ae",
+    "cliffInSeconds": 1202400,
+    "vestingInSeconds": 15552000,
+    "primeAmount": 4837.493333,
+    "grantClaimRightTo": null
+  },
+  {
+    "walletAddress": "0x024b14d4054988600e0c1a35e46b5df40157fd59",
+    "cliffInSeconds": 0,
+    "vestingInSeconds": 5090400,
+    "primeAmount": 11609.97587,
+    "grantClaimRightTo": null
+  }
+]

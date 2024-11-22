@@ -1,0 +1,20 @@
+<svg width="302" height="205" viewBox="0 0 302 205" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="92.425%" y1="23.127%" x2="19.547%" y2="65.998%" id="erxn1upy0c">
+            <stop stop-color="#C9CBFF" offset="0%"/>
+            <stop stop-color="#FFD8B1" offset="53.169%"/>
+            <stop stop-color="#FCB7CC" offset="100%"/>
+        </linearGradient>
+        <filter x="-3.5%" y="-2.1%" width="105.6%" height="108.4%" filterUnits="objectBoundingBox" id="pspzo88oca">
+            <feOffset dx="-2" dy="4" in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"/>
+            <feColorMatrix values="0 0 0 0 0.749019608 0 0 0 0 0.737254902 0 0 0 0 1 0 0 0 0.2 0" in="shadowBlurOuter1"/>
+        </filter>
+        <path d="M267.662 5c13.807 0 25 11.193 25 25v124c0 13.807-11.193 25-25 25H44.234c-.935 2.002-2.231 4.223-3.91 6.697-11.157 16.431-44.773 9.877-32.773 4.938 6.062-2.494 9.638-7.465 10.728-14.913-7.538-4.306-12.617-12.42-12.617-21.722V30c0-13.807 11.193-25 25-25h237z" id="cbewldp7ub"/>
+    </defs>
+    <g transform="matrix(-1 0 0 1 297.662 0)" fill="none" fill-rule="evenodd">
+        <use fill="#000" filter="url(#pspzo88oca)" xlink:href="#cbewldp7ub"/>
+        <path stroke="url(#erxn1upy0c)" stroke-width="3" d="M267.662 6.5c6.49 0 12.364 2.63 16.617 6.883A23.426 23.426 0 0 1 291.162 30v124c0 6.49-2.63 12.364-6.883 16.617a23.426 23.426 0 0 1-16.617 6.883h-224.4c-.922 2.16-2.306 4.595-4.18 7.354-3.897 5.74-10.731 8.438-17.16 9.407-5.501.829-10.753.392-13.743-.655-.65-.228-1.179-.473-1.536-.758.318-.286.813-.552 1.48-.826 6.54-2.691 10.46-8.019 11.64-16.083.052-.352.097-.7.135-1.044a23.618 23.618 0 0 1-9.572-9.11A23.388 23.388 0 0 1 7.162 154V30c0-6.49 2.63-12.364 6.883-16.617A23.426 23.426 0 0 1 30.662 6.5z" stroke-linejoin="square" fill="#FFF"/>
+    </g>
+</svg>

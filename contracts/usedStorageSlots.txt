@@ -1,0 +1,2 @@
+SmartLoanLimitedCollateral|COLLATERAL_SUM
+NFTAccess|ACCESS_NFT_SLOT

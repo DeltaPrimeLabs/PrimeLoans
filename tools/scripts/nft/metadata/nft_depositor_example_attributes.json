@@ -1,0 +1,40 @@
+{
+  "attributes": [
+    {
+      "trait_type": "body",
+      "value": "Charcoal grey"
+    },
+    {
+      "trait_type": "shirt",
+      "value": "White"
+    },
+    {
+      "trait_type": "suit",
+      "value": "Black"
+    },
+    {
+      "trait_type": "head",
+      "value": "Charcoal grey"
+    },
+    {
+      "trait_type": "tie",
+      "value": "Green"
+    },
+    {
+      "trait_type": "extras",
+      "value": "none"
+    },
+    {
+      "trait_type": "glasses",
+      "value": "Monocle"
+    },
+    {
+      "trait_type": "jewelry",
+      "value": "none"
+    },
+    {
+      "trait_type": "wearables",
+      "value": "none"
+    }
+  ]
+}

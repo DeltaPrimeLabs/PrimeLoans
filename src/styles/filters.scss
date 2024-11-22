@@ -1,0 +1,67 @@
+@import "~@/styles/variables";
+
+.filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+
+  .filter-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .filter__label {
+      font-size: $font-size-xsm;
+      color: $medium-gray;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+  }
+
+  .filter__separator {
+    width: 1.5px;
+    height: 17px;
+    background-color: $smoke-gray;
+    margin: 0 15px;
+  }
+
+  .filter__clear {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .clear__button {
+      font-family: Montserrat, sans-serif;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0;
+      border: 0;
+      margin: 0;
+      background-color: transparent;
+      cursor: pointer;
+
+      &:hover {
+        filter: brightness(0.85);
+      }
+
+
+      .clear__icon {
+        width: 14px;
+        height: 14px;
+        margin-right: 3px;
+      }
+
+      .clear__text {
+        font-size: $font-size-xsm;
+        color: $delta-accent;
+        font-weight: 600;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+      }
+    }
+  }
+}
