@@ -34,6 +34,10 @@ library DeploymentConstants {
 
     address private constant _FEES_REDISTRIBUTION_ADDREESS = 0x8995d790169023Ee4fF67621948EBDFe7383f59e;
 
+    // Used for Swap Rate Limiting
+    uint256 private constant _MAX_SWAPS_PER_INTERVAL = 6;
+    uint256 private constant _SWAP_INTERVAL = 5 minutes;
+
     //implementation-specific
 
     function getPercentagePrecision() internal pure returns (uint256) {
@@ -86,5 +90,14 @@ library DeploymentConstants {
     function getAllOwnedAssets() internal view returns (bytes32[] memory result) {
         DiamondStorageLib.SmartLoanStorage storage sls = DiamondStorageLib.smartLoanStorage();
         return sls.ownedAssets._inner._keys._inner._values;
+    }
+
+    // swap-rate-limiting
+    function getMaxSwapsPerInterval() internal pure returns(uint256) {
+        return _MAX_SWAPS_PER_INTERVAL;
+    }
+
+    function getSwapInterval() internal pure returns(uint256) {
+        return _SWAP_INTERVAL;
     }
 }
