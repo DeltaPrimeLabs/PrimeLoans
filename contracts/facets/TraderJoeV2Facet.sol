@@ -133,7 +133,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         }
     }
 
-    function fundLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant {
+    function fundLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external onlyOwner nonReentrant {
         if (!isPairWhitelisted(address(pair))) revert TraderJoeV2PoolNotWhitelisted();
 
         for (uint256 i; i < ids.length; ++i) {
