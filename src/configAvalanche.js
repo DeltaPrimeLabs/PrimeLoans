@@ -114,10 +114,10 @@ export default {
         //     coreAsset: 'GLP',
         //     slippageMargin: 0.02
         // },
-        // GmxV2: {
-        //     availableAssets: [],
-        //     slippageMargin: 0.5
-        // },
+        GmxV2: {
+            availableAssets: [],
+            slippageMargin: 0.5
+        },
         // Wombat: {
         //     availableAssets: [],
         //     slippageMargin: 0.02

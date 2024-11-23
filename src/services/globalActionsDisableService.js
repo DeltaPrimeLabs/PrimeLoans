@@ -59,10 +59,10 @@ export default class GlobalActionsDisableService {
   });
   gmxV2Actions$ = new BehaviorSubject({
     ADD_FROM_WALLET: true,
-    PROVIDE_LIQUIDITY: true,
+    PROVIDE_LIQUIDITY: false,
     WITHDRAW: true,
-    REMOVE_LIQUIDITY: true,
-    PARTNER_PROFILE: true,
+    REMOVE_LIQUIDITY: false,
+    PARTNER_PROFILE: false,
   });
   penpieActions$ = new BehaviorSubject({
     ADD_FROM_WALLET: true,
@@ -81,9 +81,9 @@ export default class GlobalActionsDisableService {
     CLAIM_REWARDS: true,
   });
   traderJoeLpActions$ = new BehaviorSubject({
-    ADD_FROM_WALLET: true,
+    ADD_FROM_WALLET: false,
     WITHDRAW: true,
-    ADD_LIQUIDITY: true,
+    ADD_LIQUIDITY: false,
     REMOVE_LIQUIDITY: false,
     CLAIM_TRADERJOE_REWARDS: true,
   });
