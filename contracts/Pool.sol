@@ -505,7 +505,14 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         require(block.timestamp >= intent.actionableAt, "Withdrawal intent not matured");
         require(block.timestamp <= intent.expiresAt, "Withdrawal intent expired");
 
-        require(isWithdrawalAmountAvailable(msg.sender, _amount, _amount) , "Balance is locked");
+        require(isWithdrawalAmountAvailable(msg.sender, _amount, _amount), "Balance is locked");
+
+        // Remove intent first
+        uint256 lastIndex = intents.length - 1;
+        if (intentIndex != lastIndex) {
+            intents[intentIndex] = intents[lastIndex];
+        }
+        intents.pop();
 
         _accumulateDepositInterest(msg.sender);
         _amount = Math.min(_amount, _deposited[msg.sender]);
@@ -514,6 +521,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
             revert InsufficientPoolFunds();
 
         if (_amount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
+
         // verified in "require" above
         unchecked {
             _deposited[address(this)] -= _amount;
@@ -522,6 +530,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
 
         _updateRates();
 
+        // Transfer tokens last
         _transferFromPool(msg.sender, _amount);
 
         if (address(poolRewarder) != address(0) && !isDepositorExcludedFromRewarder(msg.sender)) {
@@ -529,13 +538,6 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         }
 
         emit Withdrawal(msg.sender, _amount, block.timestamp);
-
-        // Remove the used intent
-        uint256 lastIndex = intents.length - 1;
-        if (intentIndex != lastIndex) {
-            intents[intentIndex] = intents[lastIndex];
-        }
-        intents.pop();
 
         notifyVPrimeController(msg.sender);
     }

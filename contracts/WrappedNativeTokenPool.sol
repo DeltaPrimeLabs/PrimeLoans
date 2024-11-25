@@ -56,8 +56,14 @@ contract WrappedNativeTokenPool is Pool {
         require(block.timestamp >= intent.actionableAt, "Withdrawal intent not matured");
         require(block.timestamp <= intent.expiresAt, "Withdrawal intent expired");
 
-        // Exclude the intent amount being executed
         require(isWithdrawalAmountAvailable(msg.sender, _amount, _amount), "Balance is locked");
+
+        // Remove intent first
+        uint256 lastIndex = intents.length - 1;
+        if (intentIndex != lastIndex) {
+            intents[intentIndex] = intents[lastIndex];
+        }
+        intents.pop();
 
         _accumulateDepositInterest(msg.sender);
 
@@ -67,7 +73,7 @@ contract WrappedNativeTokenPool is Pool {
             revert InsufficientPoolFunds();
 
         if (_amount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
-        // Adjust the pool's deposited balance
+
         unchecked {
             _deposited[address(this)] -= _amount;
         }
@@ -75,25 +81,17 @@ contract WrappedNativeTokenPool is Pool {
 
         _updateRates();
 
-        // Unwrap the wrapped native token
+        // Unwrap and transfer native tokens last
         IWrappedNativeToken(tokenAddress).withdraw(_amount);
-        // Transfer the native tokens to the user
         payable(msg.sender).safeTransferETH(_amount);
 
         if (address(poolRewarder) != address(0) && !isDepositorExcludedFromRewarder(msg.sender)) {
             poolRewarder.withdrawFor(_amount, msg.sender);
         }
 
-        notifyVPrimeController(msg.sender);
-
         emit Withdrawal(msg.sender, _amount, block.timestamp);
 
-        // Remove the used intent
-        uint256 lastIndex = intents.length - 1;
-        if (intentIndex != lastIndex) {
-            intents[intentIndex] = intents[lastIndex];
-        }
-        intents.pop();
+        notifyVPrimeController(msg.sender);
     }
 
     /* ========== RECEIVE NATIVE TOKEN FUNCTION ========== */
