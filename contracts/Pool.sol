@@ -226,7 +226,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function createWithdrawalIntent(uint256 amount) external {
+    function createWithdrawalIntent(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be greater than zero");
 
         // Remove expired intents first
@@ -252,7 +252,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
     }
 
 
-    function cancelWithdrawalIntent(uint256 intentIndex) external {
+    function cancelWithdrawalIntent(uint256 intentIndex) external nonReentrant {
         WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
 
         require(intentIndex < intents.length, "Invalid intent index");
