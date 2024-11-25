@@ -13,7 +13,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // let GmxV2FacetAvalanche = await deploy("GmxV2FacetAvalanche", {
     //     from: deployer,
-    //     gasLimit: 15000000,
     //     args: [],
     // });
     //
@@ -32,7 +31,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let GmxV2CallbacksFacetAvalanche = await deploy("GmxV2CallbacksFacetAvalanche", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
