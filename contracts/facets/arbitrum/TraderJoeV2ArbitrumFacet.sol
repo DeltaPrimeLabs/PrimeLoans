@@ -9,7 +9,7 @@ contract TraderJoeV2ArbitrumFacet is TraderJoeV2Facet {
     }
 
     function getWhitelistedTraderJoeV2Pairs() internal pure override returns (ILBPair[] memory pools) {
-        pools = new ILBPair[](18);
+        pools = new ILBPair[](19);
         // TJLB_DAI_USDCe
         pools[0] = ILBPair(0x500173F418137090dad96421811147b63b448A0f);
         // TJLB_ETH_USDT
@@ -47,5 +47,8 @@ contract TraderJoeV2ArbitrumFacet is TraderJoeV2Facet {
         pools[16] = ILBPair(0x8C0635aD0AfD7aa9444AF07Da6C104DD79b58D82);
         // TJLB_weETH_ETH_v2.2
         pools[17] = ILBPair(0x2088eB5E23F24458e241430eF155d4EC05BBc9e8);
+
+        // TJLB_JOE_WETH_v2.2
+        pools[18] = ILBPair(0x2088eB5E23F24458e241430eF155d4EC05BBc9e8);
     }
 }
