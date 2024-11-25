@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
-import "../ReentrancyGuardKeccak.sol";
 import "../OnlyOwnerOrInsolvent.sol";
-import "../interfaces/joe-v2/ILBRouter.sol";
+import "../ReentrancyGuardKeccak.sol";
+import "../interfaces/IWrappedNativeToken.sol";
 import "../interfaces/joe-v2/ILBFactory.sol";
 import "../interfaces/joe-v2/ILBHookLens.sol";
-import "../interfaces/joe-v2/IRewarder.sol";
 import "../interfaces/joe-v2/ILBHooksBaseRewarder.sol";
-import {DiamondStorageLib} from "../lib/DiamondStorageLib.sol";
+import "../interfaces/joe-v2/ILBRouter.sol";
+import "../interfaces/joe-v2/IRewarder.sol";
 
 //This path is updated during deployment
 import "../lib/local/DeploymentConstants.sol";
+import {DiamondStorageLib} from "../lib/DiamondStorageLib.sol";
 
 abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     using TransferHelper for address payable;
@@ -68,7 +69,19 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         return (amountX, amountY);
     }
 
-    function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant onlyOwner {
+    function wrapNativeToken() internal {
+        uint256 balance = address(this).balance;
+        if(balance > 0){
+            IWrappedNativeToken nativeToken = IWrappedNativeToken(DeploymentConstants.getNativeToken());
+            nativeToken.deposit{value : balance}();
+            ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+            _increaseExposure(tokenManager, address(nativeToken), balance);
+        }
+    }
+
+    function claimReward(IRewarder.MerkleEntry[] calldata merkleEntries) external nonReentrant onlyOwner remainsSolvent {
+        wrapNativeToken();
+
         uint256 length = merkleEntries.length;
         IERC20[] memory tokens = new IERC20[](length);
         uint256[] memory beforeBalances = new uint256[](length);
@@ -83,12 +96,17 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         for (uint256 i; i != length; ++i) {
             uint256 newBalance = tokens[i].balanceOf(address(this));
             if (newBalance > beforeBalances[i]) {
-                address(tokens[i]).safeTransfer(msg.sender, newBalance - beforeBalances[i]);
+                ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+                if(tokenManager.isTokenAssetActive(address(tokens[i]))){
+                    _increaseExposure(tokenManager, address(tokens[i]), newBalance - beforeBalances[i]);
+                }
             }
         }
     }
 
-    function claimReward(ILBPair pair, uint256[] calldata ids) external nonReentrant onlyOwner {
+    function claimReward(ILBPair pair, uint256[] calldata ids) external nonReentrant onlyOwner remainsSolvent{
+        wrapNativeToken();
+        require(isPairWhitelisted(address(pair)), "TraderJoeV2PoolNotWhitelisted");
         ILBHookLens lbHookLens = ILBHookLens(getJoeV2LBHookLens());
         ILBHookLens.Parameters memory hookLens = lbHookLens.getHooks(address(pair));
         address baseRewarder = hookLens.hooks;
@@ -98,13 +116,19 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         address rewardToken = address(ILBHooksBaseRewarder(baseRewarder).getRewardToken());
         bool isNative = (rewardToken == address(0));
         uint256 beforeBalance = isNative ? address(this).balance : IERC20(rewardToken).balanceOf(address(this));
+
         ILBHooksBaseRewarder(baseRewarder).claim(address(this), ids);
+
         uint256 reward = isNative ? address(this).balance - beforeBalance : IERC20(rewardToken).balanceOf(address(this)) - beforeBalance;
+
         if(reward > 0) {
             if(isNative) {
-                payable(msg.sender).safeTransferETH(reward);
+                wrapNativeToken();
             } else {
-                rewardToken.safeTransfer(msg.sender, reward);
+                ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+                if(tokenManager.isTokenAssetActive(rewardToken)){
+                    _increaseExposure(tokenManager, rewardToken, reward);
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 3742ed131202971f0b79e04769200986a3c7f8d0;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "./DepositSwap.sol";
 

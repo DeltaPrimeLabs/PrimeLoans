@@ -6,7 +6,7 @@ import {DiamondStorageLib} from "./lib/DiamondStorageLib.sol";
 import "./lib/SolvencyMethods.sol";
 import "./facets/SmartLoanLiquidationFacet.sol";
 
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 /**
  * @dev Enforces ownership only if there is no liquidation ongoing

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 8e5d3085ec4332d1a170bb7087f08c89141d9afe;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "@redstone-finance/evm-connector/contracts/core/RedstoneConsumerNumericBase.sol";
 import "../../lib/local/DeploymentConstants.sol";

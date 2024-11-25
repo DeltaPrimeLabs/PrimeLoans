@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let GLPFacetArbi = await deploy("GLPFacetArbi", {
         from: deployer,
-        gasLimit: 50000000,
         args: [],
     });
 

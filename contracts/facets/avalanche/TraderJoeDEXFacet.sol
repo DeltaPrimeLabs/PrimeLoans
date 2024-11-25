@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 991f66d82490413f8ba0b6c862ef5c28302bb6ad;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "../UniswapV2DEXFacet.sol";
 

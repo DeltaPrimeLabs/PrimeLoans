@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: ;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 interface IYYWombatPool {
     function deposit(uint256 amount) external;

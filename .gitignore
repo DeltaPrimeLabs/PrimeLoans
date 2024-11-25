@@ -17,7 +17,6 @@ tools/liquidation/.private*
 .openzeppelin
 typechain
 typechain-types
-lambda/.serverless
 tenderly.yaml
 
 .env

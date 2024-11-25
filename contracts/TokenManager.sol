@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: cb1fa840386b7a38a8711e20dbc566c5b3a700d7;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "./lib/Bytes32EnumerableMap.sol";
 import "./interfaces/IBorrowersRegistry.sol";

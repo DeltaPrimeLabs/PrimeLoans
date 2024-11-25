@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 65136a418b6f93ab386bcb536b847bd1de0caf3a;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 //This path is updated during deployment
 import "../GmxV2PlusFacet.sol";

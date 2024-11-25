@@ -1,4 +1,4 @@
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.17;
 
 interface IAssetsOperationsFacet {
     function borrow(bytes32 _asset, uint256 _amount) external;
@@ -12,6 +12,8 @@ interface IAssetsOperationsFacet {
     function withdraw(bytes32 _withdrawnAsset, uint256 _amount) external;
 
     function removeUnsupportedOwnedAsset(bytes32 _asset, address _address) external;
+
+    function removeUnsupportedStakedPosition(bytes32 _identifier) external;
 
     function withdrawGLP(uint256 _amount) external;
 

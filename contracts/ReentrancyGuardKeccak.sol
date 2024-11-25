@@ -4,7 +4,7 @@
 
 import {DiamondStorageLib} from "./lib/DiamondStorageLib.sol";
 
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.

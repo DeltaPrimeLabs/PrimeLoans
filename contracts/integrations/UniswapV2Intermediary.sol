@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: c5c938a0524b45376dd482cd5c8fb83fa94c2fcc;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";

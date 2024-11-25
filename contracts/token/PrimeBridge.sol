@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: fdbe5a41cfc30a8d7f63abcbfeae5f77df7368a1;
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.17;
 
 import "@layerzerolabs/solidity-examples/contracts/token/oft/v2/BaseOFTV2.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";

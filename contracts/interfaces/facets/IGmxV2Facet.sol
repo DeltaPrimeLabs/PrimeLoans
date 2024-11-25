@@ -1,4 +1,4 @@
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.17;
 
 import "../gmx-v2/EventUtils.sol";
 import "../gmx-v2/Deposit.sol";

@@ -1,4 +1,4 @@
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.17;
 
 interface IGMDFacet {
     function gmdStakeUSDC(uint256 amountStaked, uint256 minSharesOut) external;

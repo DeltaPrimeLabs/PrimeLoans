@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 33842ab4d1a332ccd47fb1cd2bb991e771922080;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "@redstone-finance/evm-connector/contracts/core/ProxyConnector.sol";
 import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";

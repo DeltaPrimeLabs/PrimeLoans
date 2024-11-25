@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: aca0d66772607a851d7017b5cb3e6f38ee11f918;
 
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.17;
 
 // Importing necessary libraries and interfaces
 import "../interfaces/ISPrimeTraderJoe.sol";

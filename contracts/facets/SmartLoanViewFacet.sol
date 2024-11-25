@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 58540cc393d0ec84985be9436eb892d71bb3b0c6;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import "../ReentrancyGuardKeccak.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";

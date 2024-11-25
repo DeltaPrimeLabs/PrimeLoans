@@ -1,7 +1,7 @@
 
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: ;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import { DiamondStorageLib } from "../lib/DiamondStorageLib.sol";
 import "../SmartLoansFactory.sol";

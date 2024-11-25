@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 // Last deployed from commit: 2ff7031532d38b344def3a4b8a953f80f29d0b00;
-pragma solidity 0.8.27;
+pragma solidity 0.8.17;
 
 import {DiamondStorageLib} from "../../lib/DiamondStorageLib.sol";
 
