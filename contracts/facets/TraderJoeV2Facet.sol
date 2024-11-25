@@ -133,12 +133,16 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         }
     }
 
-    function fundLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant {
+    function fundLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external onlyOwner nonReentrant {
         if (!isPairWhitelisted(address(pair))) revert TraderJoeV2PoolNotWhitelisted();
+
+        for (uint256 i; i < ids.length; ++i) {
+            if (ids[i] > type(uint24).max) revert IdOutOfRange();
+        }
 
         pair.batchTransferFrom(msg.sender, address(this), ids, amounts);
 
-        TraderJoeV2Bin[] memory ownedBins = getOwnedTraderJoeV2Bins();
+        TraderJoeV2Bin[] storage ownedBins = getOwnedTraderJoeV2BinsStorage();
 
         for (uint256 i; i < ids.length; ++i) {
             bool userHadBin;
@@ -153,11 +157,11 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
             }
 
             if (!userHadBin) {
-                getOwnedTraderJoeV2BinsStorage().push(TraderJoeV2Bin(pair, uint24(ids[i])));
+                ownedBins.push(TraderJoeV2Bin(pair, uint24(ids[i])));
             }
         }
 
-        if (maxBinsPerPrimeAccount() > 0 && getOwnedTraderJoeV2BinsStorage().length > maxBinsPerPrimeAccount()) revert TooManyBins();
+        if (maxBinsPerPrimeAccount() > 0 && ownedBins.length > maxBinsPerPrimeAccount()) revert TooManyBins();
 
         emit FundedLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
     }
@@ -188,7 +192,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
 
     function addLiquidityTraderJoeV2(ILBRouter traderJoeV2Router, ILBRouter.LiquidityParameters memory liquidityParameters) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
         if (!isRouterWhitelisted(address(traderJoeV2Router))) revert TraderJoeV2RouterNotWhitelisted();
-        TraderJoeV2Bin[] memory ownedBins = getOwnedTraderJoeV2Bins();
+        TraderJoeV2Bin[] storage ownedBins = getOwnedTraderJoeV2BinsStorage();
         ILBFactory lbFactory = traderJoeV2Router.getFactory();
         ILBFactory.LBPairInformation memory pairInfo = lbFactory.getLBPairInformation(liquidityParameters.tokenX, liquidityParameters.tokenY, liquidityParameters.binStep);
 
@@ -223,14 +227,14 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
             }
 
             if (!userHadBin) {
-                getOwnedTraderJoeV2BinsStorage().push(TraderJoeV2Bin(pairInfo.LBPair, uint24(depositIds[i])));
+                ownedBins.push(TraderJoeV2Bin(pairInfo.LBPair, uint24(depositIds[i])));
             }
         }
 
         _decreaseExposure(tokenManager, address(liquidityParameters.tokenX), amountXAdded);
         _decreaseExposure(tokenManager, address(liquidityParameters.tokenY), amountYAdded);
 
-        if (maxBinsPerPrimeAccount() > 0 && getOwnedTraderJoeV2BinsStorage().length > maxBinsPerPrimeAccount()) revert TooManyBins();
+        if (maxBinsPerPrimeAccount() > 0 && ownedBins.length > maxBinsPerPrimeAccount()) revert TooManyBins();
 
         emit AddLiquidityTraderJoeV2(msg.sender, address(pairInfo.LBPair), depositIds, liquidityMinted, tokenX, tokenY, amountXAdded, amountYAdded, block.timestamp);
     }
@@ -238,6 +242,9 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
     function removeLiquidityTraderJoeV2(ILBRouter traderJoeV2Router, RemoveLiquidityParameters memory parameters) external nonReentrant onlyOwnerOrInsolvent noBorrowInTheSameBlock {
         if (!isRouterWhitelisted(address(traderJoeV2Router))) revert TraderJoeV2RouterNotWhitelisted();
         ILBPair lbPair = ILBPair(traderJoeV2Router.getFactory().getLBPairInformation(parameters.tokenX, parameters.tokenY, parameters.binStep).LBPair);
+
+        if (!isPairWhitelisted(address(lbPair))) revert TraderJoeV2PoolNotWhitelisted();
+
         lbPair.approveForAll(address(traderJoeV2Router), true);
 
         (uint256 amountXReceived, uint256 amountYReceived) = _removeLiquidity(traderJoeV2Router, parameters);
@@ -323,4 +330,6 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
     error TooManyBins();
 
     error TraderJoeV2NoRewardHook();
+
+    error IdOutOfRange();
 }
