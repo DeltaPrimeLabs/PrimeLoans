@@ -199,19 +199,6 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         emit BorrowersRegistryChanged(address(borrowersRegistry_), block.timestamp);
     }
 
-    /**
-     * Sets the new Vesting Distributor.
-     * Only the owner of the Contract can execute this function.
-     * @dev _distributor the address of vestingDistributor
-     **/
-    function setVestingDistributor(address _distributor) external onlyOwner {
-        if (
-            !AddressUpgradeable.isContract(_distributor) && _distributor != address(0)
-        ) revert NotAContract(_distributor);
-        vestingDistributor = VestingDistributor(_distributor);
-
-        emit VestingDistributorChanged(_distributor, block.timestamp);
-    }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
     function transfer(address recipient, uint256 amount) external override nonReentrant returns (bool) {
