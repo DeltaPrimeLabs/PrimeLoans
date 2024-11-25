@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 import "./EventUtils.sol";
-import "./Withdrawal.sol";
+import "./WithdrawalV2.sol";
 
 // @title IWithdrawalCallbackReceiver
 // @dev interface for a withdrawal callback contract

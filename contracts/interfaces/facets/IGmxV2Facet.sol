@@ -1,8 +1,8 @@
 pragma solidity ^0.8.17;
 
 import "../gmx-v2/EventUtils.sol";
-import "../gmx-v2/Deposit.sol";
-import "../gmx-v2/Withdrawal.sol";
+import "../gmx-v2/DepositV2.sol";
+import "../gmx-v2/WithdrawalV2.sol";
 
 interface IGmxV2Facet {
     function depositBtcUsdcGmxV2(bool isLongToken, uint256 tokenAmount, uint256 minGmAmount, uint256 executionFee) external payable;
