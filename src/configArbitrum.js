@@ -92,10 +92,10 @@ export default {
         //     availableAssets: [],
         //     slippageMargin: 0.1
         // },
-        // GmxV2: {
-        //     availableAssets: [],
-        //     slippageMargin: 0.1
-        // },
+        GmxV2: {
+            availableAssets: [],
+            slippageMargin: 0.1
+        },
         // Penpie: {
         //     availableAssets: [],
         //     slippageMargin: 0.02
