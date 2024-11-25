@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let YieldYakSwapFacet = await deploy("YieldYakSwapFacet", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 

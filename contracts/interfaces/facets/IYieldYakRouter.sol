@@ -21,4 +21,13 @@ interface IYieldYakRouter {
         address _to,
         uint256 _fee
     ) external;
+
+    // @notice Returns total number of registered adapters
+    // @return Number of adapters
+    function adaptersCount() external view returns (uint256);
+
+    // @notice Returns adapter address at given index
+    // @param index Position in the adapters array
+    // @return Adapter contract address
+    function ADAPTERS(uint256 index) external view returns (address);
 }
