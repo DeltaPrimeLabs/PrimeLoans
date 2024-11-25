@@ -264,10 +264,10 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         // Remove expired intents first
         _removeExpiredIntents(msg.sender);
 
-        uint256 totalIntentAmount = getTotalIntentAmount(msg.sender);
         uint256 availableBalance = getNotLockedBalance(msg.sender, 0);
-
-        require(amount + totalIntentAmount <= availableBalance, "Insufficient available balance");
+        if(amount > availableBalance){
+            revert InsufficientAvailableBalance(amount, availableBalance);
+        }
 
         uint256 actionableAt = block.timestamp + 24 hours;
         uint256 expiresAt = actionableAt + 24 hours;
@@ -1020,6 +1020,9 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
 
     // The deposit amount must be > 0
     error ZeroDepositAmount();
+
+    // Not enough available balance
+    error InsufficientAvailableBalance(uint256 amount, uint256 availableBalance);
 
     // ERC20: cannot mint to the zero address
     error MintToAddressZero();
