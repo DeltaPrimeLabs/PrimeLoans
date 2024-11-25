@@ -10,8 +10,8 @@ import {DiamondStorageLib} from "../lib/DiamondStorageLib.sol";
 import "../interfaces/ITokenManager.sol";
 import "../interfaces/IWrappedNativeToken.sol";
 
-import "../interfaces/gmx-v2/Deposit.sol";
-import "../interfaces/gmx-v2/Withdrawal.sol";
+import "../interfaces/gmx-v2/DepositV2.sol";
+import "../interfaces/gmx-v2/WithdrawalV2.sol";
 import "../interfaces/gmx-v2/IRoleStore.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "../interfaces/gmx-v2/IDepositCallbackReceiver.sol";
