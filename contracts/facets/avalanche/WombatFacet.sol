@@ -36,6 +36,13 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     bytes32 public constant WOMBAT_sAVAX_AVAX_LP_sAVAX =
         "WOMBAT_sAVAX_AVAX_LP_sAVAX";
 
+    error RewardValidationFailed(address token, uint256 expected, uint256 actual);
+
+    struct RewardSnapshot {
+        address token;
+        uint256 balanceBefore;
+    }
+
     function depositSavaxToAvaxSavax(uint256 amount, uint256 minLpOut) external {
         _depositToken(
             "sAVAX",
@@ -446,6 +453,9 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         amount = Math.min(amount, getLpTokenBalance(lpAsset));
         require(amount > 0, "Cannot withdraw 0 tokens");
 
+        // Take reward token balance snapshots before withdrawal
+        RewardSnapshot[] memory snapshots = _captureRewardSnapshots(pid);
+
         (uint256 reward, uint256[] memory additionalRewards) = IWombatMaster(
             WOMBAT_MASTER
         ).withdraw(pid, amount);
@@ -478,7 +488,54 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         _increaseExposure(tokenManager, address(toToken), amountOut);
-        handleRewards(pid, reward, additionalRewards);
+        handleRewards(pid, reward, additionalRewards, snapshots);
+    }
+
+    function _captureRewardSnapshots(uint256 pid) internal view returns (RewardSnapshot[] memory) {
+        (, , address rewarder, , , , ) = IWombatMaster(WOMBAT_MASTER).poolInfo(pid);
+        address boostedRewarder = IWombatMaster(WOMBAT_MASTER).boostedRewarders(pid);
+
+        // Count total rewards to create properly sized array
+        uint256 totalRewards = 1; // WOM token
+        if (rewarder != address(0)) {
+            totalRewards += IRewarder(rewarder).rewardTokens().length;
+        }
+        if (boostedRewarder != address(0)) {
+            totalRewards += IRewarder(boostedRewarder).rewardTokens().length;
+        }
+
+        RewardSnapshot[] memory snapshots = new RewardSnapshot[](totalRewards);
+        uint256 snapshotIndex = 0;
+
+        // Capture WOM token balance
+        snapshots[snapshotIndex++] = RewardSnapshot({
+            token: WOM_TOKEN,
+            balanceBefore: IERC20Metadata(WOM_TOKEN).balanceOf(address(this))
+        });
+
+        // Capture base rewarder token balances
+        if (rewarder != address(0)) {
+            address[] memory rewardTokens = IRewarder(rewarder).rewardTokens();
+            for (uint256 i = 0; i < rewardTokens.length; i++) {
+                snapshots[snapshotIndex++] = RewardSnapshot({
+                    token: rewardTokens[i],
+                    balanceBefore: IERC20Metadata(rewardTokens[i]).balanceOf(address(this))
+                });
+            }
+        }
+
+        // Capture boosted rewarder token balances
+        if (boostedRewarder != address(0)) {
+            address[] memory rewardTokens = IRewarder(boostedRewarder).rewardTokens();
+            for (uint256 i = 0; i < rewardTokens.length; i++) {
+                snapshots[snapshotIndex++] = RewardSnapshot({
+                    token: rewardTokens[i],
+                    balanceBefore: IERC20Metadata(rewardTokens[i]).balanceOf(address(this))
+                });
+            }
+        }
+
+        return snapshots;
     }
 
     function _depositNative(
@@ -538,6 +595,11 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         amount = Math.min(amount, getLpTokenBalance(lpAsset));
         require(amount > 0, "Cannot withdraw 0 tokens");
 
+        // Take reward token balance snapshots before withdrawal
+        RewardSnapshot[] memory snapshots = _captureRewardSnapshots(pid);
+        // Also snapshot wrapped token balance before operations
+        uint256 wrappedBalanceBefore = wrapped.balanceOf(address(this));
+
         (uint256 reward, uint256[] memory additionalRewards) = IWombatMaster(
             WOMBAT_MASTER
         ).withdraw(pid, amount);
@@ -556,16 +618,27 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         } else {
             amountOut = IWombatRouter(WOMBAT_ROUTER)
                 .removeLiquidityFromOtherAssetAsNative(
-                    pool,
-                    address(fromToken),
-                    amount,
-                    minOut,
-                    address(this),
-                    block.timestamp
-                );
+                pool,
+                address(fromToken),
+                amount,
+                minOut,
+                address(this),
+                block.timestamp
+            );
         }
 
+        // Verify we received the expected native AVAX
+        require(address(this).balance >= amountOut, "Insufficient AVAX received");
+
+        // Wrap the native AVAX
         wrapped.deposit{value: amountOut}();
+
+        // Verify the wrapped balance increased by the expected amount
+        uint256 wrappedBalanceAfter = wrapped.balanceOf(address(this));
+        require(
+            wrappedBalanceAfter >= wrappedBalanceBefore + amountOut,
+            "Wrapped balance mismatch"
+        );
 
         if (getLpTokenBalance(lpAsset) == 0) {
             DiamondStorageLib.removeStakedPosition(lpAsset);
@@ -573,7 +646,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         _increaseExposure(tokenManager, address(wrapped), amountOut);
-        handleRewards(pid, reward, additionalRewards);
+        handleRewards(pid, reward, additionalRewards, snapshots);
     }
 
     function _depositAndStakeWombatLP(
@@ -639,61 +712,126 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         return amount;
     }
 
+    /**
+     * @dev Validates that the specified reward amount was actually received
+     * @param token The reward token address
+     * @param amount The expected reward amount
+     * @param balanceBefore Balance before the reward claim
+     * @return The validated reward amount
+     */
+    function validateRewardAmount(
+        address token,
+        uint256 amount,
+        uint256 balanceBefore
+    ) internal view returns (uint256) {
+        if (amount == 0) return 0;
+
+        uint256 balanceAfter = IERC20Metadata(token).balanceOf(address(this));
+        uint256 actualReward = balanceAfter - balanceBefore;
+
+        if (actualReward < amount) {
+            revert RewardValidationFailed(token, amount, actualReward);
+        }
+
+        return actualReward;
+    }
+
+    /**
+     * @dev Handles rewards with validation
+     * @param pid Pool ID
+     * @param reward WOM token reward amount
+     * @param additionalRewards Array of additional reward amounts
+     */
     function handleRewards(
         uint256 pid,
         uint256 reward,
-        uint256[] memory additionalRewards
+        uint256[] memory additionalRewards,
+        RewardSnapshot[] memory snapshots
     ) internal {
         (, , address rewarder, , , , ) = IWombatMaster(WOMBAT_MASTER).poolInfo(pid);
-        address boostedRewarder = IWombatMaster(WOMBAT_MASTER).boostedRewarders(
-            pid
-        );
+        address boostedRewarder = IWombatMaster(WOMBAT_MASTER).boostedRewarders(pid);
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         address owner = DiamondStorageLib.contractOwner();
 
-        if (reward > 0 && tokenManager.isTokenAssetActive(WOM_TOKEN)) {
-            _increaseExposure(tokenManager, WOM_TOKEN, reward);
-        } else if (reward > 0) {
-            WOM_TOKEN.safeTransfer(owner, reward);
+        uint256 snapshotIndex = 0;
+
+        // Handle WOM rewards
+        if (reward > 0) {
+            RewardSnapshot memory womSnapshot = snapshots[snapshotIndex++];
+            uint256 actualReward = IERC20Metadata(WOM_TOKEN).balanceOf(address(this)) - womSnapshot.balanceBefore;
+
+            if (actualReward < reward) {
+                revert RewardValidationFailed(WOM_TOKEN, reward, actualReward);
+            }
+
+            if (tokenManager.isTokenAssetActive(WOM_TOKEN)) {
+                _increaseExposure(tokenManager, WOM_TOKEN, actualReward);
+            } else {
+                WOM_TOKEN.safeTransfer(owner, actualReward);
+            }
+        } else {
+            snapshotIndex++; // Skip WOM snapshot if no reward
         }
 
+        // Handle base rewarder
         uint256 baseIdx;
         if (rewarder != address(0)) {
             address[] memory rewardTokens = IRewarder(rewarder).rewardTokens();
             baseIdx = rewardTokens.length;
+
             for (uint256 i; i != baseIdx; ++i) {
                 address rewardToken = rewardTokens[i];
                 uint256 pendingReward = additionalRewards[i];
 
                 if (pendingReward == 0) {
+                    snapshotIndex++;
                     continue;
                 }
 
+                RewardSnapshot memory snapshot = snapshots[snapshotIndex++];
+                uint256 actualReward = IERC20Metadata(rewardToken).balanceOf(address(this)) - snapshot.balanceBefore;
+
+                if (actualReward < pendingReward) {
+                    revert RewardValidationFailed(rewardToken, pendingReward, actualReward);
+                }
+
                 if (tokenManager.isTokenAssetActive(rewardToken)) {
-                    _increaseExposure(tokenManager, rewardToken, pendingReward);
+                    _increaseExposure(tokenManager, rewardToken, actualReward);
                 } else {
-                    rewardToken.safeTransfer(owner, pendingReward);
+                    rewardToken.safeTransfer(owner, actualReward);
                 }
             }
         }
+
+        // Handle boosted rewarder
         if (boostedRewarder != address(0)) {
             address[] memory rewardTokens = IRewarder(boostedRewarder).rewardTokens();
+
             for (uint256 i; i != rewardTokens.length; ++i) {
                 address rewardToken = rewardTokens[i];
                 uint256 pendingReward = additionalRewards[baseIdx + i];
 
                 if (pendingReward == 0) {
+                    snapshotIndex++;
                     continue;
                 }
 
+                RewardSnapshot memory snapshot = snapshots[snapshotIndex++];
+                uint256 actualReward = IERC20Metadata(rewardToken).balanceOf(address(this)) - snapshot.balanceBefore;
+
+                if (actualReward < pendingReward) {
+                    revert RewardValidationFailed(rewardToken, pendingReward, actualReward);
+                }
+
                 if (tokenManager.isTokenAssetActive(rewardToken)) {
-                    _increaseExposure(tokenManager, rewardToken, pendingReward);
+                    _increaseExposure(tokenManager, rewardToken, actualReward);
                 } else {
-                    rewardToken.safeTransfer(owner, pendingReward);
+                    rewardToken.safeTransfer(owner, actualReward);
                 }
             }
         }
     }
+
 
     function getLpTokenBalance(bytes32 asset) internal view returns (uint256) {
         IERC20Metadata lpToken = getERC20TokenInstance(asset, false);
