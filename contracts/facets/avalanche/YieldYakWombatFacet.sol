@@ -351,7 +351,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 minLpOut,
         bytes4 balanceSelector,
         bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
+    ) internal onlyOwner nonReentrant remainsSolvent noBorrowInTheSameBlock {
         IERC20Metadata stakeToken = getERC20TokenInstance(stakeAsset, false);
         IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
         address yyLpToken = _getYRT(yyLpAsset);
@@ -400,7 +400,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address pool,
         uint256 amount,
         uint256 minOut
-    ) internal onlyOwnerOrInsolvent nonReentrant returns (uint256 amountOut) {
+    ) internal onlyOwnerOrInsolvent nonReentrant noBorrowInTheSameBlock returns (uint256 amountOut) {
         IERC20Metadata fromToken = getERC20TokenInstance(fromAsset, false);
         IERC20Metadata toToken = getERC20TokenInstance(toAsset, false);
         IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
@@ -451,7 +451,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 minLpOut,
         bytes4 balanceSelector,
         bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
+    ) internal onlyOwner nonReentrant remainsSolvent noBorrowInTheSameBlock {
         IWrappedNativeToken wrapped = IWrappedNativeToken(
             DeploymentConstants.getNativeToken()
         );
@@ -499,7 +499,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address pool,
         uint256 amount,
         uint256 minOut
-    ) internal onlyOwnerOrInsolvent nonReentrant returns (uint256 amountOut) {
+    ) internal onlyOwnerOrInsolvent nonReentrant noBorrowInTheSameBlock returns (uint256 amountOut) {
         IERC20Metadata fromToken = getERC20TokenInstance(fromAsset, false);
         IWrappedNativeToken wrapped = IWrappedNativeToken(
             DeploymentConstants.getNativeToken()
@@ -553,7 +553,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 amount,
         bytes4 balanceSelector,
         bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
+    ) internal onlyOwner nonReentrant remainsSolvent noBorrowInTheSameBlock {
         IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
         address yyLpToken = _getYRT(yyLpAsset);
 
@@ -588,6 +588,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         nonReentrant
         remainsSolvent
         canRepayDebtFully
+        noBorrowInTheSameBlock
         returns (uint256 amountOut)
     {
         IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
