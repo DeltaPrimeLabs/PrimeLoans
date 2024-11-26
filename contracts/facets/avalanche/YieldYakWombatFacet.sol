@@ -342,42 +342,6 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             );
     }
 
-    function migrateAvaxSavaxLpSavaxFromWombatToYY() external {
-        _migrate(
-            WOMBAT_sAVAX_AVAX_LP_sAVAX,
-            YY_sAVAX_AVAX_LP_sAVAX,
-            this.sAvaxBalanceAvaxSavaxYY.selector,
-            this.withdrawSavaxFromAvaxSavaxYY.selector
-        );
-    }
-
-    function migrateAvaxGgavaxLpGgavaxFromWombatToYY() external {
-        _migrate(
-            WOMBAT_ggAVAX_AVAX_LP_ggAVAX,
-            YY_ggAVAX_AVAX_LP_ggAVAX,
-            this.ggAvaxBalanceAvaxGgavaxYY.selector,
-            this.withdrawGgavaxFromAvaxGgavaxYY.selector
-        );
-    }
-
-    function migrateAvaxSavaxLpAvaxFromWombatToYY() external {
-        _migrate(
-            WOMBAT_sAVAX_AVAX_LP_AVAX,
-            YY_sAVAX_AVAX_LP_AVAX,
-            this.avaxBalanceAvaxSavaxYY.selector,
-            this.withdrawAvaxFromAvaxSavaxYY.selector
-        );
-    }
-
-    function migrateAvaxGgavaxLpAvaxFromWombatToYY() external {
-        _migrate(
-            WOMBAT_ggAVAX_AVAX_LP_AVAX,
-            YY_ggAVAX_AVAX_LP_AVAX,
-            this.avaxBalanceAvaxGgavaxYY.selector,
-            this.withdrawAvaxFromAvaxGgavaxYY.selector
-        );
-    }
-
     function _depositToken(
         bytes32 stakeAsset,
         bytes32 wombatLpAsset,
@@ -646,48 +610,6 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         return amount;
     }
 
-    function _migrate(
-        bytes32 wombatLpAsset,
-        bytes32 yyLpAsset,
-        bytes4 balanceSelector,
-        bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
-        IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
-        address yyLpToken = _getYRT(yyLpAsset);
-        uint256 pid = IWombatMaster(WOMBAT_MASTER).getAssetPid(
-            address(wombatLpToken)
-        );
-
-        IWombatMaster.UserInfo memory userInfo = IWombatMaster(WOMBAT_MASTER)
-            .userInfo(pid, address(this));
-        uint256 wombatLpAmount = userInfo.amount;
-        if (wombatLpAmount == 0) {
-            return;
-        }
-
-        (uint256 reward, uint256[] memory additionalRewards) = IWombatMaster(
-            WOMBAT_MASTER
-        ).withdraw(pid, wombatLpAmount);
-
-        address(wombatLpToken).safeApprove(yyLpToken, 0);
-        address(wombatLpToken).safeApprove(yyLpToken, wombatLpAmount);
-
-        IYYWombatPool(yyLpToken).deposit(wombatLpAmount);
-
-        DiamondStorageLib.removeStakedPosition(wombatLpAsset);
-        IStakingPositions.StakedPosition memory position = IStakingPositions
-            .StakedPosition({
-                asset: address(wombatLpToken),
-                symbol: wombatLpAsset,
-                identifier: yyLpAsset,
-                balanceSelector: balanceSelector,
-                unstakeSelector: unstakeSelector
-            });
-        DiamondStorageLib.addStakedPosition(position);
-
-        handleRewards(pid, reward, additionalRewards);
-    }
-
     function _getYRT(bytes32 yyLpAsset) internal view returns (address) {
         if (yyLpAsset == YY_ggAVAX_AVAX_LP_AVAX) {
             return 0x7f0eB376eabF4b2B4290D09EFb2f4da99B3ea311;
@@ -700,62 +622,6 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
         if (yyLpAsset == YY_sAVAX_AVAX_LP_sAVAX) {
             return 0x9B5d890d563EE4c9255bB500a790Ca6B1FB9dB6b;
-        }
-    }
-
-    function handleRewards(
-        uint256 pid,
-        uint256 reward,
-        uint256[] memory additionalRewards
-    ) internal {
-        (, , address rewarder, , , , ) = IWombatMaster(WOMBAT_MASTER).poolInfo(pid);
-        address boostedRewarder = IWombatMaster(WOMBAT_MASTER).boostedRewarders(
-            pid
-        );
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        address owner = DiamondStorageLib.contractOwner();
-
-        if (reward > 0 && tokenManager.isTokenAssetActive(WOM_TOKEN)) {
-            _increaseExposure(tokenManager, WOM_TOKEN, reward);
-        } else if (reward > 0) {
-            WOM_TOKEN.safeTransfer(owner, reward);
-        }
-
-        uint256 baseIdx;
-        if (rewarder != address(0)) {
-            address[] memory rewardTokens = IRewarder(rewarder).rewardTokens();
-            baseIdx = rewardTokens.length;
-            for (uint256 i; i != baseIdx; ++i) {
-                address rewardToken = rewardTokens[i];
-                uint256 pendingReward = additionalRewards[i];
-
-                if (pendingReward == 0) {
-                    continue;
-                }
-
-                if (tokenManager.isTokenAssetActive(rewardToken)) {
-                    _increaseExposure(tokenManager, rewardToken, pendingReward);
-                } else {
-                    rewardToken.safeTransfer(owner, pendingReward);
-                }
-            }
-        }
-        if (boostedRewarder != address(0)) {
-            address[] memory rewardTokens = IRewarder(boostedRewarder).rewardTokens();
-            for (uint256 i; i != rewardTokens.length; ++i) {
-                address rewardToken = rewardTokens[i];
-                uint256 pendingReward = additionalRewards[baseIdx + i];
-
-                if (pendingReward == 0) {
-                    continue;
-                }
-
-                if (tokenManager.isTokenAssetActive(rewardToken)) {
-                    _increaseExposure(tokenManager, rewardToken, pendingReward);
-                } else {
-                    rewardToken.safeTransfer(owner, pendingReward);
-                }
-            }
         }
     }
 
