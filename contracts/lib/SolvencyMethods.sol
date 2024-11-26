@@ -303,4 +303,10 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
         require(ds._lastBorrowTimestamp != block.timestamp, "Borrowing must happen in a standalone transaction");
         _;
     }
+
+    modifier noOwnershipTransferInLast24hrs() {
+        DiamondStorageLib.SmartLoanStorage storage sls = DiamondStorageLib.smartLoanStorage();
+        require(block.timestamp - sls.lastOwnershipTransferTimestamp > 1 days, "Ownership was transferred in the last 24 hours");
+        _;
+    }
 }
