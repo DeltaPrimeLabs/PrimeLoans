@@ -429,32 +429,52 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         return amount <= availableBalance;
     }
 
+    function validateWithdrawalIntents(
+        WithdrawalIntent[] storage intents,
+        uint256[] calldata intentIndices,
+        uint256 amount
+    ) internal view returns (uint256 totalIntentAmount) {
+        require(intentIndices.length > 0, "Must provide at least one intent");
+
+        // Check indices are monotonically increasing
+        for(uint256 i = 1; i < intentIndices.length; i++) {
+            require(
+                intentIndices[i] > intentIndices[i-1],
+                "Intent indices must be strictly increasing"
+            );
+        }
+
+        // Validate each intent
+        totalIntentAmount = 0;
+        for(uint256 i = 0; i < intentIndices.length; i++) {
+            uint256 index = intentIndices[i];
+            require(index < intents.length, "Invalid intent index");
+
+            WithdrawalIntent storage intent = intents[index];
+            require(block.timestamp >= intent.actionableAt, "Withdrawal intent not matured");
+            require(block.timestamp <= intent.expiresAt, "Withdrawal intent expired");
+
+            totalIntentAmount += intent.amount;
+        }
+
+        require(totalIntentAmount == amount, "Total intent amount must match withdrawal amount");
+        return totalIntentAmount;
+    }
+
     /**
  * Withdraws selected amount using multiple intents
  * @param _amount the total amount to be withdrawn
  * @param intentIndices array of intent indices to be used for withdrawal
  **/
     function withdraw(uint256 _amount, uint256[] calldata intentIndices) external nonReentrant {
-        require(intentIndices.length > 0, "Must provide at least one intent");
-
         WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
 
-        // Validate total intent amount matches withdrawal amount
-        uint256 totalIntentAmount = 0;
-        for(uint256 i = 0; i < intentIndices.length; i++) {
-            require(intentIndices[i] < intents.length, "Invalid intent index");
-            WithdrawalIntent storage intent = intents[intentIndices[i]];
-
-            require(block.timestamp >= intent.actionableAt, "Withdrawal intent not matured");
-            require(block.timestamp <= intent.expiresAt, "Withdrawal intent expired");
-
-            totalIntentAmount += intent.amount;
-        }
-        require(totalIntentAmount == _amount, "Total intent amount must match withdrawal amount");
+        // Validate intents and check for duplicates
+        validateWithdrawalIntents(intents, intentIndices, _amount);
 
         require(isWithdrawalAmountAvailable(msg.sender, _amount, _amount), "Balance is locked");
 
-        // Remove intents first (from highest to lowest index to maintain correct indices)
+        // Remove intents (from highest to lowest index to maintain correct indices)
         for(uint256 i = intentIndices.length; i > 0; i--) {
             uint256 indexToRemove = intentIndices[i - 1];
             uint256 lastIndex = intents.length - 1;
@@ -468,12 +488,9 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         _amount = Math.min(_amount, _deposited[msg.sender]);
 
         if(_amount > IERC20(tokenAddress).balanceOf(address(this))) revert InsufficientPoolFunds();
-
         if(_amount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
 
-        unchecked {
-            _deposited[address(this)] -= _amount;
-        }
+        _deposited[address(this)] -= _amount;
         _burn(msg.sender, _amount);
 
         _updateRates();
@@ -484,7 +501,6 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
             poolRewarder.withdrawFor(_amount, msg.sender);
         }
 
-        // Transfer tokens last
         _transferFromPool(msg.sender, _amount);
 
         emit Withdrawal(msg.sender, _amount, block.timestamp);
