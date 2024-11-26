@@ -299,8 +299,10 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
     }
 
     modifier noBorrowInTheSameBlock() {
-        DiamondStorageLib.DiamondStorage storage ds = DiamondStorageLib.diamondStorage();
-        require(ds._lastBorrowTimestamp != block.timestamp, "Borrowing must happen in a standalone transaction");
+        {
+            DiamondStorageLib.DiamondStorage storage ds = DiamondStorageLib.diamondStorage();
+            require(ds._lastBorrowTimestamp != block.timestamp, "Borrowing must happen in a standalone transaction");
+        }
         _;
     }
 
