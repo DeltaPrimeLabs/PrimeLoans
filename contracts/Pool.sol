@@ -429,11 +429,18 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         return amount <= availableBalance;
     }
 
+    /**
+     * @dev Validates withdrawal intents and checks if requested amount is within acceptable range
+     * @param intents The array of withdrawal intents for the user
+     * @param intentIndices Array of intent indices to validate
+     * @param requestedAmount The total amount requested for withdrawal
+     * @return finalAmount The actual amount to be withdrawn (may be less than requested if balance insufficient)
+    */
     function validateWithdrawalIntents(
         WithdrawalIntent[] storage intents,
         uint256[] calldata intentIndices,
-        uint256 amount
-    ) internal view returns (uint256 totalIntentAmount) {
+        uint256 requestedAmount
+    ) internal view returns (uint256 finalAmount) {
         require(intentIndices.length > 0, "Must provide at least one intent");
 
         // Check indices are monotonically increasing
@@ -444,8 +451,8 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
             );
         }
 
-        // Validate each intent
-        totalIntentAmount = 0;
+        // Validate each intent and sum up total intended amount
+        uint256 totalIntentAmount = 0;
         for(uint256 i = 0; i < intentIndices.length; i++) {
             uint256 index = intentIndices[i];
             require(index < intents.length, "Invalid intent index");
@@ -457,8 +464,15 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
             totalIntentAmount += intent.amount;
         }
 
-        require(totalIntentAmount == amount, "Total intent amount must match withdrawal amount");
-        return totalIntentAmount;
+        // Allow up to 1% more than total intent amount
+        uint256 maxAllowedAmount = totalIntentAmount + (totalIntentAmount / 100);
+        require(
+            requestedAmount <= maxAllowedAmount,
+            "Requested amount exceeds intent amount by more than 1%"
+        );
+
+        // Return the minimum of requested amount and actual balance
+        return Math.min(requestedAmount, balanceOf(msg.sender));
     }
 
     /**
@@ -469,12 +483,12 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
     function withdraw(uint256 _amount, uint256[] calldata intentIndices) external nonReentrant {
         WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
 
-        // Validate intents and check for duplicates
-        validateWithdrawalIntents(intents, intentIndices, _amount);
+        // Validate intents and get final withdrawal amount
+        uint256 finalAmount = validateWithdrawalIntents(intents, intentIndices, _amount);
 
-        require(isWithdrawalAmountAvailable(msg.sender, _amount, _amount), "Balance is locked");
+        require(isWithdrawalAmountAvailable(msg.sender, finalAmount, finalAmount), "Balance is locked");
 
-        // Remove intents (from highest to lowest index to maintain correct indices)
+        // Remove intents from highest to lowest index to maintain array integrity
         for(uint256 i = intentIndices.length; i > 0; i--) {
             uint256 indexToRemove = intentIndices[i - 1];
             uint256 lastIndex = intents.length - 1;
@@ -485,25 +499,24 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         }
 
         _accumulateDepositInterest(msg.sender);
-        _amount = Math.min(_amount, _deposited[msg.sender]);
 
-        if(_amount > IERC20(tokenAddress).balanceOf(address(this))) revert InsufficientPoolFunds();
-        if(_amount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
+        if(finalAmount > IERC20(tokenAddress).balanceOf(address(this))) revert InsufficientPoolFunds();
+        if(finalAmount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
 
-        _deposited[address(this)] -= _amount;
-        _burn(msg.sender, _amount);
+        _deposited[address(this)] -= finalAmount;
+        _burn(msg.sender, finalAmount);
 
         _updateRates();
 
         notifyVPrimeController(msg.sender);
 
         if (address(poolRewarder) != address(0)) {
-            poolRewarder.withdrawFor(_amount, msg.sender);
+            poolRewarder.withdrawFor(finalAmount, msg.sender);
         }
 
-        _transferFromPool(msg.sender, _amount);
+        _transferFromPool(msg.sender, finalAmount);
 
-        emit Withdrawal(msg.sender, _amount, block.timestamp);
+        emit Withdrawal(msg.sender, finalAmount, block.timestamp);
     }
 
     /**
