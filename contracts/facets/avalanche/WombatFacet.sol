@@ -767,8 +767,6 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
             if (tokenManager.isTokenAssetActive(WOM_TOKEN)) {
                 _increaseExposure(tokenManager, WOM_TOKEN, actualReward);
-            } else {
-                WOM_TOKEN.safeTransfer(owner, actualReward);
             }
         } else {
             snapshotIndex++; // Skip WOM snapshot if no reward
@@ -798,8 +796,6 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
                 if (tokenManager.isTokenAssetActive(rewardToken)) {
                     _increaseExposure(tokenManager, rewardToken, actualReward);
-                } else {
-                    rewardToken.safeTransfer(owner, actualReward);
                 }
             }
         }
@@ -826,8 +822,6 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
                 if (tokenManager.isTokenAssetActive(rewardToken)) {
                     _increaseExposure(tokenManager, rewardToken, actualReward);
-                } else {
-                    rewardToken.safeTransfer(owner, actualReward);
                 }
             }
         }
