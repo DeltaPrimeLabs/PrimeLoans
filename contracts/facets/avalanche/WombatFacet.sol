@@ -404,7 +404,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 minLpOut,
         bytes4 balanceSelector,
         bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
+    ) internal onlyOwner nonReentrant remainsSolvent noBorrowInTheSameBlock {
         IERC20Metadata stakeToken = getERC20TokenInstance(stakeAsset, false);
         IERC20Metadata lpToken = getERC20TokenInstance(lpAsset, false);
 
@@ -444,7 +444,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address pool,
         uint256 amount,
         uint256 minOut
-    ) internal onlyOwnerOrInsolvent nonReentrant returns (uint256 amountOut) {
+    ) internal onlyOwnerOrInsolvent nonReentrant noBorrowInTheSameBlock returns (uint256 amountOut) {
         IERC20Metadata fromToken = getERC20TokenInstance(fromAsset, false);
         IERC20Metadata toToken = getERC20TokenInstance(toAsset, false);
         IERC20Metadata lpToken = getERC20TokenInstance(lpAsset, false);
@@ -545,7 +545,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 minLpOut,
         bytes4 balanceSelector,
         bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
+    ) internal onlyOwner nonReentrant remainsSolvent noBorrowInTheSameBlock {
         IWrappedNativeToken wrapped = IWrappedNativeToken(
             DeploymentConstants.getNativeToken()
         );
@@ -584,7 +584,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address pool,
         uint256 amount,
         uint256 minOut
-    ) internal onlyOwnerOrInsolvent nonReentrant returns (uint256 amountOut) {
+    ) internal onlyOwnerOrInsolvent nonReentrant noBorrowInTheSameBlock returns (uint256 amountOut) {
         IERC20Metadata fromToken = getERC20TokenInstance(fromAsset, false);
         IWrappedNativeToken wrapped = IWrappedNativeToken(
             DeploymentConstants.getNativeToken()
@@ -654,7 +654,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 amount,
         bytes4 balanceSelector,
         bytes4 unstakeSelector
-    ) internal onlyOwner nonReentrant remainsSolvent {
+    ) internal onlyOwner nonReentrant remainsSolvent noBorrowInTheSameBlock {
         IERC20Metadata lpToken = getERC20TokenInstance(lpAsset, false);
 
         amount = Math.min(amount, lpToken.balanceOf(msg.sender));
@@ -689,6 +689,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         nonReentrant
         remainsSolvent
         canRepayDebtFully
+        noBorrowInTheSameBlock
         returns (uint256 amountOut)
     {
         IERC20Metadata lpToken = getERC20TokenInstance(lpAsset, false);
