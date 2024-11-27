@@ -472,7 +472,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         );
 
         // Return the minimum of requested amount and actual balance
-        return Math.min(requestedAmount, balanceOf(msg.sender));
+        return Math.min(requestedAmount, getNotLockedBalance(msg.sender, totalIntentAmount));
     }
 
     /**
