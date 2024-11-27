@@ -57,10 +57,6 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
     }
 
     function afterDepositExecution(bytes32 key, Deposit.Props memory deposit, EventUtils.EventLogData memory eventData) external onlyGmxV2Keeper nonReentrant override {
-        if(deposit.account() != address(this)){
-            revert OrderCreatorNotAuthorized();
-        }
-
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         uint256 receivedMarketTokens = eventData.uintItems.items[0].value;
         address gmToken = deposit.addresses.market;
@@ -93,10 +89,6 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
     }
 
     function afterDepositCancellation(bytes32 key, Deposit.Props memory deposit, EventUtils.EventLogData memory eventData) external onlyGmxV2Keeper nonReentrant override {
-        if(deposit.account() != address(this)){
-            revert OrderCreatorNotAuthorized();
-        }
-
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         address longToken = marketToLongToken(deposit.addresses.market);
         address shortToken = marketToShortToken(deposit.addresses.market);
@@ -137,10 +129,6 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
     }
 
     function afterWithdrawalExecution(bytes32 key, Withdrawal.Props memory withdrawal, EventUtils.EventLogData memory eventData) external onlyGmxV2Keeper nonReentrant override {
-        if(withdrawal.account() != address(this)){
-            revert OrderCreatorNotAuthorized();
-        }
-
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         address longToken = marketToLongToken(withdrawal.addresses.market);
         address shortToken = marketToShortToken(withdrawal.addresses.market);
@@ -185,10 +173,6 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
     }
 
     function afterWithdrawalCancellation(bytes32 key, Withdrawal.Props memory withdrawal, EventUtils.EventLogData memory eventData) external onlyGmxV2Keeper nonReentrant override {
-        if(withdrawal.account() != address(this)){
-            revert OrderCreatorNotAuthorized();
-        }
-
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         address longToken = marketToLongToken(withdrawal.addresses.market);
         address shortToken = marketToShortToken(withdrawal.addresses.market);
@@ -217,7 +201,7 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
         );
     }
 
-    function refundExecutionFee(bytes32 /* key */, EventUtils.EventLogData memory /* eventData */) external payable nonReentrant onlyGmxV2Keeper {
+    function refundExecutionFee(bytes32 /* key */, EventUtils.EventLogData memory /* eventData */) external payable {
         wrapNativeToken();
 
         emit GasFeeRefunded(msg.value);
@@ -228,9 +212,6 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
         require(isCallerAuthorized(msg.sender), "Must be a GMX V2 authorized Keeper");
         _;
     }
-
-
-    error OrderCreatorNotAuthorized();
 
     /**
      * @dev emitted after depositing collateral to gm market

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 2a0b277ae660bed412cacb57bf751388d4abc013;
+// Last deployed from commit: c1391d85590ab530af967dbef6f857f87886a119;
 pragma solidity 0.8.17;
 
 //This path is updated during deployment
@@ -15,7 +15,7 @@ contract GmxV2PlusFacetAvalanche is GmxV2PlusFacet {
     }
 
     function getGmxV2ExchangeRouter() internal pure override returns (address) {
-        return 0x2b76df209E1343da5698AF0f8757f6170162e78b;
+        return 0x3BE24AED1a4CcaDebF2956e02C27a00726D4327d;
     }
 
     function getGmxV2DepositVault() internal pure override returns (address) {

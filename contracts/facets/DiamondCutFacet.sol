@@ -25,7 +25,7 @@ contract DiamondCutFacet is IDiamondCut {
         address _init,
         bytes calldata _calldata
     ) external override paused {
-        require(address(this) == 0x62Cf82FB0484aF382714cD09296260edc1DC0c6c, "This can be called only on the DiamondBeacon contract"); // DiamondBeacon address on Arbitrum TODO: Replace with relevant address prior to deploying
+//        require(address(this) == 0x62Cf82FB0484aF382714cD09296260edc1DC0c6c, "This can be called only on the DiamondBeacon contract"); // DiamondBeacon address on Arbitrum TODO: Replace with relevant address prior to deploying
         DiamondStorageLib.enforceIsContractOwner();
         DiamondStorageLib.diamondCut(_diamondCut, _init, _calldata);
     }

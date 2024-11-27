@@ -57,7 +57,7 @@ async function query(tknFrom: string, tknTo: string, amountIn: BigNumber) {
     console.log(`Getting YS query`)
     const maxHops = 2
     const gasPrice = ethers.utils.parseUnits('225', 'gwei')
-    const result =  yakRouter.findBestPathWithGas(
+    const result = await yakRouter.findBestPathWithGas(
         amountIn,
         tknFrom,
         tknTo,
@@ -349,17 +349,18 @@ describe('Smart loan', () => {
 
             smartLoansFactory = await deployContract(owner, SmartLoansFactoryArtifact) as SmartLoansFactory;
 
-            await deployPools(smartLoansFactory, poolNameAirdropList, tokenContracts, poolContracts, lendingPools, owner, depositor);
-            tokensPrices = await getTokensPricesMap(assetsList.filter(el => el !== 'MCKUSD'), "avalanche", getRedstonePrices, [{symbol: 'MCKUSD', value: 1}]);
-            MOCK_PRICES = convertTokenPricesMapToMockPrices(tokensPrices);
-            supportedAssets = convertAssetsListToSupportedAssets(assetsList, {MCKUSD: tokenContracts.get('MCKUSD')!.address});
-            addMissingTokenContracts(tokenContracts, assetsList);
-
             let tokenManager = await deployContract(
                 owner,
                 MockTokenManagerArtifact,
                 []
             ) as MockTokenManager;
+
+            await deployPools(smartLoansFactory, poolNameAirdropList, tokenContracts, poolContracts, lendingPools, owner, depositor, 1000, 'AVAX', [], tokenManager.address);
+            tokensPrices = await getTokensPricesMap(assetsList.filter(el => el !== 'MCKUSD'), "avalanche", getRedstonePrices, [{symbol: 'MCKUSD', value: 1}]);
+            MOCK_PRICES = convertTokenPricesMapToMockPrices(tokensPrices);
+            supportedAssets = convertAssetsListToSupportedAssets(assetsList, {MCKUSD: tokenContracts.get('MCKUSD')!.address});
+            addMissingTokenContracts(tokenContracts, assetsList);
+
 
             await tokenManager.connect(owner).initialize(supportedAssets, lendingPools);
             await tokenManager.connect(owner).setFactoryAddress(smartLoansFactory.address);

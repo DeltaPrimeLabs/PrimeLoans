@@ -23,6 +23,8 @@ library DiamondStorageLib {
     bytes32 constant OWNED_TRADERJOE_V2_BINS_POSITION = keccak256("diamond.standard.traderjoe_v2_bins_1685370112");
     //TODO: maybe we should keep here a tuple[tokenId, factory] to account for multiple Uniswap V3 deployments
     bytes32 constant OWNED_UNISWAP_V3_TOKEN_IDS_POSITION = keccak256("diamond.standard.uniswap_v3_token_ids_1685370112");
+    //
+    bytes32 constant SWAP_INFO_STORAGE_POSITION = keccak256("diamond.standard.swap_info_storage_position");
 
     struct FacetAddressAndPosition {
         address facetAddress;
@@ -95,6 +97,11 @@ library DiamondStorageLib {
         uint256 _status;
     }
 
+    struct SwapInfoStorage {
+        // Mapping to track swap count per token pairs
+        mapping(bytes32 => uint256) swapData;
+    }
+
     function reentrancyGuardStorage() internal pure returns (ReentrancyGuardStorage storage rgs) {
         bytes32 position = REENTRANCY_GUARD_STORAGE_POSITION;
         assembly {
@@ -135,6 +142,13 @@ library DiamondStorageLib {
         bytes32 position = SMARTLOAN_STORAGE_POSITION;
         assembly {
             sls.slot := position
+        }
+    }
+
+    function swapInfoStorage() internal pure returns (SwapInfoStorage storage sis) {
+        bytes32 position = SWAP_INFO_STORAGE_POSITION;
+        assembly {
+            sis.slot := position
         }
     }
 

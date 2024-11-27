@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 6123239267c57f570c1448d6c3247dae657184ec;
+// Last deployed from commit: ec6e7a0ed7ef3d10f4007e7ebad336dc88392717;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -56,27 +56,7 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         });
     }
 
-    function yakSwap(
-        uint256 _amountIn,
-        uint256 _amountOut,
-        address[] calldata _path,
-        address[] calldata _adapters
-    ) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
-        IYieldYakRouter router = IYieldYakRouter(YY_ROUTER());
-
-        // Check if all adapters are whitelisted in router
-        uint256 routerAdaptersCount = router.adaptersCount();
-        for (uint256 i = 0; i < _adapters.length; i++) {
-            bool isWhitelisted = false;
-            for (uint256 j = 0; j < routerAdaptersCount; j++) {
-                if (_adapters[i] == router.ADAPTERS(j)) {
-                    isWhitelisted = true;
-                    break;
-                }
-            }
-            require(isWhitelisted, "YakSwap: Adapter not whitelisted in router");
-        }
-
+    function yakSwap(uint256 _amountIn, uint256 _amountOut, address[] calldata _path, address[] calldata _adapters) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent isRateLimited(_path) {
         SwapTokensDetails memory swapTokensDetails = getInitialTokensDetails(_path[0], _path[_path.length - 1]);
 
         _amountIn = Math.min(swapTokensDetails.soldToken.balanceOf(address(this)), _amountIn);
@@ -84,6 +64,8 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
 
         address(swapTokensDetails.soldToken).safeApprove(YY_ROUTER(), 0);
         address(swapTokensDetails.soldToken).safeApprove(YY_ROUTER(), _amountIn);
+
+        IYieldYakRouter router = IYieldYakRouter(YY_ROUTER());
 
         IYieldYakRouter.Trade memory trade = IYieldYakRouter.Trade({
             amountIn: _amountIn,
@@ -122,6 +104,37 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         _;
     }
 
+    modifier isRateLimited(address[] calldata _path) internal returns (bool) {
+        bytes32 tokenPair = keccak256(abi.encodePacked(_path[0], _path[_path.length - 1]));
+
+        SwapInfoStorage storage sis = DiamondStorageLib.swapInfoStorage();
+        uint256 swapData = sis[tokenPair]
+
+        uint256 count = swapData >> 96;
+        uint256 lastReset = swapData & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+
+        // Check if need to reset the counter
+        if (block.timestamp >= lastReset + DeploymentConstants.getSwapInterval()) {
+            count = 0; // Reset count
+            lastReset = block.timestamp; // Update last reset time
+        }
+
+        require(count < DeploymentConstants.getMaxSwapsPerInterval(), "Swap limit reached for this pair");
+
+        // Increment swap count
+        count++;
+
+        // Emit event if this is the last allowed swap in the interval
+        if (count == DeploymentConstants.getMaxSwapsPerInterval()) {
+            emit SwapLimitReached(tokenPair, block.timestamp);
+        }
+
+        // Update swapData
+        swapData = (count << 96) | lastReset;
+
+        _;
+    }
+
     /**
      * @dev emitted after a swap of assets
      * @param user the address of user making the purchase
@@ -132,4 +145,11 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
      * @param timestamp time of the swap
      **/
     event Swap(address indexed user, bytes32 indexed soldAsset, bytes32 indexed boughtAsset, uint256 amountSold, uint256 amountBought, uint256 timestamp);
+
+    /**
+     * @dev emitted when reaches the maximum allowed number of swaps for a specific token pair within a defined time interval
+     * @param tokenPair identifier for the token pair being swapped
+     * @param timestamp time when the last allowed swap was executed
+     **/
+    event SwapLimitReached(bytes32 indexed tokenPair, uint256 timestamp);
 }
