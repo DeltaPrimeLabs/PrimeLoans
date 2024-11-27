@@ -20,7 +20,7 @@ export const ActionSection = {
 export default class GlobalActionsDisableService {
   appInReadonlyMode$ = new BehaviorSubject(false)
   assetsActions$ = new BehaviorSubject({
-    ADD_FROM_WALLET: true,
+    ADD_FROM_WALLET: false,
     SWAP: false,
     BORROW: true,
     REPAY: true,
