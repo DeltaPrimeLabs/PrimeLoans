@@ -68,17 +68,17 @@
     <Banner v-if="showDeprecatedAssetsBanner">
       We are dropping support to some tokens of your Prime Account. Please review your portfolio
     </Banner>
-    <Banner v-if="showAvalancheDepositorBanner || showArbitrumDepositorBanner" :closable="true">
-      DeltaPrime is currently paused due to an attack on the Saving pools.
+    <Banner v-if="showAvalancheDepositorBanner || showArbitrumDepositorBanner" :closable="true" background="green">
+      Savings will soon be unpaused.
       <a class="banner-link"
-         href="https://discord.com/channels/889510301421166643/912702114252329060/1305455825023664168"
+         href="https://discord.com/channels/889510301421166643/912702114252329060/1309493526601662484"
          target="_blank"><b>Read more.</b>
       </a>
     </Banner>
     <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
-      Prime Accounts are partially unpaused.
+      The Prime Account is granularly being unpaused.
       <a class="banner-link"
-         href="https://discord.com/channels/889510301421166643/912702114252329060/1308755446991032320"
+         href="https://discord.com/channels/889510301421166643/912702114252329060/1309493526601662484"
          target="_blank"><b>Read more.</b>
       </a>
     </Banner>
