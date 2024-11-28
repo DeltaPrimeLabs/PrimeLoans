@@ -816,24 +816,22 @@ contract sPrimeUniswap is
                     uint256 amountXAdded,
                     uint256 amountYAdded
                 ) = positionManager.mint(
-                        INonfungiblePositionManager.MintParams({
-                            token0: address(getToken0()),
-                            token1: address(getToken1()),
-                            fee: feeTier,
-                            tickLower: tickLower,
-                            tickUpper: tickUpper,
-                            amount0Desired: amountX,
-                            amount1Desired: amountY,
-                            amount0Min: 0,
-                            amount1Min: 0,
-                            recipient: address(this),
-                            deadline: block.timestamp
-                        })
-                    );
-                amountX -= amountXAdded;
-                amountY -= amountYAdded;
+                    INonfungiblePositionManager.MintParams({
+                        token0: address(getToken0()),
+                        token1: address(getToken1()),
+                        fee: feeTier,
+                        tickLower: tickLower,
+                        tickUpper: tickUpper,
+                        amount0Desired: amountX,
+                        amount1Desired: amountY,
+                        amount0Min: 0,
+                        amount1Min: 0,
+                        recipient: address(this),
+                        deadline: block.timestamp
+                    })
+                );
 
-                if(getToken0() != tokenX) { 
+                if(getToken0() != tokenX) {
                     (amountXAdded, amountYAdded) = (amountYAdded, amountXAdded);
                     (amountX, amountY) = (amountY, amountX);
                 }
