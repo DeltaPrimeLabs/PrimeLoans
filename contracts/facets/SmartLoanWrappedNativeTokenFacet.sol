@@ -30,10 +30,6 @@ contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent, ReentrancyGua
         IWrappedNativeToken wrapped = IWrappedNativeToken(DeploymentConstants.getNativeToken());
         wrapped.deposit{value : msg.value}();
 
-        if (wrapped.balanceOf(address(this)) != 0) {
-            DiamondStorageLib.addOwnedAsset(DeploymentConstants.getNativeTokenSymbol(), address(wrapped));
-        }
-
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         _increaseExposure(tokenManager, address(wrapped), msg.value);
 
