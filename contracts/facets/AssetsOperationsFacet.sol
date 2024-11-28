@@ -267,9 +267,14 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
      * @param _adapters yield yak swap adapters
      */
     function swapDebt(bytes32 _fromAsset, bytes32 _toAsset, uint256 _repayAmount, uint256 _borrowAmount, address[] calldata _path, address[] calldata _adapters) external onlyOwner remainsSolvent nonReentrant {
+        require(_borrowAmount > 0, "Borrow amount must be positive");
+        require(_fromAsset != _toAsset, "Cannot swap same asset");
+
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         Pool fromAssetPool = Pool(tokenManager.getPoolAddress(_fromAsset));
+
         _repayAmount = Math.min(_repayAmount, fromAssetPool.getBorrowed(address(this)));
+        require(_repayAmount > 0, "No debt to swap");
 
         IERC20Metadata toToken = getERC20TokenInstance(_toAsset, false);
         IERC20Metadata fromToken = getERC20TokenInstance(_fromAsset, false);
@@ -305,9 +310,14 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     }
 
     function swapDebtParaSwap(bytes32 _fromAsset, bytes32 _toAsset, uint256 _repayAmount, uint256 _borrowAmount, bytes4 selector, bytes memory data) external onlyOwnerOrInsolvent remainsSolvent nonReentrant {
+        require(_borrowAmount > 0, "Borrow amount must be positive");
+        require(_fromAsset != _toAsset, "Cannot swap same asset");
+
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         Pool fromAssetPool = Pool(tokenManager.getPoolAddress(_fromAsset));
+
         _repayAmount = Math.min(_repayAmount, fromAssetPool.getBorrowed(address(this)));
+        require(_repayAmount > 0, "No debt to swap");
 
         IERC20Metadata toToken = getERC20TokenInstance(_toAsset, false);
         IERC20Metadata fromToken = getERC20TokenInstance(_fromAsset, false);
