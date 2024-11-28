@@ -256,12 +256,24 @@ contract TokenManager is OwnableUpgradeable {
 
     function _removeTokenAsset(bytes32 _tokenAsset) internal {
         address tokenAddress = getAssetAddress(_tokenAsset, true);
+
+        // Remove from main asset mappings
         EnumerableMap.remove(assetToTokenAddress, _tokenAsset);
         tokenAddressToSymbol[tokenAddress] = 0;
         tokenToStatus[tokenAddress] = _NOT_SUPPORTED;
         debtCoverage[tokenAddress] = 0;
+
+        // Clear exposure group mapping for this asset
+        identifierToExposureGroup[_tokenAsset] = bytes32(0);
+
+        // Clear any pending exposures
+        pendingProtocolExposure[_tokenAsset] = 0;
+
+        // Remove from supported tokens list
         _removeTokenFromList(tokenAddress);
+
         emit TokenAssetRemoved(msg.sender, _tokenAsset, block.timestamp);
+        emit IdentifierToExposureGroupSet(msg.sender, _tokenAsset, bytes32(0), block.timestamp);
     }
 
     function removePoolAssets(bytes32[] memory _poolAssets) public onlyOwner {
