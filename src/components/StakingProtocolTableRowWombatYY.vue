@@ -371,7 +371,7 @@ export default {
       };
       modalInstance.assetLogo = this.farm.YRTTokenLogo;
       modalInstance.targetAssetsOptions = [
-        this.farm.assetToken, this.farm.otherAssetToken
+        this.farm.assetToken
       ];
       modalInstance.justInput = true
       modalInstance.selectedTargetAsset = this.farm.assetToken;
@@ -572,7 +572,8 @@ export default {
           {
             key: 'UNSTAKE_AND_WITHDRAW',
             name: 'Withdraw Wombat LP to wallet',
-            disabled: this.isActionDisabledRecord['UNSTAKE_AND_WITHDRAW'] || this.farm.inactive
+            // disabled: this.isActionDisabledRecord['UNSTAKE_AND_WITHDRAW'] || this.farm.inactive
+            disabled: true
           },
         ]
       }
@@ -616,7 +617,7 @@ export default {
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.STAKING_PROTOCOL_WOMBAT)
           .subscribe(isActionDisabledRecord => {
-            this.isActionDisabledRecord = isActionDisabledRecord;
+            this.isActionDisabledRecord = false;
             this.setupAddActionsConfiguration();
             this.setupRemoveActionsConfiguration();
           })
