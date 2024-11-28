@@ -11,17 +11,11 @@ import "../Pool.sol";
 import "../DiamondHelper.sol";
 import "../interfaces/IStakingPositions.sol";
 import "../interfaces/facets/avalanche/ITraderJoeV2Facet.sol";
-import "../interfaces/uniswap-v3-periphery/INonfungiblePositionManager.sol";
-import "../lib/uniswap-v3/UniswapV3IntegrationHelper.sol";
-import "../lib/uniswap-v3/LiquidityAmounts.sol";
 import {PriceHelper} from "../lib/joe-v2/PriceHelper.sol";
 import {Uint256x256Math} from "../lib/joe-v2/math/Uint256x256Math.sol";
-import {TickMath} from "../lib/uniswap-v3/TickMath.sol";
-import {FullMath} from "../lib/uniswap-v3/FullMath.sol";
 
 //This path is updated during deployment
 import "../lib/local/DeploymentConstants.sol";
-import "../interfaces/facets/avalanche/IUniswapV3Facet.sol";
 
 abstract contract SolvencyFacetProd is RedstoneConsumerNumericBase, DiamondHelper {
     using PriceHelper for uint256;
@@ -331,7 +325,7 @@ abstract contract SolvencyFacetProd is RedstoneConsumerNumericBase, DiamondHelpe
     }
 
     function _getThresholdWeightedValueBase(AssetPrice[] memory ownedAssetsPrices, AssetPrice[] memory stakedPositionsPrices) internal view virtual returns (uint256) {
-        return _getTWVOwnedAssets(ownedAssetsPrices) + _getTWVStakedPositions(stakedPositionsPrices) + _getTotalTraderJoeV2(true) + _getTotalUniswapV3(true);
+        return _getTWVOwnedAssets(ownedAssetsPrices) + _getTWVStakedPositions(stakedPositionsPrices) + _getTotalTraderJoeV2(true);
     }
 
     /**
@@ -558,76 +552,6 @@ abstract contract SolvencyFacetProd is RedstoneConsumerNumericBase, DiamondHelpe
     }
 
     /**
-    **/
-    function getTotalUniswapV3() public view virtual returns (uint256) {
-        return getTotalUniswapV3WithPrices();
-    }
-
-    /**
-    **/
-    function _getTotalUniswapV3(bool weighted) internal view returns (uint256) {
-        uint256 total;
-
-        uint256[] memory ownedUniswapV3TokenIds = DiamondStorageLib.getUV3OwnedTokenIdsView();
-        uint256 PRECISION = 20;
-
-        if (ownedUniswapV3TokenIds.length > 0) {
-
-            for (uint256 i; i < ownedUniswapV3TokenIds.length; i++) {
-
-                IUniswapV3Facet.UniswapV3Position memory position = getUniswapV3Position(INonfungiblePositionManager(0x655C406EBFa14EE2006250925e54ec43AD184f8B), ownedUniswapV3TokenIds[i]);
-
-                uint256[] memory prices = new uint256[](2);
-
-                {
-                    bytes32[] memory symbols = new bytes32[](2);
-
-                    symbols[0] = DeploymentConstants.getTokenManager().tokenAddressToSymbol(position.token0);
-                    symbols[1] = DeploymentConstants.getTokenManager().tokenAddressToSymbol(position.token1);
-
-                    prices = getOracleNumericValuesFromTxMsg(symbols);
-                }
-
-                {
-                    uint256 debtCoverage0 = weighted ? DeploymentConstants.getTokenManager().debtCoverage(position.token0) : 1e18;
-                    uint256 debtCoverage1 = weighted ? DeploymentConstants.getTokenManager().debtCoverage(position.token1) : 1e18;
-
-                    uint160 sqrtPriceX96_a = TickMath.getSqrtRatioAtTick(position.tickLower);
-                    uint160 sqrtPriceX96_b = TickMath.getSqrtRatioAtTick(position.tickUpper);
-
-                    uint256 price = 10**(PRECISION) * prices[0] * 10 ** IERC20Metadata(position.token1).decimals() / prices[1] / 10 ** IERC20Metadata(position.token0).decimals();
-                    uint160 sqrtMarketPriceX96 = uint160(UniswapV3IntegrationHelper.sqrt(price) * 2**96 / 10**(PRECISION/2));
-
-                    (uint256 token0Amount, uint256 token1amount) = LiquidityAmounts.getAmountsForLiquidity(
-                        sqrtMarketPriceX96,
-                        sqrtPriceX96_a,
-                        sqrtPriceX96_b,
-                        position.liquidity
-                    );
-
-                    uint256 positionWorth = debtCoverage0 * token0Amount / 10 ** IERC20Metadata(position.token0).decimals() * prices[0] / 10 ** 8
-                        + debtCoverage1 * token1amount / 10 ** IERC20Metadata(position.token1).decimals() * prices[1] / 10 ** 8;
-
-                    total = total + positionWorth;
-                }
-            }
-
-            return total;
-        } else {
-            return 0;
-        }
-    }
-
-
-    function getUniswapV3Position(
-        INonfungiblePositionManager positionManager,
-        uint256 tokenId) internal view returns (IUniswapV3Facet.UniswapV3Position memory position) {
-        (, , address token0, address token1, , int24 tickLower, int24 tickUpper, uint128 liquidity,,,,) = positionManager.positions(tokenId);
-
-        position = IUniswapV3Facet.UniswapV3Position(token0, token1, tickLower, tickUpper, liquidity);
-    }
-
-    /**
      * Returns the current value of staked positions in USD.
      * Uses provided AssetPrice struct array instead of extracting the pricing data from the calldata again.
     **/
@@ -644,14 +568,6 @@ abstract contract SolvencyFacetProd is RedstoneConsumerNumericBase, DiamondHelpe
     }
 
     /**
-     * Returns the current value of Uniswap V3 positions in USD.
-     * Uses provided AssetPrice struct array instead of extracting the pricing data from the calldata again.
-    **/
-    function getTotalUniswapV3WithPrices() public view returns (uint256) {
-        return _getTotalUniswapV3(false);
-    }
-
-    /**
      * Returns the current value of staked positions in USD.
      * @dev This function uses the redstone-evm-connector
     **/
@@ -665,7 +581,7 @@ abstract contract SolvencyFacetProd is RedstoneConsumerNumericBase, DiamondHelpe
      * @dev This function uses the redstone-evm-connector
     **/
     function getTotalValue() public view virtual returns (uint256) {
-        return getTotalAssetsValue() + getStakedValue() + getTotalTraderJoeV2() + getTotalUniswapV3();
+        return getTotalAssetsValue() + getStakedValue() + getTotalTraderJoeV2();
     }
 
     /**
@@ -673,7 +589,7 @@ abstract contract SolvencyFacetProd is RedstoneConsumerNumericBase, DiamondHelpe
      * Uses provided AssetPrice struct arrays instead of extracting the pricing data from the calldata again.
     **/
     function getTotalValueWithPrices(AssetPrice[] memory ownedAssetsPrices, AssetPrice[] memory stakedPositionsPrices) public view virtual returns (uint256) {
-        return getTotalAssetsValueWithPrices(ownedAssetsPrices) + getStakedValueWithPrices(stakedPositionsPrices) + getTotalTraderJoeV2WithPrices() + getTotalUniswapV3WithPrices();
+        return getTotalAssetsValueWithPrices(ownedAssetsPrices) + getStakedValueWithPrices(stakedPositionsPrices) + getTotalTraderJoeV2WithPrices();
     }
 
     function getFullLoanStatus() public view returns (uint256[5] memory) {
