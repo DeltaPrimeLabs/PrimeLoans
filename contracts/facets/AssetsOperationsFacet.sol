@@ -309,7 +309,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         emit DebtSwap(msg.sender, address(fromToken), address(toToken), _repayAmount, _borrowAmount, block.timestamp);
     }
 
-    function swapDebtParaSwap(bytes32 _fromAsset, bytes32 _toAsset, uint256 _repayAmount, uint256 _borrowAmount, bytes4 selector, bytes memory data) external onlyOwnerOrInsolvent remainsSolvent nonReentrant {
+    function swapDebtParaSwap(bytes32 _fromAsset, bytes32 _toAsset, uint256 _repayAmount, uint256 _borrowAmount, bytes4 selector, bytes memory data) external onlyOwner remainsSolvent nonReentrant {
         require(_borrowAmount > 0, "Borrow amount must be positive");
         require(_fromAsset != _toAsset, "Cannot swap same asset");
 
@@ -328,7 +328,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 initialRepayTokenAmount = fromToken.balanceOf(address(this));
 
         {
-            
+
             // swap toAsset to fromAsset
             address(toToken).safeApprove(PARA_TRANSFER_PROXY, 0);
             address(toToken).safeApprove(PARA_TRANSFER_PROXY, _borrowAmount);
