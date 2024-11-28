@@ -5,6 +5,7 @@ pragma solidity 0.8.17;
 import "@redstone-finance/evm-connector/contracts/core/ProxyConnector.sol";
 import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "./SmartLoanDiamondBeacon.sol";
 import "./proxies/SmartLoanDiamondProxy.sol";
@@ -22,7 +23,7 @@ import "./interfaces/ITokenManager.sol";
  * It's also responsible for keeping track of the loans, ensuring one loan per wallet rule, ownership transfers proposals/execution and
  * authorizes registered loans to borrow from lending pools.
  */
-contract SmartLoansFactory is OwnableUpgradeable, IBorrowersRegistry, ProxyConnector {
+contract SmartLoansFactory is OwnableUpgradeable, IBorrowersRegistry, ProxyConnector, ReentrancyGuardUpgradeable {
     using TransferHelper for address;
     using TransferHelper for address payable;
 
@@ -67,7 +68,7 @@ contract SmartLoansFactory is OwnableUpgradeable, IBorrowersRegistry, ProxyConne
         tokenManager = ITokenManager(_tokenManager);
     }
 
-    function createLoan() public virtual hasNoLoan returns (SmartLoanDiamondBeacon) {
+    function createLoan() public virtual nonReentrant hasNoLoan returns (SmartLoanDiamondBeacon) {
         SmartLoanDiamondProxy beaconProxy = new SmartLoanDiamondProxy(
             payable(address(smartLoanDiamond)),
         // Setting SLFactory as the initial owner and then using .transferOwnership to change the owner to msg.sender
@@ -83,7 +84,7 @@ contract SmartLoansFactory is OwnableUpgradeable, IBorrowersRegistry, ProxyConne
         return smartLoan;
     }
 
-    function createAndFundLoan(bytes32 _fundedAsset, uint256 _amount) public virtual hasNoLoan returns (SmartLoanDiamondBeacon) {
+    function createAndFundLoan(bytes32 _fundedAsset, uint256 _amount) public virtual nonReentrant hasNoLoan returns (SmartLoanDiamondBeacon) {
         address asset = tokenManager.getAssetAddress(_fundedAsset, false);
         SmartLoanDiamondProxy beaconProxy = new SmartLoanDiamondProxy(payable(address(smartLoanDiamond)),
             abi.encodeWithSelector(SmartLoanViewFacet.initialize.selector, msg.sender)
