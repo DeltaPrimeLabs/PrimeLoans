@@ -87,18 +87,31 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         uint256[] memory beforeBalances = new uint256[](length);
         for (uint256 i; i != length; ++i) {
             tokens[i] = merkleEntries[i].token;
-            beforeBalances[i] = tokens[i].balanceOf(address(this));
+            // Add handling for native token case
+            beforeBalances[i] = address(tokens[i]) == address(0)
+                ? address(this).balance
+                : tokens[i].balanceOf(address(this));
         }
 
         IRewarder rewarder = IRewarder(REWARDER);
         rewarder.batchClaim(merkleEntries);
 
         for (uint256 i; i != length; ++i) {
-            uint256 newBalance = tokens[i].balanceOf(address(this));
-            if (newBalance > beforeBalances[i]) {
-                ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-                if(tokenManager.isTokenAssetActive(address(tokens[i]))){
-                    _increaseExposure(tokenManager, address(tokens[i]), newBalance - beforeBalances[i]);
+            uint256 newBalance;
+            if (address(tokens[i]) == address(0)) {
+                // For native token
+                newBalance = address(this).balance;
+                if (newBalance > beforeBalances[i]) {
+                    wrapNativeToken();  // This will handle increasing exposure
+                }
+            } else {
+                // For ERC20 tokens
+                newBalance = tokens[i].balanceOf(address(this));
+                if (newBalance > beforeBalances[i]) {
+                    ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+                    if(tokenManager.isTokenAssetActive(address(tokens[i]))) {
+                        _increaseExposure(tokenManager, address(tokens[i]), newBalance - beforeBalances[i]);
+                    }
                 }
             }
         }
