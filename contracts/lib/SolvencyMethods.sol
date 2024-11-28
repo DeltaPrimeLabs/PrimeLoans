@@ -229,21 +229,6 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
         );
     }
 
-    // This function executes AssetsExposureController.decreaseAssetsExposure()
-    function _resetPrimeAccountAssetsExposure() public {
-        proxyDelegateCalldata(
-            DiamondHelper._getFacetAddress(AssetsExposureController.resetPrimeAccountAssetsExposure.selector),
-            abi.encodeWithSelector(AssetsExposureController.resetPrimeAccountAssetsExposure.selector)
-        );
-    }
-
-    // This function executes AssetsExposureController.increaseAssetsExposure()
-    function _setPrimeAccountAssetsExposure() public {
-        proxyDelegateCalldata(
-            DiamondHelper._getFacetAddress(AssetsExposureController.setPrimeAccountAssetsExposure.selector),
-            abi.encodeWithSelector(AssetsExposureController.setPrimeAccountAssetsExposure.selector)
-        );
-    }
 
     /**
      * Returns IERC20Metadata instance of a token
@@ -277,11 +262,6 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
         }
     }
 
-    modifier recalculateAssetsExposure() {
-        _resetPrimeAccountAssetsExposure();
-        _;
-        _setPrimeAccountAssetsExposure();
-    }
 
     /**
     * Checks whether account is solvent (health higher than 1)
