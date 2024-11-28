@@ -92,7 +92,7 @@ contract SushiSwapFacet is
         uint256 amount,
         IStakingPositions.StakedPosition memory position,
         uint256 pid
-    ) private recalculateAssetsExposure {
+    ) private {
         IMiniChef miniChef = IMiniChef(MINICHEF);
         IERC20Metadata stakedToken = getERC20TokenInstance(position.symbol, false);
         uint256 initialReceiptTokenBalance = miniChef
@@ -109,9 +109,8 @@ contract SushiSwapFacet is
 
         DiamondStorageLib.addStakedPosition(position);
 
-        if (stakedToken.balanceOf(address(this)) == 0) {
-            DiamondStorageLib.removeOwnedAsset(position.symbol);
-        }
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        _decreaseExposure(tokenManager, address(stakedToken), amount);
 
         emit Staked(
             msg.sender,
@@ -136,7 +135,7 @@ contract SushiSwapFacet is
         uint256 minAmount,
         IStakingPositions.StakedPosition memory position,
         uint256 pid
-    ) private recalculateAssetsExposure returns (uint256 unstaked) {
+    ) private returns (uint256 unstaked) {
         IMiniChef miniChef = IMiniChef(MINICHEF);
         IERC20Metadata unstakedToken = getERC20TokenInstance(
             position.symbol,
@@ -166,7 +165,9 @@ contract SushiSwapFacet is
         if (newReceiptTokenBalance == 0) {
             DiamondStorageLib.removeStakedPosition(position.identifier);
         }
-        DiamondStorageLib.addOwnedAsset(position.symbol, address(unstakedToken));
+
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        _increaseExposure(tokenManager, address(unstakedToken), newBalance - balance);
 
         emit Unstaked(
             msg.sender,

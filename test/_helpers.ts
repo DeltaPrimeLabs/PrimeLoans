@@ -668,21 +668,7 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         ],
         hardhatConfig
     )
-    await deployFacet(
-        "GMDFacet",
-        diamondAddress,
-        [
-            'gmdStakeUSDC',
-            'gmdStakeAVAX',
-            'gmdStakeBTCb',
-            'gmdStakeWETHe',
-            'gmdUnstakeUSDC',
-            'gmdUnstakeAVAX',
-            'gmdUnstakeBTCb',
-            'gmdUnstakeWETHe',
-        ],
-        hardhatConfig
-    )
+
     await deployFacet(
         "OwnershipFacet",
         diamondAddress,
@@ -854,56 +840,6 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
 
         ], hardhatConfig)
         await deployFacet("BeefyFinanceAvalancheFacet", diamondAddress, ['stakePngUsdcAvaxLpBeefy', 'stakePngUsdceAvaxLpBeefy' ,'stakeTjUsdcAvaxLpBeefy', 'unstakePngUsdcAvaxLpBeefy', 'unstakePngUsdceAvaxLpBeefy', 'unstakeTjUsdcAvaxLpBeefy'], hardhatConfig)
-        await deployFacet("VectorFinanceFacet", diamondAddress, [
-                'vectorStakeUSDC1Auto',
-                'vectorUnstakeUSDC1Auto',
-                'vectorUSDC1BalanceAuto',
-                'vectorStakeUSDT1Auto',
-                'vectorUnstakeUSDT1Auto',
-                'vectorUSDT1BalanceAuto',
-                'vectorStakeWAVAX1Auto',
-                'vectorUnstakeWAVAX1Auto',
-                'vectorWAVAX1BalanceAuto',
-                'vectorStakeSAVAX1Auto',
-                'vectorUnstakeSAVAX1Auto',
-                'vectorSAVAX1BalanceAuto',
-                'vectorMigrateAvax',
-                'vectorMigrateSAvax'
-            ],
-            hardhatConfig)
-        await deployFacet("VectorFinanceFacetOld", diamondAddress, [
-                'vectorStakeUSDC1',
-                'vectorUnstakeUSDC1',
-                'vectorUSDC1Balance',
-                'vectorStakeWAVAX1',
-                'vectorUnstakeWAVAX1',
-                'vectorWAVAX1Balance',
-                'vectorStakeSAVAX1',
-                'vectorUnstakeSAVAX1',
-                'vectorSAVAX1Balance'
-            ],
-            hardhatConfig)
-
-        await deployFacet("CurveFacet", diamondAddress, [
-            'stakeCurve',
-            'unstakeCurve',
-            'unstakeOneTokenCurve'
-        ],
-        hardhatConfig)
-
-        await deployFacet("SteakHutFinanceFacet", diamondAddress, [
-                'stakeSteakHutAVAXUSDC',
-                'unstakeSteakHutAVAXUSDC',
-                'stakeSteakHutBTCAVAX',
-                'unstakeSteakHutBTCAVAX',
-                'stakeSteakHutUSDTeUSDT',
-                'unstakeSteakHutUSDTeUSDT',
-                'stakeSteakHutJOEAVAX',
-                'unstakeSteakHutJOEAVAX',
-                'stakeSteakHutEUROCUSDC',
-                'unstakeSteakHutEUROCUSDC',
-            ],
-            hardhatConfig)
 
         await deployFacet(
             "YieldYakSwapFacet",
@@ -1175,42 +1111,7 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
             ],
             hardhatConfig
         )
-        await deployFacet(
-            "LevelFinanceFacet",
-            diamondAddress,
-            [
-                'levelStakeEthSnr',
-                'levelStakeEthMze',
-                'levelStakeEthJnr',
-                'levelStakeBtcSnr',
-                'levelStakeBtcMze',
-                'levelStakeBtcJnr',
-                'levelStakeUsdtSnr',
-                'levelStakeUsdtMze',
-                'levelStakeUsdtJnr',
-                'levelStakeUsdcSnr',
-                'levelStakeUsdcMze',
-                'levelStakeUsdcJnr',
-                'levelUnstakeEthSnr',
-                'levelUnstakeEthMze',
-                'levelUnstakeEthJnr',
-                'levelUnstakeBtcSnr',
-                'levelUnstakeBtcMze',
-                'levelUnstakeBtcJnr',
-                'levelUnstakeUsdtSnr',
-                'levelUnstakeUsdtMze',
-                'levelUnstakeUsdtJnr',
-                'levelUnstakeUsdcSnr',
-                'levelUnstakeUsdcMze',
-                'levelUnstakeUsdcJnr',
-                'levelSnrBalance',
-                'levelMzeBalance',
-                'levelJnrBalance',
-                'depositLLPAndStake',
-                'unstakeAndWithdrawLLP',
-            ],
-            hardhatConfig
-        )
+
         await deployFacet(
             "GmxV2FacetArbitrum",
             diamondAddress,

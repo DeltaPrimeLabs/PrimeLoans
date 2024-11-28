@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 
 import "@redstone-finance/evm-connector/contracts/core/ProxyConnector.sol";
 import "../facets/SolvencyFacetProd.sol";
-import "../facets/AssetsExposureController.sol";
 import "../DiamondHelper.sol";
 
 // TODO Rename to contract instead of lib
