@@ -65,7 +65,14 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param positionManager_ Position Manager contract for sPrime
     * @param traderJoeV2Router_ Trader Joe V2 Router Address
     */
-    function initialize(address tokenX_, address tokenY_, string memory name_, DepositForm[] calldata depositForm_, IPositionManager positionManager_, address traderJoeV2Router_) external initializer {
+    function initialize(
+        address tokenX_,
+        address tokenY_,
+        string memory name_,
+        DepositForm[] calldata depositForm_,
+        IPositionManager positionManager_,
+        address traderJoeV2Router_
+    ) external initializer {
         __PendingOwnable_init();
         __ReentrancyGuard_init();
         __ERC20_init(name_, "sPrime");
@@ -81,7 +88,15 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
         tokenXDecimals = tokenX.decimals();
         tokenYDecimals = tokenY.decimals();
 
-        for(uint256 i = 0 ; i < depositForm_.length ; i ++) {
+        // Validate that depositForm_ deltaIds are in ascending order
+        for(uint256 i = 1; i < depositForm_.length; i++) {
+            if(depositForm_[i-1].deltaId >= depositForm_[i].deltaId) {
+                revert UnsortedDepositForm();
+            }
+        }
+
+        // Store validated deposit form
+        for(uint256 i = 0; i < depositForm_.length; i++) {
             depositForm.push(depositForm_[i]);
         }
 
@@ -333,6 +348,8 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
         uint256 length = depositForm.length;
         liquidityConfigs = new bytes32[](length);
         depositIds = new uint256[](length);
+
+        // Since we validate sorting in initialize(), depositIds will be sorted
         for (uint256 i = 0; i < length; ++i) {
             DepositForm memory config = depositForm[i];
             int256 _id = int256(centerId) + config.deltaId;
@@ -340,7 +357,11 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
                 revert Overflow();
             }
             depositIds[i] = uint256(_id);
-            liquidityConfigs[i] = LiquidityConfigurations.encodeParams(config.distributionX, config.distributionY, uint24(uint256(_id)));
+            liquidityConfigs[i] = LiquidityConfigurations.encodeParams(
+                config.distributionX,
+                config.distributionY,
+                uint24(uint256(_id))
+            );
         }
     }
 
@@ -769,4 +790,5 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     error Unauthorized();
     error Overflow();
     error ProxyCallFailed();
+    error UnsortedDepositForm();
 }
