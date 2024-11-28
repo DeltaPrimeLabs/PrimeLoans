@@ -95,6 +95,37 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
 
 
     /**
+     * @notice Removes expired locks for the caller
+     * @dev This function should be called periodically to prevent array growth
+     * @return count Number of locks removed
+    */
+    function cleanExpiredLocks() public returns (uint256 count) {
+        LockDetails[] storage userLocks = locks[msg.sender];
+        uint256 j = 0;
+
+        // Move active locks to the beginning of the array
+        for (uint256 i = 0; i < userLocks.length; i++) {
+            if (userLocks[i].unlockTime > block.timestamp) {
+                if (i != j) {
+                    userLocks[j] = userLocks[i];
+                }
+                j++;
+            } else {
+                count++;
+            }
+        }
+
+        // Remove expired locks from the end of the array
+        uint256 removalsRequired = userLocks.length - j;
+        for (uint256 i = 0; i < removalsRequired; i++) {
+            userLocks.pop();
+        }
+
+        emit ExpiredLocksRemoved(msg.sender, count);
+    }
+
+
+    /**
      * @notice Calculates and returns the fully vested locked balance for a given account.
      * @dev The fully vested locked balance is used in the governance mechanism of the system, specifically for the allocation of vPrime tokens.
      * The method calculates the fully vested locked balance by iterating over all the locks of the account and summing up the amounts of those locks that are still active (i.e., their `unlockTime` is greater than the current block timestamp). However, the amount of each lock is scaled by the ratio of its `lockTime` to the `MAX_LOCK_TIME` (3 years). This means that the longer the lock time, the larger the contribution of the lock to the fully vested locked balance.
@@ -696,6 +727,14 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
      * @param unlockTime the time when the deposit will be unlocked
      **/
     event DepositLocked(address indexed user, uint256 amount, uint256 lockTime, uint256 unlockTime);
+
+
+    /**
+     * @dev Emitted when expired locks are removed from an account
+     * @param user The address whose locks were cleaned
+     * @param count The number of expired locks removed
+    */
+    event ExpiredLocksRemoved(address indexed user, uint256 count);
 
     /* ========== ERRORS ========== */
 
