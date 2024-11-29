@@ -15,46 +15,46 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
     const deploymentConfig = [
-        {
-            ratesCalculatorName: "WethVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "WethPoolTUP",
-            poolContractName: "WethPool",
-            depositIndexName: "WethDepositIndex",
-            borrowIndexName: "WethBorrowIndex",
-            tokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
-        },
-        {
-            ratesCalculatorName: "ArbVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "ArbPoolTUP",
-            poolContractName: "ArbPool",
-            depositIndexName: "ArbDepositIndex",
-            borrowIndexName: "ArbBorrowIndex",
-            tokenAddress: "0x912CE59144191C1204E64559FE8253a0e49E6548"
-        },
-        {
-            ratesCalculatorName: "BtcVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "BtcPoolTUP",
-            poolContractName: "BtcPool",
-            depositIndexName: "BtcDepositIndex",
-            borrowIndexName: "BtcBorrowIndex",
-            tokenAddress: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
-        },
-        {
-            ratesCalculatorName: "DaiVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "DaiPoolTUP",
-            poolContractName: "DaiPool",
-            depositIndexName: "DaiDepositIndex",
-            borrowIndexName: "DaiBorrowIndex",
-            tokenAddress: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
-        },
-        {
-            ratesCalculatorName: "UsdcVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "UsdcPoolTUP",
-            poolContractName: "UsdcPool",
-            depositIndexName: "UsdcDepositIndex",
-            borrowIndexName: "UsdcBorrowIndex",
-            tokenAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
-        }
+        // {
+        //     ratesCalculatorName: "WethVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "WethPoolTUP",
+        //     poolContractName: "WethPool",
+        //     depositIndexName: "WethDepositIndex",
+        //     borrowIndexName: "WethBorrowIndex",
+        //     tokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1"
+        // },
+        // {
+        //     ratesCalculatorName: "ArbVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "ArbPoolTUP",
+        //     poolContractName: "ArbPool",
+        //     depositIndexName: "ArbDepositIndex",
+        //     borrowIndexName: "ArbBorrowIndex",
+        //     tokenAddress: "0x912CE59144191C1204E64559FE8253a0e49E6548"
+        // },
+        // {
+        //     ratesCalculatorName: "BtcVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "BtcPoolTUP",
+        //     poolContractName: "BtcPool",
+        //     depositIndexName: "BtcDepositIndex",
+        //     borrowIndexName: "BtcBorrowIndex",
+        //     tokenAddress: "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"
+        // },
+        // {
+        //     ratesCalculatorName: "DaiVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "DaiPoolTUP",
+        //     poolContractName: "DaiPool",
+        //     depositIndexName: "DaiDepositIndex",
+        //     borrowIndexName: "DaiBorrowIndex",
+        //     tokenAddress: "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"
+        // },
+        // {
+        //     ratesCalculatorName: "UsdcVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "UsdcPoolTUP",
+        //     poolContractName: "UsdcPool",
+        //     depositIndexName: "UsdcDepositIndex",
+        //     borrowIndexName: "UsdcBorrowIndex",
+        //     tokenAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+        // }
     ]
 
     for(const poolConfig of deploymentConfig){

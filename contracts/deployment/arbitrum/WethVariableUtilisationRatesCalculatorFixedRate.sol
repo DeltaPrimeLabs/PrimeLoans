@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: b101692b2752cc38ccb73c912751d8d7aefa03cf;
+// Last deployed from commit: 8e0f6735b3fe624d9a19c2de21c223fe86edf829;
 pragma solidity 0.8.17;
 
 import "./WethVariableUtilisationRatesCalculator.sol";
