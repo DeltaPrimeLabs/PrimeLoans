@@ -19,12 +19,12 @@
           READY: 'timer--status-ready',
           PENDING: 'timer--status-pending'
         },
-        currentDate: Date.parse(new Date().toISOString())
+        currentDate: new Date().getTime() + new Date().getTimezoneOffset() * 60000
       }
     },
     mounted() {
       setInterval(() => {
-        this.currentDate = Date.parse(new Date().toISOString())
+        this.currentDate = new Date().getTime() + new Date().getTimezoneOffset() * 60000
       }, 1000)
     },
     computed: {
