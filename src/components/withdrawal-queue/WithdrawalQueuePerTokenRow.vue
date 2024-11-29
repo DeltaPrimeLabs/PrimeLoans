@@ -18,11 +18,11 @@
         </div>
       </div>
       <div>
-        <Timer v-if="entry.isPending" v-on:timerEnded="timerEnded" :date="entry.actionableAt" :status="'PENDING'"></Timer>
+        <Timer v-if="entry.isPending" v-on:timerEnded="pendingTimerEnded" :date="entry.actionableAt" :status="'PENDING'"></Timer>
         <div v-else class="no-value-dash"></div>
       </div>
       <div>
-        <Timer v-if="!entry.isPending" :date="entry.expiresAt" :status="'READY'"></Timer>
+        <Timer v-if="!entry.isPending" v-on:timerEnded="expiresTimerEnded" :date="entry.expiresAt" :status="'READY'"></Timer>
         <div v-else class="no-value-dash"></div>
       </div>
       <div>
@@ -87,8 +87,11 @@ export default {
     selectionFromParentChange(isSelected) {
       this.$refs.checkbox.changeValueWithoutEvent(isSelected)
     },
-    timerEnded() {
+    pendingTimerEnded() {
       this.entry.isPending = false
+    },
+    expiresTimerEnded() {
+      this.$emit('expired')
     }
   }
 };
