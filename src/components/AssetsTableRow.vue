@@ -456,7 +456,7 @@ export default {
         } else {
           const yakWrapRouter = new ethers.Contract(config.yakWrapRouterAddress, YAK_WRAP_ROUTER.abi, provider.getSigner());
 
-          const maxHops = 2;
+          const maxHops = 3;
           const gasPrice = ethers.utils.parseUnits('0', 'gwei');
 
           if (targetAsset === 'GLP') {
