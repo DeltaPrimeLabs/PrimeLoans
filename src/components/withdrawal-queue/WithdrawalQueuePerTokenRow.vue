@@ -2,8 +2,8 @@
   <div class="withdraw-queue-per-token-row-component">
     <div class="row">
       <div class="checkbox">
-<!--        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="entry.isPending"></Checkbox>-->
-        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="false"></Checkbox>
+        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="entry.isPending"></Checkbox>
+<!--        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="false"></Checkbox>-->
       </div>
       <div class="amount">
         <div class="double-value staked-balance">
