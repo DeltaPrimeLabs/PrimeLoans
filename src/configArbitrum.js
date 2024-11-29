@@ -46,6 +46,7 @@ export default {
       "ezETH": {name: "ezETH", symbol: "ezETH", logoExt: "png", decimals: 18, address: addresses.ezETH, debtCoverage: 0.83333333333, tradingViewSymbol: "PYTH:EZETHUSD"},
       "weETH": {name: "weETH", symbol: "weETH", logoExt: "png", decimals: 18, address: addresses.weETH, debtCoverage: 0.83333333333, tradingViewSymbol: "CRYPTO:WEETHUSD"},
       "rsETH": {name: "rsETH", symbol: "rsETH", logoExt: "png", decimals: 18, address: addresses.rsETH, debtCoverage: 0.83333333333},
+      "MCK": {name: "MCK", symbol: "MCK", logoExt: "png", decimals: 18, address: addresses.MCK, debtCoverage: 0.83333333333},
       // "SOL": {name: "SOL", symbol: "SOL", decimals: 18, address: addresses.SOL, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:SOLUSDT"},
     },
     RTKN_ADDRESS: "0xF3EaA614dAb459FD4E9f4BC5460BD9b965ed6c76",
@@ -114,41 +115,10 @@ export default {
     NATIVE_ASSET_TOGGLE_OPTIONS: ['WETH'],
     WRAPPED_TOKEN_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     POOLS_CONFIG: {
-        USDC: {
-            address: '0x5f3DB5899a7937c9ABF0A5Fc91718E6F813e4195',
-            tokenAddress: addresses.USDC
+        MCK: {
+            address: '0x6a495980FdBe315Dfc32Df2eD49488cABf84ce39',
+            tokenAddress: addresses.MCK
         },
-        ETH: {
-            address: '0x2E2fE9Bc7904649b65B6373bAF40F9e2E0b883c5',
-            tokenAddress: addresses.ETH
-        },
-        ARB: {
-            address: '0x14c82CFc2c651700a66aBDd7dC375c9CeEFDDD72',
-            tokenAddress: addresses.ARB
-        },
-        BTC: {
-            address: '0x275Caecf5542bF4a3CF64aa78a3f57dc9939675C',
-            tokenAddress: addresses.BTC
-        },
-        DAI: {
-            address: '0x7Dcf909B1E4b280bEe72C6A69b3a7Ed8adfb63f0',
-            tokenAddress: addresses.DAI,
-        },
-        USDT: {
-            address: USDT_POOL_TUP.address,
-            tokenAddress: addresses.USDT,
-            disabled: true
-        },
-        FRAX: {
-            address: FRAX_POOL_TUP.address,
-            tokenAddress: addresses.FRAX,
-            disabled: true
-        },
-        LINK: {
-            address: LINK_POOL_TUP.address,
-            tokenAddress: addresses.LINK,
-            disabled: true
-        }
     },
     poolsUnlocking: true,
     TRADERJOEV2_LP_ASSETS_CONFIG: {

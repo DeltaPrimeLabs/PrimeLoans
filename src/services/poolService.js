@@ -44,7 +44,7 @@ export default class PoolService {
 
           const pool = {
             asset: config.ASSETS_CONFIG[poolAsset],
-            assetPrice: redstonePriceData[poolAsset][0].dataPoints[0].value,
+            assetPrice: 1.114,
             contract: poolContract,
             tvl: isPoolDisabled ? 0 : tvl,
             deposit: deposit,

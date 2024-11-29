@@ -105,7 +105,7 @@ export default {
       return this.entries.filter(({isPending}) => isPending).length
     },
     getTotalToken() {
-      return this.entries.reduce((acc, current) => acc + current.amount, 0)
+      return this.entries.reduce((acc, current) => acc + Number(current.amount), 0)
     },
     rowSelectionChanged(index, isSelected) {
       if (isSelected) {

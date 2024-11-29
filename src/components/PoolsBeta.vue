@@ -13,7 +13,7 @@
                       :available="rtknData.rtknBalance"
                       :conversion-ratio="rtknData.conversionRatio">
         </RTKNStatsBar>
-        <WithdrawalQueuePerToken :asset-symbol="'AVAX'" :entries="mockEntries"></WithdrawalQueuePerToken>
+        <WithdrawalQueuePerToken :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>
         <Block :bordered="true">
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
@@ -37,7 +37,14 @@
         </Block>
       </div>
     </div>
+    <button v-on:click="testDeposit()">deposit</button>
+    <button v-on:click="create()">create</button>
+    <button v-on:click="flow()">flow</button>
+    <button v-on:click="getIntents()">get</button>
+    <button v-on:click="execute()">execute</button>
   </div>
+
+
 </template>
 
 <script>
@@ -77,6 +84,8 @@ export default {
     this.initStoresWhenProviderAndAccountCreated();
     this.lifiService.setupLifi();
     this.watchActiveRoute();
+    this.withdrawQueueService.getIntents();
+    this.watchPoolIntents();
     setTimeout(() => {
       this.arbitrumChain = window.arbitrumChain;
       if (window.arbitrumChain) {
@@ -95,11 +104,7 @@ export default {
       depositAssetsWalletBalances$: new BehaviorSubject({}),
       rtknData: {},
       arbitrumChain: true,
-      mockEntries: [
-        {amount: 10, actionableAt: (new Date().getTime()) + (1000 * 2 * 60), expiresAt: (new Date().getTime()) + (1000 * 3 * 60), isPending: false},
-        {amount: 12, actionableAt: (new Date().getTime()) + (1000 * 4 * 60), expiresAt: (new Date().getTime()) + (1000 * 2 * 60), isPending: true},
-        {amount: 42, actionableAt: (new Date().getTime()) + (1000 * 5 * 60), expiresAt: (new Date().getTime()) + (1000 * 60), isPending: false},
-      ]
+      poolIntents: [],
     };
   },
   computed: {
@@ -111,7 +116,8 @@ export default {
       'lifiService',
       'progressBarService',
       'avalancheBoostService',
-      'rtknService'
+      'rtknService',
+      'withdrawQueueService'
     ]),
     ...mapState('network', ['account', 'accountBalance', 'provider']),
   },
@@ -409,6 +415,34 @@ export default {
         console.log(data);
         this.rtknData = data;
       })
+    },
+
+    watchPoolIntents() {
+      this.withdrawQueueService.observePoolIntents().subscribe(poolIntents => {
+        console.log('------___---__--------__---___POOL INTENTS--------___---__---__--___--____');
+        console.log(poolIntents);
+        this.poolIntents = poolIntents;
+      })
+    },
+
+    create() {
+      this.withdrawQueueService.createWithdrawalIntent(8);
+    },
+
+    testDeposit() {
+      this.withdrawQueueService.deposit(120);
+    },
+
+    flow() {
+      this.withdrawQueueService.flow();
+    },
+
+    getIntents() {
+      this.withdrawQueueService.getWithdrawalIntents();
+    },
+
+    execute() {
+      this.withdrawQueueService.executeWithdrawalIntent('MCK', [0, 1])
     },
   },
 };
