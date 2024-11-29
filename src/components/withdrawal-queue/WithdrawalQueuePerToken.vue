@@ -1,9 +1,9 @@
 <template>
   <div class="withdraw-queue-per-token-component">
     <div class="accordion" v-bind:class="{'accordion--expanded': isExpanded}">
-      <div class="header" v-on:click="toggleExpanded()">
+      <div class="header" v-on:click="toggleExpanded($event)">
         <div v-if="selectedRows.length > 0" class="header__cta">
-          <FlatButton :active="true">Withdraw selected</FlatButton>
+          <FlatButton :active="true" v-on:buttonClick="withdrawAll()">Withdraw selected</FlatButton>
         </div>
         <div class="asset">
           <img :src="logoSrc(assetSymbol)">
@@ -36,16 +36,19 @@
           <div>Withdraw</div>
           <div>Cancel</div>
         </div>
-        <div class="entry" v-for="(entry, index) in entries">
-          <div class="divider"></div>
-          <WithdrawalQueuePerTokenRow
+        <div class="entries">
+          <div class="entry" v-for="(entry, index) in entries">
+            <div class="divider"></div>
+            <WithdrawalQueuePerTokenRow
               ref="row"
               v-on:selectionChange="rowSelectionChanged(index, $event)"
               v-on:expired="deleteRow(index)"
               :asset-symbol="assetSymbol"
               :entry="entry"
               :asset-price="assetPrice"
-          ></WithdrawalQueuePerTokenRow>
+              :index="index"
+            ></WithdrawalQueuePerTokenRow>
+          </div>
         </div>
       </div>
     </div>
@@ -88,6 +91,7 @@ export default {
         READY: 'status-label--ready',
       },
       assetPrice: 0,
+      selectedIds: [],
     };
   },
 
@@ -98,7 +102,7 @@ export default {
   },
 
   computed: {
-    ...mapState('serviceRegistry', ['poolService'])
+    ...mapState('serviceRegistry', ['poolService', 'withdrawQueueService'])
   },
 
   methods: {
@@ -118,6 +122,7 @@ export default {
       })
       this.selectedRows = newSelectedRows
       this.currentTableHeight = this.isExpanded ? (this.entries.length * 63 + 53) + 'px' : '0px'
+      this.withdrawQueueService.getIntents();
     },
     rowSelectionChanged(index, isSelected) {
       if (isSelected) {
@@ -125,13 +130,20 @@ export default {
       } else {
         this.selectedRows.splice(this.selectedRows.findIndex(idx => idx === index), 1)
       }
-      console.log(this.selectedRows);
-      console.log(this.entries);
       this.$refs.allCheckbox.changeValueWithoutEvent(
           this.selectedRows.length === this.entries.length - this.getPendingCount()
       )
+
+      this.selectedIds = [];
+      this.selectedRows.forEach(index => {
+        this.selectedIds.push(this.entries[index].id);
+      });
+
+      console.log(this.selectedIds);
+
     },
-    toggleExpanded() {
+    toggleExpanded($event) {
+
       this.isExpanded = !this.isExpanded
       this.currentTableHeight = this.isExpanded ? (this.entries.length * 63 + 53) + 'px' : '0px'
     },
@@ -149,14 +161,27 @@ export default {
       })
       this.selectedRows = rowsToSelect
       this.selectedRows.forEach(index => this.$refs.row[index].selectionFromParentChange(isSelected))
-    }
-    // statusLabelClass(entry) {
-    //   if (entry.isActionable) {
-    //     return this.statusLabelClasses.READY
-    //   } else {
-    //     return this.statusLabelClasses.PENDING
-    //   }
-    // }
+      console.log(this.selectedRows);
+
+      this.selectedIds = [];
+      this.selectedRows.forEach(index => {
+        this.selectedIds.push(this.entries[index].id);
+      })
+      console.log(this.selectedIds);
+    },
+
+    withdrawAll() {
+
+      this.withdrawQueueService.executeWithdrawalIntent(this.assetSymbol, this.selectedIds);
+    },
+
+    refresh() {
+      this.toggleExpanded();
+      this.$refs.row.forEach(row => row.refresh())
+      setTimeout(() => {
+        this.toggleExpanded();
+      })
+    },
   }
 };
 </script>

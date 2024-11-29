@@ -2,7 +2,8 @@
   <div class="withdraw-queue-per-token-row-component">
     <div class="row">
       <div class="checkbox">
-        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="entry.isPending"></Checkbox>
+<!--        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="entry.isPending"></Checkbox>-->
+        <Checkbox ref="checkbox" v-on:checkboxChange="selectionChanged" :disabled="false"></Checkbox>
       </div>
       <div class="amount">
         <div class="double-value staked-balance">
@@ -14,7 +15,7 @@
       </div>
       <div>
         <div class="status-label" v-bind:class="statusLabelClasses[entry.isPending ? 'PENDING' : 'READY']">
-          {{ statusLabelText[entry.isPending ? 'PENDING' : 'READY'] }}
+          {{ statusLabelText[entry.isPending ? 'PENDING' : 'READY'] }} {{entry.id}}
         </div>
       </div>
       <div>
@@ -26,9 +27,9 @@
         <div v-else class="no-value-dash"></div>
       </div>
       <div>
-        <FlatButton :active="!entry.isPending" @click="onWithdrawClick()">withdraw</FlatButton>
+        <FlatButton :active="!entry.isPending" v-on:buttonClick="onWithdrawClick()">withdraw</FlatButton>
       </div>
-      <div>
+      <div v-on:click="onCancelClick()">
         <DeltaIcon class="cross-icon" :icon-src="'src/assets/icons/cross.svg'" :size="19"></DeltaIcon>
       </div>
     </div>
@@ -56,6 +57,7 @@ export default {
     assetSymbol: {},
     assetPrice: {},
     entry: {},
+    index: {},
   },
 
   data() {
@@ -75,14 +77,24 @@ export default {
   mounted() {
   },
 
-  computed: {},
+  computed: {
+    ...mapState('serviceRegistry', [
+      'withdrawQueueService'
+    ]),
+  },
 
   methods: {
     selectionChanged(isSelected) {
       this.$emit('selectionChange', isSelected);
     },
     onWithdrawClick() {
-      console.log('withdraw');
+      this.withdrawQueueService.executeWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+    },
+
+    onCancelClick() {
+      console.log('cancel');
+      this.withdrawQueueService.cancelWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+
     },
     selectionFromParentChange(isSelected) {
       this.$refs.checkbox.changeValueWithoutEvent(isSelected)
@@ -92,7 +104,11 @@ export default {
     },
     expiresTimerEnded() {
       this.$emit('expired')
-    }
+    },
+
+    refresh() {
+      this.$forceUpdate();
+    },
   }
 };
 </script>

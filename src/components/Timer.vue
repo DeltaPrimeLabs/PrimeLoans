@@ -19,12 +19,12 @@
           READY: 'timer--status-ready',
           PENDING: 'timer--status-pending'
         },
-        currentDate: new Date().getTime() + new Date().getTimezoneOffset() * 60000
+        currentDate: new Date().getTime()
       }
     },
     mounted() {
       setInterval(() => {
-        this.currentDate = new Date().getTime() + new Date().getTimezoneOffset() * 60000
+        this.currentDate = new Date().getTime()
         if (this.date - this.currentDate <= 0) {
           this.$emit('timerEnded')
         }

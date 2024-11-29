@@ -7,7 +7,7 @@
         </div>
         <div class="header-body--expanded header-text">Withdrawal Queue</div>
         <div class="header-body">
-          <div class="header-text">Withdrawal Queue</div>
+          <div class="header-text">Withdrawal Queue <span v-if="Object.keys(allQueues).length === 0">is empty</span></div>
           <div class="summary">
             <template v-if="amountOfQueues() > 0">
               <div class="summary__label">Pending:</div>
@@ -19,7 +19,7 @@
                 <div class="summary__divider"></div>
                 <div class="summary__label">{{ soon.isPending ? 'Ready' : 'Expires' }} soon:</div>
                 <div class="summary__value">{{ soon.amount }} {{ soon.symbol }}</div>
-                <Timer :status="soon.isPending ? 'PENDING' : 'READY'"></Timer>
+                <Timer :status="soon.isPending ? 'PENDING' : 'READY'" :date="soon.expiresAt"></Timer>
               </template>
             </template>
           </div>
@@ -28,7 +28,7 @@
       </div>
       <div class="body">
         <div class="queue-per-token" v-for="(entries, asset) in allQueues">
-          <WithdrawalQueuePerToken :asset-symbol="asset" :entries="entries"></WithdrawalQueuePerToken>
+          <WithdrawalQueuePerToken ref="tokenQueue" :asset-symbol="asset" :entries="entries"></WithdrawalQueuePerToken>
         </div>
       </div>
     </div>
@@ -49,8 +49,8 @@ export default {
   },
   props: {
     allQueues: {},
-    pendingCount: 10,
-    readyCount: 10,
+    pendingCount: {},
+    readyCount: {},
     soon: {},
   },
 
@@ -74,6 +74,10 @@ export default {
         this.isExpanded = !this.isExpanded
       }
     },
+
+    refresh() {
+      this.$refs.tokenQueue.forEach(tokenQueue => tokenQueue.refresh());
+    },
   }
 };
 </script>
@@ -81,6 +85,10 @@ export default {
 <style lang="scss" scoped>
 @import "~@/styles/variables";
 @import "~@/styles/modal";
+
+.withdraw-queue-component {
+  margin-bottom: 30px;
+}
 
 .withdraw-accordion {
   background: var(--withdrawal-queue__withdraw-accordion-background);

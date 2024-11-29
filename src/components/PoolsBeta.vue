@@ -13,7 +13,15 @@
                       :available="rtknData.rtknBalance"
                       :conversion-ratio="rtknData.conversionRatio">
         </RTKNStatsBar>
-        <WithdrawalQueuePerToken :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>
+
+        <WithdrawalQueue ref="withdrawalQueue"
+                         :all-queues="poolIntents"
+                         :pending-count="queueData.totalPending"
+                         :ready-count="queueData.totalReady"
+                         :soon="queueData.soonestIntent">
+        </WithdrawalQueue>
+
+<!--        <WithdrawalQueuePerToken ref="tokenQueue" v-if="poolIntents['MCK']" :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>-->
         <Block :bordered="true">
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
@@ -38,10 +46,6 @@
       </div>
     </div>
     <button v-on:click="testDeposit()">deposit</button>
-    <button v-on:click="create()">create</button>
-    <button v-on:click="flow()">flow</button>
-    <button v-on:click="getIntents()">get</button>
-    <button v-on:click="execute()">execute</button>
   </div>
 
 
@@ -61,6 +65,7 @@ import ResumeBridgeModal from './ResumeBridgeModal';
 import SPrimePanel from './SPrimePanel.vue';
 import RTKNStatsBar from './RTKNStatsBar.vue';
 import WithdrawalQueuePerToken from "./withdrawal-queue/WithdrawalQueuePerToken.vue";
+import WithdrawalQueue from './withdrawal-queue/WithdrawalQueue.vue';
 
 const ethers = require('ethers');
 
@@ -69,6 +74,7 @@ let TOKEN_ADDRESSES;
 export default {
   name: 'PoolsBeta',
   components: {
+    WithdrawalQueue,
     WithdrawalQueuePerToken,
     RTKNStatsBar,
     SPrimePanel,
@@ -86,6 +92,7 @@ export default {
     this.watchActiveRoute();
     this.withdrawQueueService.getIntents();
     this.watchPoolIntents();
+    this.watchQueueData();
     setTimeout(() => {
       this.arbitrumChain = window.arbitrumChain;
       if (window.arbitrumChain) {
@@ -105,6 +112,7 @@ export default {
       rtknData: {},
       arbitrumChain: true,
       poolIntents: [],
+      queueData: {},
     };
   },
   computed: {
@@ -422,6 +430,16 @@ export default {
         console.log('------___---__--------__---___POOL INTENTS--------___---__---__--___--____');
         console.log(poolIntents);
         this.poolIntents = poolIntents;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
+      })
+    },
+
+    watchQueueData() {
+      this.withdrawQueueService.observeQueueData().subscribe(queueData => {
+        this.queueData = queueData;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
       })
     },
 
@@ -431,10 +449,6 @@ export default {
 
     testDeposit() {
       this.withdrawQueueService.deposit(120);
-    },
-
-    flow() {
-      this.withdrawQueueService.flow();
     },
 
     getIntents() {

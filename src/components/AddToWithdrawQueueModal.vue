@@ -7,7 +7,7 @@
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
         <div class="top-info__value">
-          {{assetBalance | smartRound(asset.decimals, true)}}
+          {{ assetBalance | smartRound(asset.decimals, true) }}
           <span class="top-info__currency">
             {{ asset.symbol }}
           </span>
@@ -21,10 +21,10 @@
                      :info="() => sourceAssetValue">
       </CurrencyInput>
 
-      <div class="queue">
+      <div v-if="queue && queue.length > 0" class="queue">
         <div class="queue__border">
           <div class="queue__content">
-            <div class="queue__title">{{asset.symbol}} Withdrawal Queue</div>
+            <div class="queue__title">{{ asset.symbol }} Withdrawal Queue</div>
             <div class="queue__entry" v-for="entry in queue">
               <div class="queue__divider"></div>
               <div class="queue__row">
@@ -41,14 +41,20 @@
                 </div>
               </div>
             </div>
+            <div>
+              <div v-if="extraIntents > 0" class="queue__divider"></div>
+              <div v-if="extraIntents > 0" class="queue__more">
+                And {{ extraIntents }} more
+              </div>
+            </div>
           </div>
         </div>
         <div class="queue__cta" @click="close()">
           Go to Withdrawal Queue
           <DeltaIcon
-              class="queue__cta-arrow"
-              :icon-src="'src/assets/icons/left-arrow.svg'"
-              :size="15"></DeltaIcon>
+            class="queue__cta-arrow"
+            :icon-src="'src/assets/icons/left-arrow.svg'"
+            :size="15"></DeltaIcon>
         </div>
       </div>
 
@@ -75,10 +81,10 @@ import Button from './Button';
 import Toggle from './Toggle';
 import BarGaugeBeta from './BarGaugeBeta';
 import config from '../config';
-import InfoIcon from "./InfoIcon.vue";
-import Timer from "./Timer.vue";
-import DeltaIcon from "./DeltaIcon.vue";
-import IconButton from "./IconButton.vue";
+import InfoIcon from './InfoIcon.vue';
+import Timer from './Timer.vue';
+import DeltaIcon from './DeltaIcon.vue';
+import IconButton from './IconButton.vue';
 
 export default {
   name: 'AddToWithdrawQueue',
@@ -100,6 +106,7 @@ export default {
     assetBalance: null,
     logo: null,
     queue: [],
+    extraIntents: {},
   },
 
   data() {
@@ -110,7 +117,7 @@ export default {
       currencyInputError: true,
       toggleOptions: config.NATIVE_ASSET_TOGGLE_OPTIONS,
       transactionOngoing: false,
-      valueAsset: "USDC",
+      valueAsset: 'USDC',
       classRecord: {
         READY: 'queue__status--ready',
         PENDING: 'queue__status--pending'
@@ -138,10 +145,12 @@ export default {
     },
 
     sourceAssetValue() {
-      const sourceAssetUsdPrice = Number(this.withdrawValue) * this.asset.price;
-      const nativeAssetUsdPrice = config.ASSETS_CONFIG[this.toggleOptions[0]].price;
+      // const sourceAssetUsdPrice = Number(this.withdrawValue) * this.asset.price;
+      // const nativeAssetUsdPrice = config.ASSETS_CONFIG[this.toggleOptions[0]].price;
+      const sourceAssetUsdPrice = 1;
+      const nativeAssetUsdPrice = 2;
 
-      if (this.valueAsset === "USDC") return `~ $${sourceAssetUsdPrice.toFixed(2)}`;
+      if (this.valueAsset === 'USDC') return `~ $${sourceAssetUsdPrice.toFixed(2)}`;
       // otherwise return amount in native symbol
       return `~ ${(sourceAssetUsdPrice / nativeAssetUsdPrice).toFixed(2)} ${this.toggleOptions[0]}`;
     },
@@ -153,6 +162,7 @@ export default {
       this.closeModal();
     },
     submit() {
+      console.log('submit');
       this.transactionOngoing = true;
       let withdrawEvent = {};
       if (this.asset.symbol === this.toggleOptions[0]) {
@@ -167,6 +177,7 @@ export default {
         };
       }
 
+      console.log(withdrawEvent);
       this.$emit('WITHDRAW', withdrawEvent);
     },
 
@@ -174,7 +185,6 @@ export default {
     withdrawValueChange(event) {
       this.withdrawValue = event.value;
       this.currencyInputError = event.error;
-      this.calculateHealthAfterTransaction();
     },
 
     assetToggleChange(asset) {
@@ -249,6 +259,14 @@ export default {
   &__value {
     font-weight: 600;
     margin-right: 4px;
+  }
+
+  &__more {
+    padding: 10px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
   }
 
   &__status {

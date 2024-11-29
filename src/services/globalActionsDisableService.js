@@ -31,10 +31,10 @@ export default class GlobalActionsDisableService {
     BRIDGE_COLLATERAL: true,
   });
   poolsActions$ = new BehaviorSubject({
-    DEPOSIT: true,
+    DEPOSIT: false,
     BRIDGE: true,
     BRIDGE_DEPOSIT: true,
-    WITHDRAW: true,
+    WITHDRAW: false,
     SWAP_DEPOSIT: true,
     CLAIM_AVALANCHE_BOOST: true,
   });
