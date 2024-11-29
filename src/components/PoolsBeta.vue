@@ -13,6 +13,7 @@
                       :available="rtknData.rtknBalance"
                       :conversion-ratio="rtknData.conversionRatio">
         </RTKNStatsBar>
+        <WithdrawalQueuePerToken :asset-symbol="'AVAX'" :entries="mockEntries"></WithdrawalQueuePerToken>
         <Block :bordered="true">
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
@@ -52,6 +53,7 @@ import erc20ABI from '../../test/abis/ERC20.json';
 import ResumeBridgeModal from './ResumeBridgeModal';
 import SPrimePanel from './SPrimePanel.vue';
 import RTKNStatsBar from './RTKNStatsBar.vue';
+import WithdrawalQueuePerToken from "./withdrawal-queue/WithdrawalQueuePerToken.vue";
 
 const ethers = require('ethers');
 
@@ -60,6 +62,7 @@ let TOKEN_ADDRESSES;
 export default {
   name: 'PoolsBeta',
   components: {
+    WithdrawalQueuePerToken,
     RTKNStatsBar,
     SPrimePanel,
     PoolsTableRowBeta,
@@ -92,6 +95,11 @@ export default {
       depositAssetsWalletBalances$: new BehaviorSubject({}),
       rtknData: {},
       arbitrumChain: true,
+      mockEntries: [
+        {amount: 10, actionableAt: (new Date().getTime()) + (1000 * 2 * 60), expiresAt: (new Date().getTime()) + (1000 * 3 * 60), isPending: false},
+        {amount: 12, actionableAt: (new Date().getTime()) + (1000 * 4 * 60), expiresAt: (new Date().getTime()) + (1000 * 2 * 60), isPending: true},
+        {amount: 42, actionableAt: (new Date().getTime()) + (1000 * 5 * 60), expiresAt: (new Date().getTime()) + (1000 * 60), isPending: false},
+      ]
     };
   },
   computed: {

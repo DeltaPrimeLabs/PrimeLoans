@@ -116,6 +116,8 @@ import InfoIcon from './InfoIcon.vue';
 import {ActionSection} from "../services/globalActionsDisableService";
 import ClaimRewardsModal from "./ClaimRewardsModal.vue";
 import DoubleClaimRewardsModal from './DoubleClaimRewardsModal.vue';
+import AddToWithdrawQueueModal from "./AddToWithdrawQueueModal.vue";
+import QueueStatus from "./AddToWithdrawQueueModal.vue";
 
 let TOKEN_ADDRESSES;
 
@@ -226,7 +228,7 @@ export default {
         menuOptions: [
           {
             iconSrc: 'src/assets/icons/swap.svg',
-            key: 'SWAP_DEPOSIT',
+            key: 'WITHDRAW',
             name: 'Swap',
             disabled: this.isActionDisabledRecord['SWAP_DEPOSIT'],
           }
@@ -384,14 +386,13 @@ export default {
     },
 
     openWithdrawModal() {
-      console.log(this.pool.apy);
-      const modalInstance = this.openModal(PoolWithdrawModal);
-      modalInstance.pool = this.pool;
-      console.log(modalInstance.pool);
-      modalInstance.apy = this.pool.apy;
-      modalInstance.available = this.pool.asset.balance;
-      modalInstance.deposit = this.pool.deposit;
-      modalInstance.assetSymbol = this.pool.asset.name;
+      const modalInstance = this.openModal(AddToWithdrawQueueModal);
+      modalInstance.assetBalance = this.pool.deposit;
+      modalInstance.asset = this.pool.asset;
+      modalInstance.queue = [
+        {amount: 0.2, symbol: 'AVAX', status: 'PENDING', date: (new Date().getTime()) + (1000 * 2 * 60)},
+        {amount: 0.2, symbol: 'WAVAX', status: 'READY', date: (new Date().getTime()) + (1000 * 2 * 60)}
+      ];
       modalInstance.$on('WITHDRAW', withdrawEvent => {
         const withdrawRequest = {
           assetSymbol: this.pool.asset.symbol,

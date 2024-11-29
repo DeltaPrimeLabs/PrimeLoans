@@ -709,6 +709,50 @@
   // endregion
 
   // region SprimeModal
-  --sprime-modal__text-color: #{$light-purple}
+  --sprime-modal__text-color: #{$light-purple};
+  // endregion
+
+  // region AddToWithdrawQueue
+  --add-to-withdraw-queue__queue-border: linear-gradient(to right, #{$dark-fuchsia} 19%, #{$pale-plum} 57%, #{$teal} 88%);
+  --add-to-withdraw-queue__queue-background: #{$space};
+  --add-to-withdraw-queue__queue-title-color: #{$washed-blue};
+  --add-to-withdraw-queue__queue-divider-background: #{$mist-space};
+  --add-to-withdraw-queue__queue-color: #{$cloud-blue};
+  --add-to-withdraw-queue__queue-status-color--ready: #{$pale-green};
+  --add-to-withdraw-queue__queue-status-color--pending: #{$orange};
+  --add-to-withdraw-queue__queue-cta-color: #{$pale-lilac};
+  // endregion
+
+  // region WithdrawalQueuePerToken
+  --withdrawal-queue-per-token__asset-color: #{$mist-blue};
+  --withdrawal-queue-per-token__header-background: #{$navy}99;
+  --withdrawal-queue-per-token__header-border: #{$deep-space};
+  --withdrawal-queue-per-token__header-chevron-background: #{$pale-lilac};
+  --withdrawal-queue-per-token__summary-label-color: #{$storm-blue};
+  --withdrawal-queue-per-token__summary-value-color: #{$mist-blue};
+  --withdrawal-queue-per-token__summary-additional-info-color: #{$washed-blue};
+  --withdrawal-queue-per-token__summary-divider-background: #{$washed-space};
+  --withdrawal-queue-per-token__body-background: #{$space}b3;
+  --withdrawal-queue-per-token__body-border: #{$deep-space};
+  --withdrawal-queue-per-token__table-header-color: #{$storm-blue};
+  --withdrawal-queue-per-token__divider-background: linear-gradient(to right, #{$dark-fuchsia} 19%, #{$pale-plum} 57%, #{$teal} 88%);
+  // endregion
+
+  // region WithdrawalQueuePerTokenRow
+  --withdrawal-queue-per-token-row__status-label-background--ready: #{$green-5};
+  --withdrawal-queue-per-token-row__status-label-border--ready: #{$green-4};
+  --withdrawal-queue-per-token-row__status-label-color--ready: #{$pale-green};
+  --withdrawal-queue-per-token-row__status-label-background--pending: #{$orange-4};
+  --withdrawal-queue-per-token-row__status-label-border--pending: #{$orange-3};
+  --withdrawal-queue-per-token-row__status-label-color--pending: #{$orange};
+  --withdrawal-queue-per-token-row__no-value-dash-background: #{$washed-blue};
+  --withdrawal-queue-per-token-row__cross-icon-background: #{$washed-blue};
+  // endregion
+
+  // region Checkbox
+  --checkbox__background: #{$space};
+  --checkbox__border: #{$mist-fuchsia};
+  --checkbox__background--disabled: #{$navy};
+  --checkbox__border--disabled: #{$new-navy};
   // endregion
 }
