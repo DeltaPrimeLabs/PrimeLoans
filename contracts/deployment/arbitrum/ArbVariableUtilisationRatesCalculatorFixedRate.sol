@@ -3,16 +3,12 @@
 pragma solidity 0.8.17;
 
 import "./WethVariableUtilisationRatesCalculator.sol";
-/**
- * @title ArbVariableUtilisationRatesCalculatorFixedRate
- * @dev Contract which returns a constant value of 0 for the deposit and borrowing rates.
- **/
+
 contract ArbVariableUtilisationRatesCalculatorFixedRate is WethVariableUtilisationRatesCalculator {
     /**
      **/
     function calculateDepositRate(uint256 _totalLoans, uint256 _totalDeposits) external view override returns (uint256) {
-        uint256 rate = this.calculateBorrowingRate(_totalLoans, _totalDeposits) * (1e18 - spread) * _totalLoans / (_totalDeposits * 1e18);
-        return rate;
+        return 0.0251e18;
     }
 
     /**
