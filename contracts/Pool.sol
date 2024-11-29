@@ -169,6 +169,65 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         _updateRates();
     }
 
+    function initializeDeposits(
+        address[] calldata depositors,
+        uint256[] calldata depositAmounts
+    ) public virtual nonReentrant onlyOwner {
+        require(depositAmounts.length == depositors.length, "Arrays length mismatch");
+        for(uint i = 0; i < depositors.length; i++) {
+            uint256 _amount = depositAmounts[i];
+            address _of = depositors[i];
+            if (_amount == 0) revert ZeroDepositAmount();
+            require(_of != address(0), "Address zero");
+            require(_of != address(this), "Cannot deposit on behalf of pool");
+            require(_deposited[_of] == 0, "Depositor already initialized");
+//            _amount = Math.min(_amount, IERC20(tokenAddress).balanceOf(msg.sender));
+            _accumulateDepositInterest(_of);
+            if (totalSupplyCap != 0) {
+                if (_deposited[address(this)] + _amount > totalSupplyCap)
+                    revert TotalSupplyCapBreached();
+            }
+//            _transferToPool(msg.sender, _amount);
+            _mint(_of, _amount);
+            _deposited[address(this)] += _amount;
+            _updateRates();
+            if (address(poolRewarder) != address(0)) {
+                poolRewarder.stakeFor(_amount, _of);
+            }
+            emit DepositorInitialized(msg.sender, _of, _amount, block.timestamp);
+            notifyVPrimeController(_of);
+        }
+    }
+
+
+    function initializeBorrows(address[] calldata borrowers, uint256[] calldata amounts) public virtual nonReentrant onlyOwner {
+        require(borrowers.length == amounts.length, "Arrays length mismatch");
+        for(uint i = 0; i < borrowers.length; i++) {
+            address _borrower = borrowers[i];
+            uint256 _amount = amounts[i];
+            if(!checkIfCanBorrow(_borrower)) {
+                revert NotAuthorizedToBorrow();
+            }
+            require(borrowed[_borrower] == 0, "Borrower already initialized");
+//            if (_amount > IERC20(tokenAddress).balanceOf(address(this)))
+//                revert InsufficientPoolFunds();
+            _accumulateBorrowingInterest(_borrower);
+            borrowed[_borrower] += _amount;
+            borrowed[address(this)] += _amount;
+//            _transferFromPool(msg.sender, _amount);
+            _updateRates();
+            emit BorrowerInitialized(msg.sender, _borrower, _amount, block.timestamp);
+        }
+    }
+
+    function checkIfCanBorrow(address account) internal view returns (bool) {
+        if (address(borrowersRegistry) == address(0))
+            revert BorrowersRegistryNotConfigured();
+        if (!borrowersRegistry.canBorrow(account))
+            revert NotAuthorizedToBorrow();
+        return true;
+    }
+
     /* ========== SETTERS ========== */
 
     /**
@@ -833,6 +892,13 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
      **/
     event Deposit(address indexed user, uint256 value, uint256 timestamp);
 
+    event DepositorInitialized(
+        address indexed user,
+        address indexed depositor,
+        uint256 value,
+        uint256 timestamp
+    );
+
     /**
      * @dev emitted after the user deposits funds on behalf of other user
      * @param user the address performing the deposit
@@ -857,6 +923,8 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
      * @param timestamp time of the borrowing
      **/
     event Borrowing(address indexed user, uint256 value, uint256 timestamp);
+
+    event BorrowerInitialized(address indexed user, address indexed borrower, uint256 value, uint256 timestamp);
 
     /**
      * @dev emitted after the user repays debt

@@ -63,7 +63,7 @@ contract UsdcVariableUtilisationRatesCalculator is IRatesCalculator, Ownable {
      * @dev _totalLoans total value of loans
      * @dev _totalDeposits total value of deposits
      **/
-    function calculateDepositRate(uint256 _totalLoans, uint256 _totalDeposits) external view override returns (uint256) {
+    function calculateDepositRate(uint256 _totalLoans, uint256 _totalDeposits) external view virtual override returns (uint256) {
         if (_totalDeposits == 0) return 0;
 
         if (_totalLoans >= _totalDeposits) {
@@ -84,7 +84,7 @@ contract UsdcVariableUtilisationRatesCalculator is IRatesCalculator, Ownable {
      * @dev _totalLoans total value of loans
      * @dev _totalDeposits total value of deposits
      **/
-    function calculateBorrowingRate(uint256 totalLoans, uint256 totalDeposits) external pure override returns (uint256) {
+    function calculateBorrowingRate(uint256 totalLoans, uint256 totalDeposits) external pure virtual override returns (uint256) {
         if (totalDeposits == 0) return OFFSET_1;
 
         uint256 poolUtilisation = getPoolUtilisation(totalLoans, totalDeposits);
