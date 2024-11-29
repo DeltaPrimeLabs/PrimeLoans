@@ -25,11 +25,14 @@
     mounted() {
       setInterval(() => {
         this.currentDate = new Date().getTime() + new Date().getTimezoneOffset() * 60000
+        if (this.date - this.currentDate <= 0) {
+          this.$emit('timerEnded')
+        }
       }, 1000)
     },
     computed: {
       timerFormatted() {
-        return moment(this.date - this.currentDate).format('hh:mm:ss')
+        return moment.duration(this.date - this.currentDate).format('hh:mm:ss', {trim: false})
       }
     }
   }

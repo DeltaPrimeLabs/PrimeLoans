@@ -18,7 +18,7 @@
         </div>
       </div>
       <div>
-        <Timer v-if="entry.isPending" :date="entry.actionableAt" :status="'PENDING'"></Timer>
+        <Timer v-if="entry.isPending" v-on:timerEnded="timerEnded" :date="entry.actionableAt" :status="'PENDING'"></Timer>
         <div v-else class="no-value-dash"></div>
       </div>
       <div>
@@ -86,6 +86,9 @@ export default {
     },
     selectionFromParentChange(isSelected) {
       this.$refs.checkbox.changeValueWithoutEvent(isSelected)
+    },
+    timerEnded() {
+      this.entry.isPending = false
     }
   }
 };
