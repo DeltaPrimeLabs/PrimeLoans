@@ -15,38 +15,38 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
     const deploymentConfig = [
-        {
-            ratesCalculatorName: "WavaxVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "WavaxPoolTUP",
-            poolContractName: "WavaxPool",
-            depositIndexName: "WavaxDepositIndex",
-            borrowIndexName: "WavaxBorrowIndex",
-            tokenAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"
-        },
-        {
-            ratesCalculatorName: "UsdtVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "UsdtPoolTUP",
-            poolContractName: "UsdtPool",
-            depositIndexName: "UsdtDepositIndex",
-            borrowIndexName: "UsdtBorrowIndex",
-            tokenAddress: "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7"
-        },
-        {
-            ratesCalculatorName: "BtcVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "BtcPoolTUP",
-            poolContractName: "BtcPool",
-            depositIndexName: "BtcDepositIndex",
-            borrowIndexName: "BtcBorrowIndex",
-            tokenAddress: "0x152b9d0FdC40C096757F570A51E494bd4b943E50"
-        },
-        {
-            ratesCalculatorName: "EthVariableUtilisationRatesCalculatorFixedRate",
-            poolTupName: "EthPoolTUP",
-            poolContractName: "EthPool",
-            depositIndexName: "EthDepositIndex",
-            borrowIndexName: "EthBorrowIndex",
-            tokenAddress: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab"
-        },
+        // {
+        //     ratesCalculatorName: "WavaxVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "WavaxPoolTUP",
+        //     poolContractName: "WavaxPool",
+        //     depositIndexName: "WavaxDepositIndex",
+        //     borrowIndexName: "WavaxBorrowIndex",
+        //     tokenAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7"
+        // },
+        // {
+        //     ratesCalculatorName: "UsdtVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "UsdtPoolTUP",
+        //     poolContractName: "UsdtPool",
+        //     depositIndexName: "UsdtDepositIndex",
+        //     borrowIndexName: "UsdtBorrowIndex",
+        //     tokenAddress: "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7"
+        // },
+        // {
+        //     ratesCalculatorName: "BtcVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "BtcPoolTUP",
+        //     poolContractName: "BtcPool",
+        //     depositIndexName: "BtcDepositIndex",
+        //     borrowIndexName: "BtcBorrowIndex",
+        //     tokenAddress: "0x152b9d0FdC40C096757F570A51E494bd4b943E50"
+        // },
+        // {
+        //     ratesCalculatorName: "EthVariableUtilisationRatesCalculatorFixedRate",
+        //     poolTupName: "EthPoolTUP",
+        //     poolContractName: "EthPool",
+        //     depositIndexName: "EthDepositIndex",
+        //     borrowIndexName: "EthBorrowIndex",
+        //     tokenAddress: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab"
+        // },
         {
             ratesCalculatorName: "UsdcVariableUtilisationRatesCalculatorFixedRate",
             poolTupName: "UsdcPoolTUP",
@@ -146,14 +146,13 @@ async function deployLinearIndex(name, poolTupAddress, deploy, deployer, admin) 
     let resultIndex = await deploy(name, {
         contract: `contracts/deployment/avalanche/${name}.sol:${name}`,
         from: deployer,
-        gasLimit: 50000000,
         args: [],
     });
 
     console.log(`Deployed linear index at address: ${resultIndex.address}`);
 
     //sleep 1 second
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 30000));
     await verifyContract(hre,
         {
             address: resultIndex.address,
@@ -165,14 +164,13 @@ async function deployLinearIndex(name, poolTupAddress, deploy, deployer, admin) 
     let resultTUP = await deploy(`${name}TUP`, {
         contract: `contracts/proxies/tup/avalanche/${name}TUP.sol:${name}TUP`,
         from: deployer,
-        gasLimit: 50000000,
         args: [resultIndex.address, admin, []],
     });
 
     console.log(`${name}TUP deployed at address: ${resultTUP.address}`);
 
     //sleep 1 second
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 30000));
     await verifyContract(hre,
         {
             address: resultTUP.address,
@@ -185,7 +183,6 @@ async function deployLinearIndex(name, poolTupAddress, deploy, deployer, admin) 
 
     let initializeTx = await index.attach(resultTUP.address).initialize(
         poolTupAddress,
-        { gasLimit: 50000000 }
     );
 
     console.log(`Initializing ${name} with poolTupAddress: ${poolTupAddress} as the owner`);
@@ -218,7 +215,7 @@ async function deployPoolTUPWithImplementationAndMultisigAdmin(deploy, deployer,
     );
 
     //sleep 1 second
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 30000));
     await verifyContract(hre,
         {
             address: resultTUPContract.address,
@@ -255,7 +252,10 @@ async function initializePoolTUPAndProposeOwnershipTransferToMultisig(
         borrowIndexAddress,
         tokenAddress,
         poolRewarderAddress,
-        totalSupplyCap
+        totalSupplyCap,
+        {
+            gasLimit: 5_000_000
+        }
     );
     let txResult = await tx.wait();
     if(txResult.status === 0) {
@@ -310,7 +310,7 @@ async function deployContractWithOwnershipTransfer(deploy, deployer, contractNam
     );
 
     //sleep 1 second
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 30000));
     await verifyContract(hre,
         {
             address: result.address,

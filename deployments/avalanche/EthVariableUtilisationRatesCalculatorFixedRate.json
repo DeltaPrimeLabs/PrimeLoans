@@ -1,0 +1,446 @@
+{
+  "address": "0x7B73b03Bb444115F55e851c75BAA59359EfC711d",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "performer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newSpread",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "SpreadChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BREAKPOINT_1",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BREAKPOINT_2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BREAKPOINT_3",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_RATE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OFFSET_1",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OFFSET_2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OFFSET_3",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "OFFSET_4",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SLOPE_1",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SLOPE_2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SLOPE_3",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SLOPE_4",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "totalLoans",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalDeposits",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateBorrowingRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_totalLoans",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_totalDeposits",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateDepositRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_totalLoans",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_totalDeposits",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPoolUtilisation",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_spread",
+          "type": "uint256"
+        }
+      ],
+      "name": "setSpread",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "spread",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x8d02acb52f95ef52e64abd72508cb85508c6965879c5295e4c792350a1116791",
+  "receipt": {
+    "to": null,
+    "from": "0x5Ee7673Ba06a87f125d14F2C009ec2C4dE02728C",
+    "contractAddress": "0x7B73b03Bb444115F55e851c75BAA59359EfC711d",
+    "transactionIndex": 0,
+    "gasUsed": "396555",
+    "logsBloom": "0x00000000000000800000000000000000000000000000000000800000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000020000000000000000000800000000000000000000000008000000400000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000400000000000000000000000000000000000000",
+    "blockHash": "0x76b8519dd1e8516409a2b002324599a62d1d3d749a2814a94c55854281f29407",
+    "transactionHash": "0x8d02acb52f95ef52e64abd72508cb85508c6965879c5295e4c792350a1116791",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 53707094,
+        "transactionHash": "0x8d02acb52f95ef52e64abd72508cb85508c6965879c5295e4c792350a1116791",
+        "address": "0x7B73b03Bb444115F55e851c75BAA59359EfC711d",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000005ee7673ba06a87f125d14f2c009ec2c4de02728c"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0x76b8519dd1e8516409a2b002324599a62d1d3d749a2814a94c55854281f29407"
+      }
+    ],
+    "blockNumber": 53707094,
+    "cumulativeGasUsed": "396555",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "e6d79d9d6a802a619c5b39aa93141cf3",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"performer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newSpread\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"SpreadChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"BREAKPOINT_1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"BREAKPOINT_2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"BREAKPOINT_3\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MAX_RATE\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"OFFSET_1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"OFFSET_2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"OFFSET_3\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"OFFSET_4\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SLOPE_1\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SLOPE_2\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SLOPE_3\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"SLOPE_4\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"totalLoans\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalDeposits\",\"type\":\"uint256\"}],\"name\":\"calculateBorrowingRate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_totalLoans\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_totalDeposits\",\"type\":\"uint256\"}],\"name\":\"calculateDepositRate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_totalLoans\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_totalDeposits\",\"type\":\"uint256\"}],\"name\":\"getPoolUtilisation\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_spread\",\"type\":\"uint256\"}],\"name\":\"setSpread\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"spread\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getPoolUtilisation(uint256,uint256)\":{\"details\":\"_totalLoans total value of loans_totalDeposits total value of deposits*\"},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner.\"},\"setSpread(uint256)\":{\"params\":{\"_spread\":\"spread defined by user*\"}},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"calculateBorrowingRate(uint256,uint256)\":{\"notice\":\"Always return fixed deposit rate*\"},\"calculateDepositRate(uint256,uint256)\":{\"notice\":\"*\"},\"getPoolUtilisation(uint256,uint256)\":{\"notice\":\"Returns the pool utilisation, which is a ratio between loans and deposits utilisation = value_of_loans / value_of_deposits\"},\"setSpread(uint256)\":{\"notice\":\"Sets the spread between deposit and borrow rate, number between 0 and 1e18\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/deployment/avalanche/EthVariableUtilisationRatesCalculatorFixedRate.sol\":\"EthVariableUtilisationRatesCalculatorFixedRate\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":10},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (access/Ownable.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor() {\\n        _transferOwnership(_msgSender());\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        _checkOwner();\\n        _;\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if the sender is not the owner.\\n     */\\n    function _checkOwner() internal view virtual {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby disabling any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        _transferOwnership(address(0));\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        _transferOwnership(newOwner);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Internal function without access restriction.\\n     */\\n    function _transferOwnership(address newOwner) internal virtual {\\n        address oldOwner = _owner;\\n        _owner = newOwner;\\n        emit OwnershipTransferred(oldOwner, newOwner);\\n    }\\n}\\n\",\"keccak256\":\"0xba43b97fba0d32eb4254f6a5a297b39a19a247082a02d6e69349e071e2946218\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\"},\"contracts/deployment/avalanche/EthVariableUtilisationRatesCalculatorFixedRate.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n// Last deployed from commit: 5cf28801765938c1a9376cbe00c1aad6cb21c3fd;\\npragma solidity 0.8.17;\\n\\nimport \\\"./WavaxVariableUtilisationRatesCalculator.sol\\\";\\n\\ncontract EthVariableUtilisationRatesCalculatorFixedRate is WavaxVariableUtilisationRatesCalculator {\\n    /**\\n     **/\\n    function calculateDepositRate(uint256 _totalLoans, uint256 _totalDeposits) external view override returns (uint256) {\\n        return 0.0554e18;\\n    }\\n\\n    /**\\n     * Always return fixed deposit rate\\n     **/\\n    function calculateBorrowingRate(uint256 totalLoans, uint256 totalDeposits) external pure override returns (uint256) {\\n        return 0.0696e18;\\n    }\\n}\",\"keccak256\":\"0xc145825cb7490e983fee016c6bbc0c987df300ad6eede1ae9b44052217df48ed\",\"license\":\"BUSL-1.1\"},\"contracts/deployment/avalanche/WavaxVariableUtilisationRatesCalculator.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n// Last deployed from commit: 83717555c511b82ae0d517b5f6fd5e09b7728852;\\npragma solidity 0.8.17;\\n\\nimport \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport \\\"../../interfaces/IRatesCalculator.sol\\\";\\n\\n/**\\n * @title WavaxVariableUtilisationRatesCalculator\\n * @dev Contract which calculates the interest rates based on pool utilisation.\\n * Utilisation is computed as the ratio between funds borrowed and funds deposited to the pool.\\n * Borrowing rates are calculated using a piecewise linear function. The first piece is defined by SLOPE_1\\n * and OFFSET (shift). Second piece is defined by SLOPE_2 (calculated off-chain), BREAKPOINT (threshold value above\\n * which second piece is considered) and MAX_RATE (value at pool utilisation of 1).\\n **/\\ncontract WavaxVariableUtilisationRatesCalculator is IRatesCalculator, Ownable {\\n    uint256 public constant SLOPE_1 = 0.05e18;\\n    uint256 public constant OFFSET_1 = 0;\\n\\n    uint256 public constant BREAKPOINT_1 = 0.6e18;\\n\\n    uint256 public constant SLOPE_2 = 0.2e18;\\n    //negative, hence minus in calculations\\n    uint256 public constant OFFSET_2 = 0.09e18;\\n\\n    uint256 public constant BREAKPOINT_2 = 0.8e18;\\n\\n    uint256 public constant SLOPE_3 = 0.5e18;\\n    //negative, hence minus in calculations\\n    uint256 public constant OFFSET_3 = 0.33e18;\\n\\n    // BREAKPOINT must be lower than 1e18\\n\\n    uint256 public constant BREAKPOINT_3 = 0.9e18;\\n\\n    uint256 public constant SLOPE_4= 29.8e18;\\n    //negative, hence minus in calculations\\n    uint256 public constant OFFSET_4 = 26.7e18;\\n\\n    uint256 public constant MAX_RATE = 3.1e18;\\n\\n\\n\\n\\n    //residual spread to account for arithmetic inaccuracies in calculation of deposit rate. Does not result in any meaningful\\n    //profit generation\\n    uint256 public spread = 1e12;\\n\\n    /* ========== VIEW FUNCTIONS ========== */\\n\\n    /**\\n     * Returns the pool utilisation, which is a ratio between loans and deposits\\n     * utilisation = value_of_loans / value_of_deposits\\n     * @dev _totalLoans total value of loans\\n     * @dev _totalDeposits total value of deposits\\n     **/\\n    function getPoolUtilisation(uint256 _totalLoans, uint256 _totalDeposits) public pure returns (uint256) {\\n        if (_totalDeposits == 0) return 0;\\n\\n        return (_totalLoans * 1e18) / _totalDeposits;\\n    }\\n\\n    /**\\n     * Returns the current deposit rate\\n     * The value is based on the current borrowing rate and satisfies the invariant:\\n     * value_of_loans * borrowing_rate = value_of_deposits * deposit_rate\\n     * @dev _totalLoans total value of loans\\n     * @dev _totalDeposits total value of deposits\\n     **/\\n    function calculateDepositRate(uint256 _totalLoans, uint256 _totalDeposits) external view virtual override returns (uint256) {\\n        if (_totalDeposits == 0) return 0;\\n\\n        if (_totalLoans >= _totalDeposits) {\\n            return MAX_RATE * (1e18 - spread) / 1e18;\\n        } else {\\n            uint256 rate = this.calculateBorrowingRate(_totalLoans, _totalDeposits) * (1e18 - spread) * _totalLoans / (_totalDeposits * 1e18);\\n            return rate;\\n        }\\n    }\\n\\n    /**\\n     * Returns the current borrowing rate\\n     * The value is based on the pool utilisation according to the piecewise linear formula:\\n     * 1) for pool utilisation lower than or equal to breakpoint:\\n     * borrowing_rate = SLOPE_1 * utilisation + OFFSET\\n     * 2) for pool utilisation greater than breakpoint:\\n     * borrowing_rate = SLOPE_2 * utilisation + MAX_RATE - SLOPE_2\\n     * @dev _totalLoans total value of loans\\n     * @dev _totalDeposits total value of deposits\\n     **/\\n    function calculateBorrowingRate(uint256 totalLoans, uint256 totalDeposits) external pure virtual override returns (uint256) {\\n        if (totalDeposits == 0) return OFFSET_1;\\n\\n        uint256 poolUtilisation = getPoolUtilisation(totalLoans, totalDeposits);\\n\\n        if (poolUtilisation >= 1e18) {\\n            return MAX_RATE;\\n        } else if (poolUtilisation <= BREAKPOINT_1) {\\n            return (poolUtilisation * SLOPE_1) / 1e18 + OFFSET_1;\\n        } else if (poolUtilisation <= BREAKPOINT_2) {\\n            return (poolUtilisation * SLOPE_2) / 1e18 - OFFSET_2;\\n        } else if (poolUtilisation <= BREAKPOINT_3) {\\n            return (poolUtilisation * SLOPE_3) / 1e18 - OFFSET_3;\\n        } else {\\n            // full formula derived from piecewise linear function calculation except for SLOPE_2/3/4 subtraction (separated for\\n            // unsigned integer safety check)\\n            return (poolUtilisation * SLOPE_4) / 1e18 - OFFSET_4;\\n        }\\n    }\\n\\n    /* ========== SETTERS ========== */\\n    /**\\n     * Sets the spread between deposit and borrow rate, number between 0 and 1e18\\n     * @param _spread spread defined by user\\n     **/\\n    function setSpread(uint256 _spread) external onlyOwner {\\n        require(_spread < 1e18, \\\"Spread must be smaller than 1e18\\\");\\n        spread = _spread;\\n        emit SpreadChanged(msg.sender, _spread, block.timestamp);\\n    }\\n\\n    /* ========== OVERRIDDEN FUNCTIONS ========== */\\n\\n    function renounceOwnership() public virtual override {}\\n\\n    /* ========== EVENTS ========== */\\n\\n    /**\\n     * @dev emitted after changing the spread\\n     * @param performer an address of wallet setting a new spread\\n     * @param newSpread new spread\\n     * @param timestamp time of a spread change\\n     **/\\n    event SpreadChanged(address indexed performer, uint256 newSpread, uint256 timestamp);\\n}\",\"keccak256\":\"0x4e459996471b2291bd455bb6c87fda5dca8d4fac404fe4ee50757d97ebdd6a9c\",\"license\":\"BUSL-1.1\"},\"contracts/interfaces/IRatesCalculator.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\n// Last deployed from commit: ;\\npragma solidity 0.8.17;\\n\\n/**\\n * @title IRatesCalculator\\n * @dev Interface defining base method for contracts implementing interest rates calculation.\\n * The calculated value could be based on the relation between funds borrowed and deposited.\\n */\\ninterface IRatesCalculator {\\n    function calculateBorrowingRate(uint256 totalLoans, uint256 totalDeposits) external view returns (uint256);\\n\\n    function calculateDepositRate(uint256 totalLoans, uint256 totalDeposits) external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x5b134bca4918b4e379fcb312eada2385e815cd13ef1fbee2fcdc7028cc45d754\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x608060405264e8d4a5100060015534801561001957600080fd5b5061002333610028565b610078565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b61055a806100876000396000f3fe608060405234801561001057600080fd5b50600436106100fc5760003560e01c806301a5e5a01461010157806318c544b114610123578063321105fb1461012b5780633bf42d4b1461013957806349d94fee1461014857806356f21639146101585780635c25c76c146101675780636e28a05d1461017057806370935a501461017f578063715018a61461018e5780637cd08331146101905780638da5cb5b146101a35780639a6fc9dc146101c35780639ceca965146101d3578063b5f78b05146101e6578063b66a261c146101f5578063bfe7cfd214610208578063c24dbebd14610217578063df841eec14610226578063f2fde38b14610242575b600080fd5b610110670853a0d2313c000081565b6040519081526020015b60405180910390f35b610110600081565b61011066b1a2bc2ec5000081565b6101106702c68af0bb14000081565b6101106801728974898eee000081565b610110670494654067e1000081565b61011060015481565b61011067013fbe85edc9000081565b610110670b1a2bc2ec50000081565b005b61011061019e366004610479565b610257565b6101ab610266565b6040516001600160a01b03909116815260200161011a565b61011068019d8ede1ce2a4000081565b6101106101e1366004610479565b610275565b610110670c7d713b49da000081565b61018e61020336600461049b565b6102ab565b6101106706f05b59d3b2000081565b610110672b05699353b6000081565b610110610234366004610479565b66f744d4cc5e000092915050565b61018e6102503660046104b4565b610351565b565b66c4d201a88e80005b92915050565b6000546001600160a01b031690565b60008160000361028757506000610260565b8161029a84670de0b6b3a76400006104dd565b6102a49190610502565b9392505050565b6102b36103ca565b670de0b6b3a7640000811061030f5760405162461bcd60e51b815260206004820181905260248201527f537072656164206d75737420626520736d616c6c6572207468616e203165313860448201526064015b60405180910390fd5b60018190556040805182815242602082015233917f9e606dc778840dd5372c982cb6a54acae1e2f85905de7f64d37c63a0c5830e22910160405180910390a250565b6103596103ca565b6001600160a01b0381166103be5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608401610306565b6103c781610429565b50565b336103d3610266565b6001600160a01b0316146102555760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610306565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6000806040838503121561048c57600080fd5b50508035926020909101359150565b6000602082840312156104ad57600080fd5b5035919050565b6000602082840312156104c657600080fd5b81356001600160a01b03811681146102a457600080fd5b808202811582820484141761026057634e487b7160e01b600052601160045260246000fd5b60008261051f57634e487b7160e01b600052601260045260246000fd5b50049056fea264697066735822122077632f807cc10c172ef2bc4c7b7e80cebdf7b840c7e3560d7bcc7d51757bb0bc64736f6c63430008110033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100fc5760003560e01c806301a5e5a01461010157806318c544b114610123578063321105fb1461012b5780633bf42d4b1461013957806349d94fee1461014857806356f21639146101585780635c25c76c146101675780636e28a05d1461017057806370935a501461017f578063715018a61461018e5780637cd08331146101905780638da5cb5b146101a35780639a6fc9dc146101c35780639ceca965146101d3578063b5f78b05146101e6578063b66a261c146101f5578063bfe7cfd214610208578063c24dbebd14610217578063df841eec14610226578063f2fde38b14610242575b600080fd5b610110670853a0d2313c000081565b6040519081526020015b60405180910390f35b610110600081565b61011066b1a2bc2ec5000081565b6101106702c68af0bb14000081565b6101106801728974898eee000081565b610110670494654067e1000081565b61011060015481565b61011067013fbe85edc9000081565b610110670b1a2bc2ec50000081565b005b61011061019e366004610479565b610257565b6101ab610266565b6040516001600160a01b03909116815260200161011a565b61011068019d8ede1ce2a4000081565b6101106101e1366004610479565b610275565b610110670c7d713b49da000081565b61018e61020336600461049b565b6102ab565b6101106706f05b59d3b2000081565b610110672b05699353b6000081565b610110610234366004610479565b66f744d4cc5e000092915050565b61018e6102503660046104b4565b610351565b565b66c4d201a88e80005b92915050565b6000546001600160a01b031690565b60008160000361028757506000610260565b8161029a84670de0b6b3a76400006104dd565b6102a49190610502565b9392505050565b6102b36103ca565b670de0b6b3a7640000811061030f5760405162461bcd60e51b815260206004820181905260248201527f537072656164206d75737420626520736d616c6c6572207468616e203165313860448201526064015b60405180910390fd5b60018190556040805182815242602082015233917f9e606dc778840dd5372c982cb6a54acae1e2f85905de7f64d37c63a0c5830e22910160405180910390a250565b6103596103ca565b6001600160a01b0381166103be5760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608401610306565b6103c781610429565b50565b336103d3610266565b6001600160a01b0316146102555760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152606401610306565b600080546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6000806040838503121561048c57600080fd5b50508035926020909101359150565b6000602082840312156104ad57600080fd5b5035919050565b6000602082840312156104c657600080fd5b81356001600160a01b03811681146102a457600080fd5b808202811582820484141761026057634e487b7160e01b600052601160045260246000fd5b60008261051f57634e487b7160e01b600052601260045260246000fd5b50049056fea264697066735822122077632f807cc10c172ef2bc4c7b7e80cebdf7b840c7e3560d7bcc7d51757bb0bc64736f6c63430008110033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "getPoolUtilisation(uint256,uint256)": {
+        "details": "_totalLoans total value of loans_totalDeposits total value of deposits*"
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+      },
+      "setSpread(uint256)": {
+        "params": {
+          "_spread": "spread defined by user*"
+        }
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "calculateBorrowingRate(uint256,uint256)": {
+        "notice": "Always return fixed deposit rate*"
+      },
+      "calculateDepositRate(uint256,uint256)": {
+        "notice": "*"
+      },
+      "getPoolUtilisation(uint256,uint256)": {
+        "notice": "Returns the pool utilisation, which is a ratio between loans and deposits utilisation = value_of_loans / value_of_deposits"
+      },
+      "setSpread(uint256)": {
+        "notice": "Sets the spread between deposit and borrow rate, number between 0 and 1e18"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 7,
+        "contract": "contracts/deployment/avalanche/EthVariableUtilisationRatesCalculatorFixedRate.sol:EthVariableUtilisationRatesCalculatorFixedRate",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 216,
+        "contract": "contracts/deployment/avalanche/EthVariableUtilisationRatesCalculatorFixedRate.sol:EthVariableUtilisationRatesCalculatorFixedRate",
+        "label": "spread",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

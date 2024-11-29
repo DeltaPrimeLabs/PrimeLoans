@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 83717555c511b82ae0d517b5f6fd5e09b7728852;
+// Last deployed from commit: 5cf28801765938c1a9376cbe00c1aad6cb21c3fd;
 pragma solidity 0.8.17;
 
 import "./UsdcVariableUtilisationRatesCalculator.sol";
