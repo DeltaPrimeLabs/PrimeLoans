@@ -41,7 +41,7 @@
           <WithdrawalQueuePerTokenRow
               ref="row"
               v-on:selectionChange="rowSelectionChanged(index, $event)"
-              v-on:expired="rowExpired(index)"
+              v-on:expired="deleteRow(index)"
               :asset-symbol="assetSymbol"
               :entry="entry"
               :asset-price="assetPrice"
@@ -108,9 +108,15 @@ export default {
     getTotalToken() {
       return this.entries.reduce((acc, current) => acc + Number(current.amount), 0)
     },
-    rowExpired(index) {
+    deleteRow(index) {
       this.entries.splice(index, 1)
-      this.selectedRows.splice(this.selectedRows.findIndex(idx => idx === index), 1)
+      const newSelectedRows = []
+      this.selectedRows.forEach(idx => {
+        if (idx !== index) {
+          newSelectedRows.push(idx > index ? idx - 1 : idx)
+        }
+      })
+      this.selectedRows = newSelectedRows
       this.currentTableHeight = this.isExpanded ? (this.entries.length * 63 + 53) + 'px' : '0px'
     },
     rowSelectionChanged(index, isSelected) {
