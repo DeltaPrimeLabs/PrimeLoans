@@ -5,9 +5,9 @@ const hre = require("hardhat");
 const OwnableArtifact = require("../../artifacts/@openzeppelin/contracts/access/Ownable.sol/Ownable.json");
 const PoolArtifact = require("../../artifacts/contracts/Pool.sol/Pool.json");
 
-const MULTISIG_OWNER = "0xDfA6706FC583b635CD6daF0E3915901A2fBaBAaD";
-const MULTISIG_ADMIN = "0xa9Ca8462aB2949ADa86297904e09Ab4Eb12cdCf0";
-const SMART_LOANS_FACTORY = "0xFf5e3dDaefF411a1dC6CcE00014e4Bca39265c20";
+const MULTISIG_OWNER = "0x44AfCcF712E8A097a6727B48b57c75d7A85a9B0c";
+const MULTISIG_ADMIN = "0x6855A3cA53cB01646A9a3e6d1BC30696499C0b4a";
+const SMART_LOANS_FACTORY = "0x3Ea9D480295A73fd2aF95b4D96c2afF88b21B03D";
 let deploymentHisotryConfig = []
 let acceptOwnershipNeeded = []
 
