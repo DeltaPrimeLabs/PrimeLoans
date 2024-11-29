@@ -749,6 +749,11 @@
   --withdrawal-queue-per-token-row__cross-icon-background: #{$medium-gray};
   // endregion
 
+  // region WithdrawQueue
+  --withdrawal-queue__withdraw-accordion-background: #{$white}4c;
+  --withdrawal-queue__withdraw-accordion-shadow: 7px 7px 30px 0 #{$delta-steel}80;
+  // endregion
+
   // region Checkbox
   --checkbox__background: #{$white};
   --checkbox__border: #{$cloud-gray};
