@@ -15,7 +15,7 @@
       </div>
       <div>
         <div class="status-label" v-bind:class="statusLabelClasses[entry.isPending ? 'PENDING' : 'READY']">
-          {{ statusLabelText[entry.isPending ? 'PENDING' : 'READY'] }} {{entry.id}}
+          {{ statusLabelText[entry.isPending ? 'PENDING' : 'READY'] }}
         </div>
       </div>
       <div>
