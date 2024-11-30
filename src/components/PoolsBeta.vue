@@ -201,10 +201,13 @@ export default {
               this.poolsList[poolIndex].hasAvalancheBoost = true;
               this.poolsList[poolIndex].avalancheBoostRewardToken = config.AVALANCHE_BOOST_CONFIG[poolAsset].rewardToken;
               let secondsInYear = 3600 * 24 * 365;
-              if (poolIndex === 0 || poolIndex === 3) {
-                this.poolsList[poolIndex].miningApy = 0.05;
-              } else {
-                this.poolsList[poolIndex].miningApy = rates[poolAsset] * secondsInYear / (this.poolsList[poolIndex].tvl * this.poolsList[poolIndex].assetPrice);
+              this.poolsList[poolIndex].miningApy = rates[poolAsset] * secondsInYear / (this.poolsList[poolIndex].tvl * this.poolsList[poolIndex].assetPrice);
+
+              if (poolAsset == 'BTC') {
+                this.poolsList[poolIndex].miningApy = 0.0523;
+              }
+              if (poolAsset == 'AVAX') {
+                this.poolsList[poolIndex].miningApy = 0.0497;
               }
             }
           );
