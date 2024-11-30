@@ -14,6 +14,8 @@ export default class WithdrawQueueService {
 
   progressBarService;
   modalService;
+  poolService;
+
   provider;
   account;
   poolContracts = [];
@@ -26,9 +28,10 @@ export default class WithdrawQueueService {
   soonestIntent;
   queueData$ = new BehaviorSubject({});
 
-  constructor(providerService, accountService, progressBarService, modalService) {
+  constructor(providerService, accountService, progressBarService, modalService, poolService) {
     this.progressBarService = progressBarService;
     this.modalService = modalService;
+    this.poolService = poolService;
     combineLatest(providerService.observeProviderCreated(), accountService.observeAccountLoaded())
       .subscribe(async ([provider, account]) => {
         this.provider = provider;
@@ -81,7 +84,7 @@ export default class WithdrawQueueService {
       actionableIntents.push(
         ...poolIntents[token]
           .filter(intent => intent.isActionable)
-          .map(intent => ({ ...intent, symbol: token }))
+          .map(intent => ({...intent, symbol: token}))
       );
     }
 
@@ -96,17 +99,23 @@ export default class WithdrawQueueService {
     this.progressBarService.requestProgressBar();
     this.modalService.closeModal();
 
-    const transaction = await this.pools[poolSymbol].contract
-      .connect(this.provider.getSigner())
-      .createWithdrawalIntent(parseUnits(amount.toString(), 18));
+    try {
+      const transaction = await this.pools[poolSymbol].contract
+        .connect(this.provider.getSigner())
+        .createWithdrawalIntent(parseUnits(amount.toString(), 18));
 
-    await awaitConfirmation(transaction, this.provider, 'create withdrawal intent');
+      await awaitConfirmation(transaction, this.provider, 'create withdrawal intent');
 
-    this.progressBarService.emitProgressBarInProgressState();
-    setTimeout(() => {
-      this.progressBarService.emitProgressBarSuccessState();
-      this.getIntents();
-    }, 1000);
+
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.getIntents();
+      }, config.refreshDelay);
+
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async getWithdrawalIntents(poolContract) {
@@ -122,6 +131,8 @@ export default class WithdrawQueueService {
       isPending: intent.isPending,
     })).filter(intent => !intent.isExpired);
 
+    this.totalReady = 0;
+    this.totalPending = 0;
     this.totalReady += intents.filter(intent => intent.isActionable).length;
     this.totalPending += intents.filter(intent => intent.isPending).length;
 
@@ -150,35 +161,45 @@ export default class WithdrawQueueService {
       sum = sum.add(intent.amountBigNumber);
     })
     const sumx = formatUnits(sum.toString(), 18);
-    const transaction = await
-      this.pools[poolSymbol].contract
-        .connect(this.provider.getSigner())
-        .withdraw(sum, ids, {gasLimit: 1000000});
 
-    await awaitConfirmation(transaction, this.provider, 'execute withdrawal intent');
+    try {
+      const transaction = await
+        this.pools[poolSymbol].contract
+          .connect(this.provider.getSigner())
+          .withdraw(sum, ids, {gasLimit: 1000000});
 
-    this.progressBarService.emitProgressBarInProgressState();
-    setTimeout(() => {
-      this.progressBarService.emitProgressBarSuccessState();
-      this.getIntents();
-    }, 1000);
+      await awaitConfirmation(transaction, this.provider, 'execute withdrawal intent');
+
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.getIntents();
+        this.poolService.setupPools();
+      }, config.refreshDelay);
+    } catch (error) {
+      this.handleError(error)
+    }
   }
 
   async cancelWithdrawalIntent(poolSymbol, id) {
     this.progressBarService.requestProgressBar();
 
-    const transaction = await
-    this.pools[poolSymbol].contract
-      .connect(this.provider.getSigner())
-      .cancelWithdrawalIntent(id, {gasLimit: 1000000});
+    try {
+      const transaction = await
+        this.pools[poolSymbol].contract
+          .connect(this.provider.getSigner())
+          .cancelWithdrawalIntent(id, {gasLimit: 1000000});
 
-    await awaitConfirmation(transaction, this.provider, 'cancel withdrawal intent');
+      await awaitConfirmation(transaction, this.provider, 'cancel withdrawal intent');
 
-    this.progressBarService.emitProgressBarInProgressState();
-    setTimeout(() => {
-      this.progressBarService.emitProgressBarSuccessState();
-      this.getIntents();
-    }, 1000);
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.getIntents();
+      }, config.refreshDelay);
+    } catch (error) {
+      this.handleError(error)
+    }
   }
 
 
@@ -193,5 +214,15 @@ export default class WithdrawQueueService {
 
   observeQueueData() {
     return this.queueData$.asObservable();
+  }
+
+  handleError(error) {
+    switch (error.code) {
+      case 4001:
+        this.progressBarService.emitProgressBarCancelledState()
+        break;
+      default:
+        this.progressBarService.emitProgressBarErrorState();
+    }
   }
 }

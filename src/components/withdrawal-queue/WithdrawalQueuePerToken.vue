@@ -11,8 +11,8 @@
         </div>
         <div class="summary">
           <div class="summary__label">Total:</div>
-          <div class="summary__value">{{ getTotalToken() }} {{ assetSymbol }}</div>
-          <div class="summary__additional-info">($ {{ getTotalToken() * assetPrice }})</div>
+          <div class="summary__value">{{ getTotalToken() | smartRound(5, true)}} {{ assetSymbol }}</div>
+          <div class="summary__additional-info">{{ getTotalToken() * assetPrice | usd}}</div>
           <div class="summary__divider"></div>
           <div class="summary__label">Pending:</div>
           <div class="summary__value">{{ getPendingCount() }}</div>
@@ -27,7 +27,7 @@
       <div class="body" :style="{height: currentTableHeight}">
         <div class="table-header">
           <div class="checkbox">
-            <Checkbox ref="allCheckbox" v-on:checkboxChange="allSelectionChanged"></Checkbox>
+            <Checkbox ref="allCheckbox" :disabled="selectAllDisabled" v-on:checkboxChange="allSelectionChanged"></Checkbox>
           </div>
           <div class="amount">Amount</div>
           <div>Status</div>
@@ -102,7 +102,10 @@ export default {
   },
 
   computed: {
-    ...mapState('serviceRegistry', ['poolService', 'withdrawQueueService'])
+    ...mapState('serviceRegistry', ['poolService', 'withdrawQueueService']),
+    selectAllDisabled() {
+      return this.entries.filter(({isPending}) => !isPending).length === 0
+    },
   },
 
   methods: {

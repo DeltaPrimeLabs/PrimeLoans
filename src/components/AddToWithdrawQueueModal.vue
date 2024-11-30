@@ -7,7 +7,7 @@
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
         <div class="top-info__value">
-          {{ assetBalance | smartRound(asset.decimals, true) }}
+          {{ assetBalance | smartRound(5, true) }}
           <span class="top-info__currency">
             {{ asset.symbol }}
           </span>
@@ -49,13 +49,13 @@
             </div>
           </div>
         </div>
-        <div class="queue__cta" @click="close()">
+<!--        <div class="queue__cta" @click="close()">
           Go to Withdrawal Queue
           <DeltaIcon
             class="queue__cta-arrow"
             :icon-src="'src/assets/icons/left-arrow.svg'"
             :size="15"></DeltaIcon>
-        </div>
+        </div>-->
       </div>
 
       <div class="toggle-container" v-if="asset.symbol === toggleOptions[0]">

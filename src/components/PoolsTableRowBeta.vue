@@ -257,6 +257,7 @@ export default {
       const poolAssetsPrices = {};
       const poolContracts = {};
       this.poolService.observePools().subscribe(pools => {
+        console.log('PoolsTableRow', pools);
         pools.forEach(pool => {
           poolDepositBalances[pool.asset.symbol] = pool.deposit;
           poolAssetsPrices[pool.asset.symbol] = pool.assetPrice;

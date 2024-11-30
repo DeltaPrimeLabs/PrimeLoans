@@ -21,6 +21,7 @@ export default class PoolService {
   }
 
   setupPools(provider, account, redstonePriceData, ltipService) {
+    console.log('PoolService.setupPools');
     const poolsFromConfig = Object.keys(config.POOLS_CONFIG);
 
     return combineLatest(

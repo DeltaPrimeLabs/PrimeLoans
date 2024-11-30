@@ -45,7 +45,6 @@
         </Block>
       </div>
     </div>
-    <button v-on:click="testDeposit()">deposit</button>
   </div>
 
 
@@ -441,22 +440,6 @@ export default {
         this.$forceUpdate();
         this.$refs.withdrawalQueue.refresh();
       })
-    },
-
-    create() {
-      this.withdrawQueueService.createWithdrawalIntent(8);
-    },
-
-    testDeposit() {
-      this.withdrawQueueService.deposit(120);
-    },
-
-    getIntents() {
-      this.withdrawQueueService.getWithdrawalIntents();
-    },
-
-    execute() {
-      this.withdrawQueueService.executeWithdrawalIntent('MCK', [0, 1])
     },
   },
 };

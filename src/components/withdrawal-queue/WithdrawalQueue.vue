@@ -6,10 +6,11 @@
           <DeltaIcon class="chevron" :icon-src="'src/assets/icons/chevron-down.svg'" :size="21"></DeltaIcon>
         </div>
         <div class="header-body--expanded header-text">Withdrawal Queue</div>
-        <div class="header-body">
-          <div class="header-text">Withdrawal Queue <span v-if="Object.keys(allQueues).length === 0">is empty</span></div>
-          <div class="summary">
-            <template v-if="amountOfQueues() > 0">
+        <div class="header-body" v-bind:class="{'header-body--empty': amountOfQueues() === 0}">
+          <div class="header-text">Withdrawal Queue <span v-if="Object.keys(allQueues).length === 0">is empty</span>
+          </div>
+          <template v-if="amountOfQueues() > 0">
+            <div class="summary">
               <div class="summary__label">Pending:</div>
               <div class="summary__value">{{ pendingCount }}</div>
               <div class="summary__divider"></div>
@@ -21,9 +22,9 @@
                 <div class="summary__value">{{ soon.amount }} {{ soon.symbol }}</div>
                 <Timer :status="soon.isPending ? 'PENDING' : 'READY'" :date="soon.expiresAt"></Timer>
               </template>
-            </template>
-          </div>
-          <div></div>
+            </div>
+            <div></div>
+          </template>
         </div>
       </div>
       <div class="body">
@@ -36,9 +37,9 @@
 </template>
 
 <script>
-import DeltaIcon from "../DeltaIcon.vue";
-import Timer from "../Timer.vue";
-import WithdrawalQueuePerToken from "./WithdrawalQueuePerToken.vue";
+import DeltaIcon from '../DeltaIcon.vue';
+import Timer from '../Timer.vue';
+import WithdrawalQueuePerToken from './WithdrawalQueuePerToken.vue';
 
 export default {
   name: 'WithdrawalQueue',
@@ -76,7 +77,11 @@ export default {
     },
 
     refresh() {
-      this.$refs.tokenQueue.forEach(tokenQueue => tokenQueue.refresh());
+      if (this.$refs.tokenQueue) {
+        this.$refs.tokenQueue.forEach(tokenQueue => tokenQueue.refresh());
+      } else {
+        this.$forceUpdate();
+      }
     },
   }
 };
@@ -133,6 +138,10 @@ export default {
   display: grid;
   grid-template-columns: 170px 10fr 170px;
   padding: 20px 24px 20px 26px;
+
+  &--empty {
+    grid-template-columns: 1fr;
+  }
 }
 
 .header-body--expanded {
@@ -205,6 +214,7 @@ export default {
 .header-text {
   font-size: 16px;
   font-weight: 600;
+  justify-self: center;
 }
 
 </style>
