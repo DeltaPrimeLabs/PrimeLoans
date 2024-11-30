@@ -51,6 +51,8 @@ export default class WithdrawQueueService {
   }
 
   getIntents() {
+    this.totalPending = 0;
+    this.totalReady = 0;
     combineLatest(Object.keys(this.pools).map(poolSymbol => this.getWithdrawalIntents(this.pools[poolSymbol].contract)))
       .subscribe(intents => {
         intents.forEach((intent, i) => {
@@ -128,8 +130,6 @@ export default class WithdrawQueueService {
 
     console.log(intents);
 
-    this.totalReady = 0;
-    this.totalPending = 0;
     this.totalReady += intents.filter(intent => intent.isActionable).length;
     this.totalPending += intents.filter(intent => intent.isPending).length;
 

@@ -96,13 +96,13 @@ export default {
   },
 
   mounted() {
-    this.poolService.observePools().subscribe(pools => {
-      this.assetPrice = pools.find(pool => pool.asset.symbol === this.assetSymbol).price
+    this.priceService.observePrices().subscribe(prices => {
+      this.assetPrice = prices[this.assetSymbol];
     })
   },
 
   computed: {
-    ...mapState('serviceRegistry', ['poolService', 'withdrawQueueService']),
+    ...mapState('serviceRegistry', ['poolService', 'withdrawQueueService', 'priceService']),
     selectAllDisabled() {
       return this.entries.filter(({isPending}) => !isPending).length === 0
     },

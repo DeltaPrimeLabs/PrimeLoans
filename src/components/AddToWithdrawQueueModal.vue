@@ -145,10 +145,10 @@ export default {
     },
 
     sourceAssetValue() {
-      // const sourceAssetUsdPrice = Number(this.withdrawValue) * this.asset.price;
-      // const nativeAssetUsdPrice = config.ASSETS_CONFIG[this.toggleOptions[0]].price;
-      const sourceAssetUsdPrice = 1;
-      const nativeAssetUsdPrice = 2;
+      const sourceAssetUsdPrice = Number(this.withdrawValue) * this.asset.price;
+      const nativeAssetUsdPrice = config.ASSETS_CONFIG[this.toggleOptions[0]].price;
+      // const sourceAssetUsdPrice = 1;
+      // const nativeAssetUsdPrice = 2;
 
       if (this.valueAsset === 'USDC') return `~ $${sourceAssetUsdPrice.toFixed(2)}`;
       // otherwise return amount in native symbol
