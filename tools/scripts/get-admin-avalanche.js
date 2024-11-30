@@ -103,6 +103,33 @@ const extraOldPoolTUPs = {
     "oldBeacon5": "0x023dA3e0D49Ee05704773271b11484C6D1E76cCb",
 }
 
+const newlyDeployedPoolsV3 = {
+    "WAVAX rates calculator": "0x555B0CdAfd5869a2ddCA6033C88F5EEfBE64E372",
+    "WAVAX pool TUP": "0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4",
+    "WAVAX deposit index TUP": "0x97886abb2BDBEA0e49a86eA1BCD2c4A7120B35D5",
+    "WAVAX borrow index TUP": "0x5f3DB5899a7937c9ABF0A5Fc91718E6F813e4195",
+
+    "USDT rates calculator": "0x7438F10eF07ee81Cd04d70b28647010913E3d8e8",
+    "USDT pool TUP": "0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e",
+    "USDT deposit index TUP": "0xE5CFfF71f2B19dEfa05655Cb4Bb34B9510537d41",
+    "USDT borrow index TUP": "0xf526285F60e9373f47B88a2776c32C99245277f9",
+
+    "BTC rates calculator": "0xd987b201Dab303d823D040c89bfe7AFDB1D7998c",
+    "BTC pool TUP": "0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738",
+    "BTC deposit index TUP": "0xeD66e0581200f8900f76D2c97667e4d2D59dBA53",
+    "BTC borrow index TUP": "0x9A3502f32cc6844A028bC005E2F73ea17e956528",
+
+    "ETH rates calculator": "0x7B73b03Bb444115F55e851c75BAA59359EfC711d",
+    "ETH pool TUP": "0x2A84c101F3d45610595050a622684d5412bdf510",
+    "ETH deposit index TUP": "0x918e0D8cC0B13FaCB83C1174CD1D3940517bf544",
+    "ETH borrow index TUP": "0x22e97b2Fc82dE90faB7A68eF98144c165cc56856",
+
+    "USDC rates calculator": "0xacF6D84E0620589Da3a0f17ABc7bF896945d7b72",
+    "USDC pool TUP": "0x8027e004d80274FB320e9b8f882C92196d779CE8",
+    "USDC deposit index TUP": "0x93B9d03BF70c50F469a7BB5623e78036B74B2556",
+    "USDC borrow index TUP": "0x08245F89BF4712FdF9Fe3B25B85AC332Da99BE79",
+}
+
 const knownAddresses = {
     "0x44AfCcF712E8A097a6727B48b57c75d7A85a9B0c": "MULTISIG OWNER",
     "0x6855A3cA53cB01646A9a3e6d1BC30696499C0b4a": "MUTLISIG ADMIN",
@@ -125,6 +152,11 @@ const knownAddresses = {
     "0xe7E35BEd5256E9d5C697b5486c3F5E07ba04F563": "WavaxPoolTUP",
     "0x40E4Ff9e018462Ce71Fa34aBdFA27B8C5e2B1AfB": "ADMIN COMPROMISED",
     "0xbAc44698844f13cF0AF423b19040659b688ef036": "OWNER COMPROMISED",
+    "0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4": "WAVAX pool TUP V3",
+    "0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e": "USDT pool TUP V3",
+    "0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738": "BTC pool TUP V3",
+    "0x2A84c101F3d45610595050a622684d5412bdf510": "ETH pool TUP V3",
+    "0x8027e004d80274FB320e9b8f882C92196d779CE8": "USDC pool TUP V3",
 };
 
 const compromisedAddresses = {
@@ -160,8 +192,8 @@ async function main() {
     let { admin: smartLoansFactoryAdmin, owner: smartLoansFactoryOwner } = await getInfo(smartLoansFactoryAddress);
     data.push({ Contract: "SmartLoansFactory", Admin: `${smartLoansFactoryAdmin} (${getReadableName(smartLoansFactoryAdmin)})`, Owner: `${smartLoansFactoryOwner} (${getReadableName(smartLoansFactoryOwner)})` });
 
-    for (let pool in extraOldPoolTUPs) {
-        let poolAddress = extraOldPoolTUPs[pool];
+    for (let pool in newlyDeployedPoolsV3) {
+        let poolAddress = newlyDeployedPoolsV3[pool];
         let { admin: poolAdmin, owner: poolOwner } = await getInfo(poolAddress);
         data.push({ Contract: pool, Admin: `${poolAdmin} (${getReadableName(poolAdmin)})`, Owner: `${poolOwner} (${getReadableName(poolOwner)})` });
     }

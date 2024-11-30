@@ -84,6 +84,11 @@ const knownAddresses = {
     "0x275Caecf5542bF4a3CF64aa78a3f57dc9939675C": "BTC pool TUP NEW",
     "0x7Dcf909B1E4b280bEe72C6A69b3a7Ed8adfb63f0": "DAI pool TUP NEW",
     "0x5f3DB5899a7937c9ABF0A5Fc91718E6F813e4195": "USDC pool TUP NEW",
+    "0x788A8324943beb1a7A47B76959E6C1e6B87eD360": "WETH pool TUP V3",
+    "0xc69d703a7Fc31ABb901F1cd3f8963a9f76C41671": "ARB pool TUP V3",
+    "0xEA712a175D5E96Ca4CF15101c1C1133dbEB6E5F6": "BTC pool TUP V3",
+    "0xFA354E4289db87bEB81034A3ABD6D465328378f1": "DAI pool TUP V3",
+    "0x8Ac9Dc27a6174a1CC30873B367A60AcdFAb965cc": "USDC pool TUP V3",
 
 };
 
@@ -129,6 +134,34 @@ const newlyDeployedPools = {
 }
 
 
+const newlyDeployedPoolsV3 = {
+    "WETH rates calculator": "0x3Acd0A2717F295AA83D7FFD2fD44BE2FAB16c474",
+    "WETH pool TUP": "0x788A8324943beb1a7A47B76959E6C1e6B87eD360",
+    "WETH deposit index TUP": "0x6d641b350D7227b386453a29B69b9f17587BC335",
+    "WETH borrow index TUP": "0x2c0eD57e398E8d4e2D86ee4aAc6E8d9E11570F04",
+
+    "ARB rates calculator": "0x11DAa8Ce3D705E7Cb068601eC374567559066c26",
+    "ARB pool TUP": "0xc69d703a7Fc31ABb901F1cd3f8963a9f76C41671",
+    "ARB deposit index TUP": "0x3c9699f886493B006282B53c05B8154e3cb53249",
+    "ARB borrow index TUP": "0x0f9C986e9fe3d7C9DE6e018CCb4E83Dc555558BE",
+
+    "BTC rates calculator": "0xAD45F10F2F9ea66132097F2A86aeF6d7d71DAAF0",
+    "BTC pool TUP": "0xEA712a175D5E96Ca4CF15101c1C1133dbEB6E5F6",
+    "BTC deposit index TUP": "0x4Ae6513a0DD63A8Ca6939384759Bf7f5C4bE6557",
+    "BTC borrow index TUP": "0x5E67f58BE8B989De26a2009a23c8da594Ed00F1f",
+
+    "DAI rates calculator": "0x76531022B1Cf97d6Ff123762eb74F68FA9958Ef6",
+    "DAI pool TUP": "0xFA354E4289db87bEB81034A3ABD6D465328378f1",
+    "DAI deposit index TUP": "0xa6Af43652a62C23f6f27183746F69a46baE6F066",
+    "DAI borrow index TUP": "0x636557Cf41D39092739f53A8fad50C333C3884C6",
+
+    "USDC rates calculator": "0xb218DbE9d51b69DfB213a0d67579E3442B3Bae74",
+    "USDC pool TUP": "0x8Ac9Dc27a6174a1CC30873B367A60AcdFAb965cc",
+    "USDC deposit index TUP": "0x476156FD77091Fd2bbe058Db34BCd203Cd1531C8",
+    "USDC borrow index TUP": "0x867F2a45733841484FDfC98642EFcf385f472994",
+}
+
+
 function getReadableName(address) {
     return knownAddresses[address] || "Unknown";
 }
@@ -157,8 +190,8 @@ async function main() {
     let { admin: smartLoansFactoryAdmin, owner: smartLoansFactoryOwner } = await getInfo(smartLoansFactoryAddress);
     data.push({ Contract: "SmartLoansFactory", Admin: `${smartLoansFactoryAdmin} (${getReadableName(smartLoansFactoryAdmin)})`, Owner: `${smartLoansFactoryOwner} (${getReadableName(smartLoansFactoryOwner)})` });
 
-    for (let pool in newlyDeployedPools) {
-        let poolAddress = newlyDeployedPools[pool];
+    for (let pool in newlyDeployedPoolsV3) {
+        let poolAddress = newlyDeployedPoolsV3[pool];
         let { admin: poolAdmin, owner: poolOwner } = await getInfo(poolAddress);
         data.push({ Contract: pool, Admin: `${poolAdmin} (${getReadableName(poolAdmin)})`, Owner: `${poolOwner} (${getReadableName(poolOwner)})` });
     }
