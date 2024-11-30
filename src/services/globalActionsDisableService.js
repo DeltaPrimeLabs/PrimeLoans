@@ -22,8 +22,8 @@ export default class GlobalActionsDisableService {
   assetsActions$ = new BehaviorSubject({
     ADD_FROM_WALLET: false,
     SWAP: false,
-    BORROW: true,
-    REPAY: true,
+    BORROW: false,
+    REPAY: false,
     SWAP_DEBT: true,
     WRAP: true,
     CLAIM_GLP_REWARDS: true,
