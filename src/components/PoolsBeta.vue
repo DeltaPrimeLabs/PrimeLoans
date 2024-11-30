@@ -21,13 +21,15 @@
                          :soon="queueData.soonestIntent">
         </WithdrawalQueue>
 
-<!--        <WithdrawalQueuePerToken ref="tokenQueue" v-if="poolIntents['MCK']" :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>-->
+        <!--        <WithdrawalQueuePerToken ref="tokenQueue" v-if="poolIntents['MCK']" :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>-->
         <Block :bordered="true">
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
             {{ totalDeposit | usd }}
             <span class="rtkn-balance"
-                  v-if="Number(rtknData.rtknBalance) > 0">Your rTKN balance: {{ rtknData.rtknBalance | smartRound(2, true) }}</span>
+                  v-if="Number(rtknData.rtknBalance) > 0">Your rTKN balance: {{
+                rtknData.rtknBalance | smartRound(2, true)
+              }}</span>
           </NameValueBadgeBeta>
           <div class="pools">
             <div class="pools-table">
@@ -63,7 +65,7 @@ import erc20ABI from '../../test/abis/ERC20.json';
 import ResumeBridgeModal from './ResumeBridgeModal';
 import SPrimePanel from './SPrimePanel.vue';
 import RTKNStatsBar from './RTKNStatsBar.vue';
-import WithdrawalQueuePerToken from "./withdrawal-queue/WithdrawalQueuePerToken.vue";
+import WithdrawalQueuePerToken from './withdrawal-queue/WithdrawalQueuePerToken.vue';
 import WithdrawalQueue from './withdrawal-queue/WithdrawalQueue.vue';
 
 const ethers = require('ethers');
@@ -199,7 +201,11 @@ export default {
               this.poolsList[poolIndex].hasAvalancheBoost = true;
               this.poolsList[poolIndex].avalancheBoostRewardToken = config.AVALANCHE_BOOST_CONFIG[poolAsset].rewardToken;
               let secondsInYear = 3600 * 24 * 365;
-              this.poolsList[poolIndex].miningApy = rates[poolAsset] * secondsInYear / (this.poolsList[poolIndex].tvl * this.poolsList[poolIndex].assetPrice);
+              if (poolIndex === 0 || poolIndex === 3) {
+                this.poolsList[poolIndex].miningApy = 0.05;
+              } else {
+                this.poolsList[poolIndex].miningApy = rates[poolAsset] * secondsInYear / (this.poolsList[poolIndex].tvl * this.poolsList[poolIndex].assetPrice);
+              }
             }
           );
         }
