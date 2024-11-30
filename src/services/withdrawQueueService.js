@@ -53,7 +53,7 @@ export default class WithdrawQueueService {
   getIntents() {
     this.totalPending = 0;
     this.totalReady = 0;
-    combineLatest(Object.keys(this.pools).map(poolSymbol => this.getWithdrawalIntents(this.pools[poolSymbol].contract)))
+    combineLatest(Object.keys(this.pools).map(poolSymbol => this.getWithdrawalIntents(this.pools[poolSymbol].contract, poolSymbol)))
       .subscribe(intents => {
         intents.forEach((intent, i) => {
           if (intent.length > 0) {
@@ -97,7 +97,7 @@ export default class WithdrawQueueService {
     try {
       const transaction = await this.pools[poolSymbol].contract
         .connect(this.provider.getSigner())
-        .createWithdrawalIntent(parseUnits(amount.toString(), 18), {gasLimit: 1000000});
+        .createWithdrawalIntent(parseUnits(amount.toString(), config.ASSETS_CONFIG[poolSymbol].decimals), {gasLimit: 1000000});
 
       await awaitConfirmation(transaction, this.provider, 'create withdrawal intent');
 
@@ -113,13 +113,13 @@ export default class WithdrawQueueService {
     }
   }
 
-  async getWithdrawalIntents(poolContract) {
+  async getWithdrawalIntents(poolContract, poolSymbol) {
     console.log(poolContract);
     const userIntents = await poolContract.getUserIntents(this.account);
     console.log(userIntents);
     const intents = userIntents.map((intent, index) => ({
       id: index,
-      amount: formatUnits(intent.amount, 18),
+      amount: formatUnits(intent.amount, config.ASSETS_CONFIG[poolSymbol].decimals),
       amountBigNumber: intent.amount,
       actionableAt: Number(formatUnits(intent.actionableAt, 0)) * 1000,
       expiresAt: Number(formatUnits(intent.expiresAt, 0)) * 1000,
@@ -157,7 +157,7 @@ export default class WithdrawQueueService {
       let intent = this.poolIntents[poolSymbol].find(intent => intent.id === id);
       sum = sum.add(intent.amountBigNumber);
     })
-    const sumx = formatUnits(sum.toString(), 18);
+    const sumx = formatUnits(sum.toString(), config.ASSETS_CONFIG[poolSymbol].decimals);
 
     try {
       const transaction = await

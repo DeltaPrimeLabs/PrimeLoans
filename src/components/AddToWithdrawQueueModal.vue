@@ -85,6 +85,7 @@ import InfoIcon from './InfoIcon.vue';
 import Timer from './Timer.vue';
 import DeltaIcon from './DeltaIcon.vue';
 import IconButton from './IconButton.vue';
+import {mapState} from 'vuex';
 
 export default {
   name: 'AddToWithdrawQueue',
@@ -137,9 +138,14 @@ export default {
     setTimeout(() => {
       this.setupValidators();
     });
+
+    this.priceService.observePrices().subscribe(prices => {
+      this.assetPrice = prices[this.asset.symbol];
+    });
   },
 
   computed: {
+    ...mapState('serviceRegistry', ['priceService']),
     getModalHeight() {
       return this.asset.symbol === this.toggleOptions[0] ? '561px' : null;
     },
