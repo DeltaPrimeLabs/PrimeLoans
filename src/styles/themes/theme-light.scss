@@ -711,4 +711,53 @@
   // region SprimeModal
   --sprime-modal__text-color: #{$persian-blue};
   // endregion
+
+  // region AddToWithdrawQueue
+  --add-to-withdraw-queue__queue-border: linear-gradient(117deg, #{$delta-pale} 39%, #{$pale-orange} 62%, #{$pale-raspberry} 82%);
+  --add-to-withdraw-queue__queue-background: #{$white};
+  --add-to-withdraw-queue__queue-title-color: #{$light-lilac};
+  --add-to-withdraw-queue__queue-divider-background: #{$goose-gray};
+  --add-to-withdraw-queue__queue-color: #{$steel-gray};
+  --add-to-withdraw-queue__queue-status-color--ready: #{$lime-green};
+  --add-to-withdraw-queue__queue-status-color--pending: #{$old-orange};
+  --add-to-withdraw-queue__queue-cta-color: #{$persian-blue};
+  // endregion
+
+  // region WithdrawalQueuePerToken
+  --withdrawal-queue-per-token__asset-color: #{$black};
+  --withdrawal-queue-per-token__header-background: #{$delta-accent}0c;
+  --withdrawal-queue-per-token__header-border: #{$delta-light};
+  --withdrawal-queue-per-token__header-chevron-background: #{$delta-accent};
+  --withdrawal-queue-per-token__summary-label-color: #{$dark-gray};
+  --withdrawal-queue-per-token__summary-value-color: #{$black};
+  --withdrawal-queue-per-token__summary-additional-info-color: #{$medium-gray};
+  --withdrawal-queue-per-token__summary-divider-background: #{$smoke-gray};
+  --withdrawal-queue-per-token__body-background: #{$white}99;
+  --withdrawal-queue-per-token__body-border: #{$delta-light};
+  --withdrawal-queue-per-token__table-header-color: #{$dark-gray};
+  --withdrawal-queue-per-token__divider-background: linear-gradient(to right, #{$delta-pale} 43%, #{$pale-orange} 62%, #{$pale-raspberry} 79%);
+  // endregion
+
+  // region WithdrawalQueuePerTokenRow
+  --withdrawal-queue-per-token-row__status-label-background--ready: #{$green-1};
+  --withdrawal-queue-per-token-row__status-label-border--ready: #{$green-2};
+  --withdrawal-queue-per-token-row__status-label-color--ready: #{$green-3};
+  --withdrawal-queue-per-token-row__status-label-background--pending: #{$orange-1};
+  --withdrawal-queue-per-token-row__status-label-border--pending: #{$orange-2};
+  --withdrawal-queue-per-token-row__status-label-color--pending: #{$old-orange};
+  --withdrawal-queue-per-token-row__no-value-dash-background: #{$medium-gray};
+  --withdrawal-queue-per-token-row__cross-icon-background: #{$medium-gray};
+  // endregion
+
+  // region WithdrawQueue
+  --withdrawal-queue__withdraw-accordion-background: #{$white}4c;
+  --withdrawal-queue__withdraw-accordion-shadow: 7px 7px 30px 0 #{$delta-steel}80;
+  // endregion
+
+  // region Checkbox
+  --checkbox__background: #{$white};
+  --checkbox__border: #{$cloud-gray};
+  --checkbox__background--disabled: #{$mist-gray};
+  --checkbox__border--disabled: #{$pearly-gray};
+  // endregion
 }

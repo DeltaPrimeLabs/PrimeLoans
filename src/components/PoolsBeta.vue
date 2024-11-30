@@ -13,6 +13,15 @@
                       :available="rtknData.rtknBalance"
                       :conversion-ratio="rtknData.conversionRatio">
         </RTKNStatsBar>
+
+        <WithdrawalQueue ref="withdrawalQueue"
+                         :all-queues="poolIntents"
+                         :pending-count="queueData.totalPending"
+                         :ready-count="queueData.totalReady"
+                         :soon="queueData.soonestIntent">
+        </WithdrawalQueue>
+
+<!--        <WithdrawalQueuePerToken ref="tokenQueue" v-if="poolIntents['MCK']" :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>-->
         <Block :bordered="true">
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
@@ -37,6 +46,8 @@
       </div>
     </div>
   </div>
+
+
 </template>
 
 <script>
@@ -52,6 +63,8 @@ import erc20ABI from '../../test/abis/ERC20.json';
 import ResumeBridgeModal from './ResumeBridgeModal';
 import SPrimePanel from './SPrimePanel.vue';
 import RTKNStatsBar from './RTKNStatsBar.vue';
+import WithdrawalQueuePerToken from "./withdrawal-queue/WithdrawalQueuePerToken.vue";
+import WithdrawalQueue from './withdrawal-queue/WithdrawalQueue.vue';
 
 const ethers = require('ethers');
 
@@ -60,6 +73,8 @@ let TOKEN_ADDRESSES;
 export default {
   name: 'PoolsBeta',
   components: {
+    WithdrawalQueue,
+    WithdrawalQueuePerToken,
     RTKNStatsBar,
     SPrimePanel,
     PoolsTableRowBeta,
@@ -74,6 +89,9 @@ export default {
     this.initStoresWhenProviderAndAccountCreated();
     this.lifiService.setupLifi();
     this.watchActiveRoute();
+    this.withdrawQueueService.getIntents();
+    this.watchPoolIntents();
+    this.watchQueueData();
     setTimeout(() => {
       this.arbitrumChain = window.arbitrumChain;
       if (window.arbitrumChain) {
@@ -92,6 +110,8 @@ export default {
       depositAssetsWalletBalances$: new BehaviorSubject({}),
       rtknData: {},
       arbitrumChain: true,
+      poolIntents: [],
+      queueData: {},
     };
   },
   computed: {
@@ -103,7 +123,8 @@ export default {
       'lifiService',
       'progressBarService',
       'avalancheBoostService',
-      'rtknService'
+      'rtknService',
+      'withdrawQueueService'
     ]),
     ...mapState('network', ['account', 'accountBalance', 'provider']),
   },
@@ -400,6 +421,24 @@ export default {
       this.rtknService.observeData().subscribe(data => {
         console.log(data);
         this.rtknData = data;
+      })
+    },
+
+    watchPoolIntents() {
+      this.withdrawQueueService.observePoolIntents().subscribe(poolIntents => {
+        console.log('------___---__--------__---___POOL INTENTS--------___---__---__--___--____');
+        console.log(poolIntents);
+        this.poolIntents = poolIntents;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
+      })
+    },
+
+    watchQueueData() {
+      this.withdrawQueueService.observeQueueData().subscribe(queueData => {
+        this.queueData = queueData;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
       })
     },
   },

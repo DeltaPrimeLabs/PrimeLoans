@@ -31,11 +31,13 @@ import vPrimeService from "../services/vPrimeService";
 import GlobalActionsDisableService from "../services/globalActionsDisableService";
 import AvalancheBoostService from '../services/avalancheBoostService';
 import RtknService from '../services/rtknService';
+import WithdrawQueueService from '../services/withdrawQueueService';
 
 const providerService = new ProviderService();
 const accountService = new AccountService();
 const progressBarService = new ProgressBarService();
 const modalService = new ModalService();
+const poolService = new PoolService();
 
 export default {
   namespaced: true,
@@ -52,7 +54,7 @@ export default {
     lpService: new LpService(),
     providerService: providerService,
     accountService: accountService,
-    poolService: new PoolService(),
+    poolService: poolService,
     priceService: new PriceService(),
     collateralService: new CollateralService(),
     debtService: new DebtService(),
@@ -73,5 +75,6 @@ export default {
     globalActionsDisableService: new GlobalActionsDisableService(),
     avalancheBoostService: new AvalancheBoostService(),
     rtknService: new RtknService(providerService, accountService, progressBarService, modalService),
+    withdrawQueueService: new WithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
   },
 };

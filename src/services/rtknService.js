@@ -16,7 +16,7 @@ export default class RtknService {
   CONVERTER_CONTRACT_ADDRESS = '0xAd2E3761f071026ed1619876937a0eeC5c3c98B4';
   ABI = RTKN_TO_PRIME_CONVERTER.abi;
 
-  contract;
+  convertedContract;
   rtknTokenContract;
   provider;
 
@@ -29,7 +29,7 @@ export default class RtknService {
       .subscribe(async ([provider, account]) => {
         this.provider = provider;
         this.account = account;
-        this.contract = new ethers.Contract(this.CONVERTER_CONTRACT_ADDRESS, this.ABI, provider);
+        this.convertedContract = new ethers.Contract(this.CONVERTER_CONTRACT_ADDRESS, this.ABI, provider);
         this.setup();
       });
   }
@@ -40,11 +40,11 @@ export default class RtknService {
   }
 
   async getData() {
-    const maxCap = Number(formatUnits(await this.contract.rRTKNMaxCap(), 18))
-    const totalPledged = Number(formatUnits(await this.contract.totalrTKNPledged(), 18))
-    const totalUsers = Number(formatUnits(await this.contract.getTotalUsers(), 0))
-    const yourPledge = Number(formatUnits(await this.contract.userrTKNPledged(this.account), 18))
-    const eligiblePrime = Number(formatUnits(await this.contract.previewFuturePrimeAmountBasedOnPledgedAmountForUser(this.account), 18))
+    const maxCap = Number(formatUnits(await this.convertedContract.rRTKNMaxCap(), 18))
+    const totalPledged = Number(formatUnits(await this.convertedContract.totalrTKNPledged(), 18))
+    const totalUsers = Number(formatUnits(await this.convertedContract.getTotalUsers(), 0))
+    const yourPledge = Number(formatUnits(await this.convertedContract.userrTKNPledged(this.account), 18))
+    const eligiblePrime = Number(formatUnits(await this.convertedContract.previewFuturePrimeAmountBasedOnPledgedAmountForUser(this.account), 18))
     // const conversionRatio = Number(formatUnits(await this.contract.CONVERSION_RATIO(), 18))
     const conversionRatio = 0.808015513897867;
 
@@ -67,7 +67,7 @@ export default class RtknService {
     this.modalService.closeModal();
 
     await this.rtknTokenContract.connect(this.provider.getSigner()).approve(this.CONVERTER_CONTRACT_ADDRESS, parseUnits(amount.toString(), 18));
-    const contractConnected = await this.contract.connect(this.provider.getSigner());
+    const contractConnected = await this.convertedContract.connect(this.provider.getSigner());
     const transaction = await contractConnected.pledgerTKN(parseUnits(amount.toString(), 18));
     const tx = await awaitConfirmation(transaction, this.provider, 'pledge rTKN');
     this.progressBarService.emitProgressBarInProgressState();

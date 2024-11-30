@@ -1,6 +1,6 @@
 <template>
   <div class="checkbox-component">
-    <div class="checkbox">
+    <div class="checkbox" v-bind:class="{'checkbox--disabled': disabled}">
       <div class="checkbox__icon" v-on:click="checkboxClick()">
         <img v-if="value" class="icon__img" src="src/assets/icons/checkbox_on.svg">
         <div v-if="!value" class="icon__checkbox--off"></div>
@@ -17,6 +17,7 @@ export default {
   name: 'Checkbox',
   props: {
     label: null,
+    disabled: false,
   },
 
   data() {
@@ -30,6 +31,9 @@ export default {
       this.value = !this.value;
       this.$emit('checkboxChange', this.value);
     },
+    changeValueWithoutEvent(isSelected) {
+      this.value = isSelected
+    }
   }
 };
 </script>
@@ -40,9 +44,17 @@ export default {
 .checkbox-component {
 
   .checkbox {
-    display: flex;
     flex-direction: row;
     align-items: center;
+
+    &--disabled {
+      pointer-events: none;
+
+      .icon__checkbox--off {
+        background: var(--checkbox__background--disabled) !important;
+        border: solid 1px var(--checkbox__border--disabled) !important;
+      }
+    }
 
     .checkbox__icon {
       display: flex;
@@ -60,7 +72,8 @@ export default {
         width: 16px;
         height: 16px;
         border-radius: 3px;
-        border: solid 1px $cloud-gray;
+        background: var(--checkbox__background);
+        border: solid 1px var(--checkbox__border);
       }
     }
 

@@ -1,16 +1,8 @@
 <template>
-  <div class="pools-table-row-component">
-    <div class="table__row" v-if="pool" :class="{'arbitrum': isArbitrum, 'disabled': pool.disabled}">
+  <div class="withdrawal-queue-table-row-component">
+    <div class="table__row" v-if="pool">
       <div class="table__cell asset">
-        <img class="asset__icon" :src="getAssetIcon(pool.asset.symbol)">
-        <div class="asset__info">
-          <div class="asset__name">{{ pool.asset.symbol }}</div>
-        </div>
-        <div v-if="pool.hasAvalancheBoost">
-          <img
-            v-tooltip="{content: `This pool is incentivized with Boost Program.`, classes: 'info-tooltip'}"
-            src="src/assets/icons/stars.png" class="stars-icon">
-        </div>
+
       </div>
       <div class="table__cell table__cell--double-value deposit">
         <template>
@@ -31,8 +23,7 @@
         <div class="avalanche-boost-unclaimed" v-if="pool.hasAvalancheBoost">
           <LoadedValue :check="() => pool.unclaimed !== null && pool.unclaimedOld !== null"
                        :value="(pool.hasAvalancheBoost ? Number(pool.unclaimed) + Number(pool.unclaimedOld) : 0) | smartRound(5, false)"></LoadedValue>
-          <img class="asset__icon" v-if="pool.avalancheBoostRewardToken"
-               :src="getAssetIcon(pool.avalancheBoostRewardToken)">
+          <img class="asset__icon" v-if="pool.avalancheBoostRewardToken" :src="getAssetIcon(pool.avalancheBoostRewardToken)">
         </div>
       </div>
 
@@ -88,11 +79,11 @@
           v-on:iconButtonClick="actionClick">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-          class="actions__icon-button"
-          v-if="moreActionsConfig"
-          :config="moreActionsConfig"
-          v-on:iconButtonClick="actionClick"
-          :disabled="!pool">
+            class="actions__icon-button"
+            v-if="moreActionsConfig"
+            :config="moreActionsConfig"
+            v-on:iconButtonClick="actionClick"
+            :disabled="!pool">
         </IconButtonMenuBeta>
       </div>
     </div>
@@ -114,11 +105,9 @@ import config from '../config';
 import YAK_ROUTER_ABI from '../../test/abis/YakRouter.json';
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import InfoIcon from './InfoIcon.vue';
-import {ActionSection} from '../services/globalActionsDisableService';
-import ClaimRewardsModal from './ClaimRewardsModal.vue';
+import {ActionSection} from "../services/globalActionsDisableService";
+import ClaimRewardsModal from "./ClaimRewardsModal.vue";
 import DoubleClaimRewardsModal from './DoubleClaimRewardsModal.vue';
-import AddToWithdrawQueueModal from './AddToWithdrawQueueModal.vue';
-import QueueStatus from './AddToWithdrawQueueModal.vue';
 
 let TOKEN_ADDRESSES;
 
@@ -138,7 +127,6 @@ export default {
     this.setupPoolsAssetsData();
     this.watchLifi();
     this.watchActionDisabling();
-    this.watchWithdrawalIntents();
     setTimeout(() => {
       console.log(this.isActionDisabledRecord);
     }, 4000)
@@ -157,7 +145,6 @@ export default {
       isArbitrum: null,
       isAvalanche: null,
       isActionDisabledRecord: {},
-      intents: null,
     };
   },
 
@@ -179,8 +166,7 @@ export default {
       'lifiService',
       'progressBarService',
       'providerService',
-      'globalActionsDisableService',
-      'withdrawQueueService'
+      'globalActionsDisableService'
     ]),
   },
 
@@ -232,7 +218,7 @@ export default {
         menuOptions: [
           {
             iconSrc: 'src/assets/icons/swap.svg',
-            key: 'WITHDRAW',
+            key: 'SWAP_DEPOSIT',
             name: 'Swap',
             disabled: this.isActionDisabledRecord['SWAP_DEPOSIT'],
           }
@@ -246,7 +232,7 @@ export default {
       };
     },
 
-    setupWalletAssetBalances() {
+      setupWalletAssetBalances() {
       this.walletAssetBalancesService.observeWalletAssetBalances().subscribe(balances => {
         this.walletAssetBalances = balances;
       });
@@ -257,7 +243,6 @@ export default {
       const poolAssetsPrices = {};
       const poolContracts = {};
       this.poolService.observePools().subscribe(pools => {
-        console.log('PoolsTableRow', pools);
         pools.forEach(pool => {
           poolDepositBalances[pool.asset.symbol] = pool.deposit;
           poolAssetsPrices[pool.asset.symbol] = pool.assetPrice;
@@ -278,20 +263,11 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.POOLS)
-        .subscribe(isActionDisabledRecord => {
-          this.isActionDisabledRecord = isActionDisabledRecord;
-          this.setupActionsConfiguration();
-          this.setupMoreActionsConfiguration();
-        })
-    },
-
-    watchWithdrawalIntents() {
-      this.withdrawQueueService.observePoolIntents().subscribe(intents => {
-        console.log('ROW_----------___--____-___--___---');
-        console.log(intents);
-        this.intents = intents[this.pool.asset.symbol];
-        console.log(this.intents);
-      })
+          .subscribe(isActionDisabledRecord => {
+            this.isActionDisabledRecord = isActionDisabledRecord;
+            this.setupActionsConfiguration();
+            this.setupMoreActionsConfiguration();
+          })
     },
 
     actionClick(key) {
@@ -400,39 +376,27 @@ export default {
     },
 
     openWithdrawModal() {
-      const modalInstance = this.openModal(AddToWithdrawQueueModal);
-      let queue = [];
-      let extraIntents = 0
-      if (this.intents && this.intents.length > 0) {
-        queue = this.intents.slice(0, 2).map(intent => ({
-          amount: intent.amount,
-          symbol: this.pool.asset.symbol,
-          status: intent.isPending ? 'PENDING' : 'READY',
-          date: intent.isPending ? intent.actionableAt : intent.expiresAt
-        }));
-        extraIntents = this.intents.length - queue.length;
-      }
-      modalInstance.assetBalance = this.pool.deposit;
-      modalInstance.asset = this.pool.asset;
-      modalInstance.queue = queue;
-      modalInstance.extraIntents = extraIntents;
+      console.log(this.pool.apy);
+      const modalInstance = this.openModal(PoolWithdrawModal);
+      modalInstance.pool = this.pool;
+      console.log(modalInstance.pool);
+      modalInstance.apy = this.pool.apy;
+      modalInstance.available = this.pool.asset.balance;
+      modalInstance.deposit = this.pool.deposit;
+      modalInstance.assetSymbol = this.pool.asset.name;
       modalInstance.$on('WITHDRAW', withdrawEvent => {
         const withdrawRequest = {
           assetSymbol: this.pool.asset.symbol,
           amount: withdrawEvent.value,
           withdrawNativeToken: withdrawEvent.withdrawNativeToken,
         };
-        console.log(withdrawEvent);
-        // this.handleTransaction(this.withdraw, {withdrawRequest: withdrawRequest}, () => {
-        //   this.pool.deposit = Number(this.pool.deposit) - withdrawRequest.amount;
-        //   this.$forceUpdate();
-        // }, (error) => {
-        //   this.handleTransactionError(error);
-        // }).then(() => {
-        // });
-
-        this.withdrawQueueService.createWithdrawalIntent(this.pool.asset.symbol, withdrawEvent.value)
-
+        this.handleTransaction(this.withdraw, {withdrawRequest: withdrawRequest}, () => {
+          this.pool.deposit = Number(this.pool.deposit) - withdrawRequest.amount;
+          this.$forceUpdate();
+        }, (error) => {
+          this.handleTransactionError(error);
+        }).then(() => {
+        });
       });
     },
 
