@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: c2bfee98a59745a565435d8d8abe7a9391c35493;
+// Last deployed from commit: 4dcebfff5421bf34da692a82f969b7928678bd41;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -70,6 +70,13 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
             }
         }
         return lockedBalance;
+    }
+
+    // method onlyOwner for transferring all tokens left in pool to msg.sender
+    function transferAllTokensToOwner() public onlyOwner {
+        uint256 balance = IERC20(tokenAddress).balanceOf(address(this));
+        address multisigOwner = 0x44AfCcF712E8A097a6727B48b57c75d7A85a9B0c;
+        IERC20(tokenAddress).transfer(multisigOwner, balance);
     }
 
     function getNotLockedBalance(address account) public view returns (uint256 notLockedBalance) {
