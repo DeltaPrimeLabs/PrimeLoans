@@ -113,8 +113,8 @@ export default class WithdrawQueueService {
         this.getIntents();
       }, config.refreshDelay);
 
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      this.handleError(error);
     }
   }
 
