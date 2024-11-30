@@ -134,21 +134,6 @@ export default {
             address: '0xFA354E4289db87bEB81034A3ABD6D465328378f1',
             tokenAddress: addresses.DAI,
         },
-        USDT: {
-            address: USDT_POOL_TUP.address,
-            tokenAddress: addresses.USDT,
-            disabled: true
-        },
-        FRAX: {
-            address: FRAX_POOL_TUP.address,
-            tokenAddress: addresses.FRAX,
-            disabled: true
-        },
-        LINK: {
-            address: LINK_POOL_TUP.address,
-            tokenAddress: addresses.LINK,
-            disabled: true
-        }
     },
     poolsUnlocking: true,
     TRADERJOEV2_LP_ASSETS_CONFIG: {

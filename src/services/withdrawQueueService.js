@@ -10,8 +10,6 @@ const ethers = require('ethers');
 
 export default class WithdrawQueueService {
 
-  MOCK_POOL_CONTRACT = '0x6a495980FdBe315Dfc32Df2eD49488cABf84ce39';
-
   progressBarService;
   modalService;
   poolService;
@@ -22,7 +20,6 @@ export default class WithdrawQueueService {
   pools = {};
   poolIntents = {};
   poolIntents$ = new BehaviorSubject({});
-  mockTokenContract;
   totalReady = 0;
   totalPending = 0;
   soonestIntent;
@@ -36,10 +33,6 @@ export default class WithdrawQueueService {
       .subscribe(async ([provider, account]) => {
         this.provider = provider;
         this.account = account;
-        const mockPoolContract = new ethers.Contract(this.MOCK_POOL_CONTRACT, POOL.abi, provider);
-        this.poolContracts.push(mockPoolContract);
-
-        this.mockTokenContract = new ethers.Contract('0x5CE6eE56619d3EA3e54D5E9C7d92Bec266e872aF', ERC_20_ABI, provider);
         this.setupPoolContracts();
         this.getIntents();
       });
@@ -102,7 +95,7 @@ export default class WithdrawQueueService {
     try {
       const transaction = await this.pools[poolSymbol].contract
         .connect(this.provider.getSigner())
-        .createWithdrawalIntent(parseUnits(amount.toString(), 18));
+        .createWithdrawalIntent(parseUnits(amount.toString(), 18), {gasLimit: 1000000});
 
       await awaitConfirmation(transaction, this.provider, 'create withdrawal intent');
 
@@ -119,7 +112,9 @@ export default class WithdrawQueueService {
   }
 
   async getWithdrawalIntents(poolContract) {
+    console.log(poolContract);
     const userIntents = await poolContract.getUserIntents(this.account);
+    console.log(userIntents);
     const intents = userIntents.map((intent, index) => ({
       id: index,
       amount: formatUnits(intent.amount, 18),
@@ -130,6 +125,8 @@ export default class WithdrawQueueService {
       isExpired: intent.isExpired,
       isPending: intent.isPending,
     })).filter(intent => !intent.isExpired);
+
+    console.log(intents);
 
     this.totalReady = 0;
     this.totalPending = 0;
@@ -203,10 +200,6 @@ export default class WithdrawQueueService {
   }
 
 
-  async deposit(amount) {
-    await this.mockTokenContract.connect(this.provider.getSigner()).approve(this.MOCK_POOL_CONTRACT, parseUnits(amount.toString(), 18));
-    await this.poolContracts[0].connect(this.provider.getSigner()).deposit(parseUnits(amount.toString(), 18));
-  }
 
   observePoolIntents() {
     return this.poolIntents$.asObservable();
