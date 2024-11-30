@@ -69,7 +69,7 @@
       We are dropping support to some tokens of your Prime Account. Please review your portfolio
     </Banner>
     <Banner v-if="showAvalancheDepositorBanner || showArbitrumDepositorBanner" :closable="true" background="green">
-      Savings will be unpaused this Saturday 4pm CET.
+      Savings will be unpaused this Saturday 6:30pm CET.
     </Banner>
     <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
       The Prime Account is granularly being unpaused.
