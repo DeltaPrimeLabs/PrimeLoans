@@ -123,11 +123,11 @@ export default {
             tokenAddress: addresses.ETH
         },
         ARB: {
-            address: '0xc69d703a7Fc31ABb901F1cd3f8963a9f76C41671',
+            address: '0xC629E8889350F1BBBf6eD1955095C2198dDC41c2',
             tokenAddress: addresses.ARB
         },
         BTC: {
-            address: '0xEA712a175D5E96Ca4CF15101c1C1133dbEB6E5F6',
+            address: '0x0ed7B42B74F039eda928E1AE6F44Eed5EF195Fb5',
             tokenAddress: addresses.BTC
         },
         DAI: {
