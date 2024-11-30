@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <CurrencyInput :symbol="asset.primary"
+      <CurrencyInput :symbol="asset.symbol"
                      :asset="asset"
                      v-on:newValue="withdrawValueChange"
                      :validators="validators"
