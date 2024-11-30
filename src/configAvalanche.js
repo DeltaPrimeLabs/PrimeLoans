@@ -139,27 +139,27 @@ export default {
     WRAPPED_TOKEN_ADDRESS: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
     POOLS_CONFIG: {
         AVAX: {
-            address: WAVAX_POOL_TUP.address,
+            address: '0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4',
             tokenAddress: addresses.AVAX,
             hasAvalancheBoost: true
         },
         USDC: {
-            address: USDC_POOL_TUP.address,
+            address: '0x8027e004d80274FB320e9b8f882C92196d779CE8',
             tokenAddress: addresses.USDC,
             hasAvalancheBoost: true
         },
         USDT: {
-            address: USDT_POOL_TUP.address,
+            address: '0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e',
             tokenAddress: addresses.USDT,
             hasAvalancheBoost: true
         },
         BTC: {
-            address: BTC_POOL_TUP.address,
+            address: '0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738',
             tokenAddress: addresses.BTC,
             hasAvalancheBoost: true
         },
         ETH: {
-            address: ETH_POOL_TUP.address,
+            address: '0x2A84c101F3d45610595050a622684d5412bdf510',
             tokenAddress: addresses.ETH
         }
     },
