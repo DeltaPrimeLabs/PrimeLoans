@@ -181,12 +181,12 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
                 uint256 diff = balance - currentBalance;
                 _deposited[address(this)] += diff;
                 _mint(account, diff);
-                emit BalanceCorrected(account, diff, block.timestamp);
+                emit BalanceCorrected(account, int256(diff), block.timestamp);
             } else if(balance < currentBalance) {
                 uint256 diff = currentBalance - balance;
                 _deposited[address(this)] -= diff;
                 _burn(account, diff);
-                emit BalanceCorrected(account, -diff, block.timestamp);
+                emit BalanceCorrected(account, -int256(diff), block.timestamp);
             }
         }
     }
