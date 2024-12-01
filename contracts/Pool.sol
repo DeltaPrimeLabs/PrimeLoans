@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 84497b01716b53fb360c04d763183339d5599174;
+// Last deployed from commit: df4e8663a52ef1d5a18b05efa088f2816405be91;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -176,6 +176,9 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         for(uint i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             uint256 balance = balances[i];
+
+            _accumulateDepositInterest(account);
+
             uint256 currentBalance = balanceOf(account);
             if(balance > currentBalance) {
                 uint256 diff = balance - currentBalance;
