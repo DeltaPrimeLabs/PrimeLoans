@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/AddressBlacklist.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.17;\n\ncontract AddressBlacklist {\n    address public owner;\n    mapping(address => bool) private blacklist;\n    address[] private blacklistedAddresses;\n    mapping(address => uint256) private addressToIndex;\n\n    event AddressBlacklisted(address indexed account);\n    event AddressRemovedFromBlacklist(address indexed account);\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\n    event BatchBlacklisted(uint256 count);\n    event BatchRemovedFromBlacklist(uint256 count);\n\n    modifier onlyOwner() {\n        require(msg.sender == owner, \"AddressBlacklist: caller is not the owner\");\n        _;\n    }\n\n    constructor() {\n        owner = msg.sender;\n    }\n\n    function transferOwnership(address newOwner) public onlyOwner {\n        require(newOwner != address(0), \"AddressBlacklist: new owner is the zero address\");\n        emit OwnershipTransferred(owner, newOwner);\n        owner = newOwner;\n    }\n\n    function blacklistAddresses(address[] calldata accounts) external onlyOwner {\n        uint256 length = accounts.length;\n        require(length > 0, \"AddressBlacklist: empty array\");\n\n        uint256 addedCount = 0;\n        for (uint256 i = 0; i < length; i++) {\n            address account = accounts[i];\n            if (account == address(0)) continue; // Skip zero address\n            if (blacklist[account]) continue;    // Skip already blacklisted\n\n            blacklist[account] = true;\n            addressToIndex[account] = blacklistedAddresses.length;\n            blacklistedAddresses.push(account);\n\n            emit AddressBlacklisted(account);\n            addedCount++;\n        }\n\n        emit BatchBlacklisted(addedCount);\n    }\n\n    function removeFromBlacklistBatch(address[] calldata accounts) external onlyOwner {\n        uint256 length = accounts.length;\n        require(length > 0, \"AddressBlacklist: empty array\");\n\n        uint256 removedCount = 0;\n        for (uint256 i = 0; i < length; i++) {\n            address account = accounts[i];\n            if (account == address(0)) continue; // Skip zero address\n            if (!blacklist[account]) continue;   // Skip non-blacklisted\n\n            // Get the index of the address to remove\n            uint256 indexToRemove = addressToIndex[account];\n            uint256 lastIndex = blacklistedAddresses.length - 1;\n\n            if (indexToRemove != lastIndex) {\n                // Move the last address to the index being removed\n                address lastAddress = blacklistedAddresses[lastIndex];\n                blacklistedAddresses[indexToRemove] = lastAddress;\n                addressToIndex[lastAddress] = indexToRemove;\n            }\n\n            // Remove the last element\n            blacklistedAddresses.pop();\n            delete blacklist[account];\n            delete addressToIndex[account];\n\n            emit AddressRemovedFromBlacklist(account);\n            removedCount++;\n        }\n\n        emit BatchRemovedFromBlacklist(removedCount);\n    }\n\n    // Original single-address functions maintained for backward compatibility\n    function blacklistAddress(address account) external onlyOwner {\n        require(account != address(0), \"AddressBlacklist: cannot blacklist zero address\");\n        require(!blacklist[account], \"AddressBlacklist: address already blacklisted\");\n\n        blacklist[account] = true;\n        addressToIndex[account] = blacklistedAddresses.length;\n        blacklistedAddresses.push(account);\n\n        emit AddressBlacklisted(account);\n    }\n\n    function removeFromBlacklist(address account) external onlyOwner {\n        require(account != address(0), \"AddressBlacklist: cannot remove zero address\");\n        require(blacklist[account], \"AddressBlacklist: address not blacklisted\");\n\n        uint256 indexToRemove = addressToIndex[account];\n        uint256 lastIndex = blacklistedAddresses.length - 1;\n\n        if (indexToRemove != lastIndex) {\n            address lastAddress = blacklistedAddresses[lastIndex];\n            blacklistedAddresses[indexToRemove] = lastAddress;\n            addressToIndex[lastAddress] = indexToRemove;\n        }\n\n        blacklistedAddresses.pop();\n        delete blacklist[account];\n        delete addressToIndex[account];\n\n        emit AddressRemovedFromBlacklist(account);\n    }\n\n    // View functions\n    function isBlacklisted(address account) external view returns (bool) {\n        return blacklist[account];\n    }\n\n    function getAllBlacklistedAddresses() external view returns (address[] memory) {\n        return blacklistedAddresses;\n    }\n\n    function getBlacklistCount() external view returns (uint256) {\n        return blacklistedAddresses.length;\n    }\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 10
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
