@@ -15,8 +15,6 @@
       <div class="table__cell table__cell--double-value deposit">
         <template>
           <div class="double-value__pieces">
-            <img src="src/assets/icons/warning.svg" v-if="isRecalculated"
-                 v-tooltip="{content: 'The shown balance is overvalued. This will adjust in the next few hours.', classes: 'info-tooltip long'}">
             <img src="src/assets/icons/warning.svg" v-if="isRecalculatedYY"
                  v-tooltip="{content: 'The balances from YieldYak pools are being updated. That should be finished soon.', classes: 'info-tooltip long'}">
             <LoadedValue :check="() => pool.deposit != null"
@@ -162,7 +160,6 @@ export default {
       isAvalanche: null,
       isActionDisabledRecord: {},
       intents: null,
-      isRecalculated: false,
       isRecalculatedYY: false
     };
   },
@@ -273,7 +270,6 @@ export default {
         this.poolAssetsPrices = poolAssetsPrices;
         this.poolContracts = poolContracts;
 
-        this.setIsRecalculated();
         this.setIsRecalculatedYY();
         this.$forceUpdate();
       })
@@ -573,56 +569,6 @@ export default {
       this.closeModal();
       this.disableAllButtons = false;
       this.isBalanceEstimated = false;
-    },
-    setIsRecalculated() {
-      let recalulatedInfo = {
-        'avalanche': {
-          'USDC': [
-            '0x9c972D06EcEee9DC08e2d295742D2045F8e54Fa2',
-            '0xF04f593769be47aF2868a71ff623A54C8F2C753E',
-            '0xdA731BB54d40E9cb389b094Be994eD21CF529150'
-          ],
-          'AVAX': [
-            '0x61475a7a46000316e5Da2C3553A589FBF2198163',
-            '0x97cdd8176084B24ae8a385d4eA9177C31bA0022B',
-            '0x4030322659544000A59be8d74EF30F843e8c4E14',
-            '0x4030322659544000A59be8d74EF30F843e8c4E14',
-            '0xBAF6610405Bd8C60432fBd329885DAE617E647CA'
-          ],
-          'USDT': [
-            '0x9c972D06EcEee9DC08e2d295742D2045F8e54Fa2',
-            '0x22c2263dAa8Da302673157056737d3DDe9c1c306',
-          ],
-          'ETH': [
-
-          ],
-          'BTC': []
-        },
-        'arbitrum': {
-          'BTC': [
-            '0x91c09c1Dee357f430003D393984256Fd0a569A8B',
-            '0xDD70995447f309Ef03C52aEe6721063aa72B500e',
-          ],
-          'DAI': [
-            '0x9D8C9112384967260078F1161FF82E40c0Da81A5'
-          ],
-          'USDC': [
-            '0x86004CB5440fF1B30D267f7E5E09491A7cbeBc96',
-            '0x389E7CE501036d6028ccAe37a1F2cd4Af3F17950',
-            '0x22c2263dAa8Da302673157056737d3DDe9c1c306',
-            '0xDD70995447f309Ef03C52aEe6721063aa72B500e',
-            '0x91c09c1Dee357f430003D393984256Fd0a569A8B'
-          ],
-          'ETH': [
-            '0x22c2263dAa8Da302673157056737d3DDe9c1c306',
-            '0x91c09c1Dee357f430003D393984256Fd0a569A8B',
-            '0x23A51375A34813bB86DBadDecf3722FEB60B3889'
-          ],
-          'ARB': []
-        }
-      }
-
-      this.isRecalculated = recalulatedInfo[config.chainSlug][this.pool.asset.symbol].indexOf(this.account) !== -1;
     },
     setIsRecalculatedYY() {
       let recalculatedYieldYak = [
