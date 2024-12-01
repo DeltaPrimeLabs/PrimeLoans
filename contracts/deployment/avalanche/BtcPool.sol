@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 5cf28801765938c1a9376cbe00c1aad6cb21c3fd;
+// Last deployed from commit: 3711b8ab78a04d27fa4cdc43b2c308eb5e51c6c6;
 pragma solidity 0.8.17;
 
 import "../../Pool.sol";
@@ -34,7 +34,7 @@ contract BtcPool is Pool {
      * @param _amount the total amount to be withdrawn
      * @param intentIndices array of intent indices to be used for withdrawal
      */
-    function withdraw(uint256 _amount, uint256[] calldata intentIndices) public override nonReentrant {
+    function withdraw(uint256 _amount, uint256[] calldata intentIndices) public override{
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
@@ -42,7 +42,7 @@ contract BtcPool is Pool {
         super.withdraw(_amount, intentIndices);
     }
 
-    function transfer(address _to, uint256 _amount) public override nonReentrant returns (bool) {
+    function transfer(address _to, uint256 _amount) public override returns (bool) {
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
@@ -50,7 +50,7 @@ contract BtcPool is Pool {
         return super.transfer(_to, _amount);
     }
 
-    function transferFrom(address _from, address _to, uint256 _amount) public override nonReentrant returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _amount) public override returns (bool) {
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
@@ -58,7 +58,7 @@ contract BtcPool is Pool {
         return super.transferFrom(_from, _to, _amount);
     }
 
-    function deposit(uint256 _amount) public override nonReentrant {
+    function deposit(uint256 _amount) public override{
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
