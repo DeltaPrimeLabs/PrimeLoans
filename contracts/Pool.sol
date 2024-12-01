@@ -511,7 +511,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
  * @param _amount the total amount to be withdrawn
  * @param intentIndices array of intent indices to be used for withdrawal
  **/
-    function withdraw(uint256 _amount, uint256[] calldata intentIndices) external nonReentrant {
+    function withdraw(uint256 _amount, uint256[] calldata intentIndices) external virtual nonReentrant {
         WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
 
         // Validate intents and get final withdrawal amount
