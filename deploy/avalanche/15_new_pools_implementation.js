@@ -27,6 +27,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     pools["ETH"] = ethPool.address;
     console.log(`Deployed EthPool at address: ${ethPool.address}`);
 
+    // sleep 20 seconds
+    await new Promise(r => setTimeout(r, 20000));
+
     await verifyContract(hre,
         {
             address: ethPool.address,
@@ -44,6 +47,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     pools["BTC"] = btcPool.address;
     console.log(`Deployed BtcPool at address: ${btcPool.address}`);
+
+    // sleep 20 seconds
+    await new Promise(r => setTimeout(r, 20000));
 
     await verifyContract(hre,
         {
@@ -63,6 +69,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     pools["USDC"] = usdcPool.address;
     console.log(`Deployed UsdcPool at address: ${usdcPool.address}`);
 
+    // sleep 20 seconds
+    await new Promise(r => setTimeout(r, 20000));
+
     await verifyContract(hre,
         {
             address: usdcPool.address,
@@ -81,6 +90,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     pools["UDST"] = usdtPool.address;
     console.log(`Deployed UsdtPool at address: ${usdtPool.address}`);
 
+    // sleep 20 seconds
+    await new Promise(r => setTimeout(r, 20000));
+
     await verifyContract(hre,
         {
             address: usdtPool.address,
@@ -98,6 +110,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     pools["WAVAX"] = wavaxPool.address;
     console.log(`Deployed WavaxPool at address: ${wavaxPool.address}`);
+
+    // sleep 20 seconds
+    await new Promise(r => setTimeout(r, 20000));
 
     await verifyContract(hre,
         {

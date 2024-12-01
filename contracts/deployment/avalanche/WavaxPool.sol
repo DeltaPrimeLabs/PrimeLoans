@@ -35,7 +35,7 @@ contract WavaxPool is WrappedNativeTokenPool {
      * @param _amount the total amount to be withdrawn
      * @param intentIndices array of intent indices to be used for withdrawal
      */
-    function withdraw(uint256 _amount, uint256[] calldata intentIndices) external override nonReentrant {
+    function withdraw(uint256 _amount, uint256[] calldata intentIndices) public override nonReentrant {
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
@@ -48,7 +48,7 @@ contract WavaxPool is WrappedNativeTokenPool {
      * @param _amount the total amount to be withdrawn
      * @param intentIndices array of intent indices to be used for withdrawal
      */
-    function withdrawNativeToken(uint256 _amount, uint256[] calldata intentIndices) external override nonReentrant {
+    function withdrawNativeToken(uint256 _amount, uint256[] calldata intentIndices) public override nonReentrant {
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
@@ -56,19 +56,27 @@ contract WavaxPool is WrappedNativeTokenPool {
         super.withdrawNativeToken(_amount, intentIndices);
     }
 
-    function transfer(address _to, uint256 _amount, uint256[] calldata intentIndices) external override nonReentrant {
+    function transfer(address _to, uint256 _amount) public override nonReentrant returns (bool) {
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's transfer function
-        super.transfer(_to, _amount, intentIndices);
+        return super.transfer(_to, _amount);
     }
 
-    function transferFrom(address _from, address _to, uint256 _amount, uint256[] calldata intentIndices) external override nonReentrant {
+    function transferFrom(address _from, address _to, uint256 _amount) public override nonReentrant returns (bool) {
         // Check if the sender is blacklisted
         require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's transferFrom function
-        super.transferFrom(_from, _to, _amount, intentIndices);
+        return super.transferFrom(_from, _to, _amount);
+    }
+
+    function deposit(uint256 _amount) public override nonReentrant {
+        // Check if the sender is blacklisted
+        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+
+        // Call the parent contract's deposit function
+        super.deposit(_amount);
     }
 }

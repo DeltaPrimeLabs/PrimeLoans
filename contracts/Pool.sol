@@ -304,7 +304,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         _removeExpiredIntents(msg.sender);
     }
 
-    function transfer(address recipient, uint256 amount) external override nonReentrant returns (bool) {
+    function transfer(address recipient, uint256 amount) public virtual override nonReentrant returns (bool) {
         if(recipient == address(0)) revert TransferToZeroAddress();
         if(recipient == address(this)) revert TransferToPoolAddress();
         if(!isWithdrawalAmountAvailable(msg.sender, amount, 0)){
@@ -372,7 +372,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         return true;
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) external override nonReentrant returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public virtual override nonReentrant returns (bool) {
         if(_allowed[sender][msg.sender] < amount) revert InsufficientAllowance(amount, _allowed[sender][msg.sender]);
 
         if(recipient == address(0)) revert TransferToZeroAddress();
@@ -511,7 +511,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
  * @param _amount the total amount to be withdrawn
  * @param intentIndices array of intent indices to be used for withdrawal
  **/
-    function withdraw(uint256 _amount, uint256[] calldata intentIndices) external virtual nonReentrant {
+    function withdraw(uint256 _amount, uint256[] calldata intentIndices) public virtual nonReentrant {
         WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
 
         // Validate intents and get final withdrawal amount

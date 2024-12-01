@@ -47,7 +47,7 @@ contract WrappedNativeTokenPool is Pool {
      * @param _amount The amount to be withdrawn.
      * @param intentIndices array of intent indices to be used for withdrawal
      */
-    function withdrawNativeToken(uint256 _amount, uint256[] calldata intentIndices) external nonReentrant {
+    function withdrawNativeToken(uint256 _amount, uint256[] calldata intentIndices) public virtual nonReentrant {
         WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
 
         // Validate intents and get final withdrawal amount
