@@ -79,4 +79,12 @@ contract WavaxPool is WrappedNativeTokenPool {
         // Call the parent contract's deposit function
         super.deposit(_amount);
     }
+
+    function depositNativeToken() public payable override nonReentrant {
+        // Check if the sender is blacklisted
+        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+
+        // Call the parent contract's deposit function
+        super.depositNativeToken();
+    }
 }
