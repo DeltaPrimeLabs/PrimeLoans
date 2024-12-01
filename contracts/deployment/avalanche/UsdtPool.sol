@@ -37,4 +37,20 @@ contract UsdtPool is Pool {
         // Call the parent contract's withdraw function
         super.withdraw(_amount, intentIndices);
     }
+
+    function transfer(address _to, uint256 _amount, uint256[] calldata intentIndices) external override nonReentrant {
+        // Check if the sender is blacklisted
+        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+
+        // Call the parent contract's transfer function
+        super.transfer(_to, _amount, intentIndices);
+    }
+
+    function transferFrom(address _from, address _to, uint256 _amount, uint256[] calldata intentIndices) external override nonReentrant {
+        // Check if the sender is blacklisted
+        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+
+        // Call the parent contract's transferFrom function
+        super.transferFrom(_from, _to, _amount, intentIndices);
+    }
 }
