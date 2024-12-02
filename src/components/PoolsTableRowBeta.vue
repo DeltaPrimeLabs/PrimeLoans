@@ -572,6 +572,7 @@ export default {
       this.isBalanceEstimated = false;
     },
     setIsRecalculatedYY() {
+      if (this.isArbitrum) return;
       let recalculatedYieldYak = [
         "0x80751eacad9431ec8b86b857777383dc07c5603d",
         "0xa80fa66f66e7eddfefa0a617b49f43dd713fd086",
