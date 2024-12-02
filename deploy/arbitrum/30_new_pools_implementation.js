@@ -7,13 +7,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    // embedCommitHash('Pool', './contracts');
-    //
-    // embedCommitHash('WethPool', './contracts/deployment/arbitrum');
-    // embedCommitHash('BtcPool', './contracts/deployment/arbitrum');
-    // embedCommitHash('UsdcPool', './contracts/deployment/arbitrum');
-    // embedCommitHash('ArbPool', './contracts/deployment/arbitrum');
-    // embedCommitHash('DaiPool', './contracts/deployment/arbitrum');
+    embedCommitHash('Pool', './contracts');
+
+    embedCommitHash('WethPool', './contracts/deployment/arbitrum');
+    embedCommitHash('BtcPool', './contracts/deployment/arbitrum');
+    embedCommitHash('UsdcPool', './contracts/deployment/arbitrum');
+    embedCommitHash('ArbPool', './contracts/deployment/arbitrum');
+    embedCommitHash('DaiPool', './contracts/deployment/arbitrum');
 
     let pools = {}
 
