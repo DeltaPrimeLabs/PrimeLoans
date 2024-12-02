@@ -743,19 +743,19 @@ export default {
     },
     setupValidators() {
       this.sourceValidators = [
-        {
-          validate: async (value) => {
-            if (!this.swapDebtMode) {
-              if (value > parseFloat(this.assetBalances[this.sourceAsset])) {
-                return 'Amount exceeds the current balance.';
-              }
-            } else {
-              if (value > parseFloat(this.debtsPerAsset[this.sourceAsset].debt)) {
-                return 'Amount exceeds the current debt.';
-              }
-            }
-          },
-        }
+        // {
+        //   validate: async (value) => {
+        //     if (!this.swapDebtMode) {
+        //       if (value > parseFloat(this.assetBalances[this.sourceAsset])) {
+        //         return 'Amount exceeds the current balance.';
+        //       }
+        //     } else {
+        //       if (value > parseFloat(this.debtsPerAsset[this.sourceAsset].debt)) {
+        //         return 'Amount exceeds the current debt.';
+        //       }
+        //     }
+        //   },
+        // }
       ];
       this.targetValidators = [
         // {
