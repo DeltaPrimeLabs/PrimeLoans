@@ -3,7 +3,7 @@
 pragma solidity 0.8.17;
 
 import "../../WrappedNativeTokenPool.sol";
-import "../../AddressBlacklist.sol";
+import "../../AddressRecalculationStatus.sol";
 
 
 /**
@@ -11,7 +11,7 @@ import "../../AddressBlacklist.sol";
  * @dev Contract allowing user to deposit to and borrow WAVAX from a dedicated user account
  */
 contract WavaxPool is WrappedNativeTokenPool {
-    AddressBlacklist public constant BLACKLIST = AddressBlacklist(0x3a77375988667fB4EA5d7AeD0696f606741F5e84); // Replace with actual deployment address
+    AddressRecalculationStatus public constant BLACKLIST = AddressRecalculationStatus(0x3a77375988667fB4EA5d7AeD0696f606741F5e84); // Replace with actual deployment address
 
     // Returns max. acceptable pool utilisation after borrow action
     function getMaxPoolUtilisationForBorrowing() override public view returns (uint256) {
@@ -37,7 +37,7 @@ contract WavaxPool is WrappedNativeTokenPool {
      */
     function withdraw(uint256 _amount, uint256[] calldata intentIndices) public override{
         // Check if the sender is blacklisted
-        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+        require(!BLACKLIST.needsRecalculationCheck(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's withdraw function
         super.withdraw(_amount, intentIndices);
@@ -50,7 +50,7 @@ contract WavaxPool is WrappedNativeTokenPool {
      */
     function withdrawNativeToken(uint256 _amount, uint256[] calldata intentIndices) public override{
         // Check if the sender is blacklisted
-        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+        require(!BLACKLIST.needsRecalculationCheck(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's withdraw function
         super.withdrawNativeToken(_amount, intentIndices);
@@ -58,7 +58,7 @@ contract WavaxPool is WrappedNativeTokenPool {
 
     function transfer(address _to, uint256 _amount) public override returns (bool) {
         // Check if the sender is blacklisted
-        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+        require(!BLACKLIST.needsRecalculationCheck(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's transfer function
         return super.transfer(_to, _amount);
@@ -66,7 +66,7 @@ contract WavaxPool is WrappedNativeTokenPool {
 
     function transferFrom(address _from, address _to, uint256 _amount) public override returns (bool) {
         // Check if the sender is blacklisted
-        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+        require(!BLACKLIST.needsRecalculationCheck(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's transferFrom function
         return super.transferFrom(_from, _to, _amount);
@@ -74,7 +74,7 @@ contract WavaxPool is WrappedNativeTokenPool {
 
     function deposit(uint256 _amount) public override{
         // Check if the sender is blacklisted
-        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+        require(!BLACKLIST.needsRecalculationCheck(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's deposit function
         super.deposit(_amount);
@@ -82,7 +82,7 @@ contract WavaxPool is WrappedNativeTokenPool {
 
     function depositNativeToken() public payable override{
         // Check if the sender is blacklisted
-        require(!BLACKLIST.isBlacklisted(msg.sender), "Pool: sender is blacklisted");
+        require(!BLACKLIST.needsRecalculationCheck(msg.sender), "Pool: sender is blacklisted");
 
         // Call the parent contract's deposit function
         super.depositNativeToken();
