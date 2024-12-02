@@ -482,7 +482,8 @@ export default {
         const tknFrom = TOKEN_ADDRESSES[sourceAsset];
         const tknTo = TOKEN_ADDRESSES[targetAsset];
 
-        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, provider.getSigner());
+        const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
+        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, readProvider);
 
         const maxHops = 3;
         const gasPrice = ethers.utils.parseUnits('0.2', 'gwei');
