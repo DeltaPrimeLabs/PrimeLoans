@@ -7,26 +7,29 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer, admin } = await getNamedAccounts();
 
-    let AddressBlacklist = await deploy("AddressBlacklist", {
+    let AddressRecalculationStatus = await deploy("AddressRecalculationStatus", {
         from: deployer,
         args: [],
     });
 
 
     console.log(
-        `AddressBlacklist deployed at address: ${AddressBlacklist.address}`
+        `AddressRecalculationStatus deployed at address: ${AddressRecalculationStatus.address}`
     );
+
+    // sleep 20 seconds
+    await new Promise(r => setTimeout(r, 20000));
 
     await verifyContract(hre,
         {
-            address: AddressBlacklist.address,
-            contract: `contracts/AddressBlacklist.sol:AddressBlacklist`,
+            address: AddressRecalculationStatus.address,
+            contract: `contracts/AddressRecalculationStatus.sol:AddressRecalculationStatus`,
             constructorArguments: []
-        });
-    console.log(`Verified AddressBlacklist`);
+        });e
+    console.log(`Verified AddressRecalculationStatus`);
 
 
 
 };
 
-module.exports.tags = ["avalanche-address-blacklist"];
+module.exports.tags = ["avalanche-address-recaclulation-status"];

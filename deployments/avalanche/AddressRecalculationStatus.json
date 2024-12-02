@@ -1,0 +1,309 @@
+{
+  "address": "0x46a2CF74C6142CE7568aee5b1eFf77287781cd9D",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "AddressNeedsRecalculation",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "AddressRecalculationComplete",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchMarkedForRecalculation",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchRecalculationComplete",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "getAllAddressesNeedingRecalculation",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRecalculationCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "markAddressForRecalculation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "accounts",
+          "type": "address[]"
+        }
+      ],
+      "name": "markForRecalculation",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "markRecalculationComplete",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "accounts",
+          "type": "address[]"
+        }
+      ],
+      "name": "markRecalculationCompleteBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "needsRecalculationCheck",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x64f300fc8050ab3f55054832c011917bedb56851fd8ad834b2d8f42d4f220746",
+  "receipt": {
+    "to": null,
+    "from": "0x5Ee7673Ba06a87f125d14F2C009ec2C4dE02728C",
+    "contractAddress": "0x46a2CF74C6142CE7568aee5b1eFf77287781cd9D",
+    "transactionIndex": 0,
+    "gasUsed": "790745",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x64a8db4b8f2d7c0ae5b8d5ed7a1877b26bf72524d2bf0d7c65a03b56fe1a199d",
+    "transactionHash": "0x64f300fc8050ab3f55054832c011917bedb56851fd8ad834b2d8f42d4f220746",
+    "logs": [],
+    "blockNumber": 53829306,
+    "cumulativeGasUsed": "790745",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "739d01ee45f04e832e098272a3195f09",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressNeedsRecalculation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AddressRecalculationComplete\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"name\":\"BatchMarkedForRecalculation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"name\":\"BatchRecalculationComplete\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"getAllAddressesNeedingRecalculation\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getRecalculationCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"markAddressForRecalculation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"accounts\",\"type\":\"address[]\"}],\"name\":\"markForRecalculation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"markRecalculationComplete\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"accounts\",\"type\":\"address[]\"}],\"name\":\"markRecalculationCompleteBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"needsRecalculationCheck\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/AddressRecalculationStatus.sol\":\"AddressRecalculationStatus\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":10},\"remappings\":[]},\"sources\":{\"contracts/AddressRecalculationStatus.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.17;\\n\\ncontract AddressRecalculationStatus {\\n    address public owner;\\n    mapping(address => bool) private needsRecalculation;\\n    address[] private addressesNeedingRecalculation;\\n    mapping(address => uint256) private addressToIndex;\\n\\n    event AddressNeedsRecalculation(address indexed account);\\n    event AddressRecalculationComplete(address indexed account);\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n    event BatchMarkedForRecalculation(uint256 count);\\n    event BatchRecalculationComplete(uint256 count);\\n\\n    modifier onlyOwner() {\\n        require(msg.sender == owner, \\\"AddressRecalculationStatus: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    constructor() {\\n        owner = msg.sender;\\n    }\\n\\n    function transferOwnership(address newOwner) public onlyOwner {\\n        require(newOwner != address(0), \\\"AddressRecalculationStatus: new owner is the zero address\\\");\\n        emit OwnershipTransferred(owner, newOwner);\\n        owner = newOwner;\\n    }\\n\\n    function markForRecalculation(address[] calldata accounts) external onlyOwner {\\n        uint256 length = accounts.length;\\n        require(length > 0, \\\"AddressRecalculationStatus: empty array\\\");\\n\\n        uint256 addedCount = 0;\\n        for (uint256 i = 0; i < length; i++) {\\n            address account = accounts[i];\\n            if (account == address(0)) continue; // Skip zero address\\n            if (needsRecalculation[account]) continue;    // Skip already marked\\n\\n            needsRecalculation[account] = true;\\n            addressToIndex[account] = addressesNeedingRecalculation.length;\\n            addressesNeedingRecalculation.push(account);\\n\\n            emit AddressNeedsRecalculation(account);\\n            addedCount++;\\n        }\\n\\n        emit BatchMarkedForRecalculation(addedCount);\\n    }\\n\\n    function markRecalculationCompleteBatch(address[] calldata accounts) external onlyOwner {\\n        uint256 length = accounts.length;\\n        require(length > 0, \\\"AddressRecalculationStatus: empty array\\\");\\n\\n        uint256 completedCount = 0;\\n        for (uint256 i = 0; i < length; i++) {\\n            address account = accounts[i];\\n            if (account == address(0)) continue; // Skip zero address\\n            if (!needsRecalculation[account]) continue;   // Skip addresses not marked\\n\\n            // Get the index of the address to remove\\n            uint256 indexToRemove = addressToIndex[account];\\n            uint256 lastIndex = addressesNeedingRecalculation.length - 1;\\n\\n            if (indexToRemove != lastIndex) {\\n                // Move the last address to the index being removed\\n                address lastAddress = addressesNeedingRecalculation[lastIndex];\\n                addressesNeedingRecalculation[indexToRemove] = lastAddress;\\n                addressToIndex[lastAddress] = indexToRemove;\\n            }\\n\\n            // Remove the last element\\n            addressesNeedingRecalculation.pop();\\n            delete needsRecalculation[account];\\n            delete addressToIndex[account];\\n\\n            emit AddressRecalculationComplete(account);\\n            completedCount++;\\n        }\\n\\n        emit BatchRecalculationComplete(completedCount);\\n    }\\n\\n    // Original single-address functions maintained for backward compatibility\\n    function markAddressForRecalculation(address account) external onlyOwner {\\n        require(account != address(0), \\\"AddressRecalculationStatus: cannot mark zero address\\\");\\n        require(!needsRecalculation[account], \\\"AddressRecalculationStatus: address already marked for recalculation\\\");\\n\\n        needsRecalculation[account] = true;\\n        addressToIndex[account] = addressesNeedingRecalculation.length;\\n        addressesNeedingRecalculation.push(account);\\n\\n        emit AddressNeedsRecalculation(account);\\n    }\\n\\n    function markRecalculationComplete(address account) external onlyOwner {\\n        require(account != address(0), \\\"AddressRecalculationStatus: cannot mark zero address\\\");\\n        require(needsRecalculation[account], \\\"AddressRecalculationStatus: address not marked for recalculation\\\");\\n\\n        uint256 indexToRemove = addressToIndex[account];\\n        uint256 lastIndex = addressesNeedingRecalculation.length - 1;\\n\\n        if (indexToRemove != lastIndex) {\\n            address lastAddress = addressesNeedingRecalculation[lastIndex];\\n            addressesNeedingRecalculation[indexToRemove] = lastAddress;\\n            addressToIndex[lastAddress] = indexToRemove;\\n        }\\n\\n        addressesNeedingRecalculation.pop();\\n        delete needsRecalculation[account];\\n        delete addressToIndex[account];\\n\\n        emit AddressRecalculationComplete(account);\\n    }\\n\\n    // View functions\\n    function needsRecalculationCheck(address account) external view returns (bool) {\\n        return needsRecalculation[account];\\n    }\\n\\n    function getAllAddressesNeedingRecalculation() external view returns (address[] memory) {\\n        return addressesNeedingRecalculation;\\n    }\\n\\n    function getRecalculationCount() external view returns (uint256) {\\n        return addressesNeedingRecalculation.length;\\n    }\\n}\",\"keccak256\":\"0x5e0bdd29cfac49c6f2c7907e184af5c6ea92022b76752569fd3e0e0a1a583698\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50600080546001600160a01b03191633179055610cee806100326000396000f3fe608060405234801561001057600080fd5b50600436106100835760003560e01c8063019c245b146100885780634b12f0851461009d5780637b39feda146100de5780638da5cb5b146100f35780639524d42f1461011e578063a948c38b14610131578063da066b1514610144578063f2fde38b14610155578063fdbb4e9014610168575b600080fd5b61009b6100963660046109e5565b61017b565b005b6100c96100ab3660046109e5565b6001600160a01b031660009081526001602052604090205460ff1690565b60405190151581526020015b60405180910390f35b6100e661037f565b6040516100d59190610a15565b600054610106906001600160a01b031681565b6040516001600160a01b0390911681526020016100d5565b61009b61012c3660046109e5565b6103e1565b61009b61013f366004610a62565b61052e565b6002546040519081526020016100d5565b61009b6101633660046109e5565b61076d565b61009b610176366004610a62565b61086a565b6000546001600160a01b031633146101ae5760405162461bcd60e51b81526004016101a590610ad6565b60405180910390fd5b6001600160a01b0381166101d45760405162461bcd60e51b81526004016101a590610b29565b6001600160a01b03811660009081526001602052604090205460ff16610252576040805162461bcd60e51b8152602060048201526024810191909152600080516020610c9983398151915260448201527f657373206e6f74206d61726b656420666f7220726563616c63756c6174696f6e60648201526084016101a5565b6001600160a01b03811660009081526003602052604081205460025490919061027d90600190610b93565b90508082146103055760006002828154811061029b5761029b610bac565b600091825260209091200154600280546001600160a01b0390921692508291859081106102ca576102ca610bac565b600091825260208083209190910180546001600160a01b0319166001600160a01b039485161790559290911681526003909152604090208290555b600280548061031657610316610bc2565b60008281526020808220830160001990810180546001600160a01b03191690559092019092556001600160a01b038516808352600182526040808420805460ff19169055600390925281832083905590519091600080516020610c7983398151915291a2505050565b606060028054806020026020016040519081016040528092919081815260200182805480156103d757602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116103b9575b5050505050905090565b6000546001600160a01b0316331461040b5760405162461bcd60e51b81526004016101a590610ad6565b6001600160a01b0381166104315760405162461bcd60e51b81526004016101a590610b29565b6001600160a01b03811660009081526001602052604090205460ff16156104bc5760405162461bcd60e51b815260206004820152604460248201819052600080516020610c99833981519152908201527f65737320616c7265616479206d61726b656420666f7220726563616c63756c616064820152633a34b7b760e11b608482015260a4016101a5565b6001600160a01b0381166000818152600160208181526040808420805460ff1916841790556002805460039093528185208390559282018355918352600080516020610c398339815191520180546001600160a01b0319168417905551600080516020610c598339815191529190a250565b6000546001600160a01b031633146105585760405162461bcd60e51b81526004016101a590610ad6565b80806105765760405162461bcd60e51b81526004016101a590610bd8565b6000805b8281101561073257600085858381811061059657610596610bac565b90506020020160208101906105ab91906109e5565b90506001600160a01b0381166105c15750610720565b6001600160a01b03811660009081526001602052604090205460ff166105e75750610720565b6001600160a01b03811660009081526003602052604081205460025490919061061290600190610b93565b905080821461069a5760006002828154811061063057610630610bac565b600091825260209091200154600280546001600160a01b03909216925082918590811061065f5761065f610bac565b600091825260208083209190910180546001600160a01b0319166001600160a01b039485161790559290911681526003909152604090208290555b60028054806106ab576106ab610bc2565b60008281526020808220830160001990810180546001600160a01b03191690559092019092556001600160a01b038516808352600182526040808420805460ff19169055600390925281832083905590519091600080516020610c7983398151915291a28461071981610c1f565b9550505050505b8061072a81610c1f565b91505061057a565b506040518181527f83c3945091c8e950f44f504e3f441b9510b5c515e515977497d8e8f7ac0779ec906020015b60405180910390a150505050565b6000546001600160a01b031633146107975760405162461bcd60e51b81526004016101a590610ad6565b6001600160a01b03811661080f5760405162461bcd60e51b815260206004820152603960248201527f41646472657373526563616c63756c6174696f6e5374617475733a206e6577206044820152786f776e657220697320746865207a65726f206164647265737360381b60648201526084016101a5565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b6000546001600160a01b031633146108945760405162461bcd60e51b81526004016101a590610ad6565b80806108b25760405162461bcd60e51b81526004016101a590610bd8565b6000805b828110156109b45760008585838181106108d2576108d2610bac565b90506020020160208101906108e791906109e5565b90506001600160a01b0381166108fd57506109a2565b6001600160a01b03811660009081526001602052604090205460ff161561092457506109a2565b6001600160a01b0381166000818152600160208181526040808420805460ff1916841790556002805460039093528185208390559282018355918352600080516020610c398339815191520180546001600160a01b0319168417905551600080516020610c598339815191529190a28261099d81610c1f565b935050505b806109ac81610c1f565b9150506108b6565b506040518181527f9be436aa6ac69cf3400a71837dff451ec3cf77c5fd33bd35a75947f08dd751d39060200161075f565b6000602082840312156109f757600080fd5b81356001600160a01b0381168114610a0e57600080fd5b9392505050565b6020808252825182820181905260009190848201906040850190845b81811015610a565783516001600160a01b031683529284019291840191600101610a31565b50909695505050505050565b60008060208385031215610a7557600080fd5b82356001600160401b0380821115610a8c57600080fd5b818501915085601f830112610aa057600080fd5b813581811115610aaf57600080fd5b8660208260051b8501011115610ac457600080fd5b60209290920196919550909350505050565b60208082526033908201527f41646472657373526563616c63756c6174696f6e5374617475733a2063616c6c60408201527232b91034b9903737ba103a34329037bbb732b960691b606082015260800190565b60208082526034908201527f41646472657373526563616c63756c6174696f6e5374617475733a2063616e6e6040820152736f74206d61726b207a65726f206164647265737360601b606082015260800190565b634e487b7160e01b600052601160045260246000fd5b81810381811115610ba657610ba6610b7d565b92915050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fd5b60208082526027908201527f41646472657373526563616c63756c6174696f6e5374617475733a20656d70746040820152667920617272617960c81b606082015260800190565b600060018201610c3157610c31610b7d565b506001019056fe405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace2db8702b6a2ee316e63813e508e1a1cad1aeaa8ec311db1303d80f4ec5482d99adc2f0ff652814c659e2895a81140ae0f043db1cd709c91a0cd6da861718633541646472657373526563616c63756c6174696f6e5374617475733a2061646472a264697066735822122080b2c608bb13ef5252802474e88e11a7485f0ccd74fd140d710547b221a98ec564736f6c63430008110033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100835760003560e01c8063019c245b146100885780634b12f0851461009d5780637b39feda146100de5780638da5cb5b146100f35780639524d42f1461011e578063a948c38b14610131578063da066b1514610144578063f2fde38b14610155578063fdbb4e9014610168575b600080fd5b61009b6100963660046109e5565b61017b565b005b6100c96100ab3660046109e5565b6001600160a01b031660009081526001602052604090205460ff1690565b60405190151581526020015b60405180910390f35b6100e661037f565b6040516100d59190610a15565b600054610106906001600160a01b031681565b6040516001600160a01b0390911681526020016100d5565b61009b61012c3660046109e5565b6103e1565b61009b61013f366004610a62565b61052e565b6002546040519081526020016100d5565b61009b6101633660046109e5565b61076d565b61009b610176366004610a62565b61086a565b6000546001600160a01b031633146101ae5760405162461bcd60e51b81526004016101a590610ad6565b60405180910390fd5b6001600160a01b0381166101d45760405162461bcd60e51b81526004016101a590610b29565b6001600160a01b03811660009081526001602052604090205460ff16610252576040805162461bcd60e51b8152602060048201526024810191909152600080516020610c9983398151915260448201527f657373206e6f74206d61726b656420666f7220726563616c63756c6174696f6e60648201526084016101a5565b6001600160a01b03811660009081526003602052604081205460025490919061027d90600190610b93565b90508082146103055760006002828154811061029b5761029b610bac565b600091825260209091200154600280546001600160a01b0390921692508291859081106102ca576102ca610bac565b600091825260208083209190910180546001600160a01b0319166001600160a01b039485161790559290911681526003909152604090208290555b600280548061031657610316610bc2565b60008281526020808220830160001990810180546001600160a01b03191690559092019092556001600160a01b038516808352600182526040808420805460ff19169055600390925281832083905590519091600080516020610c7983398151915291a2505050565b606060028054806020026020016040519081016040528092919081815260200182805480156103d757602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116103b9575b5050505050905090565b6000546001600160a01b0316331461040b5760405162461bcd60e51b81526004016101a590610ad6565b6001600160a01b0381166104315760405162461bcd60e51b81526004016101a590610b29565b6001600160a01b03811660009081526001602052604090205460ff16156104bc5760405162461bcd60e51b815260206004820152604460248201819052600080516020610c99833981519152908201527f65737320616c7265616479206d61726b656420666f7220726563616c63756c616064820152633a34b7b760e11b608482015260a4016101a5565b6001600160a01b0381166000818152600160208181526040808420805460ff1916841790556002805460039093528185208390559282018355918352600080516020610c398339815191520180546001600160a01b0319168417905551600080516020610c598339815191529190a250565b6000546001600160a01b031633146105585760405162461bcd60e51b81526004016101a590610ad6565b80806105765760405162461bcd60e51b81526004016101a590610bd8565b6000805b8281101561073257600085858381811061059657610596610bac565b90506020020160208101906105ab91906109e5565b90506001600160a01b0381166105c15750610720565b6001600160a01b03811660009081526001602052604090205460ff166105e75750610720565b6001600160a01b03811660009081526003602052604081205460025490919061061290600190610b93565b905080821461069a5760006002828154811061063057610630610bac565b600091825260209091200154600280546001600160a01b03909216925082918590811061065f5761065f610bac565b600091825260208083209190910180546001600160a01b0319166001600160a01b039485161790559290911681526003909152604090208290555b60028054806106ab576106ab610bc2565b60008281526020808220830160001990810180546001600160a01b03191690559092019092556001600160a01b038516808352600182526040808420805460ff19169055600390925281832083905590519091600080516020610c7983398151915291a28461071981610c1f565b9550505050505b8061072a81610c1f565b91505061057a565b506040518181527f83c3945091c8e950f44f504e3f441b9510b5c515e515977497d8e8f7ac0779ec906020015b60405180910390a150505050565b6000546001600160a01b031633146107975760405162461bcd60e51b81526004016101a590610ad6565b6001600160a01b03811661080f5760405162461bcd60e51b815260206004820152603960248201527f41646472657373526563616c63756c6174696f6e5374617475733a206e6577206044820152786f776e657220697320746865207a65726f206164647265737360381b60648201526084016101a5565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b6000546001600160a01b031633146108945760405162461bcd60e51b81526004016101a590610ad6565b80806108b25760405162461bcd60e51b81526004016101a590610bd8565b6000805b828110156109b45760008585838181106108d2576108d2610bac565b90506020020160208101906108e791906109e5565b90506001600160a01b0381166108fd57506109a2565b6001600160a01b03811660009081526001602052604090205460ff161561092457506109a2565b6001600160a01b0381166000818152600160208181526040808420805460ff1916841790556002805460039093528185208390559282018355918352600080516020610c398339815191520180546001600160a01b0319168417905551600080516020610c598339815191529190a28261099d81610c1f565b935050505b806109ac81610c1f565b9150506108b6565b506040518181527f9be436aa6ac69cf3400a71837dff451ec3cf77c5fd33bd35a75947f08dd751d39060200161075f565b6000602082840312156109f757600080fd5b81356001600160a01b0381168114610a0e57600080fd5b9392505050565b6020808252825182820181905260009190848201906040850190845b81811015610a565783516001600160a01b031683529284019291840191600101610a31565b50909695505050505050565b60008060208385031215610a7557600080fd5b82356001600160401b0380821115610a8c57600080fd5b818501915085601f830112610aa057600080fd5b813581811115610aaf57600080fd5b8660208260051b8501011115610ac457600080fd5b60209290920196919550909350505050565b60208082526033908201527f41646472657373526563616c63756c6174696f6e5374617475733a2063616c6c60408201527232b91034b9903737ba103a34329037bbb732b960691b606082015260800190565b60208082526034908201527f41646472657373526563616c63756c6174696f6e5374617475733a2063616e6e6040820152736f74206d61726b207a65726f206164647265737360601b606082015260800190565b634e487b7160e01b600052601160045260246000fd5b81810381811115610ba657610ba6610b7d565b92915050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fd5b60208082526027908201527f41646472657373526563616c63756c6174696f6e5374617475733a20656d70746040820152667920617272617960c81b606082015260800190565b600060018201610c3157610c31610b7d565b506001019056fe405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace2db8702b6a2ee316e63813e508e1a1cad1aeaa8ec311db1303d80f4ec5482d99adc2f0ff652814c659e2895a81140ae0f043db1cd709c91a0cd6da861718633541646472657373526563616c63756c6174696f6e5374617475733a2061646472a264697066735822122080b2c608bb13ef5252802474e88e11a7485f0ccd74fd140d710547b221a98ec564736f6c63430008110033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2849,
+        "contract": "contracts/AddressRecalculationStatus.sol:AddressRecalculationStatus",
+        "label": "owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 2853,
+        "contract": "contracts/AddressRecalculationStatus.sol:AddressRecalculationStatus",
+        "label": "needsRecalculation",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_bool)"
+      },
+      {
+        "astId": 2856,
+        "contract": "contracts/AddressRecalculationStatus.sol:AddressRecalculationStatus",
+        "label": "addressesNeedingRecalculation",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_array(t_address)dyn_storage"
+      },
+      {
+        "astId": 2860,
+        "contract": "contracts/AddressRecalculationStatus.sol:AddressRecalculationStatus",
+        "label": "addressToIndex",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_address)dyn_storage": {
+        "base": "t_address",
+        "encoding": "dynamic_array",
+        "label": "address[]",
+        "numberOfBytes": "32"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
