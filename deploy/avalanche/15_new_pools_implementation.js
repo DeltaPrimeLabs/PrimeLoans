@@ -7,20 +7,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    embedCommitHash('Pool', './contracts');
-
-    embedCommitHash('EthPool', './contracts/deployment/avalanche');
-    embedCommitHash('BtcPool', './contracts/deployment/avalanche');
-    embedCommitHash('UsdcPool', './contracts/deployment/avalanche');
-    embedCommitHash('UsdtPool', './contracts/deployment/avalanche');
-    embedCommitHash('WavaxPool', './contracts/deployment/avalanche');
+    // embedCommitHash('Pool', './contracts');
+    //
+    // embedCommitHash('EthPool', './contracts/deployment/avalanche');
+    // embedCommitHash('BtcPool', './contracts/deployment/avalanche');
+    // embedCommitHash('UsdcPool', './contracts/deployment/avalanche');
+    // embedCommitHash('UsdtPool', './contracts/deployment/avalanche');
+    // embedCommitHash('WavaxPool', './contracts/deployment/avalanche');
 
     let pools = {}
 
     let ethPool = await deploy("EthPool", {
         contract: "contracts/deployment/avalanche/EthPool.sol:EthPool",
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -41,7 +40,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let btcPool = await deploy("BtcPool", {
         contract: "contracts/deployment/avalanche/BtcPool.sol:BtcPool",
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -62,7 +60,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let usdcPool = await deploy("UsdcPool", {
         contract: "contracts/deployment/avalanche/UsdcPool.sol:UsdcPool",
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -83,7 +80,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let usdtPool = await deploy("UsdtPool", {
         contract: "contracts/deployment/avalanche/UsdtPool.sol:UsdtPool",
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -104,7 +100,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let wavaxPool = await deploy("WavaxPool", {
         contract: "contracts/deployment/avalanche/WavaxPool.sol:WavaxPool",
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 

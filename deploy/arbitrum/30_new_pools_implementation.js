@@ -7,12 +7,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    embedCommitHash('Pool', './contracts');
-
-    embedCommitHash('WethPool', './contracts/deployment/arbitrum');
-    embedCommitHash('BtcPool', './contracts/deployment/arbitrum');
-    embedCommitHash('UsdcPool', './contracts/deployment/arbitrum');
-    embedCommitHash('ArbPool', './contracts/deployment/arbitrum');
+    // embedCommitHash('Pool', './contracts');
+    //
+    // embedCommitHash('WethPool', './contracts/deployment/arbitrum');
+    // embedCommitHash('BtcPool', './contracts/deployment/arbitrum');
+    // embedCommitHash('UsdcPool', './contracts/deployment/arbitrum');
+    // embedCommitHash('ArbPool', './contracts/deployment/arbitrum');
+    // embedCommitHash('DaiPool', './contracts/deployment/arbitrum');
 
     let pools = {}
 
@@ -89,6 +90,24 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         {
             address: arbPool.address,
             contract: `contracts/deployment/arbitrum/ArbPool.sol:ArbPool`,
+            constructorArguments: []
+        });
+    console.log(`Verified ArbPool`);
+
+    let daiPool = await deploy("DaiPool", {
+        contract: "contracts/deployment/arbitrum/DaiPool.sol:DaiPool",
+        from: deployer,
+        gasLimit: 100000000,
+        args: [],
+    });
+
+    pools["DAI"] = daiPool.address;
+    console.log(`Deployed DaiPool at address: ${daiPool.address}`);
+
+    await verifyContract(hre,
+        {
+            address: daiPool.address,
+            contract: `contracts/deployment/arbitrum/DaiPool.sol:DaiPool`,
             constructorArguments: []
         });
     console.log(`Verified ArbPool`);
