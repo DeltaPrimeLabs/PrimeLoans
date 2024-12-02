@@ -3,7 +3,6 @@
 pragma solidity 0.8.17;
 
 import "../../Pool.sol";
-import "../../AddressRecalculationStatus.sol";
 
 
 /**
@@ -11,8 +10,6 @@ import "../../AddressRecalculationStatus.sol";
  * @dev Contract allowing user to deposit to and borrow WETH.e from a dedicated user account
  */
 contract EthPool is Pool {
-    AddressRecalculationStatus public constant RECALCULATION_STATUS = AddressRecalculationStatus(0x3a77375988667fB4EA5d7AeD0696f606741F5e84); // Replace with actual deployment address
-
     function getMaxPoolUtilisationForBorrowing() override public view returns (uint256) {
         return 0.925e18;
     }

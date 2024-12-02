@@ -11,7 +11,7 @@ import "../../AddressRecalculationStatus.sol";
  * @dev Contract allowing user to deposit to and borrow WAVAX from a dedicated user account
  */
 contract WavaxPool is WrappedNativeTokenPool {
-    AddressRecalculationStatus public constant RECALCULATION_STATUS = AddressRecalculationStatus(0x3a77375988667fB4EA5d7AeD0696f606741F5e84); // Replace with actual deployment address
+    AddressRecalculationStatus public constant RECALCULATION_STATUS = AddressRecalculationStatus(0x57f2a8fb67C818347eAC8B3C4efd4298913263aB); // Replace with actual deployment address
 
     // Returns max. acceptable pool utilisation after borrow action
     function getMaxPoolUtilisationForBorrowing() override public view returns (uint256) {

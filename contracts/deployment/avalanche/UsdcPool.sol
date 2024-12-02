@@ -11,7 +11,7 @@ import "../../AddressRecalculationStatus.sol";
  * @dev Contract allowing user to deposit to and borrow USDC from a dedicated user account
  */
 contract UsdcPool is Pool {
-    AddressRecalculationStatus public constant RECALCULATION_STATUS = AddressRecalculationStatus(0x3a77375988667fB4EA5d7AeD0696f606741F5e84); // Replace with actual deployment address
+    AddressRecalculationStatus public constant RECALCULATION_STATUS = AddressRecalculationStatus(0x46a2CF74C6142CE7568aee5b1eFf77287781cd9D); // Replace with actual deployment address
 
     function name() public virtual override pure returns(string memory _name){
         _name = "DeltaPrimeUSDCoin";
