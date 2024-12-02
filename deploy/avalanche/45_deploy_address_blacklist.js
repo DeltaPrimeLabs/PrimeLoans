@@ -25,7 +25,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             address: AddressRecalculationStatus.address,
             contract: `contracts/AddressRecalculationStatus.sol:AddressRecalculationStatus`,
             constructorArguments: []
-        });e
+        });
     console.log(`Verified AddressRecalculationStatus`);
 
 
