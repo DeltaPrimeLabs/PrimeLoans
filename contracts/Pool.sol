@@ -272,7 +272,7 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         }
 
         uint256 actionableAt = block.timestamp + 24 hours;
-        uint256 expiresAt = actionableAt + 24 hours;
+        uint256 expiresAt = actionableAt + 48 hours;
 
         WithdrawalIntent memory newIntent = WithdrawalIntent({
             amount: amount,
