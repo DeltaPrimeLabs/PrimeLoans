@@ -108,6 +108,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
     function addOwnedAsset(bytes32 _asset, address _address) external onlyWhitelistedLiquidators nonReentrant{
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        require(tokenManager.tokenAddressToSymbol(_address) = _asset, "Asset address/symbol mismatch");
         require(tokenManager.isTokenAssetActive(_address), "Asset not supported");
 
         DiamondStorageLib.addOwnedAsset(_asset, _address);
