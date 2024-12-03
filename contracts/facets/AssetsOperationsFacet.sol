@@ -108,7 +108,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
     function addOwnedAsset(bytes32 _asset, address _address) external onlyWhitelistedLiquidators nonReentrant{
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        require(tokenManager.tokenAddressToSymbol(_address) = _asset, "Asset address/symbol mismatch");
+        require(tokenManager.tokenAddressToSymbol(_address) == _asset, "Asset address/symbol mismatch");
         require(tokenManager.isTokenAssetActive(_address), "Asset not supported");
 
         DiamondStorageLib.addOwnedAsset(_asset, _address);
@@ -302,7 +302,6 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             require(isWhitelistedAdapterOptimized(_adapters[i]), "YakSwap: Adapter not whitelisted in router");
         }
 
-        DiamondStorageLib.DiamondStorage storage ds = DiamondStorageLib.diamondStorage();
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         Pool fromAssetPool = Pool(tokenManager.getPoolAddress(_fromAsset));
 
@@ -327,7 +326,11 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
 
         Pool(tokenManager.getPoolAddress(_toAsset)).borrow(_borrowAmount);
-        ds._lastBorrowTimestamp = block.timestamp;
+        {
+            DiamondStorageLib.DiamondStorage storage ds = DiamondStorageLib.diamondStorage();
+            ds._lastBorrowTimestamp = block.timestamp;
+        }
+
         uint256 initialRepayTokenAmount = fromToken.balanceOf(address(this));
 
         {
