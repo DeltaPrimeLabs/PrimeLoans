@@ -91,7 +91,6 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         IYieldYakRouter router = IYieldYakRouter(YY_ROUTER());
 
         // Check if all adapters are whitelisted in router
-        uint256 routerAdaptersCount = router.adaptersCount();
         for (uint256 i = 0; i < _adapters.length; i++) {
             require(isWhitelistedAdapterOptimized(_adapters[i]), "YakSwap: Adapter not whitelisted in router");
         }
