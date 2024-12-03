@@ -313,6 +313,17 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         require(address(toToken) == _path[0], "Invalid token input");
         require(address(fromToken) == _path[_path.length - 1], "Invalid token input");
 
+        // Check $value % diff - max 5%
+        {
+            bytes32[] memory symbols = new bytes32[](2);
+            symbols[0] = _fromAsset;
+            symbols[1] = _toAsset;
+            uint256[] memory prices = getPrices(symbols);
+            uint256 fromAssetValue = _repayAmount * prices[0];
+            uint256 toAssetValue = _borrowAmount * prices[1];
+            require(fromAssetValue * 105 / 100 >= toAssetValue, "Slippage too high");
+        }
+
         Pool(tokenManager.getPoolAddress(_toAsset)).borrow(_borrowAmount);
         uint256 initialRepayTokenAmount = fromToken.balanceOf(address(this));
 
