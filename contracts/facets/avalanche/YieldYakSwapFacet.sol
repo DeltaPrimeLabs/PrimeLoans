@@ -56,6 +56,32 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         });
     }
 
+    function isWhitelistedAdapterOptimized(address adapter) public virtual pure returns (bool) {
+        if (adapter == 0xDB66686Ac8bEA67400CF9E5DD6c8849575B90148) return true;  // UnilikeAdapter
+        if (adapter == 0x3614657EDc3cb90BA420E5f4F61679777e4974E3) return true;  // UnilikeAdapter
+        if (adapter == 0x3f314530a4964acCA1f20dad2D35275C23Ed7F5d) return true;  // UnilikeAdapter
+        if (adapter == 0xA05A3ebE5D0Ab59E449Fe34014f51948cb9F31dF) return true;  // VelodromeAdapter
+        if (adapter == 0xaFb5aE9934266a131F44F2A80c783d6a827A3d1a) return true;  // CurveLikeAdapter
+        if (adapter == 0x491dc06178CAF5b962DB53576a8A1456a8476232) return true;  // Curve1Adapter
+        if (adapter == 0xd0f6e66113A6D6Cca238371948F4Ce2893D62881) return true;  // CurvePlainAdapter
+        if (adapter == 0x5083fC22c18771609fA661fc6304a611613A6068) return true;  // CurvePlainAdapter
+        if (adapter == 0x77fc17D927eBcEaEA2c4704BaB1AEebB0547ea42) return true;  // Curve2Adapter
+        if (adapter == 0x22c62c9E409B97F1f9caA5Ca5433074914d73c3e) return true;  // CurvePlainAdapter
+        if (adapter == 0x3EeA1f1fFCA00c69bA5a99E362D9A7d4e3902B3c) return true;  // CurvePlainAdapter
+        if (adapter == 0x29deCcD2f4Fdb046D24585d01B1DcDFb902ACAcD) return true;  // UniswapV3Adapter
+        if (adapter == 0x6A68F261F8976559259d74A3494C19Ee2bDE0e4F) return true;  // LB2Adapter
+        if (adapter == 0xd8F5aBA3Ee8E3B27633E06b43f459f5bCE516Ab6) return true;  // LB22Adapter
+        if (adapter == 0x3B9645B2432374d9B3Fa766b95D5A793D7241190) return true;  // WoofiV2Adapter
+        if (adapter == 0x7F8B47Ff174Eaf96960a050B220a907dFa3feD5b) return true;  // GmxAdapter
+        if (adapter == 0x2F6ca0a98CF8f7D407E98993fD576f70F0FAA80B) return true;  // SAvaxAdapter
+        if (adapter == 0x5C4d23fd18Fc4128f77426F42237acFcE618D0b1) return true;  // WAvaxAdapter
+        if (adapter == 0x7De32C76309aeB1025CBA3384caBe36326603046) return true;  // ?
+        if (adapter == 0x97d26D7fc0895e3456b2146585848b466cfbb1cf) return true;  // RamsesV2Adapter
+        if (adapter == 0x79632b8194a1Ce048e5d9b0e282E9eE2d4579c20) return true;  // GGAvaxAdapter
+        if (adapter == 0x214617987145Ef7c5462870362FdCAe9cacdf3C8) return true;  // TokenMillAdapter
+        return false;
+    }
+
     function yakSwap(
         uint256 _amountIn,
         uint256 _amountOut,
@@ -67,14 +93,7 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         // Check if all adapters are whitelisted in router
         uint256 routerAdaptersCount = router.adaptersCount();
         for (uint256 i = 0; i < _adapters.length; i++) {
-            bool isWhitelisted = false;
-            for (uint256 j = 0; j < routerAdaptersCount; j++) {
-                if (_adapters[i] == router.ADAPTERS(j)) {
-                    isWhitelisted = true;
-                    break;
-                }
-            }
-            require(isWhitelisted, "YakSwap: Adapter not whitelisted in router");
+            require(isWhitelistedAdapterOptimized(_adapters[i]), "YakSwap: Adapter not whitelisted in router");
         }
 
         SwapTokensDetails memory swapTokensDetails = getInitialTokensDetails(_path[0], _path[_path.length - 1]);
