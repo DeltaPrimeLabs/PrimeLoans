@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let YieldYakFacet = await deploy("YieldYakFacet", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -20,6 +19,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     console.log(
         `YieldYakFacet implementation deployed at address: ${YieldYakFacet.address}`
     );
+
+    await new Promise(r => setTimeout(r, 10000));
 
     await verifyContract(hre,
         {

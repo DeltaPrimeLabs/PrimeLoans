@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 19d9982858f4feeff1ca98cbf31b07304a79ac7f;
+// Last deployed from commit: 47cac92e2aae18ac8937139ac1f8de17bc62f581;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -14,7 +14,6 @@ import "../../OnlyOwnerOrInsolvent.sol";
 import {DiamondStorageLib} from "../../lib/DiamondStorageLib.sol";
 import "../../interfaces/IWrappedNativeToken.sol";
 
-// TODO: Check STATUS (tokenManager) of Vault tokens before allowing to stake
 //This path is updated during deployment
 import "../../lib/local/DeploymentConstants.sol";
 
@@ -218,7 +217,7 @@ contract YieldYakFacetArbi is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
             msg.sender,
             stakingDetails.tokenSymbol,
             stakingDetails.vaultAddress,
-            depositTokenReceived,
+            depositToken.balanceOf(address(this)) - initialDepositTokenBalance,
             stakingDetails.amount,
             block.timestamp);
     }

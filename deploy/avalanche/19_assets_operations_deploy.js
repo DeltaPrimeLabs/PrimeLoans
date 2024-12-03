@@ -11,7 +11,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let AssetsOperationsAvalancheFacet = await deploy("AssetsOperationsAvalancheFacet", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -21,7 +20,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     );
 
     // sleep 5 seconds
-    await new Promise(r => setTimeout(r, 5000));
+    await new Promise(r => setTimeout(r, 20000));
 
     await verifyContract(hre,
         {
