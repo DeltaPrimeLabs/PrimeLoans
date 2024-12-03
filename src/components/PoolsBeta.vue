@@ -209,6 +209,12 @@ export default {
               if (poolAsset == 'AVAX') {
                 this.poolsList[poolIndex].miningApy = 0.0497;
               }
+              if (poolAsset == 'USDC') {
+                this.poolsList[poolIndex].miningApy = 0.069;
+              }
+              if (poolAsset == 'USDT') {
+                this.poolsList[poolIndex].miningApy = 0.0914;
+              }
             }
           );
         }
