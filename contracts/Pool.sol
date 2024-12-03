@@ -335,7 +335,11 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
 
         _accumulateDepositInterest(sender);
 
-        _deposited[sender] -= amount;
+        // verified in "require" above
+        unchecked {
+            _deposited[sender] -= amount;
+        }
+        
         _allowed[sender][msg.sender] -= amount;
 
         _accumulateDepositInterest(recipient);
