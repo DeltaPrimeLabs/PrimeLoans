@@ -16,7 +16,7 @@
         <template>
           <div class="double-value__pieces">
             <img src="src/assets/icons/warning.svg" v-if="isRecalculatedYY"
-                 v-tooltip="{content: 'The balances from Yield Yak pools are being updated. Withdrawals will be available soon.', classes: 'info-tooltip long'}">
+                 v-tooltip="{content: 'The balances from YieldYak pools are being updated. That should be finished soon.', classes: 'info-tooltip long'}">
             <LoadedValue :check="() => pool.deposit != null"
                          :value="pool.deposit | smartRound(5, false) | formatWithSpaces"></LoadedValue>
           </div>
@@ -199,7 +199,7 @@ export default {
       this.actionsConfig = [
         {
           iconSrc: 'src/assets/icons/plus.svg',
-          tooltip: this.isRecalculatedYY ? 'Available soon' : "Deposit / Bridge",
+          tooltip: 'Deposit / Bridge',
           menuOptions: [
             {
               key: 'DEPOSIT',
@@ -221,7 +221,7 @@ export default {
         },
         {
           iconSrc: 'src/assets/icons/minus.svg',
-          tooltip: this.isRecalculatedYY ? 'Available soon' : 'Withdraw',
+          tooltip: 'Withdraw',
           iconButtonActionKey: 'WITHDRAW',
           disabled: this.isActionDisabledRecord['WITHDRAW'],
         }
@@ -271,7 +271,6 @@ export default {
         this.poolContracts = poolContracts;
 
         this.setIsRecalculatedYY();
-        this.setupActionsConfiguration();
         this.$forceUpdate();
       })
     },
@@ -926,10 +925,8 @@ export default {
         "0x2bf674b122d8a5b1219466c8a1dab91adc1b637f",
         "0x66d4558facc464930f274df992af771b7b0b3c0a",
         "0xef03bcbca0b53bb23400b459ab0f0ddab31871e6",
-          "0xe4a6e69e445eb9462fb3e6cb8386c4cce0832346",
-          "0x12b26dd6a01d0de420ba2ef485e4152c9b16d603"
       ]
-      this.isRecalculatedYY = recalculatedYieldYak.indexOf(this.account.toLowerCase()) !== -1;
+      this.isRecalculatedYY = recalculatedYieldYak.indexOf(this.account) !== -1;
     }
   }
 };
