@@ -10,7 +10,7 @@
           <div class="double-value__pieces">
             <img v-if="availableToWithdraw < entry.amount"
                  src="src/assets/icons/warning.svg"
-                 v-tooltip="{content: `This witdraw will likely fail, available withdrawal amount is less than the intent`, classes: 'info-tooltip long'}">
+                 v-tooltip="{content: `This withdraw will likely fail, available withdrawal amount is less than the intent`, classes: 'info-tooltip long'}">
             {{ formatTokenBalanceWithLessThan(entry.amount, 8) }}
           </div>
           <div class="double-value__usd">{{ entry.amount * assetPrice | usd }}</div>
