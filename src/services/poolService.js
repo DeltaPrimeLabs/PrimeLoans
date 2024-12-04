@@ -54,7 +54,7 @@ export default class PoolService {
             totalBorrowed: isPoolDisabled ? 0 : totalBorrowed,
             interest: isPoolDisabled ? 0 : deposit * apy / 365,
             maxUtilisation: isPoolDisabled ? '0' : fromWei(poolDetails[5]),
-            availableToWithdraw: tvl * fromWei(poolDetails[5]) - totalBorrowed,
+            availableToWithdraw: tvl - totalBorrowed,
             utilisation: isPoolDisabled ? 0 : totalBorrowed / tvl,
             disabled: config.POOLS_CONFIG[poolAsset].disabled,
             poolsUnlocking: config.poolsUnlocking,
