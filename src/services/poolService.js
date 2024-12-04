@@ -1,4 +1,4 @@
-import {combineLatest, map, Subject} from 'rxjs';
+import {BehaviorSubject, combineLatest, map, Subject} from 'rxjs';
 import config from '../config';
 import POOL from '@artifacts/contracts/WrappedNativeTokenPool.sol/WrappedNativeTokenPool.json';
 import {formatUnits, fromWei, parseUnits} from '@/utils/calculate';
@@ -8,7 +8,7 @@ import redstone from 'redstone-api';
 const ethers = require('ethers');
 
 export default class PoolService {
-  pools$ = new Subject();
+  pools$ = new BehaviorSubject([]);
   pools = [];
 
   emitPools(pools) {
@@ -54,6 +54,7 @@ export default class PoolService {
             totalBorrowed: isPoolDisabled ? 0 : totalBorrowed,
             interest: isPoolDisabled ? 0 : deposit * apy / 365,
             maxUtilisation: isPoolDisabled ? '0' : fromWei(poolDetails[5]),
+            availableToWithdraw: tvl * fromWei(poolDetails[5]) - totalBorrowed,
             utilisation: isPoolDisabled ? 0 : totalBorrowed / tvl,
             disabled: config.POOLS_CONFIG[poolAsset].disabled,
             poolsUnlocking: config.poolsUnlocking,
