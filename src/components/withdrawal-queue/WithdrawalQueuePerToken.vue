@@ -11,8 +11,8 @@
         </div>
         <div class="summary">
           <div class="summary__label">Total:</div>
-          <div class="summary__value">{{ getTotalToken() | smartRound(5, true) }} {{ assetSymbol }}</div>
-          <div class="summary__additional-info">{{ getTotalToken() * assetPrice | usd }}</div>
+          <div class="summary__value">{{ getTotalToken() | smartRound(5, true)}} {{ assetSymbol }}</div>
+          <div class="summary__additional-info">{{ getTotalToken() * assetPrice | usd}}</div>
           <div class="summary__divider"></div>
           <div class="summary__label">Pending:</div>
           <div class="summary__value">{{ getPendingCount() }}</div>
@@ -27,8 +27,7 @@
       <div class="body" :style="{height: currentTableHeight}">
         <div class="table-header">
           <div class="checkbox">
-            <Checkbox ref="allCheckbox" :disabled="selectAllDisabled"
-                      v-on:checkboxChange="allSelectionChanged"></Checkbox>
+            <Checkbox ref="allCheckbox" :disabled="selectAllDisabled" v-on:checkboxChange="allSelectionChanged"></Checkbox>
           </div>
           <div class="amount">Amount</div>
           <div>Status</div>
@@ -48,7 +47,6 @@
               :entry="entry"
               :asset-price="assetPrice"
               :index="index"
-              :available-to-withdraw="availableToWithdraw"
             ></WithdrawalQueuePerTokenRow>
           </div>
         </div>
@@ -59,11 +57,11 @@
 
 <script>
 import config from '../../config';
-import DeltaIcon from '../DeltaIcon.vue';
-import Checkbox from '../Checkbox.vue';
-import WithdrawalQueuePerTokenRow from './WithdrawalQueuePerTokenRow.vue';
-import FlatButton from '../FlatButton.vue';
-import {mapState} from 'vuex';
+import DeltaIcon from "../DeltaIcon.vue";
+import Checkbox from "../Checkbox.vue";
+import WithdrawalQueuePerTokenRow from "./WithdrawalQueuePerTokenRow.vue";
+import FlatButton from "../FlatButton.vue";
+import { mapState } from "vuex";
 
 export default {
   name: 'WithdrawalQueuePerToken',
@@ -94,21 +92,13 @@ export default {
       },
       assetPrice: 0,
       selectedIds: [],
-      availableToWithdraw: 0,
     };
   },
 
   mounted() {
     this.priceService.observePrices().subscribe(prices => {
       this.assetPrice = prices[this.assetSymbol];
-    });
-    setTimeout(() => {
-      this.poolService.observePools().subscribe(pools => {
-        const pool = pools.find(pool => pool.asset.symbol === this.assetSymbol);
-        this.availableToWithdraw = pool.availableToWithdraw;
-        this.$forceUpdate();
-      })
-    }, 100);
+    })
   },
 
   computed: {
@@ -144,7 +134,7 @@ export default {
         this.selectedRows.splice(this.selectedRows.findIndex(idx => idx === index), 1)
       }
       this.$refs.allCheckbox.changeValueWithoutEvent(
-        this.selectedRows.length === this.entries.length - this.getPendingCount()
+          this.selectedRows.length === this.entries.length - this.getPendingCount()
       )
 
       this.selectedIds = [];
