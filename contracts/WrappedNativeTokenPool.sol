@@ -6,19 +6,18 @@ import "./Pool.sol";
 import "./interfaces/IWrappedNativeToken.sol";
 
 /**
- * @title Pool
- * @dev Contract allowing user to deposit to and borrow from a single pot
+ * @title WrappedNativeTokenPool
+ * @dev Contract allowing users to deposit and withdraw native tokens with wrapping functionality.
  * Depositors are rewarded with the interest rates collected from borrowers.
- * Rates are compounded every second and getters always return the current deposit and borrowing balance.
- * The interest rates calculation is delegated to the external calculator contract.
+ * The interest rates calculation is delegated to an external calculator contract.
  */
 contract WrappedNativeTokenPool is Pool {
     using TransferHelper for address payable;
     using TransferHelper for address;
 
     /**
-     * Wraps and deposits amount attached to the transaction
-     **/
+     * @notice Wraps and deposits the amount of native token attached to the transaction.
+     */
     function depositNativeToken() public payable virtual {
         if(msg.value == 0) revert ZeroDepositAmount();
 
@@ -44,36 +43,53 @@ contract WrappedNativeTokenPool is Pool {
     }
 
     /**
-     * Unwraps and withdraws selected amount from the user deposits
-     * @dev _amount the amount to be withdrawn
-     **/
-    function withdrawNativeToken(uint256 _amount) external nonReentrant {
-        if(_amount > IERC20(tokenAddress).balanceOf(address(this))) revert InsufficientPoolFunds();
+     * @notice Unwraps and withdraws the specified amount from the user's deposits, enforcing withdrawal intents.
+     * @param _amount The amount to be withdrawn.
+     * @param intentIndices array of intent indices to be used for withdrawal
+     */
+    function withdrawNativeToken(uint256 _amount, uint256[] calldata intentIndices) external nonReentrant {
+        WithdrawalIntent[] storage intents = withdrawalIntents[msg.sender];
+
+        // Validate intents and get final withdrawal amount
+        uint256 finalAmount = validateWithdrawalIntents(intents, intentIndices, _amount);
+
+        require(isWithdrawalAmountAvailable(msg.sender, finalAmount, finalAmount), "Balance is locked");
+
+        // Remove intents from highest to lowest index to maintain array integrity
+        for(uint256 i = intentIndices.length; i > 0; i--) {
+            uint256 indexToRemove = intentIndices[i - 1];
+            uint256 lastIndex = intents.length - 1;
+            if (indexToRemove != lastIndex) {
+                intents[indexToRemove] = intents[lastIndex];
+            }
+            intents.pop();
+        }
 
         _accumulateDepositInterest(msg.sender);
 
-        if(_amount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
-        // verified in "require" above
-        unchecked {
-            _deposited[address(this)] -= _amount;
-        }
-        _burn(msg.sender, _amount);
+        if (finalAmount > IERC20(tokenAddress).balanceOf(address(this)))
+            revert InsufficientPoolFunds();
+        if (finalAmount > _deposited[address(this)]) revert BurnAmountExceedsBalance();
+
+        _deposited[address(this)] -= finalAmount;
+        _burn(msg.sender, finalAmount);
 
         _updateRates();
 
-        IWrappedNativeToken(tokenAddress).withdraw(_amount);
-        payable(msg.sender).safeTransferETH(_amount);
-
         if (address(poolRewarder) != address(0)) {
-            poolRewarder.withdrawFor(_amount, msg.sender);
+            poolRewarder.withdrawFor(finalAmount, msg.sender);
         }
 
         notifyVPrimeController(msg.sender);
 
-        emit Withdrawal(msg.sender, _amount, block.timestamp);
+        // Unwrap and transfer native tokens last
+        IWrappedNativeToken(tokenAddress).withdraw(finalAmount);
+        payable(msg.sender).safeTransferETH(finalAmount);
+
+        emit Withdrawal(msg.sender, finalAmount, block.timestamp);
     }
 
-    /* ========== RECEIVE AVAX FUNCTION ========== */
-    //needed for withdrawNativeToken
+    /* ========== RECEIVE NATIVE TOKEN FUNCTION ========== */
+    // Needed for withdrawNativeToken
     receive() external payable {}
 }
