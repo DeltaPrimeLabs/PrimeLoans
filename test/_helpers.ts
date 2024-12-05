@@ -555,16 +555,19 @@ export const deployPools = async function(
     tokenManager: string = ''
 ) {
     for (const token of tokens) {
+        console.log('x1')
         let {
             poolContract,
             tokenContract
         } = await deployAndInitializeLendingPool(owner, token.name, smartLoansFactory.address, token.airdropList, chain, '', tokenManager);
+        console.log('x2')
         for (const user of token.airdropList) {
             if (token.name == 'AVAX' || token.name == 'MCKUSD') {
                 await tokenContract!.connect(user).approve(poolContract.address, toWei(depositAmount.toString()));
                 await (WrapperBuilder.wrap(poolContract.connect(user)).usingSimpleNumericMock(mockPrices)).deposit(toWei(depositAmount.toString()));
             }
         }
+        console.log('x3')
         lendingPools.push(new PoolAsset(toBytes32(token.name), poolContract.address));
         tokenContracts.set(token.name, tokenContract);
         poolContracts.set(token.name, poolContract);
@@ -682,17 +685,22 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         ],
         hardhatConfig
     )
-    console.log(2)
 
     await deployFacet(
-        "AssetsExposureController",
+        "WithdrawalIntentFacet",
         diamondAddress,
         [
-            'resetPrimeAccountAssetsExposure',
-            'setPrimeAccountAssetsExposure',
+            'createWithdrawalIntent',
+            'executeWithdrawalIntent',
+            'cancelWithdrawalIntent',
+            'clearExpiredIntents',
+            'getUserIntents',
+            'getTotalIntentAmount',
+            'getAvailableBalance'
         ],
         hardhatConfig
     )
+
 
     if (mock) {
         await deployFacet("HealthMeterFacetMock", diamondAddress, ['getHealthMeter'], hardhatConfig);
@@ -872,38 +880,38 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         ],
         hardhatConfig);
 
-        await deployFacet("WombatFacet", diamondAddress, [
-            'depositSavaxToAvaxSavax',
-            'withdrawSavaxFromAvaxSavax',
-            'sAvaxBalanceAvaxSavax',
-            'depositGgavaxToAvaxGgavax',
-            'withdrawGgavaxFromAvaxGgavax',
-            'ggAvaxBalanceAvaxGgavax',
-            'depositAvaxToAvaxSavax',
-            'withdrawAvaxFromAvaxSavax',
-            'avaxBalanceAvaxSavax',
-            'depositAvaxToAvaxGgavax',
-            'withdrawAvaxFromAvaxGgavax',
-            'avaxBalanceAvaxGgavax',
-            'withdrawSavaxFromAvaxSavaxInOtherToken',
-            'withdrawGgavaxFromAvaxGgavaxInOtherToken',
-            'withdrawAvaxFromAvaxSavaxInOtherToken',
-            'withdrawAvaxFromAvaxGgavaxInOtherToken',
-            'depositAndStakeAvaxSavaxLpSavax',
-            'unstakeAndWithdrawAvaxSavaxLpSavax',
-            'depositAndStakeAvaxSavaxLpAvax',
-            'unstakeAndWithdrawAvaxSavaxLpAvax',
-            'depositAvaxGgavaxLpGgavax',
-            'unstakeAndWithdrawAvaxGgavaxLpGgavax',
-            'depositAndStakeAvaxGgavaxLpAvax',
-            'unstakeAndWithdrawAvaxGgavaxLpAvax',
-            'claimAllWombatRewards',
-            'pendingRewardsForAvaxSavaxLpSavax',
-            'pendingRewardsForAvaxSavaxLpAvax',
-            'pendingRewardsForAvaxGgavaxLpGgavax',
-            'pendingRewardsForAvaxGgavaxLpAvax',
-        ],
-        hardhatConfig);
+        // await deployFacet("WombatFacet", diamondAddress, [
+        //     'depositSavaxToAvaxSavax',
+        //     'withdrawSavaxFromAvaxSavax',
+        //     'sAvaxBalanceAvaxSavax',
+        //     'depositGgavaxToAvaxGgavax',
+        //     'withdrawGgavaxFromAvaxGgavax',
+        //     'ggAvaxBalanceAvaxGgavax',
+        //     'depositAvaxToAvaxSavax',
+        //     'withdrawAvaxFromAvaxSavax',
+        //     'avaxBalanceAvaxSavax',
+        //     'depositAvaxToAvaxGgavax',
+        //     'withdrawAvaxFromAvaxGgavax',
+        //     'avaxBalanceAvaxGgavax',
+        //     'withdrawSavaxFromAvaxSavaxInOtherToken',
+        //     'withdrawGgavaxFromAvaxGgavaxInOtherToken',
+        //     'withdrawAvaxFromAvaxSavaxInOtherToken',
+        //     'withdrawAvaxFromAvaxGgavaxInOtherToken',
+        //     'depositAndStakeAvaxSavaxLpSavax',
+        //     'unstakeAndWithdrawAvaxSavaxLpSavax',
+        //     'depositAndStakeAvaxSavaxLpAvax',
+        //     'unstakeAndWithdrawAvaxSavaxLpAvax',
+        //     'depositAvaxGgavaxLpGgavax',
+        //     'unstakeAndWithdrawAvaxGgavaxLpGgavax',
+        //     'depositAndStakeAvaxGgavaxLpAvax',
+        //     'unstakeAndWithdrawAvaxGgavaxLpAvax',
+        //     'claimAllWombatRewards',
+        //     'pendingRewardsForAvaxSavaxLpSavax',
+        //     'pendingRewardsForAvaxSavaxLpAvax',
+        //     'pendingRewardsForAvaxGgavaxLpGgavax',
+        //     'pendingRewardsForAvaxGgavaxLpAvax',
+        // ],
+        // hardhatConfig);
 
         await deployFacet("YieldYakWombatFacet", diamondAddress, [
                 'depositSavaxToAvaxSavaxYY',
@@ -930,10 +938,10 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
                 'unstakeAndWithdrawAvaxGgavaxLpGgavaxYY',
                 'depositAndStakeAvaxGgavaxLpAvaxYY',
                 'unstakeAndWithdrawAvaxGgavaxLpAvaxYY',
-                'migrateAvaxSavaxLpSavaxFromWombatToYY',
-                'migrateAvaxGgavaxLpGgavaxFromWombatToYY',
-                'migrateAvaxSavaxLpAvaxFromWombatToYY',
-                'migrateAvaxGgavaxLpAvaxFromWombatToYY',
+                // 'migrateAvaxSavaxLpSavaxFromWombatToYY',
+                // 'migrateAvaxGgavaxLpGgavaxFromWombatToYY',
+                // 'migrateAvaxSavaxLpAvaxFromWombatToYY',
+                // 'migrateAvaxGgavaxLpAvaxFromWombatToYY',
             ],
             hardhatConfig
         );
@@ -1292,7 +1300,6 @@ export async function syncTime() {
 }
 
 export async function deployAndInitializeLendingPool(owner: any, tokenName: string, smartLoansFactoryAddress: string, tokenAirdropList: any, chain = 'AVAX', rewarder: string = '', tokenManagerAddress: string = '') {
-
     const mockVariableUtilisationRatesCalculator = (await deployContract(owner, VariableUtilisationRatesCalculatorArtifact)) as MockVariableUtilisationRatesCalculator;
     let pool = (await deployContract(owner, PoolArtifact)) as Pool;
     let tokenContract: any;
@@ -1368,7 +1375,6 @@ export async function deployAndInitializeLendingPool(owner: any, tokenName: stri
     }
 
     rewarder = rewarder !== '' ? rewarder : ethers.constants.AddressZero;
-
     const depositIndex = (await deployContract(owner, LinearIndexArtifact, [])) as LinearIndex;
     await depositIndex.initialize(pool.address);
     const borrowingIndex = (await deployContract(owner, LinearIndexArtifact, [])) as LinearIndex;

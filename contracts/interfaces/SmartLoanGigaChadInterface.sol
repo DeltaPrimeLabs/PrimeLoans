@@ -33,8 +33,10 @@ import "./facets/arbitrum/IPenpieFacet.sol";
 import "./facets/arbitrum/ILTIPFacet.sol";
 import "./facets/avalanche/IWombatFacet.sol";
 import "./facets/avalanche/IYieldYakWombatFacet.sol";
+import "./facets/IWithdrawalIntentFacet.sol";
 
 interface SmartLoanGigaChadInterface is
+    IWithdrawalIntentFacet,
     IHealthMeterFacetProd,
     IGLPFacet,
     IYieldYakSwapFacet,
