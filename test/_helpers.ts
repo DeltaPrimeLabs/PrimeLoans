@@ -683,6 +683,21 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         hardhatConfig
     )
 
+    await deployFacet(
+        "WithdrawalIntentFacet",
+        diamondAddress,
+        [
+            'createWithdrawalIntent',
+            'executeWithdrawalIntent',
+            'cancelWithdrawalIntent',
+            'clearExpiredIntents',
+            'getUserIntents',
+            'getTotalIntentAmount',
+            'getAvailableBalance'
+        ],
+        hardhatConfig
+    )
+
     if (mock) {
         await deployFacet("HealthMeterFacetMock", diamondAddress, ['getHealthMeter'], hardhatConfig);
     } else {
@@ -1281,7 +1296,6 @@ export async function syncTime() {
 }
 
 export async function deployAndInitializeLendingPool(owner: any, tokenName: string, smartLoansFactoryAddress: string, tokenAirdropList: any, chain = 'AVAX', rewarder: string = '', tokenManagerAddress: string = '') {
-
     const mockVariableUtilisationRatesCalculator = (await deployContract(owner, VariableUtilisationRatesCalculatorArtifact)) as MockVariableUtilisationRatesCalculator;
     let pool = (await deployContract(owner, PoolArtifact)) as Pool;
     let tokenContract: any;
@@ -1357,7 +1371,6 @@ export async function deployAndInitializeLendingPool(owner: any, tokenName: stri
     }
 
     rewarder = rewarder !== '' ? rewarder : ethers.constants.AddressZero;
-
     const depositIndex = (await deployContract(owner, LinearIndexArtifact, [])) as LinearIndex;
     await depositIndex.initialize(pool.address);
     const borrowingIndex = (await deployContract(owner, LinearIndexArtifact, [])) as LinearIndex;

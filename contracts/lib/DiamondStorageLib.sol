@@ -23,6 +23,7 @@ library DiamondStorageLib {
     bytes32 constant OWNED_TRADERJOE_V2_BINS_POSITION = keccak256("diamond.standard.traderjoe_v2_bins_1685370112");
     //TODO: maybe we should keep here a tuple[tokenId, factory] to account for multiple Uniswap V3 deployments
     bytes32 constant OWNED_UNISWAP_V3_TOKEN_IDS_POSITION = keccak256("diamond.standard.uniswap_v3_token_ids_1685370112");
+    bytes32 constant WITHDRAWAL_INTENTS_POSITION = keccak256("diamond.standard.withdrawal.intents");
 
     struct FacetAddressAndPosition {
         address facetAddress;
@@ -79,6 +80,19 @@ library DiamondStorageLib {
         uint256 lastOwnershipTransferTimestamp;
     }
 
+    struct WithdrawalIntent {
+        uint256 amount;
+        uint256 actionableAt;
+        uint256 expiresAt;
+    }
+
+    struct WithdrawalIntentsStorage {
+        // token address => WithdrawalIntent[]
+        mapping(address => WithdrawalIntent[]) intents;
+        // token address => total pending amount
+        mapping(address => uint256) totalPendingAmount;
+    }
+
     struct TraderJoeV2Storage {
         // TJ v2 bins of the contract
         ITraderJoeV2Facet.TraderJoeV2Bin[] ownedTjV2Bins;
@@ -96,6 +110,13 @@ library DiamondStorageLib {
 
     struct ReentrancyGuardStorage {
         uint256 _status;
+    }
+
+    function withdrawalIntentsStorage() internal pure returns (WithdrawalIntentsStorage storage wis) {
+        bytes32 position = WITHDRAWAL_INTENTS_POSITION;
+        assembly {
+            wis.slot := position
+        }
     }
 
     function reentrancyGuardStorage() internal pure returns (ReentrancyGuardStorage storage rgs) {
