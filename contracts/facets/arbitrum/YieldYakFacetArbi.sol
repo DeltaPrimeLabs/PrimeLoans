@@ -165,7 +165,7 @@ contract YieldYakFacetArbi is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
       * @dev This function uses the redstone-evm-connector
       * @param stakingDetails IYieldYak.YYStakingDetails staking details
     **/
-    function _stakeTokenYY(IYieldYak.YYStakingDetails memory stakingDetails) private {
+    function _stakeTokenYY(IYieldYak.YYStakingDetails memory stakingDetails) noBorrowInTheSameBlock private {
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         IERC20Metadata yrtToken = IERC20Metadata(stakingDetails.vaultAddress);
         uint256 initialYRTBalance = yrtToken.balanceOf(address(this));
@@ -199,7 +199,7 @@ contract YieldYakFacetArbi is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
       * @dev This function uses the redstone-evm-connector
       * @param stakingDetails IYieldYak.YYStakingDetails staking details
     **/
-    function _unstakeTokenYY(IYieldYak.YYStakingDetails memory stakingDetails) private {
+    function _unstakeTokenYY(IYieldYak.YYStakingDetails memory stakingDetails) noBorrowInTheSameBlock private {
         IYieldYak vaultContract = IYieldYak(stakingDetails.vaultAddress);
         IERC20Metadata depositToken = IERC20Metadata(stakingDetails.tokenAddress);
         uint256 initialDepositTokenBalance = depositToken.balanceOf(address(this));
