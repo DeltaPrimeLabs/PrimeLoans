@@ -29,7 +29,7 @@ import YAK_ROUTER_ABI from '../../test/abis/YakRouter.json';
 import {getSwapData} from '../utils/paraSwapUtils';
 import {getBurnData} from '../utils/caiUtils';
 import {combineLatest, from, map, tap} from 'rxjs';
-import ABI_YY_WOMBAT_STRATEGY from "../abis/YYWombatStrategy.json";
+import ABI_YY_WOMBAT_STRATEGY from '../abis/YYWombatStrategy.json';
 
 const toBytes32 = require('ethers').utils.formatBytes32String;
 const fromBytes32 = require('ethers').utils.parseBytes32String;
@@ -1299,17 +1299,17 @@ export default {
 
       try {
         const rewardsInfo = lpAsset.version === '2.2'
-            ?
-            {
-              rewards: [
-                {
-                  tokenAddress: config.ASSETS_CONFIG[lpAsset.rewardToken].address,
-                  amount: await traderJoeService.getRewardsInfoV2_2(lpAsset.hooksSimpleRewarder, state.smartLoanContract.address, lpAsset.binIds, provider)
-                }
-              ]
-            }
-            :
-            await traderJoeService.getRewardsInfo(state.smartLoanContract.address, lpAsset.address);
+          ?
+          {
+            rewards: [
+              {
+                tokenAddress: config.ASSETS_CONFIG[lpAsset.rewardToken].address,
+                amount: await traderJoeService.getRewardsInfoV2_2(lpAsset.hooksSimpleRewarder, state.smartLoanContract.address, lpAsset.binIds, provider)
+              }
+            ]
+          }
+          :
+          await traderJoeService.getRewardsInfo(state.smartLoanContract.address, lpAsset.address);
 
         lpAsset.rewardsInfo = rewardsInfo;
       } catch (error) {
@@ -2939,7 +2939,7 @@ export default {
       const wrappedContract = await wrapContract(state.smartLoanContract, loanAssets);
 
       const transaction =
-          claimRewardsRequest.version === '2.2'
+        claimRewardsRequest.version === '2.2'
           ?
           await wrappedContract.claimReward(claimRewardsRequest.pair, claimRewardsRequest.ids)
           :
@@ -3522,7 +3522,10 @@ export default {
 
       let minGmAmount = parseUnits(addLiquidityRequest.minGmAmount.toFixed(targetDecimals), targetDecimals);
 
-      const transaction = await wrappedContract[addLiquidityRequest.method](sourceAmount, minGmAmount, executionFeeWei, {value: executionFeeWei, gasLimit: 9999999});
+      const transaction = await wrappedContract[addLiquidityRequest.method](sourceAmount, minGmAmount, executionFeeWei, {
+        value: executionFeeWei,
+        gasLimit: 9999999
+      });
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
       rootState.serviceRegistry.modalService.closeModal();
@@ -3580,7 +3583,10 @@ export default {
       const minShortTokenAmount = minTargetTokenAmount.div(2);
 
 
-      const transaction = await wrappedContract[removeLiquidityRequest.method](sourceAmount, minLongTokenAmount, minShortTokenAmount, executionFeeWei, {value: executionFeeWei, gasLimit: 9999999});
+      const transaction = await wrappedContract[removeLiquidityRequest.method](sourceAmount, minLongTokenAmount, minShortTokenAmount, executionFeeWei, {
+        value: executionFeeWei,
+        gasLimit: 9999999
+      });
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
       rootState.serviceRegistry.modalService.closeModal();
@@ -3857,50 +3863,62 @@ export default {
         [swapDebtRequest.targetAsset]
       ]);
 
-      const sourceDecimals = config.ASSETS_CONFIG[swapDebtRequest.sourceAsset].decimals;
-      const sourceAmount = parseUnits(parseFloat(swapDebtRequest.sourceAmount).toFixed(sourceDecimals), sourceDecimals);
-      const sourceTokenAddress = TOKEN_ADDRESSES[swapDebtRequest.sourceAsset];
+      console.log('loanAssets', loanAssets);
 
-      const targetDecimals = config.ASSETS_CONFIG[swapDebtRequest.targetAsset].decimals;
-      const targetAmount = parseUnits(parseFloat(swapDebtRequest.targetAmount).toFixed(targetDecimals), targetDecimals);
-      const targetTokenAddress = TOKEN_ADDRESSES[swapDebtRequest.targetAsset];
+      let sourceDecimals = config.ASSETS_CONFIG[swapDebtRequest.sourceAsset].decimals;
+      let sourceAmount = parseUnits(parseFloat(swapDebtRequest.sourceAmount).toFixed(sourceDecimals), sourceDecimals);
 
-      const actualSwapSourceTokenAddress = targetTokenAddress;
-      const actualSwapTargetTokenAddress = sourceTokenAddress;
-      const actualSwapSourceAmount = targetAmount;
-      const actualSwapTargetAmount = sourceAmount;
-      const actualSwapSourceDecimals = targetDecimals;
-      const actualSwapTargetDecimals = sourceDecimals;
+      let targetDecimals = config.ASSETS_CONFIG[swapDebtRequest.targetAsset].decimals;
+      let targetAmount = parseUnits(parseFloat(swapDebtRequest.targetAmount).toFixed(targetDecimals), targetDecimals);
 
-      let wrappedLoan = await wrapContract(state.smartLoanContract, loanAssets);
-      console.warn('------___-____-___--___--__---___-SWAP DATA_------___---__---__--__---__--___');
-      const paraSwapSDK = constructSimpleSDK({chainId: config.chainId, axios});
-      const swapData = await getSwapData(
-        paraSwapSDK,
-        wrappedLoan.address,
-        actualSwapSourceTokenAddress,
-        actualSwapTargetTokenAddress,
-        actualSwapSourceAmount,
-        actualSwapSourceDecimals,
-        actualSwapTargetDecimals
-      );
+      console.log('sourceDecimals', sourceDecimals);
+      console.log('sourceAmount', sourceAmount);
+      console.log('targetDecimals', targetDecimals);
+      console.log('targetAmount', targetAmount);
 
-      const transaction = await wrappedLoan.swapDebtParaSwap(
-        toBytes32(swapDebtRequest.sourceAsset),
+      console.log('toBytes32(swapDebtRequest.sourceAsset));', toBytes32(swapDebtRequest.sourceAsset));
+      console.log('toBytes32(swapDebtRequest.targetAsset));', toBytes32(swapDebtRequest.targetAsset));
+      console.log('sourceAmount);', sourceAmount);
+      console.log('targetAmount);', targetAmount);
+      console.log('swapDebtRequest.path);', swapDebtRequest.path);
+      console.log('swapDebtRequest.adapters);', swapDebtRequest.adapters);
+
+      console.log('sourceAmount);', formatUnits(sourceAmount, 18));
+      console.log('targetAmount);', formatUnits(targetAmount, 6));
+
+      // toBytes32(swapDebtRequest.sourceAsset)
+      // toBytes32(swapDebtRequest.targetAsset)
+      // sourceAmount
+      // targetAmount
+      // swapDebtRequest.path
+      // swapDebtRequest.adapters
+      const path = swapDebtRequest.path.map(token => token.toLowerCase());
+      console.log(path);
+
+      const transaction = await (await wrapContract(state.smartLoanContract, loanAssets)).swapDebt(
         toBytes32(swapDebtRequest.targetAsset),
+        toBytes32(swapDebtRequest.sourceAsset),
         sourceAmount,
         targetAmount,
-        swapData.routeData.selector,
-        swapData.routeData.data,
+        path,
+        swapDebtRequest.adapters,
+        {gasLimit: 9999999}
       );
+
+      console.log(transaction);
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
       rootState.serviceRegistry.modalService.closeModal();
 
       let tx = await awaitConfirmation(transaction, provider, 'swap');
 
+      console.log(tx);
+
       const amountDebtSwappedTo = formatUnits(getLog(tx, SMART_LOAN.abi, 'DebtSwap').args.borrowAmount, config.ASSETS_CONFIG[swapDebtRequest.targetAsset].decimals);
       const amountDebtSwappedFrom = formatUnits(getLog(tx, SMART_LOAN.abi, 'DebtSwap').args.repayAmount, config.ASSETS_CONFIG[swapDebtRequest.sourceAsset].decimals);
+
+      console.log('amountDebtSwappedTo', amountDebtSwappedTo);
+      console.log('amountDebtSwappedFrom', amountDebtSwappedFrom);
 
       const sourceDebtAfterTransaction = Number(state.debtsPerAsset[swapDebtRequest.sourceAsset].debt) - Number(amountDebtSwappedFrom);
       const targetDebtAfterTransaction = Number(state.debtsPerAsset[swapDebtRequest.targetAsset].debt) + Number(amountDebtSwappedTo);

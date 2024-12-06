@@ -3,7 +3,7 @@
     <Modal>
       <div class="modal__title">
         <span></span>
-        {{ title }}
+        {{ title }} 123 {{swapDebtMode}} {{swapDex}}
       </div>
 
       <div class="dex-toggle" v-if="!swapDebtMode && dexOptions && dexOptions.length > 1">
@@ -442,7 +442,7 @@ export default {
 
     async query(sourceAsset, targetAsset, amountIn, amountOut) {
       if (this.swapDebtMode) {
-        return await this.queryMethod(targetAsset, sourceAsset, amountIn);
+        return await this.queryMethod(targetAsset, sourceAsset, amountIn, amountOut);
       } else {
         return await this.queryMethods[this.swapDex](sourceAsset, targetAsset, amountIn);
       }
@@ -469,9 +469,11 @@ export default {
       const queryResponse =
           this.swapDebtMode
               ?
-              await this.query(this.targetAsset, this.sourceAsset, sourceAmountInWei)
+              await this.query(this.targetAsset, this.sourceAsset, sourceAmountInWei, oracleReceivedAmountInWei)
               :
               await this.query(this.sourceAsset, this.targetAsset, sourceAmountInWei);
+
+      console.log(queryResponse);
 
 
       let estimated;
@@ -486,6 +488,8 @@ export default {
           const estimatedReceivedTokens = parseFloat(formatUnits(estimated, BigNumber.from(this.targetAssetData.decimals)));
           console.log(estimatedReceivedTokens);
           this.updateSlippageWithAmounts(estimatedReceivedTokens);
+          this.path = queryResponse.path;
+          this.adapters = queryResponse.adapters;
         } else {
           console.log('queryResponse', queryResponse);
           console.log(queryResponse instanceof BigNumber);
