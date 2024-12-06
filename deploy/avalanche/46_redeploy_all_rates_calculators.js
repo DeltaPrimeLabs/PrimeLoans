@@ -7,20 +7,20 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const tokens = ['Usdc', 'Dai', 'Weth', 'Btc', 'Arb'];
+    const tokens = ['Usdc', 'Usdt', 'Wavax', 'Btc', 'Eth'];
 
     // Embed commit hash for all contracts
-    for (const token of tokens) {
-        embedCommitHash(
-            `${token}VariableUtilisationRatesCalculatorFixedRate`,
-            "./contracts/deployment/arbitrum"
-        );
-    }
+    // for (const token of tokens) {
+    //     embedCommitHash(
+    //         `${token}VariableUtilisationRatesCalculatorFixedRate`,
+    //         "./contracts/deployment/avalanche"
+    //     );
+    // }
 
     // Deploy and verify all contracts
     for (const token of tokens) {
         const contractName = `${token}VariableUtilisationRatesCalculatorFixedRate`;
-        const contractPath = `contracts/deployment/arbitrum/${contractName}.sol:${contractName}`;
+        const contractPath = `contracts/deployment/avalanche/${contractName}.sol:${contractName}`;
 
         const result = await deploy(contractName, {
             contract: contractPath,
@@ -44,4 +44,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     }
 };
 
-module.exports.tags = ["arbitrum-redeploy-rates-calculator"];
+module.exports.tags = ["avalanche-redeploy-rates-calculator"];
