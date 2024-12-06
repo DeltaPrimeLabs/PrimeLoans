@@ -282,6 +282,13 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         return false;
     }
 
+    function isWithinBounds(uint256 _estimate, uint256 _userInput) internal pure returns(bool) {
+        if(_estimate * 95 / 100 <= _userInput && _estimate * 105 / 100 >= _userInput) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Swap existing debt to another debt
     * @dev This function uses the redstone-evm-connector
@@ -320,9 +327,16 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             symbols[0] = _fromAsset;
             symbols[1] = _toAsset;
             uint256[] memory prices = getPrices(symbols);
-            uint256 fromAssetValue = _repayAmount * prices[0];
-            uint256 toAssetValue = _borrowAmount * prices[1];
-            require(fromAssetValue * 105 / 100 >= toAssetValue, "Slippage too high");
+
+            require(
+                isWithinBounds(
+                    (prices[0] * _repayAmount) /
+                    10 ** IERC20Metadata(fromToken).decimals(), // Repay amount in USD
+                    (_borrowAmount * prices[1]) /
+                    10 ** IERC20Metadata(toToken).decimals() // Borrow amount in USD
+                ),
+                "Dollar value diff too high"
+            );
         }
 
         Pool(tokenManager.getPoolAddress(_toAsset)).borrow(_borrowAmount);

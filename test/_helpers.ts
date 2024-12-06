@@ -682,17 +682,6 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         ],
         hardhatConfig
     )
-    console.log(2)
-
-    await deployFacet(
-        "AssetsExposureController",
-        diamondAddress,
-        [
-            'resetPrimeAccountAssetsExposure',
-            'setPrimeAccountAssetsExposure',
-        ],
-        hardhatConfig
-    )
 
     if (mock) {
         await deployFacet("HealthMeterFacetMock", diamondAddress, ['getHealthMeter'], hardhatConfig);
@@ -872,38 +861,38 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         ],
         hardhatConfig);
 
-        await deployFacet("WombatFacet", diamondAddress, [
-            'depositSavaxToAvaxSavax',
-            'withdrawSavaxFromAvaxSavax',
-            'sAvaxBalanceAvaxSavax',
-            'depositGgavaxToAvaxGgavax',
-            'withdrawGgavaxFromAvaxGgavax',
-            'ggAvaxBalanceAvaxGgavax',
-            'depositAvaxToAvaxSavax',
-            'withdrawAvaxFromAvaxSavax',
-            'avaxBalanceAvaxSavax',
-            'depositAvaxToAvaxGgavax',
-            'withdrawAvaxFromAvaxGgavax',
-            'avaxBalanceAvaxGgavax',
-            'withdrawSavaxFromAvaxSavaxInOtherToken',
-            'withdrawGgavaxFromAvaxGgavaxInOtherToken',
-            'withdrawAvaxFromAvaxSavaxInOtherToken',
-            'withdrawAvaxFromAvaxGgavaxInOtherToken',
-            'depositAndStakeAvaxSavaxLpSavax',
-            'unstakeAndWithdrawAvaxSavaxLpSavax',
-            'depositAndStakeAvaxSavaxLpAvax',
-            'unstakeAndWithdrawAvaxSavaxLpAvax',
-            'depositAvaxGgavaxLpGgavax',
-            'unstakeAndWithdrawAvaxGgavaxLpGgavax',
-            'depositAndStakeAvaxGgavaxLpAvax',
-            'unstakeAndWithdrawAvaxGgavaxLpAvax',
-            'claimAllWombatRewards',
-            'pendingRewardsForAvaxSavaxLpSavax',
-            'pendingRewardsForAvaxSavaxLpAvax',
-            'pendingRewardsForAvaxGgavaxLpGgavax',
-            'pendingRewardsForAvaxGgavaxLpAvax',
-        ],
-        hardhatConfig);
+        // await deployFacet("WombatFacet", diamondAddress, [
+        //     'depositSavaxToAvaxSavax',
+        //     'withdrawSavaxFromAvaxSavax',
+        //     'sAvaxBalanceAvaxSavax',
+        //     'depositGgavaxToAvaxGgavax',
+        //     'withdrawGgavaxFromAvaxGgavax',
+        //     'ggAvaxBalanceAvaxGgavax',
+        //     'depositAvaxToAvaxSavax',
+        //     'withdrawAvaxFromAvaxSavax',
+        //     'avaxBalanceAvaxSavax',
+        //     'depositAvaxToAvaxGgavax',
+        //     'withdrawAvaxFromAvaxGgavax',
+        //     'avaxBalanceAvaxGgavax',
+        //     'withdrawSavaxFromAvaxSavaxInOtherToken',
+        //     'withdrawGgavaxFromAvaxGgavaxInOtherToken',
+        //     'withdrawAvaxFromAvaxSavaxInOtherToken',
+        //     'withdrawAvaxFromAvaxGgavaxInOtherToken',
+        //     'depositAndStakeAvaxSavaxLpSavax',
+        //     'unstakeAndWithdrawAvaxSavaxLpSavax',
+        //     'depositAndStakeAvaxSavaxLpAvax',
+        //     'unstakeAndWithdrawAvaxSavaxLpAvax',
+        //     'depositAvaxGgavaxLpGgavax',
+        //     'unstakeAndWithdrawAvaxGgavaxLpGgavax',
+        //     'depositAndStakeAvaxGgavaxLpAvax',
+        //     'unstakeAndWithdrawAvaxGgavaxLpAvax',
+        //     'claimAllWombatRewards',
+        //     'pendingRewardsForAvaxSavaxLpSavax',
+        //     'pendingRewardsForAvaxSavaxLpAvax',
+        //     'pendingRewardsForAvaxGgavaxLpGgavax',
+        //     'pendingRewardsForAvaxGgavaxLpAvax',
+        // ],
+        // hardhatConfig);
 
         await deployFacet("YieldYakWombatFacet", diamondAddress, [
                 'depositSavaxToAvaxSavaxYY',
@@ -930,10 +919,10 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
                 'unstakeAndWithdrawAvaxGgavaxLpGgavaxYY',
                 'depositAndStakeAvaxGgavaxLpAvaxYY',
                 'unstakeAndWithdrawAvaxGgavaxLpAvaxYY',
-                'migrateAvaxSavaxLpSavaxFromWombatToYY',
-                'migrateAvaxGgavaxLpGgavaxFromWombatToYY',
-                'migrateAvaxSavaxLpAvaxFromWombatToYY',
-                'migrateAvaxGgavaxLpAvaxFromWombatToYY',
+                // 'migrateAvaxSavaxLpSavaxFromWombatToYY',
+                // 'migrateAvaxGgavaxLpGgavaxFromWombatToYY',
+                // 'migrateAvaxSavaxLpAvaxFromWombatToYY',
+                // 'migrateAvaxGgavaxLpAvaxFromWombatToYY',
             ],
             hardhatConfig
         );
