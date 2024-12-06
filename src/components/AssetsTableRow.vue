@@ -1142,7 +1142,6 @@ export default {
     },
 
     async getSmartLoanContractNativeTokenBalance() {
-      s
       const balance = parseFloat(ethers.utils.formatEther(await this.provider.getBalance(this.smartLoanContract.address)));
       return balance;
     },

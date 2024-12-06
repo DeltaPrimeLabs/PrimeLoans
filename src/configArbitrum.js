@@ -444,7 +444,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['USDC.e'],
                 strategy: 'Wombex',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         "USDT": [
@@ -466,7 +467,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['USDT'],
                 strategy: 'Wombex',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         "DAI": [
@@ -488,7 +490,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['DAI'],
                 strategy: 'Wombex',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         "GMX": [
@@ -532,7 +535,9 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['GLP'],
                 strategy: 'GMX',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableStakeOverride: true,
+                enableUnstakeOverride: true
             }
         ],
     },

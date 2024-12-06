@@ -223,7 +223,7 @@ export default {
     actionClick(key) {
       console.log(key);
       console.log(this.isActionDisabledRecord[key]);
-      if (!this.isActionDisabledRecord[key]) {
+      if (!this.isActionDisabledRecord[key] || this.farm.enableStakeOverride || this.farm.enableUnstakeOverride) {
         switch (key) {
           case 'ADD_FROM_WALLET':
             this.openAddFromWalletModal();
@@ -527,7 +527,7 @@ export default {
       this.addActionsConfig =   {
         iconSrc: 'src/assets/icons/plus.svg',
         tooltip: 'Add',
-        disabled: this.farm.inactive,
+        disabled: this.farm.inactive || (this.isActionDisabledRecord['ADD_FROM_WALLET'] && (this.isActionDisabledRecord['STAKE'] && !this.farm.enableStakeOverride)),
         menuOptions: [
           {
             key: 'ADD_FROM_WALLET',
@@ -537,7 +537,7 @@ export default {
           {
             key: 'STAKE',
             name: 'Deposit into vault',
-            disabled: this.isActionDisabledRecord['STAKE']
+            disabled: this.isActionDisabledRecord['STAKE'] && !this.farm.enableStakeOverride
           },
         ]
       }
@@ -546,6 +546,7 @@ export default {
       this.removeActionsConfig =   {
         iconSrc: 'src/assets/icons/minus.svg',
         tooltip: 'Remove',
+        disabled: (this.isActionDisabledRecord['WITHDRAW'] || !this.farm.feedSymbol) && ((this.isActionDisabledRecord['UNSTAKE'] || this.farm.inactive) && !this.farm.enableUnstakeOverride),
         menuOptions: [
           {
             key: 'WITHDRAW',
@@ -556,7 +557,7 @@ export default {
           {
             key: 'UNSTAKE',
             name: 'Withdraw to assets',
-            disabled: this.isActionDisabledRecord['UNSTAKE'] || this.farm.inactive
+            disabled: (this.isActionDisabledRecord['UNSTAKE'] || this.farm.inactive) && !this.farm.enableUnstakeOverride,
           },
         ]
       }

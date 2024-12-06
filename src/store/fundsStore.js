@@ -4042,9 +4042,14 @@ export default {
         parseUnits(parseFloat(wrapRequest.amount).toFixed(wrapRequest.decimals)));
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
-      rootState.serviceRegistry.modalService.closeModal();
 
       let tx = await awaitConfirmation(transaction, provider, 'wrap');
+
+      rootState.serviceRegistry.progressBarService.emitProgressBarInProgressState();
+      rootState.serviceRegistry.modalService.closeModal();
+      setTimeout(() => {
+        rootState.serviceRegistry.progressBarService.emitProgressBarSuccessState();
+      }, SUCCESS_DELAY_AFTER_TRANSACTION);
 
       setTimeout(async () => {
         await dispatch('updateFunds');

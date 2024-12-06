@@ -339,7 +339,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['AVAX'],
                 strategy: 'AAVE',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             },
             {
                 protocol: 'VECTOR_FINANCE',
@@ -406,6 +407,7 @@ export default {
                 strategy: 'Platypus',
                 banner: 'Due to the recent Platypus exploit, deposits in their farms have been disabled.',
                 refreshDelay: 60000,
+                enableUnstakeOverride: true
             },
             {
                 protocol: 'VECTOR_FINANCE',
@@ -528,7 +530,9 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'GMX',
                 rewardTokens: ['GLP'],
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableStakeOverride: true,
+                enableUnstakeOverride: true
             },
         ],
         PNG_AVAX_USDC_LP: [
@@ -549,6 +553,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'Pangolin',
                 refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         PNG_AVAX_ETH_LP: [
@@ -569,6 +574,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'Pangolin',
                 refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         // TJ_AVAX_USDC_LP: [
