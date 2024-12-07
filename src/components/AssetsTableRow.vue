@@ -532,6 +532,7 @@ export default {
             {gasLimit: 1e12}
           );
 
+          console.log('path');
           console.log(path);
           return path;
 

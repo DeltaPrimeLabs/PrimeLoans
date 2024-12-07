@@ -3896,13 +3896,12 @@ export default {
       console.log(path);
 
       const transaction = await (await wrapContract(state.smartLoanContract, loanAssets)).swapDebt(
-        toBytes32(swapDebtRequest.targetAsset),
         toBytes32(swapDebtRequest.sourceAsset),
+        toBytes32(swapDebtRequest.targetAsset),
         sourceAmount,
         targetAmount,
-        path,
-        swapDebtRequest.adapters,
-        {gasLimit: 9999999}
+        path.reverse(),
+        [...swapDebtRequest.adapters].reverse()
       );
 
       console.log(transaction);

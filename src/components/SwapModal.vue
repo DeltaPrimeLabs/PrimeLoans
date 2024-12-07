@@ -3,7 +3,7 @@
     <Modal>
       <div class="modal__title">
         <span></span>
-        {{ title }} 123 {{swapDebtMode}} {{swapDex}}
+        {{ title }} {{swapDex}}
       </div>
 
       <div class="dex-toggle" v-if="!swapDebtMode && dexOptions && dexOptions.length > 1">
@@ -11,7 +11,7 @@
       </div>
 
       <div class="modal-top-info-bar-wrapper">
-        <div class="modal-top-info-bar" v-if="swapDex === 'YakSwap' && showYakSwapWarning">
+        <div class="modal-top-info-bar" v-if="swapDex === 'YakSwap' && showYakSwapWarning && !swapDebtMode">
           <div>
             We recommend using Paraswap for swaps of $50K+.
           </div>
@@ -20,6 +20,12 @@
         <div class="modal-top-info-bar" v-if="['YakSwap', 'ParaSwapV2'].includes(swapDex) && !swapDebtMode">
           <div>
             Token availability might change with different aggregators.
+          </div>
+        </div>
+
+        <div class="modal-top-info-bar" v-if="swapDebtMode">
+          <div>
+            Due to high pool utilization, swap debt transactions may not be available. Borrowing is available only for pools with a pool utilization < 92.5%.
           </div>
         </div>
 
