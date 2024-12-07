@@ -10,18 +10,18 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const MULTISIG_OWNER = "0xDfA6706FC583b635CD6daF0E3915901A2fBaBAaD"
     const MULTISIG_ADMIN = "0xa9Ca8462aB2949ADa86297904e09Ab4Eb12cdCf0"
 
-    // embedCommitHash("rToken", "./contracts");
-    //
-    // let RTKNDP = await deploy("RTKNDP", {
-    //     from: deployer,
-    //     gasLimit: 100000000,
-    //     args: [],
-    // });
-    //
-    //
-    // console.log(
-    //     `RTKNDP implementation deployed at address: ${RTKNDP.address}`
-    // );
+    embedCommitHash("rToken", "./contracts");
+
+    let RTKNDP = await deploy("RTKNDP", {
+        from: deployer,
+        gasLimit: 100000000,
+        args: [],
+    });
+
+
+    console.log(
+        `RTKNDP implementation deployed at address: ${RTKNDP.address}`
+    );
 
     await verifyContract(hre,
         {
@@ -31,22 +31,22 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         });
     console.log(`Verified RTKNDP`);
 
-    // let resultTUP = await deploy(`RTKNTUP`, {
-    //     contract: `contracts/proxies/tup/arbitrum/rTKNTUP.sol:RTKNTUP`,
-    //     from: deployer,
-    //     gasLimit: 50000000,
-    //     args: [RTKNDP.address, MULTISIG_ADMIN, []],
-    // });
-    //
-    // console.log(`rTKNTUP deployed at address: ${resultTUP.address}`);
-    //
-    // await verifyContract(hre,
-    //     {
-    //         address: resultTUP.address,
-    //         contract: `contracts/proxies/tup/arbitrum/rTKNTUP.sol:RTKNTUP`,
-    //         constructorArguments: [RTKNDP.address, MULTISIG_ADMIN, []]
-    //     });
-    // console.log(`Verified rTKNTUP.sol`)
+    let resultTUP = await deploy(`RTKNTUP`, {
+        contract: `contracts/proxies/tup/arbitrum/rTKNTUP.sol:RTKNTUP`,
+        from: deployer,
+        gasLimit: 50000000,
+        args: [RTKNDP.address, MULTISIG_ADMIN, []],
+    });
+
+    console.log(`rTKNTUP deployed at address: ${resultTUP.address}`);
+
+    await verifyContract(hre,
+        {
+            address: resultTUP.address,
+            contract: `contracts/proxies/tup/arbitrum/rTKNTUP.sol:RTKNTUP`,
+            constructorArguments: [RTKNDP.address, MULTISIG_ADMIN, []]
+        });
+    console.log(`Verified rTKNTUP.sol`)
 };
 
 module.exports.tags = ["arbitrum-rTKN"];

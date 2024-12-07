@@ -6,9 +6,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract RTKNDP is Initializable, ERC20Upgradeable, OwnableUpgradeable {
+contract RTKNDP2 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
     function initialize() public initializer {
-        __ERC20_init("ReimbursementTokenDeltaPrime", "rTKNDP");
+        __ERC20_init("ReimbursementTokenDeltaPrime2", "rTKNDP2");
         __Ownable_init();
     }
 
