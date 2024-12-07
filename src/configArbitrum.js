@@ -49,6 +49,7 @@ export default {
       // "SOL": {name: "SOL", symbol: "SOL", decimals: 18, address: addresses.SOL, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:SOLUSDT"},
     },
     RTKN_ADDRESS: "0xF3EaA614dAb459FD4E9f4BC5460BD9b965ed6c76",
+    RTKN_2_ADDRESS: "0x47f655e3B4D0b686D26FBAD9C6378f66D6388af7",
     PRIME: {hide: true, name: "PRIME", symbol: "PRIME", decimals: 18, address: addresses.PRIME},
     SPRIME_CONFIG: {
         default: "UNISWAP",

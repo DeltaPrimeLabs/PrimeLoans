@@ -18,6 +18,7 @@ export default class RtknService {
 
   convertedContract;
   rtknTokenContract;
+  rtkn2TokenContract;
   provider;
 
   data$ = new Subject();
@@ -35,7 +36,11 @@ export default class RtknService {
   }
 
   async setup() {
-    this.rtknTokenContract = new ethers.Contract(config.RTKN_ADDRESS, ERC_20_ABI, this.provider);
+    if (config.chainSlug === 'arbitrum') {
+      this.rtknTokenContract = new ethers.Contract(config.RTKN_ADDRESS, ERC_20_ABI, this.provider);
+    }
+
+    this.rtkn2TokenContract = new ethers.Contract(config.RTKN_2_ADDRESS, ERC_20_ABI, this.provider);
     await this.getData();
   }
 
@@ -48,8 +53,14 @@ export default class RtknService {
     // const conversionRatio = Number(formatUnits(await this.contract.CONVERSION_RATIO(), 18))
     const conversionRatio = 0.808015513897867;
 
-    const rtknBalance = formatUnits(await this.rtknTokenContract.balanceOf(this.account), 18);
+    let rtknBalance = 0, rtkn2Balance;
+
+    if (config.chainSlug === 'arbitrum') {
+      rtknBalance = formatUnits(await this.rtknTokenContract.balanceOf(this.account), 18);
+    }
+    rtkn2Balance = formatUnits(await this.rtkn2TokenContract.balanceOf(this.account), 18);
     console.log('rtknBalance', rtknBalance);
+    console.log('rtkn2Balance', rtknBalance);
 
     this.data$.next({
       maxCap,
@@ -58,7 +69,8 @@ export default class RtknService {
       yourPledge,
       eligiblePrime,
       conversionRatio,
-      rtknBalance
+      rtknBalance,
+      rtkn2Balance
     });
   }
 

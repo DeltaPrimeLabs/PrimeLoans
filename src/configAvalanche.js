@@ -45,6 +45,7 @@ export default {
       "GGP": {unsupported: true, name: "GGP", symbol: "GGP", logoExt: "png", decimals: 18, address: addresses.GGP, debtCoverage: 0, tradingViewSymbol: "TRADERJOE:GGPWAVAX_AE671E.USD", fetchPrice: true, priceEndpoint: "https://api.gogopool.com/prices", priceJsonField: "ggpInUSD"},
       "WOM": {unsupported: true, name: "WOM", symbol: "WOM", logoExt: "png", decimals: 18, address: addresses.WOM, debtCoverage: 0, tradingViewSymbol: "TRADERJOE:GGPWAVAX_AE671E.USD"},
     },
+    RTKN_2_ADDRESS: "0x0E31136cD6742B4656eD46E28306080620eD70a7",
     PRIME: {hide: true, name: "PRIME", symbol: "PRIME", decimals: 18, address: addresses.PRIME},
     SPRIME_CONFIG: {
         default: "TRADERJOEV2",

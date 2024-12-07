@@ -28,7 +28,7 @@
             {{ totalDeposit | usd }}
             <span class="rtkn-balance"
                   v-if="Number(rtknData.rtknBalance) > 0">Your rTKN balance: {{
-                rtknData.rtknBalance | smartRound(2, true)
+                (rtknData.rtknBalance + rtknData.rtkn2Balance) | smartRound(2, true)
               }}</span>
           </NameValueBadgeBeta>
           <div class="pools">
@@ -96,9 +96,7 @@ export default {
     this.watchQueueData();
     setTimeout(() => {
       this.arbitrumChain = window.arbitrumChain;
-      if (window.arbitrumChain) {
-        this.setupRTKN();
-      }
+      this.setupRTKN(this.arbitrumChain);
       this.$forceUpdate();
     }, 100)
   },
