@@ -27,8 +27,8 @@
           <NameValueBadgeBeta :name="'Your deposits'">
             {{ totalDeposit | usd }}
             <span class="rtkn-balance"
-                  v-if="Number(rtknData.rtknBalance) > 0">Your rTKN balance: {{
-                (rtknData.rtknBalance + rtknData.rtkn2Balance) | smartRound(2, true)
+                  v-if="Number(rtknData.rtknBalance) > 0 || Number(rtknData.rtkn2Balance) > 0">Your rTKN balance: {{
+                (Number(rtknData.rtknBalance) + Number(rtknData.rtkn2Balance)) | smartRound(2, true)
               }}</span>
           </NameValueBadgeBeta>
           <div class="pools">
@@ -432,6 +432,7 @@ export default {
 
     setupRTKN() {
       this.rtknService.observeData().subscribe(data => {
+        console.log('rtkn');
         console.log(data);
         this.rtknData = data;
       })

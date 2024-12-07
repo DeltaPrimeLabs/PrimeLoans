@@ -69,7 +69,6 @@
       We are dropping support to some tokens of your Prime Account. Please review your portfolio
     </Banner>
     <Banner v-if="showAvalancheDepositorBanner || showArbitrumDepositorBanner" :closable="true" background="green">
-      Savings will be unpaused this Saturday 7:30pm.
     </Banner>
     <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
       The Prime Account is granularly being unpaused.
@@ -216,7 +215,7 @@ export default {
 
     if (config.chainId === 42161) {
       if (window.location.href.includes('pools')) {
-        this.showArbitrumDepositorBanner = true;
+        // this.showArbitrumDepositorBanner = true;
       }
       if (window.location.href.includes('prime-account')) {
         this.remainingTime = getCountdownString(1695218400000);

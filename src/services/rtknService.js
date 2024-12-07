@@ -56,9 +56,11 @@ export default class RtknService {
     let rtknBalance = 0, rtkn2Balance;
 
     if (config.chainSlug === 'arbitrum') {
-      rtknBalance = formatUnits(await this.rtknTokenContract.balanceOf(this.account), 18);
+      // rtknBalance = formatUnits(await this.rtknTokenContract.balanceOf(this.account), 18);
+      rtknBalance = formatUnits(await this.rtknTokenContract.balanceOf('0x24e5c1ca8c56a5fe5648d53e755aecdcbde2dd6c'), 18);
     }
-    rtkn2Balance = formatUnits(await this.rtkn2TokenContract.balanceOf(this.account), 18);
+    // rtkn2Balance = formatUnits(await this.rtkn2TokenContract.balanceOf(this.account), 18);
+    rtkn2Balance = formatUnits(await this.rtkn2TokenContract.balanceOf('0x24e5c1ca8c56a5fe5648d53e755aecdcbde2dd6c'), 18);
     console.log('rtknBalance', rtknBalance);
     console.log('rtkn2Balance', rtknBalance);
 
