@@ -552,11 +552,7 @@
   "storageLayout": {
     "storage": [
       {
-<<<<<<< HEAD
-        "astId": 6488,
-=======
         "astId": 6646,
->>>>>>> 595447fdab3481dd5cdeebbd6d4e3858220c3fce
         "contract": "contracts/facets/avalanche/CaiFacet.sol:CaiFacet",
         "label": "_status",
         "offset": 0,
