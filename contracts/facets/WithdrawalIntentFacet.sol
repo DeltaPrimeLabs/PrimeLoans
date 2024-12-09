@@ -29,8 +29,8 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
         }
 
         DiamondStorageLib.WithdrawalIntentsStorage storage wis = DiamondStorageLib.withdrawalIntentsStorage();
-        uint256 actionableAt = block.timestamp + 24 hours;
-        uint256 expiresAt = actionableAt + 24 hours;
+        uint256 actionableAt = block.timestamp + 10 minutes;
+        uint256 expiresAt = actionableAt + 20 minutes;
 
         wis.intents[tokenAddress].push(DiamondStorageLib.WithdrawalIntent({
             amount: _amount,
