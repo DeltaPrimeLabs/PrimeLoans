@@ -43,6 +43,7 @@ export default class PoolService {
           const isPoolDisabled = config.POOLS_CONFIG[poolAsset].disabled;
           const miningApy = 0
 
+          const maxUtilisation = fromWei(poolDetails[5]);
           const pool = {
             asset: config.ASSETS_CONFIG[poolAsset],
             assetPrice: redstonePriceData[poolAsset][0].dataPoints[0].value,
@@ -53,8 +54,9 @@ export default class PoolService {
             borrowingAPY: isPoolDisabled ? 0 : fromWei(poolDetails[3]),
             totalBorrowed: isPoolDisabled ? 0 : totalBorrowed,
             interest: isPoolDisabled ? 0 : deposit * apy / 365,
-            maxUtilisation: isPoolDisabled ? '0' : fromWei(poolDetails[5]),
+            maxUtilisation: isPoolDisabled ? '0' : maxUtilisation,
             availableToWithdraw: tvl - totalBorrowed,
+            availableToBorrow: (tvl * maxUtilisation) - totalBorrowed,
             utilisation: isPoolDisabled ? 0 : totalBorrowed / tvl,
             disabled: config.POOLS_CONFIG[poolAsset].disabled,
             poolsUnlocking: config.poolsUnlocking,
