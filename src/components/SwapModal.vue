@@ -3,7 +3,7 @@
     <Modal>
       <div class="modal__title">
         <span></span>
-        {{ title }}
+        {{ title }} {{swapDex}}
       </div>
 
       <div class="dex-toggle" v-if="!swapDebtMode && dexOptions && dexOptions.length > 1">
@@ -11,7 +11,7 @@
       </div>
 
       <div class="modal-top-info-bar-wrapper">
-        <div class="modal-top-info-bar" v-if="swapDex === 'YakSwap' && showYakSwapWarning">
+        <div class="modal-top-info-bar" v-if="swapDex === 'YakSwap' && showYakSwapWarning && !swapDebtMode">
           <div>
             We recommend using Paraswap for swaps of $50K+.
           </div>
@@ -20,6 +20,12 @@
         <div class="modal-top-info-bar" v-if="['YakSwap', 'ParaSwapV2'].includes(swapDex) && !swapDebtMode">
           <div>
             Token availability might change with different aggregators.
+          </div>
+        </div>
+
+        <div class="modal-top-info-bar" v-if="swapDebtMode">
+          <div>
+            Due to high pool utilization, swap debt transactions may not be available. Borrowing is available only for pools with a pool utilization < 92.5%.
           </div>
         </div>
 
@@ -442,7 +448,7 @@ export default {
 
     async query(sourceAsset, targetAsset, amountIn, amountOut) {
       if (this.swapDebtMode) {
-        return await this.queryMethod(targetAsset, sourceAsset, amountIn);
+        return await this.queryMethod(targetAsset, sourceAsset, amountIn, amountOut);
       } else {
         return await this.queryMethods[this.swapDex](sourceAsset, targetAsset, amountIn);
       }
@@ -469,9 +475,11 @@ export default {
       const queryResponse =
           this.swapDebtMode
               ?
-              await this.query(this.targetAsset, this.sourceAsset, sourceAmountInWei)
+              await this.query(this.targetAsset, this.sourceAsset, sourceAmountInWei, oracleReceivedAmountInWei)
               :
               await this.query(this.sourceAsset, this.targetAsset, sourceAmountInWei);
+
+      console.log(queryResponse);
 
 
       let estimated;
@@ -486,6 +494,8 @@ export default {
           const estimatedReceivedTokens = parseFloat(formatUnits(estimated, BigNumber.from(this.targetAssetData.decimals)));
           console.log(estimatedReceivedTokens);
           this.updateSlippageWithAmounts(estimatedReceivedTokens);
+          this.path = queryResponse.path;
+          this.adapters = queryResponse.adapters;
         } else {
           console.log('queryResponse', queryResponse);
           console.log(queryResponse instanceof BigNumber);

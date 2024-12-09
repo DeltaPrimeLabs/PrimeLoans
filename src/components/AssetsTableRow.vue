@@ -488,6 +488,67 @@ export default {
       };
     },
 
+    swapDebtQueryMethod() {
+      return async (sourceAsset, targetAsset, amountIn, amountOut) => {
+        console.log('sourceAsset', sourceAsset);
+        console.log('targetAsset', targetAsset);
+        console.log('amountIn', amountIn);
+        console.log('amountOut', amountOut);
+        const tknFrom = TOKEN_ADDRESSES[sourceAsset];
+        const tknTo = TOKEN_ADDRESSES[targetAsset];
+
+        const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
+        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, readProvider);
+
+        const maxHops = 3;
+        const gasPrice = ethers.utils.parseUnits('0.2', 'gwei');
+
+        const MAX_TRY_AMOUNT = 20;
+
+        let i = 0;
+        let targetBorrowedAmount = amountOut;
+
+        console.log(i);
+
+        console.log('targetBorrowedAmount', targetBorrowedAmount);
+        console.log('tknFrom', tknFrom);
+        console.log('tknTo', tknTo);
+        console.log('maxHops', maxHops);
+        console.log('gasPrice', gasPrice);
+
+        // targetBorrowedAmount: 0x50f495
+        // tknFrom: 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7
+        // tknTo: 0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e
+        // maxHops: 3
+        // gasPrice: 0x0bebc200
+        // amountIn = amountIn.mul(BigNumber.from('10005')).div(BigNumber.from('10000'));
+        try {
+          let path = await yakRouter.findBestPathWithGas(
+            amountIn,
+            tknFrom,
+            tknTo,
+            maxHops,
+            gasPrice,
+            {gasLimit: 1e12}
+          );
+
+          console.log('path');
+          console.log(path);
+          return path;
+
+          // if (path.amounts[path.amounts.length - 1].gt(amountIn)) {
+          //   return path;
+          // }
+
+          targetBorrowedAmount = targetBorrowedAmount.mul(BigNumber.from('10005')).div(BigNumber.from('10000'));
+        } catch (e) {
+          this.handleTransactionError(e);
+        } finally {
+          i++;
+        }
+      }
+    },
+
     paraSwapV2QueryMethod() {
       return async (sourceAsset, targetAsset, amountIn) => {
         console.warn('PARA SWAP 2 QUERY METHOD');
@@ -736,7 +797,7 @@ export default {
       modalInstance.dexOptions = Object.entries(config.SWAP_DEXS_CONFIG)
         .filter(([dexName, dexConfig]) => dexConfig.availableAssets.includes(this.asset.symbol))
         .map(([dexName, dexConfig]) => dexName);
-      modalInstance.swapDex = Object.keys(config.SWAP_DEXS_CONFIG)[1];
+      modalInstance.swapDex = Object.keys(config.SWAP_DEXS_CONFIG)[0];
       modalInstance.title = 'Swap debt';
       modalInstance.swapDebtMode = true;
       modalInstance.slippageMargin = 0.2;
@@ -769,7 +830,7 @@ export default {
       modalInstance.debt = this.fullLoanStatus.debt;
       modalInstance.thresholdWeightedValue = this.fullLoanStatus.thresholdWeightedValue ? this.fullLoanStatus.thresholdWeightedValue : 0;
       modalInstance.health = this.fullLoanStatus.health;
-      modalInstance.queryMethod = this.paraSwapV2QueryMethod();
+      modalInstance.queryMethod = this.swapDebtQueryMethod();
       modalInstance.$on('SWAP', swapEvent => {
         const swapDebtRequest = {
           ...swapEvent,

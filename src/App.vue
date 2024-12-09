@@ -216,7 +216,7 @@ export default {
 
     if (config.chainId === 42161) {
       if (window.location.href.includes('pools')) {
-        this.showArbitrumDepositorBanner = true;
+        // this.showArbitrumDepositorBanner = true;
       }
       if (window.location.href.includes('prime-account')) {
         this.remainingTime = getCountdownString(1695218400000);

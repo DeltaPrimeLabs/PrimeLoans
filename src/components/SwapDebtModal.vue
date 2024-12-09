@@ -272,8 +272,8 @@ export default {
       });
     },
 
-    async query(sourceAsset, targetAsset, amountIn) {
-      return await this.queryMethod(sourceAsset, targetAsset, amountIn);
+    async query(sourceAsset, targetAsset, amountIn, amountOut) {
+      return await this.queryMethod(sourceAsset, targetAsset, amountIn, amountOut);
     },
 
     async chooseBestTrade(basedOnSource = true) {
