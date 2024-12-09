@@ -4,10 +4,13 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MockToken is ERC20 {
-    constructor(address[] memory airdropUsers) ERC20("MockToken", "USDT") {
+    constructor() ERC20("MCKTKN18", "MockToken18") {}
 
-        for (uint256 i = 0; i < airdropUsers.length; i++) {
-            _mint(airdropUsers[i], 10000 * 10 ** decimals());
-        }
+    function decimals() public pure override returns (uint8) {
+        return 18;
+    }
+
+    function mint() external {
+        _mint(msg.sender, 10000 * 10 ** decimals());
     }
 }
