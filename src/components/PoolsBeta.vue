@@ -85,21 +85,19 @@ export default {
     TableHeader
   },
   async mounted() {
-    await this.setupFiles();
-    this.initPools();
-    this.watchPools();
-    this.initStoresWhenProviderAndAccountCreated();
-    this.lifiService.setupLifi();
-    this.watchActiveRoute();
-    this.withdrawQueueService.getIntents();
-    this.watchPoolIntents();
-    this.watchQueueData();
-    setTimeout(() => {
-      this.arbitrumChain = window.arbitrumChain;
-      this.setupRTKN(this.arbitrumChain);
-      this.$forceUpdate();
-    }, 100)
-    this.$forceUpdate();
+    window.chain$.subscribe(async chain => {
+      this.arbitrumChain = chain === 'arbitrum';
+      await this.setupFiles();
+      this.initPools();
+      this.watchPools();
+      this.initStoresWhenProviderAndAccountCreated();
+      this.lifiService.setupLifi();
+      this.watchActiveRoute();
+      this.withdrawQueueService.getIntents();
+      this.watchPoolIntents();
+      this.watchQueueData();
+      this.setupRTKN();
+    });
   },
 
   data() {
@@ -110,7 +108,7 @@ export default {
       poolsTableHeaderConfig: null,
       depositAssetsWalletBalances$: new BehaviorSubject({}),
       rtknData: {},
-      arbitrumChain: config.chainSlug === 'arbitrum',
+      arbitrumChain: false,
       poolIntents: [],
       queueData: {},
     };

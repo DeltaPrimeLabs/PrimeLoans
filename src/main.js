@@ -16,20 +16,24 @@ import VTooltip from 'v-tooltip';
 import config from './config';
 import ConfigAvalanche from './configAvalanche';
 import ConfigArbitrum from './configArbitrum';
+import {BehaviorSubject} from 'rxjs';
 const RPC_ERROR_FALLBACK_DURATION_MINS = 15
 
 if (window.ethereum) {
+  window.chain$ = new BehaviorSubject({});
   window.ethereum.request({method: 'eth_chainId'}).then((id) => {
     const chainId = parseInt(id, 16);
     switch (chainId) {
       case 43114: {
         window.chain = 'avalanche';
+        window.chain$.next('avalanche');
         Object.assign(config, ConfigAvalanche);
         setupRpc();
         break;
       }
       case 42161: {
         window.chain = 'arbitrum';
+        window.chain$.next('arbitrum');
         Object.assign(config, ConfigArbitrum);
         break;
       }
