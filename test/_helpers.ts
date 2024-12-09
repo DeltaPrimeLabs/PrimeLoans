@@ -555,19 +555,16 @@ export const deployPools = async function(
     tokenManager: string = ''
 ) {
     for (const token of tokens) {
-        console.log('x1')
         let {
             poolContract,
             tokenContract
         } = await deployAndInitializeLendingPool(owner, token.name, smartLoansFactory.address, token.airdropList, chain, '', tokenManager);
-        console.log('x2')
         for (const user of token.airdropList) {
             if (token.name == 'AVAX' || token.name == 'MCKUSD') {
                 await tokenContract!.connect(user).approve(poolContract.address, toWei(depositAmount.toString()));
                 await (WrapperBuilder.wrap(poolContract.connect(user)).usingSimpleNumericMock(mockPrices)).deposit(toWei(depositAmount.toString()));
             }
         }
-        console.log('x3')
         lendingPools.push(new PoolAsset(toBytes32(token.name), poolContract.address));
         tokenContracts.set(token.name, tokenContract);
         poolContracts.set(token.name, poolContract);
