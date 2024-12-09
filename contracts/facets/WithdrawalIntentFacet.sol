@@ -14,6 +14,8 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
     using TransferHelper for address;
 
     function createWithdrawalIntent(bytes32 _asset, uint256 _amount) external onlyOwner nonReentrant {
+        require((_asset == "BNB") || (_asset == "GBP"), "Invalid asset"); // for testing with mock tokens
+
         require(_amount > 0, "Amount must be greater than zero");
 
         IERC20Metadata token = getERC20TokenInstance(_asset, true);
@@ -41,6 +43,8 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
     }
 
     function executeWithdrawalIntent(bytes32 _asset, uint256[] calldata intentIndices) external onlyOwner nonReentrant {
+        require((_asset == "BNB") || (_asset == "GBP"), "Invalid asset"); // for testing with mock tokens
+
         IERC20Metadata token = getERC20TokenInstance(_asset, true);
         address tokenAddress = address(token);
 
@@ -71,6 +75,7 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
     }
 
     function cancelWithdrawalIntent(bytes32 _asset, uint256 intentIndex) external onlyOwner nonReentrant {
+        require((_asset == "BNB") || (_asset == "GBP"), "Invalid asset"); // for testing with mock tokens
         address tokenAddress = address(getERC20TokenInstance(_asset, true));
         DiamondStorageLib.WithdrawalIntentsStorage storage wis = DiamondStorageLib.withdrawalIntentsStorage();
         DiamondStorageLib.WithdrawalIntent[] storage intents = wis.intents[tokenAddress];
@@ -90,6 +95,7 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
     }
 
     function clearExpiredIntents(bytes32 _asset) external {
+        require((_asset == "BNB") || (_asset == "GBP"), "Invalid asset"); // for testing with mock tokens
         address tokenAddress = address(getERC20TokenInstance(_asset, true));
         _removeExpiredIntents(tokenAddress);
     }
