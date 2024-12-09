@@ -42,7 +42,7 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
         emit WithdrawalIntentCreated(_asset, _amount, actionableAt, expiresAt);
     }
 
-    function executeWithdrawalIntent(bytes32 _asset, uint256[] calldata intentIndices) external onlyOwner nonReentrant {
+    function executeWithdrawalIntent(bytes32 _asset, uint256[] calldata intentIndices) external onlyOwner nonReentrant remainsSolvent {
         require((_asset == "BNB") || (_asset == "GBP"), "Invalid asset"); // for testing with mock tokens
 
         IERC20Metadata token = getERC20TokenInstance(_asset, true);
