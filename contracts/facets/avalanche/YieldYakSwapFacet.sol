@@ -99,6 +99,7 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
 
         _amountIn = Math.min(swapTokensDetails.soldToken.balanceOf(address(this)), _amountIn);
         require(_amountIn > 0, "Amount of tokens to sell has to be greater than 0");
+        require(getAvailableBalance(swapTokensDetails.tokenSoldSymbol) >= _amountIn, "Insufficient balance");
 
         address(swapTokensDetails.soldToken).safeApprove(YY_ROUTER(), 0);
         address(swapTokensDetails.soldToken).safeApprove(YY_ROUTER(), _amountIn);
