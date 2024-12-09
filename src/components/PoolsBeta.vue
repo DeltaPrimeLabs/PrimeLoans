@@ -436,6 +436,10 @@ export default {
       this.rtknService.observeData().subscribe(data => {
         console.log(data);
         this.rtknData = data;
+        this.$forceUpdate();
+        setTimeout(() => {
+          this.$forceUpdate();
+        }, 100);
       })
     },
 
