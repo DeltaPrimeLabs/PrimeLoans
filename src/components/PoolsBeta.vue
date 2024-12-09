@@ -95,12 +95,12 @@ export default {
     this.watchPoolIntents();
     this.watchQueueData();
     setTimeout(() => {
-      this.arbitrumChain = window.arbitrumChain;
       if (window.arbitrumChain) {
         this.setupRTKN();
       }
       this.$forceUpdate();
     }, 100)
+    this.$forceUpdate();
   },
 
   data() {
@@ -111,7 +111,7 @@ export default {
       poolsTableHeaderConfig: null,
       depositAssetsWalletBalances$: new BehaviorSubject({}),
       rtknData: {},
-      arbitrumChain: true,
+      arbitrumChain: config.chainSlug === 'arbitrum',
       poolIntents: [],
       queueData: {},
     };
