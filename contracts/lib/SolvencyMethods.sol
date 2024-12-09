@@ -4,17 +4,17 @@ pragma solidity 0.8.17;
 
 import "@redstone-finance/evm-connector/contracts/core/ProxyConnector.sol";
 import "../facets/SolvencyFacetProd.sol";
-import "../facets/WithdrawalIntentFacet.sol";
+import "../interfaces/facets/IWithdrawalIntentFacet.sol";
 import "../DiamondHelper.sol";
 
 // TODO Rename to contract instead of lib
 contract SolvencyMethods is DiamondHelper, ProxyConnector {
     // This function executes WithdrawalIntentFacet.getAvailableBalance()
-    function getAvailableBalance(bytes32 _asset) internal view virtual returns (uint256) {
+    function _getAvailableBalance(bytes32 _asset) internal view virtual returns (uint256) {
         return abi.decode(
             proxyCalldataView(
-                DiamondHelper._getFacetAddress(WithdrawalIntentFacet.getAvailableBalance.selector),
-                abi.encodeWithSelector(WithdrawalIntentFacet.getAvailableBalance.selector, _asset)
+                DiamondHelper._getFacetAddress(IWithdrawalIntentFacet.getAvailableBalance.selector),
+                abi.encodeWithSelector(IWithdrawalIntentFacet.getAvailableBalance.selector, _asset)
             ),
             (uint256)
         );
