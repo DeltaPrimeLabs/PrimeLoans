@@ -1,7 +1,7 @@
 import RTKN_TO_PRIME_CONVERTER
   from '/artifacts/contracts/interfaces/IRtknToPrimeConverter.sol/IRtknToPrimeConverter.json';
 import ERC_20_ABI from '../../test/abis/ERC20.json';
-import {combineLatest, forkJoin, Subject} from 'rxjs';
+import {BehaviorSubject, combineLatest, forkJoin, Subject} from 'rxjs';
 import {formatUnits, parseUnits} from '../utils/calculate';
 import {awaitConfirmation} from '../utils/blockchain';
 import config from '../config';
@@ -20,7 +20,7 @@ export default class RtknService {
   rtknTokenContract;
   provider;
 
-  data$ = new Subject();
+  data$ = new BehaviorSubject({});
 
   constructor(providerService, accountService, progressBarService, modalService) {
     this.progressBarService = progressBarService;
