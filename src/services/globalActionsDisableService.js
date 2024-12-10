@@ -26,7 +26,7 @@ export default class GlobalActionsDisableService {
     REPAY: false,
     SWAP_DEBT: false,
     WRAP: false,
-    CLAIM_GLP_REWARDS: true,
+    CLAIM_GLP_REWARDS: false,
     WITHDRAW: true,
     BRIDGE_COLLATERAL: true,
   });

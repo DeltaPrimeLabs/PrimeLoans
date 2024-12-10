@@ -109,12 +109,12 @@ export default {
             availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'GLP', 'sAVAX', 'GMX', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
             slippageMargin: 0.02
         },
-        // GLP_DIRECT: {
-        //     displayName: 'Direct',
-        //     availableAssets: ['GLP', 'ETH', 'AVAX', 'USDC', 'BTC'],
-        //     coreAsset: 'GLP',
-        //     slippageMargin: 0.02
-        // },
+        GLP_DIRECT: {
+            displayName: 'Direct',
+            availableAssets: ['GLP', 'ETH', 'AVAX', 'USDC', 'BTC'],
+            coreAsset: 'GLP',
+            slippageMargin: 0.02
+        },
         GmxV2: {
             availableAssets: [],
             slippageMargin: 0.5
