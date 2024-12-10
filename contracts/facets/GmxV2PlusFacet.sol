@@ -136,6 +136,8 @@ abstract contract GmxV2PlusFacet is GmxV2FacetCommon {
             ? IERC20(gmToken).balanceOf(address(this))
             : gmAmount;
 
+        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(gmToken)) >= gmAmount, "Insufficient balance");
+
         bytes[] memory data = new bytes[](3);
         data[0] = abi.encodeWithSelector(
             IGmxV2Router.sendWnt.selector,
