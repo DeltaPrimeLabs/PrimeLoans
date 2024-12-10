@@ -81,7 +81,7 @@ export default {
   }
 
   &.big {
-    font-size: $font-size-mlg;
+    font-size: 17px;
     font-weight: 600;
   }
 }
