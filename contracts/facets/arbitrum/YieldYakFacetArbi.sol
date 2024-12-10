@@ -207,6 +207,8 @@ contract YieldYakFacetArbi is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         uint256 initialDepositTokenBalance = depositToken.balanceOf(address(this));
         stakingDetails.amount = Math.min(vaultContract.balanceOf(address(this)), stakingDetails.amount);
 
+        require(_getAvailableBalance(stakingDetails.vaultTokenSymbol) >= stakingDetails.amount, "Insufficient balance");
+
         vaultContract.withdraw(stakingDetails.amount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
