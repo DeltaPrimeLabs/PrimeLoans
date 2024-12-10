@@ -45,13 +45,17 @@ export default class RtknService {
   }
 
   async getData() {
-    const maxCap = Number(formatUnits(await this.convertedContract.rRTKNMaxCap(), 18))
-    const totalPledged = Number(formatUnits(await this.convertedContract.totalrTKNPledged(), 18))
-    const totalUsers = Number(formatUnits(await this.convertedContract.getTotalUsers(), 0))
-    const yourPledge = Number(formatUnits(await this.convertedContract.userrTKNPledged(this.account), 18))
-    const eligiblePrime = Number(formatUnits(await this.convertedContract.previewFuturePrimeAmountBasedOnPledgedAmountForUser(this.account), 18))
-    // const conversionRatio = Number(formatUnits(await this.contract.CONVERSION_RATIO(), 18))
-    const conversionRatio = 0.808015513897867;
+    let maxCap, totalPledged, totalUsers, yourPledge, eligiblePrime, conversionRatio;
+
+    if (config.chainSlug === 'arbitrum') {
+      maxCap = Number(formatUnits(await this.convertedContract.rRTKNMaxCap(), 18))
+      totalPledged = Number(formatUnits(await this.convertedContract.totalrTKNPledged(), 18))
+      totalUsers = Number(formatUnits(await this.convertedContract.getTotalUsers(), 0))
+      yourPledge = Number(formatUnits(await this.convertedContract.userrTKNPledged(this.account), 18))
+      eligiblePrime = Number(formatUnits(await this.convertedContract.previewFuturePrimeAmountBasedOnPledgedAmountForUser(this.account), 18))
+      // const conversionRatio = Number(formatUnits(await this.contract.CONVERSION_RATIO(), 18))
+      conversionRatio = 0.808015513897867;
+    }
 
     let rtknBalance = 0, rtkn2Balance;
 
@@ -59,6 +63,18 @@ export default class RtknService {
       rtknBalance = formatUnits(await this.rtknTokenContract.balanceOf(this.account), 18);
     }
     rtkn2Balance = formatUnits(await this.rtkn2TokenContract.balanceOf(this.account), 18);
+
+    console.log('here')
+    console.log({
+      maxCap,
+      totalPledged,
+      totalUsers,
+      yourPledge,
+      eligiblePrime,
+      conversionRatio,
+      rtknBalance,
+      rtkn2Balance
+    })
 
     this.data$.next({
       maxCap,
