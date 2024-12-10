@@ -61,7 +61,7 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
         require(_getAvailableBalance("AVAX") >= amount, "Insufficient balance");
 
 
-    IERC20Metadata yrtToken = IERC20Metadata(YY_AAVE_AVAX);
+        IERC20Metadata yrtToken = IERC20Metadata(YY_AAVE_AVAX);
         uint256 initialYRTBalance = yrtToken.balanceOf(address(this));
 
         IWrappedNativeToken(AVAX_TOKEN).withdraw(amount);
@@ -203,6 +203,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         amount = Math.min(yakStakingContract.balanceOf(address(this)), amount);
 
+        require(_getAvailableBalance("AVAX") >= amount, "Insufficient balance");
+
         yakStakingContract.withdraw(amount);
 
         uint256 depositTokenBalanceAfterWithdrawal = address(this).balance;
@@ -342,7 +344,7 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         stakingDetails.amount = Math.min(IERC20Metadata(stakingDetails.tokenAddress).balanceOf(address(this)), stakingDetails.amount);
         require(stakingDetails.amount > 0, "Cannot stake 0 tokens");
-        require(_getAvailableBalance(stakingDetails.tokenSymbol) >= stakingDetails.amount, "Insufficient balance");
+        require(_getAvailableBalance(stakingDetails.vaultTokenSymbol) >= stakingDetails.amount, "Insufficient balance");
 
         // _ACTIVE = 2
         require(tokenManager.tokenToStatus(stakingDetails.tokenAddress) == 2, "Token not supported");
@@ -375,6 +377,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
         IERC20Metadata depositToken = IERC20Metadata(stakingDetails.tokenAddress);
         uint256 initialDepositTokenBalance = depositToken.balanceOf(address(this));
         stakingDetails.amount = Math.min(vaultContract.balanceOf(address(this)), stakingDetails.amount);
+
+        require(_getAvailableBalance(stakingDetails.vaultTokenSymbol) >= stakingDetails.amount, "Insufficient balance");
 
         vaultContract.withdraw(stakingDetails.amount);
 
