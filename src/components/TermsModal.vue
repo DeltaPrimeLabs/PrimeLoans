@@ -21,7 +21,7 @@
         <div class="content__part content__part--last">Stay safe Degen!</div>
       </div>
 
-      <a href="https://deltaprime.io/documents/DeltaPrime_Terms_of_Use.pdf" class="terms-link" target="_blank">
+      <a href="https://deltaprime.io/legals/terms-Of-Use" class="terms-link" target="_blank">
         Link to terms
       </a>
 
