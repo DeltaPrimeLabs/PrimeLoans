@@ -179,28 +179,28 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         emit FundedLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
     }
 
-    function withdrawLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant onlyOwner canRepayDebtFully noBorrowInTheSameBlock remainsSolvent {
-        if (!isPairWhitelisted(address(pair))) revert TraderJoeV2PoolNotWhitelisted();
-
-        pair.batchTransferFrom(address(this), msg.sender, ids, amounts);
-
-        TraderJoeV2Bin[] storage binsStorage = getOwnedTraderJoeV2BinsStorage();
-        TraderJoeV2Bin storage bin;
-
-        for (int256 i; uint(i) < binsStorage.length; i++) {
-            if (address(binsStorage[uint(i)].pair) == address(pair)) {
-                bin = binsStorage[uint(i)];
-
-                if (bin.pair.balanceOf(address(this), bin.id) == 0) {
-                    binsStorage[uint(i)] = binsStorage[binsStorage.length - 1];
-                    i--;
-                    binsStorage.pop();
-                }
-            }
-        }
-
-        emit WithdrawnLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
-    }
+//    function withdrawLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant onlyOwner canRepayDebtFully noBorrowInTheSameBlock remainsSolvent {
+//        if (!isPairWhitelisted(address(pair))) revert TraderJoeV2PoolNotWhitelisted();
+//
+//        pair.batchTransferFrom(address(this), msg.sender, ids, amounts);
+//
+//        TraderJoeV2Bin[] storage binsStorage = getOwnedTraderJoeV2BinsStorage();
+//        TraderJoeV2Bin storage bin;
+//
+//        for (int256 i; uint(i) < binsStorage.length; i++) {
+//            if (address(binsStorage[uint(i)].pair) == address(pair)) {
+//                bin = binsStorage[uint(i)];
+//
+//                if (bin.pair.balanceOf(address(this), bin.id) == 0) {
+//                    binsStorage[uint(i)] = binsStorage[binsStorage.length - 1];
+//                    i--;
+//                    binsStorage.pop();
+//                }
+//            }
+//        }
+//
+//        emit WithdrawnLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
+//    }
 
 
     function addLiquidityTraderJoeV2(ILBRouter traderJoeV2Router, ILBRouter.LiquidityParameters memory liquidityParameters) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
