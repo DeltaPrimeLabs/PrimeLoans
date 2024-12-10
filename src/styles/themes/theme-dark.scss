@@ -23,6 +23,7 @@
   --account-apr-widget-component__widget-title-color: #{$storm-blue};
   --account-apr-widget-component__no-smart-loan-dash-color: #{$washed-blue};
   --account-apr-widget-component__widget-comment-color: #{$washed-blue};
+  --account-apr-widget-component__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
   // endregion
 
   // region Wallet
@@ -768,5 +769,19 @@
   --percentage-gauge__indicator-color: #{$pale-fuchsia};
   --percentage-gauge__indicator-shadow: 0.7px 0.7px 4.1px 0 #{$dark-space}b2;
   --percentage-gauge__labels-color: #{$washed-blue};
+  // endregion
+
+  // region MiniPercentageGauge
+  --mini-percentage-gauge__gradient-color-1: #{$pale-red};
+  --mini-percentage-gauge__gradient-color-2: #{$paler-red};
+  --mini-percentage-gauge__gradient-color-3: #{$not-vivid-pink};
+  --mini-percentage-gauge__gradient-color-4: #{$purplish-pink};
+  --mini-percentage-gauge__gradient-color-5: #{$deep-lilac};
+  --mini-percentage-gauge__gradient-color-6: #{$deep-blue};
+  --mini-percentage-gauge__gradient-color-7: #{$pale-red};
+  --mini-percentage-gauge__hand-pointer-shadow: 0.7px 0.7px 4.1px 0 #{$dark-space}b2;
+  --mini-percentage-gauge__shadow: drop-shadow(1px 1px 8px #{$dark-space}cc);
+  --mini-percentage-gauge__indicator-color: #{$pale-fuchsia};
+  --mini-percentage-gauge__indicator-shadow:  0.7px 0.7px 4.1px 0 #{$dark-space}b2;
   // endregion
 }
