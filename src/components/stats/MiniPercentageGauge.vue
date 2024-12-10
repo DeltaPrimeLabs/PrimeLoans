@@ -21,6 +21,7 @@
 
 import { getThemeVariable } from "../../utils/style-themes";
 import { smartRound } from "../../utils/calculate";
+import { mapState } from "vuex";
 
 export default {
   name: 'MiniPercentageGauge',
@@ -37,6 +38,9 @@ export default {
     this.$refs.rangeMask.style.webkitMaskImage = 'url(src/assets/images/percentage-gauge-range-mini.svg)';
     this.$refs.rangeMask.style.maskImage = 'url(src/assets/images/percentage-gauge-range-mini.svg)';
     this.calculateValueColor(this.percentageValue)
+    this.themeService.observeThemeChange().subscribe(_ => {
+      this.calculateValueColor(this.percentageValue)
+    })
   },
   methods: {
     smartRound,
@@ -44,11 +48,11 @@ export default {
       this.gaugeHandRotation = ((value + 100) / 2) * 1.7 + 270
       const breakpoints = [0, 0.12, 0.26, 0.37, 0.5, 0.63]
       const percentage = (value + 100) / 200
-      console.log(value);
-      console.log(percentage);
-      console.log(breakpoints.findLastIndex(breakpoint => breakpoint <= percentage));
       this.valueColor = getThemeVariable(`--mini-percentage-gauge__gradient-color-${breakpoints.findLastIndex(breakpoint => breakpoint <= percentage) + 1}`)
     }
+  },
+  computed: {
+    ...mapState('serviceRegistry', ['themeService'])
   },
   watch: {
     percentageValue: function (newValue) {
