@@ -56,6 +56,23 @@ const SCRIPTS = {
 
             return potentialContract ? [potentialContract] : null;
         }
+    },
+    'proptocol-upgrade-with-timelock': {
+        path: path.join(__dirname, 'scripts', 'prepare-protocol-upgrade-with-timelock.js'),
+        description: 'Prepares protocol upgrade data, including diamondCut calldata, timelock calldata and final report',
+        patterns: [
+            'prepare diamond cut',
+            'generate diamond cut',
+            'create diamond cut',
+            'upgrade facet',
+            'diamond upgrade',
+            'diamond cut',
+            'timelock' +
+            'prepare timelock',
+            'upgrade',
+            'protocol upgrade'
+        ],
+        extractParams: (text) => [] // No params needed as script handles all prompts
     }
 };
 
@@ -177,10 +194,10 @@ async function processUserInput(input) {
 }
 
 async function startAssistant() {
-    console.log('Web3 Assistant ready! (Type "exit" to quit)');
+    console.log('DeltaAI Agent ready! (Type "exit" to quit)');
 
     const askQuestion = () => {
-        rl.question('\nHow can I help you? ', async (input) => {
+        rl.question('\nHow can I be of an assistance to you today? ', async (input) => {
             if (input.toLowerCase() === 'exit') {
                 rl.close();
                 return;
