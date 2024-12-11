@@ -12,13 +12,6 @@ contract RTKNDP2 is Initializable, ERC20Upgradeable, OwnableUpgradeable {
         __Ownable_init();
     }
 
-    function mintBatch(address[] memory recipients, uint256[] memory amounts) public onlyOwner {
-        require(recipients.length == amounts.length, "Arrays must have the same length");
-        for (uint256 i = 0; i < recipients.length; i++) {
-            _mint(recipients[i], amounts[i]);
-        }
-    }
-
     constructor(){
         _disableInitializers();
     }
