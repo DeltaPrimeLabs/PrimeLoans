@@ -62,9 +62,7 @@
       </div>
 
       <div class="table__cell max-apy">
-        <span>{{ maxApy | percent }}<img v-if="boostApy"
-                                                      v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApy ? (maxApy * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}"
-                                                      src="src/assets/icons/stars.png" class="stars-icon"></span>
+        <span>{{ maxApy | percent }}</span>
       </div>
 
       <div class="table__cell">
@@ -582,13 +580,6 @@ export default {
     watchGgpIncentives() {
       this.ggpIncentivesService.collectedGGPYieldYak$.subscribe(collected => {
         this.collectedGGP = collected;
-        setTimeout(() => {
-          this.$forceUpdate();
-        });
-      });
-      this.ggpIncentivesService.boostGGPYieldYakApy$.subscribe(boost => {
-        const ggpPrice = this.assets['GGP'] ? this.assets['GGP'].price : 0;
-        this.boostApy = boost ? boost.boostApy * ggpPrice : 0;
         setTimeout(() => {
           this.$forceUpdate();
         });
