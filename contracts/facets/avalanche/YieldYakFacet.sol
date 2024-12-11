@@ -344,7 +344,7 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         stakingDetails.amount = Math.min(IERC20Metadata(stakingDetails.tokenAddress).balanceOf(address(this)), stakingDetails.amount);
         require(stakingDetails.amount > 0, "Cannot stake 0 tokens");
-        require(_getAvailableBalance(stakingDetails.vaultTokenSymbol) >= stakingDetails.amount, "Insufficient balance");
+        require(_getAvailableBalance(stakingDetails.tokenSymbol) >= stakingDetails.amount, "Insufficient balance");
 
         // _ACTIVE = 2
         require(tokenManager.tokenToStatus(stakingDetails.tokenAddress) == 2, "Token not supported");
