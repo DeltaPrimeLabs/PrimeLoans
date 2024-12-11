@@ -73,7 +73,33 @@ const SCRIPTS = {
             'protocol upgrade'
         ],
         extractParams: (text) => [] // No params needed as script handles all prompts
-    }
+    },
+    'check-pools-surplus': {
+        path: path.join(__dirname, 'scripts', 'check-pools-surplus.js'),
+        description: 'Shows surplus/deficit situation for lending pools',
+        patterns: [
+            'check surplus',
+            'show surplus',
+            'pool surplus',
+            'check pool surplus',
+            'pool balance',
+            'check pool balance',
+            'show pool balance',
+            'check pools',
+            'pool status',
+            'surplus status'
+        ],
+        extractParams: (text) => {
+            const networks = ['avalanche', 'arbitrum', 'all'];
+            // Try to find network specification in the text
+            for (const network of networks) {
+                if (text.toLowerCase().includes(network)) {
+                    return [network];
+                }
+            }
+            return ['all']; // Default to all networks if none specified
+        }
+    },
 };
 
 // Create readline interface
