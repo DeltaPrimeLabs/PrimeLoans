@@ -103,7 +103,13 @@ describe('Smart loan', () => {
 
             smartLoansFactory = await deployContract(owner, SmartLoansFactoryArtifact) as SmartLoansFactory;
 
-            await deployPools(smartLoansFactory, poolNameAirdropList, tokenContracts, poolContracts, lendingPools, owner, depositor);
+            let tokenManager = await deployContract(
+                owner,
+                MockTokenManagerArtifact,
+                []
+            ) as MockTokenManager;
+
+            await deployPools(smartLoansFactory, poolNameAirdropList, tokenContracts, poolContracts, lendingPools, owner, depositor,  1000, 'AVAX', [], tokenManager.address);
             tokensPrices = await getTokensPricesMap(
                 assetsList,
                 "avalanche",
@@ -114,11 +120,7 @@ describe('Smart loan', () => {
             supportedAssets = convertAssetsListToSupportedAssets(assetsList);
             addMissingTokenContracts(tokenContracts, assetsList);
 
-            let tokenManager = await deployContract(
-                owner,
-                MockTokenManagerArtifact,
-                []
-            ) as MockTokenManager;
+
 
             await tokenManager.connect(owner).initialize(supportedAssets, lendingPools);
             await tokenManager.connect(owner).setFactoryAddress(smartLoansFactory.address);
@@ -209,13 +211,13 @@ describe('Smart loan', () => {
 
             await network.provider.request({
                 method: "hardhat_setBalance",
-                params: ["0x0f1DfeF1a40557d279d0de6E49aB306891A638b8", "0xffffffffffffffff"],
+                params: ["0xF362feA9659cf036792c9cb02f8ff8198E21B4cB", "0xffffffffffffffff"],
             });
             await network.provider.request({
                 method: "hardhat_impersonateAccount",
-                params: ["0x0f1DfeF1a40557d279d0de6E49aB306891A638b8"],
+                params: ["0xF362feA9659cf036792c9cb02f8ff8198E21B4cB"],
             });
-            const sAvaxWhale = await ethers.provider.getSigner('0x0f1DfeF1a40557d279d0de6E49aB306891A638b8');
+            const sAvaxWhale = await ethers.provider.getSigner('0xF362feA9659cf036792c9cb02f8ff8198E21B4cB');
             await tokenContracts.get('sAVAX')!.connect(sAvaxWhale).transfer(owner.address, toWei("50"));
             await tokenContracts.get('sAVAX')!.connect(owner).approve(wrappedLoan.address, toWei("50"));
             await wrappedLoan.fund(toBytes32("sAVAX"), toWei("50"));

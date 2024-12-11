@@ -35,7 +35,7 @@ contract AssetsOperationsArbitrumFacet is AssetsOperationsFacet {
         * Withdraws specified amount of a GLP
         * @param _amount to be withdrawn
     **/
-//    function withdrawGLP(uint256 _amount) public override onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
+    function withdrawGLP(uint256 _amount) public override onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
 //        IERC20Metadata token = getERC20TokenInstance("GLP", true);
 //        IERC20Metadata stakedGlpToken = IERC20Metadata(0x5402B5F40310bDED796c7D0F3FF6683f5C0cFfdf);
 //        _amount = Math.min(token.balanceOf(address(this)), _amount);
@@ -49,7 +49,7 @@ contract AssetsOperationsArbitrumFacet is AssetsOperationsFacet {
 //        tokenManager.decreaseProtocolExposure("GLP", _amount);
 //
 //        emit Withdrawn(msg.sender, "GLP", _amount, block.timestamp);
-//    }
+    }
 
     function isWhitelistedAdapterOptimized(address adapter) public override pure returns (bool) {
         if (adapter == 0x9b96595298a1Ba7b6c389f217d55896960BBB4AE) return true;  // ?
