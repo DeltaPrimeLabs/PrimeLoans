@@ -32,11 +32,11 @@ contract AssetsOperationsAvalancheFacet is AssetsOperationsFacet {
         emit Funded(msg.sender, "GLP", _amount, block.timestamp);
     }
 
-    /**
-        * Withdraws specified amount of a GLP
-        * @param _amount to be withdrawn
-    **/
-//    function withdrawGLP(uint256 _amount) public override onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
+//    /**
+//        * Withdraws specified amount of a GLP
+//        * @param _amount to be withdrawn
+//    **/
+    function withdrawGLP(uint256 _amount) public override onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
 //        IERC20Metadata token = getERC20TokenInstance("GLP", true);
 //        IERC20Metadata stakedGlpToken = IERC20Metadata(0xaE64d55a6f09E4263421737397D1fdFA71896a69);
 //        _amount = Math.min(token.balanceOf(address(this)), _amount);
@@ -50,5 +50,5 @@ contract AssetsOperationsAvalancheFacet is AssetsOperationsFacet {
 //        tokenManager.decreaseProtocolExposure("GLP", _amount);
 //
 //        emit Withdrawn(msg.sender, "GLP", _amount, block.timestamp);
-//    }
+    }
 }
