@@ -244,14 +244,8 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             WOMBAT_sAVAX_AVAX_LP_sAVAX,
             amount,
             this.sAvaxBalanceAvaxSavax.selector,
-            this.unstakeAndWithdrawAvaxSavaxLpSavax.selector
+            this.withdrawSavaxFromAvaxSavax.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxSavaxLpSavax(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return _unstakeAndWithdrawWombatLP(WOMBAT_sAVAX_AVAX_LP_sAVAX, amount);
     }
 
     function depositAndStakeAvaxSavaxLpAvax(uint256 amount) external {
@@ -259,14 +253,8 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             WOMBAT_sAVAX_AVAX_LP_AVAX,
             amount,
             this.avaxBalanceAvaxSavax.selector,
-            this.unstakeAndWithdrawAvaxSavaxLpAvax.selector
+            this.withdrawAvaxFromAvaxSavax.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxSavaxLpAvax(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return _unstakeAndWithdrawWombatLP(WOMBAT_sAVAX_AVAX_LP_AVAX, amount);
     }
 
     function depositAvaxGgavaxLpGgavax(uint256 amount) external {
@@ -274,14 +262,8 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             WOMBAT_ggAVAX_AVAX_LP_ggAVAX,
             amount,
             this.ggAvaxBalanceAvaxGgavax.selector,
-            this.unstakeAndWithdrawAvaxGgavaxLpGgavax.selector
+            this.withdrawGgavaxFromAvaxGgavax.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxGgavaxLpGgavax(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return _unstakeAndWithdrawWombatLP(WOMBAT_ggAVAX_AVAX_LP_ggAVAX, amount);
     }
 
     function depositAndStakeAvaxGgavaxLpAvax(uint256 amount) external {
@@ -289,14 +271,8 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             WOMBAT_ggAVAX_AVAX_LP_AVAX,
             amount,
             this.avaxBalanceAvaxGgavax.selector,
-            this.unstakeAndWithdrawAvaxGgavaxLpAvax.selector
+            this.withdrawAvaxFromAvaxGgavax.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxGgavaxLpAvax(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return _unstakeAndWithdrawWombatLP(WOMBAT_ggAVAX_AVAX_LP_AVAX, amount);
     }
 
     function claimAllWombatRewards() external onlyOwner nonReentrant remainsSolvent {
@@ -621,39 +597,6 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         _addStakingPosition(lpToken, lpAsset, balanceSelector, unstakeSelector);
     }
 
-    function _unstakeAndWithdrawWombatLP(
-        bytes32 lpAsset,
-        uint256 amount
-    )
-    internal
-    onlyOwner
-    nonReentrant
-    remainsSolvent
-    canRepayDebtFully
-    noBorrowInTheSameBlock
-    returns (uint256 amountOut)
-    {
-        IERC20Metadata lpToken = getERC20TokenInstance(lpAsset, false);
-        uint256 pid = IWombatMaster(WOMBAT_MASTER).getAssetPid(address(lpToken));
-
-        amount = Math.min(amount, getLpTokenBalance(lpAsset));
-        require(amount > 0, "Cannot withdraw 0 tokens");
-
-        RewardSnapshot[] memory snapshots = _captureRewardSnapshots(pid);
-        (uint256 reward, uint256[] memory additionalRewards) = IWombatMaster(
-            WOMBAT_MASTER
-        ).withdraw(pid, amount);
-
-        address(lpToken).safeTransfer(msg.sender, amount);
-
-        if (getLpTokenBalance(lpAsset) == 0) {
-            DiamondStorageLib.removeStakedPosition(lpAsset);
-        }
-
-        handleRewards(pid, reward, additionalRewards, snapshots);
-
-        return amount;
-    }
 
     function _addStakingPosition(
         IERC20Metadata lpToken,
