@@ -388,6 +388,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         vars.lpToken = getERC20TokenInstance(lpAsset, false);
         vars.amount = Math.min(vars.stakeToken.balanceOf(address(this)), amount);
 
+        require(_getAvailableBalance(stakeAsset) >= vars.amount, "Insufficient balance");
         require(vars.amount > 0, "Cannot deposit 0 tokens");
 
         address(vars.stakeToken).safeApprove(pool, 0);
@@ -430,6 +431,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 pid = IWombatMaster(WOMBAT_MASTER).getAssetPid(address(tokensDetails.lpToken));
 
         amount = Math.min(amount, getLpTokenBalance(lpAsset));
+        require(_getAvailableBalance(lpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         RewardSnapshot[] memory snapshots = _captureRewardSnapshots(pid);
@@ -483,6 +485,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         IERC20Metadata lpToken = getERC20TokenInstance(lpAsset, false);
 
         amount = Math.min(wrapped.balanceOf(address(this)), amount);
+        require(_getAvailableBalance(DeploymentConstants.getNativeTokenSymbol()) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot deposit 0 tokens");
 
         wrapped.withdraw(amount);
@@ -524,6 +527,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 pid = IWombatMaster(WOMBAT_MASTER).getAssetPid(address(tokensDetailsWithNative.lpToken));
 
         amount = Math.min(amount, getLpTokenBalance(lpAsset));
+        require(_getAvailableBalance(lpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         RewardSnapshot[] memory snapshots = _captureRewardSnapshots(pid);
