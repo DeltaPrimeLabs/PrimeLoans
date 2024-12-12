@@ -203,7 +203,7 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         amount = Math.min(yakStakingContract.balanceOf(address(this)), amount);
 
-        require(_getAvailableBalance("AVAX") >= amount, "Insufficient balance");
+        require(_getAvailableBalance("YY_AAVE_AVAX") >= amount, "Insufficient balance");
 
         yakStakingContract.withdraw(amount);
 
