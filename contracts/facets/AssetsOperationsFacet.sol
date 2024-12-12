@@ -209,6 +209,8 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     function repay(bytes32 _asset, uint256 _amount) public payable nonReentrant {
         IERC20Metadata token = getERC20TokenInstance(_asset, true);
 
+        require(_getAvailableBalance(_asset) >= _amount, "Insufficient balance");
+
         if (_isSolvent()) {
             DiamondStorageLib.enforceIsContractOwner();
         }
