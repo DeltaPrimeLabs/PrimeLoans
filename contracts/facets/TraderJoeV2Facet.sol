@@ -179,7 +179,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         emit FundedLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
     }
 
-//    function withdrawLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant onlyOwner canRepayDebtFully noBorrowInTheSameBlock remainsSolvent {
+    function withdrawLiquidityTraderJoeV2(ILBPair pair, uint256[] memory ids, uint256[] memory amounts) external nonReentrant onlyOwner canRepayDebtFully noBorrowInTheSameBlock remainsSolvent {
 //        if (!isPairWhitelisted(address(pair))) revert TraderJoeV2PoolNotWhitelisted();
 //
 //        pair.batchTransferFrom(address(this), msg.sender, ids, amounts);
@@ -200,7 +200,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
 //        }
 //
 //        emit WithdrawnLiquidityTraderJoeV2(msg.sender, address(pair), ids, amounts, block.timestamp);
-//    }
+    }
 
 
     function addLiquidityTraderJoeV2(ILBRouter traderJoeV2Router, ILBRouter.LiquidityParameters memory liquidityParameters) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
@@ -215,6 +215,9 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
 
         bytes32 tokenX = tokenManager.tokenAddressToSymbol(address(liquidityParameters.tokenX));
         bytes32 tokenY = tokenManager.tokenAddressToSymbol(address(liquidityParameters.tokenY));
+
+        require(_getAvailableBalance(tokenX) >= liquidityParameters.amountX, "Insufficient balance");
+        require(_getAvailableBalance(tokenY) >= liquidityParameters.amountY, "Insufficient balance");
 
         liquidityParameters.to = address(this);
         liquidityParameters.refundTo = address(this);
