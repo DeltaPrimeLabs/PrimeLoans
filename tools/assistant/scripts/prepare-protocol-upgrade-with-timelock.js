@@ -11,6 +11,17 @@ const DIAMOND_LOUPE_ABI = [
     "function facetAddress(bytes4 _functionSelector) external view returns (address)"
 ];
 
+// List of functions to automatically skip
+const EXCLUDED_FUNCTIONS = [
+    '_getAllPricesForLiquidation',
+    '_getHealthRatio',
+    '_getHealthRatioWithPrices',
+    '_getThresholdWeightedValue',
+    '_getThresholdWeightedValuePayable',
+    'extractTimestampsAndAssertAllAreEqual',
+    'getPrice'
+];
+
 // Network configurations
 const NETWORKS = {
     avalanche: {
@@ -193,9 +204,18 @@ async function prepareProtocolUpgradeWithTimelock() {
         const rollbackCuts = [];
         const facetAddress = await promptUser('\nEnter the facet address (new implementation):');
 
+        // Keep track of skipped functions for reporting
+        const automaticallySkipped = [];
+
         for (const func of selectedContract.abi.filter(item => item.type === 'function')) {
             const types = func.inputs.map(input => input.type);
             const selector = ethers.utils.id(`${func.name}(${types.join(',')})`).slice(0, 10);
+
+            // Check if function should be automatically skipped
+            if (EXCLUDED_FUNCTIONS.includes(func.name)) {
+                automaticallySkipped.push(func.name);
+                continue;
+            }
 
             console.log(`\nFunction: ${func.name}`);
             console.log(`Selector: ${selector}`);
@@ -224,6 +244,11 @@ async function prepareProtocolUpgradeWithTimelock() {
                 console.log('Invalid action for current selector state - skipping');
                 continue;
             }
+        }
+
+        if (automaticallySkipped.length > 0) {
+            console.log('\nAutomatically skipped the following functions:');
+            automaticallySkipped.forEach(funcName => console.log(`- ${funcName}`));
         }
 
         if (cuts.length === 0) {
