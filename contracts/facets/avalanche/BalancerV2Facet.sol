@@ -47,6 +47,7 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
         for (uint256 i; i < stakedTokensLength; i++) {
             if (request.stakedAmounts[i] > 0 && !tokenManager.isTokenAssetActive(request.stakedTokens[i])) revert DepositingInactiveToken();
             if (request.stakedTokens[i] == address(gauge)) revert DepositingWrongToken();
+            require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(request.stakedTokens[i])) >= request.stakedAmounts[i], "Insufficient balance");
         }
 
         uint256[] memory initialDepositTokenBalances = new uint256[](stakedTokensLength);
@@ -183,6 +184,8 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
 
         uint256 initialGaugeBalance = IERC20(gauge).balanceOf(address(this));
         amount = Math.min(amount, IERC20(pool).balanceOf(address(this)));
+
+        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(pool)) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot stake 0 tokens");
 
         IERC20(pool).approve(address(gauge), amount);
