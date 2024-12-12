@@ -357,6 +357,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address yyLpToken = _getYRT(yyLpAsset);
 
         amount = Math.min(stakeToken.balanceOf(address(this)), amount);
+        require(_getAvailableBalance(stakeAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot deposit 0 tokens");
 
         address(stakeToken).safeApprove(wombatPool, 0);
@@ -407,6 +408,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address yyLpToken = _getYRT(yyLpAsset);
 
         amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
+        require(_getAvailableBalance(yyLpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         IYYWombatPool(yyLpToken).withdraw(amount);
@@ -459,6 +461,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address yyLpToken = _getYRT(yyLpAsset);
 
         amount = Math.min(wrapped.balanceOf(address(this)), amount);
+        require(_getAvailableBalance(DeploymentConstants.getNativeTokenSymbol()) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot deposit 0 tokens");
 
         wrapped.withdraw(amount);
@@ -508,6 +511,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address yyLpToken = _getYRT(yyLpAsset);
 
         amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
+        require(_getAvailableBalance(yyLpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         IYYWombatPool(yyLpToken).withdraw(amount);
@@ -591,23 +595,23 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         noBorrowInTheSameBlock
         returns (uint256 amountOut)
     {
-        IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
-        address yyLpToken = _getYRT(yyLpAsset);
-
-        amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
-        require(amount > 0, "Cannot withdraw 0 tokens");
-
-        IYYWombatPool(yyLpToken).withdraw(amount);
-
-        address(wombatLpToken).safeTransfer(
-            msg.sender,
-            wombatLpToken.balanceOf(address(this))
-        );
-
-        if (getLpTokenBalance(yyLpAsset) == 0) {
-            DiamondStorageLib.removeStakedPosition(yyLpAsset);
-        }
-
+//        IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
+//        address yyLpToken = _getYRT(yyLpAsset);
+//
+//        amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
+//        require(amount > 0, "Cannot withdraw 0 tokens");
+//
+//        IYYWombatPool(yyLpToken).withdraw(amount);
+//
+//        address(wombatLpToken).safeTransfer(
+//            msg.sender,
+//            wombatLpToken.balanceOf(address(this))
+//        );
+//
+//        if (getLpTokenBalance(yyLpAsset) == 0) {
+//            DiamondStorageLib.removeStakedPosition(yyLpAsset);
+//        }
+//
         return amount;
     }
 
