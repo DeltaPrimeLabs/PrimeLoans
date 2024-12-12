@@ -71,25 +71,11 @@ interface IYieldYakWombatFacet {
 
     function depositAndStakeAvaxSavaxLpSavaxYY(uint256 amount) external;
 
-    function unstakeAndWithdrawAvaxSavaxLpSavaxYY(uint256 amount) external;
-
     function depositAndStakeAvaxSavaxLpAvaxYY(uint256 amount) external;
-
-    function unstakeAndWithdrawAvaxSavaxLpAvaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut);
 
     function depositAvaxGgavaxLpGgavaxYY(uint256 amount) external;
 
-    function unstakeAndWithdrawAvaxGgavaxLpGgavaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut);
-
     function depositAndStakeAvaxGgavaxLpAvaxYY(uint256 amount) external;
-
-    function unstakeAndWithdrawAvaxGgavaxLpAvaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut);
 
     function migrateAvaxSavaxLpSavaxFromWombatToYY() external;
 

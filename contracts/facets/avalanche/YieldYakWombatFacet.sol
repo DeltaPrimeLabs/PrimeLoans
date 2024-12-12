@@ -264,19 +264,8 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             YY_sAVAX_AVAX_LP_sAVAX,
             amount,
             this.sAvaxBalanceAvaxSavaxYY.selector,
-            this.unstakeAndWithdrawAvaxSavaxLpSavaxYY.selector
+            this.withdrawSavaxFromAvaxSavaxYY.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxSavaxLpSavaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return
-            _unstakeAndWithdrawWombatLP(
-                WOMBAT_sAVAX_AVAX_LP_sAVAX,
-                YY_sAVAX_AVAX_LP_sAVAX,
-                amount
-            );
     }
 
     function depositAndStakeAvaxSavaxLpAvaxYY(uint256 amount) external {
@@ -285,19 +274,8 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             YY_sAVAX_AVAX_LP_AVAX,
             amount,
             this.avaxBalanceAvaxSavaxYY.selector,
-            this.unstakeAndWithdrawAvaxSavaxLpAvaxYY.selector
+            this.withdrawAvaxFromAvaxSavaxYY.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxSavaxLpAvaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return
-            _unstakeAndWithdrawWombatLP(
-                WOMBAT_sAVAX_AVAX_LP_AVAX,
-                YY_sAVAX_AVAX_LP_AVAX,
-                amount
-            );
     }
 
     function depositAvaxGgavaxLpGgavaxYY(uint256 amount) external {
@@ -306,19 +284,8 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             YY_ggAVAX_AVAX_LP_ggAVAX,
             amount,
             this.ggAvaxBalanceAvaxGgavaxYY.selector,
-            this.unstakeAndWithdrawAvaxGgavaxLpGgavaxYY.selector
+            this.withdrawGgavaxFromAvaxGgavaxYY.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxGgavaxLpGgavaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return
-            _unstakeAndWithdrawWombatLP(
-                WOMBAT_ggAVAX_AVAX_LP_ggAVAX,
-                YY_ggAVAX_AVAX_LP_ggAVAX,
-                amount
-            );
     }
 
     function depositAndStakeAvaxGgavaxLpAvaxYY(uint256 amount) external {
@@ -327,19 +294,8 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             YY_ggAVAX_AVAX_LP_AVAX,
             amount,
             this.avaxBalanceAvaxGgavaxYY.selector,
-            this.unstakeAndWithdrawAvaxGgavaxLpAvaxYY.selector
+            this.withdrawAvaxFromAvaxGgavaxYY.selector
         );
-    }
-
-    function unstakeAndWithdrawAvaxGgavaxLpAvaxYY(
-        uint256 amount
-    ) external returns (uint256 amountOut) {
-        return
-            _unstakeAndWithdrawWombatLP(
-                WOMBAT_ggAVAX_AVAX_LP_AVAX,
-                YY_ggAVAX_AVAX_LP_AVAX,
-                amount
-            );
     }
 
     function _depositToken(
@@ -580,39 +536,6 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
                 unstakeSelector: unstakeSelector
             });
         DiamondStorageLib.addStakedPosition(position);
-    }
-
-    function _unstakeAndWithdrawWombatLP(
-        bytes32 wombatLpAsset,
-        bytes32 yyLpAsset,
-        uint256 amount
-    )
-        internal
-        onlyOwner
-        nonReentrant
-        remainsSolvent
-        canRepayDebtFully
-        noBorrowInTheSameBlock
-        returns (uint256 amountOut)
-    {
-//        IERC20Metadata wombatLpToken = getERC20TokenInstance(wombatLpAsset, false);
-//        address yyLpToken = _getYRT(yyLpAsset);
-//
-//        amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
-//        require(amount > 0, "Cannot withdraw 0 tokens");
-//
-//        IYYWombatPool(yyLpToken).withdraw(amount);
-//
-//        address(wombatLpToken).safeTransfer(
-//            msg.sender,
-//            wombatLpToken.balanceOf(address(this))
-//        );
-//
-//        if (getLpTokenBalance(yyLpAsset) == 0) {
-//            DiamondStorageLib.removeStakedPosition(yyLpAsset);
-//        }
-//
-        return amount;
     }
 
     function _getYRT(bytes32 yyLpAsset) internal view returns (address) {
