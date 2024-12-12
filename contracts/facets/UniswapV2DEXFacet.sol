@@ -53,6 +53,8 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     * @param _minimumBought minimum amount of asset to be bought
     **/
     function swapAssets(bytes32 _soldAsset, bytes32 _boughtAsset, uint256 _exactSold, uint256 _minimumBought) internal remainsSolvent returns (uint256[] memory) {
+        require(_getAvailableBalance(_soldAsset) >= _exactSold, "Insufficient balance");
+
         IERC20Metadata soldToken = getERC20TokenInstance(_soldAsset, true);
         IERC20Metadata boughtToken = getERC20TokenInstance(_boughtAsset, false);
 
@@ -80,6 +82,9 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     * Adds liquidity
     **/
     function addLiquidity(bytes32 _assetA, bytes32 _assetB, uint amountA, uint amountB, uint amountAMin, uint amountBMin) internal remainsSolvent {
+        require(_getAvailableBalance(_assetA) >= amountA, "Insufficient balance");
+        require(_getAvailableBalance(_assetB) >= amountB, "Insufficient balance");
+
         IERC20Metadata tokenA = getERC20TokenInstance(_assetA, false);
         IERC20Metadata tokenB = getERC20TokenInstance(_assetB, false);
 
@@ -118,11 +123,13 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         address lpTokenAddress = exchange.getPair(address(tokenA), address(tokenB));
         liquidity = Math.min(liquidity, IERC20(lpTokenAddress).balanceOf(address(this)));
 
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(lpTokenAddress)) >= liquidity, "Insufficient balance");
+
         lpTokenAddress.safeTransfer(getExchangeIntermediaryContract(), liquidity);
 
         (uint amountA, uint amountB) = exchange.removeLiquidity(address(tokenA), address(tokenB), liquidity, amountAMin, amountBMin);
 
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         _decreaseExposure(tokenManager, lpTokenAddress, liquidity);
         _increaseExposure(tokenManager, address(tokenA), amountA);
         _increaseExposure(tokenManager, address(tokenB), amountB);
