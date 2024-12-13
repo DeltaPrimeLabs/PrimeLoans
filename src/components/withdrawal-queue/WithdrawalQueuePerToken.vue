@@ -112,7 +112,7 @@ export default {
   },
 
   computed: {
-    ...mapState('serviceRegistry', ['poolService', 'withdrawQueueService', 'priceService']),
+    ...mapState('serviceRegistry', ['poolService', 'poolWithdrawQueueService', 'priceService']),
     selectAllDisabled() {
       return this.entries.filter(({isPending}) => !isPending).length === 0
     },

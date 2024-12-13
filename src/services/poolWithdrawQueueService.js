@@ -8,7 +8,7 @@ import {awaitConfirmation} from '../utils/blockchain';
 
 const ethers = require('ethers');
 
-export default class WithdrawQueueService {
+export default class PoolWithdrawQueueService {
 
   progressBarService;
   modalService;

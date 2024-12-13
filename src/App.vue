@@ -373,7 +373,7 @@ export default {
     },
 
     watchPrimeAccountLoaded() {
-      this.accountService.observeSmartLoanContract$().subscribe(() => {
+      this.accountService.observeSmartLoanContract().subscribe(() => {
         // this.showPrimeAccountBanner = false;
         // this.showArbitrumPrimeAccountBanner = false;
 
@@ -401,7 +401,7 @@ export default {
       console.log('checking terms');
       combineLatest([
         this.accountService.observeAccountLoaded(),
-        this.accountService.observeSmartLoanContract$(),
+        this.accountService.observeSmartLoanContract(),
         this.poolService.observePools(),
         this.getCountry()
       ])

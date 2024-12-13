@@ -47,6 +47,8 @@ export default {
       "weETH": {name: "weETH", symbol: "weETH", logoExt: "png", decimals: 18, address: addresses.weETH, debtCoverage: 0.83333333333, tradingViewSymbol: "CRYPTO:WEETHUSD"},
       "rsETH": {name: "rsETH", symbol: "rsETH", logoExt: "png", decimals: 18, address: addresses.rsETH, debtCoverage: 0.83333333333},
       // "SOL": {name: "SOL", symbol: "SOL", decimals: 18, address: addresses.SOL, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:SOLUSDT"},
+      "BNB": {name: "BNB", symbol: "BNB", decimals: 6, address: addresses.BNB, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:BNBUSDT"},
+      // "PA_MCK": {name: "PA_MCK", symbol: "PA_MCK", decimals: 18, address: addresses.PA_MCK, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:SOLUSDT"},
     },
     RTKN_ADDRESS: "0xF3EaA614dAb459FD4E9f4BC5460BD9b965ed6c76",
     RTKN_2_ADDRESS: "0x47f655e3B4D0b686D26FBAD9C6378f66D6388af7",

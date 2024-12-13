@@ -9,7 +9,7 @@ export default class accountService {
     return this.accountLoaded$.asObservable();
   }
 
-  observeSmartLoanContract$() {
+  observeSmartLoanContract() {
     return this.smartLoanContract$.asObservable();
   }
 

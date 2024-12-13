@@ -31,7 +31,8 @@ import vPrimeService from "../services/vPrimeService";
 import GlobalActionsDisableService from "../services/globalActionsDisableService";
 import AvalancheBoostService from '../services/avalancheBoostService';
 import RtknService from '../services/rtknService';
-import WithdrawQueueService from '../services/withdrawQueueService';
+import PoolWithdrawQueueService from '../services/poolWithdrawQueueService';
+import PAWithdrawQueueService from '../services/paWithdrawQueueService';
 
 const providerService = new ProviderService();
 const accountService = new AccountService();
@@ -75,6 +76,7 @@ export default {
     globalActionsDisableService: new GlobalActionsDisableService(),
     avalancheBoostService: new AvalancheBoostService(),
     rtknService: new RtknService(providerService, accountService, progressBarService, modalService),
-    withdrawQueueService: new WithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
+    poolWithdrawQueueService: new PoolWithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
+    paWithdrawQueueService: new PAWithdrawQueueService(providerService, accountService, progressBarService, modalService),
   },
 };

@@ -359,7 +359,7 @@ export default {
         this.getUserBinsAndBalances();
       });
 
-      this.accountService.observeSmartLoanContract$().subscribe(() => {
+      this.accountService.observeSmartLoanContract().subscribe(() => {
         this.setupAddActionsConfiguration();
         this.setupRemoveActionsConfiguration();
         this.setupMoreActionsConfiguration();

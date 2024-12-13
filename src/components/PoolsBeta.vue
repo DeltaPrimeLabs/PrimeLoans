@@ -93,7 +93,7 @@ export default {
       this.initStoresWhenProviderAndAccountCreated();
       this.lifiService.setupLifi();
       this.watchActiveRoute();
-      this.withdrawQueueService.getIntents();
+      this.poolWithdrawQueueService.getIntents();
       this.watchPoolIntents();
       this.watchQueueData();
       this.setupRTKN();
@@ -123,7 +123,7 @@ export default {
       'progressBarService',
       'avalancheBoostService',
       'rtknService',
-      'withdrawQueueService'
+      'poolWithdrawQueueService'
     ]),
     ...mapState('network', ['account', 'accountBalance', 'provider']),
   },
@@ -441,7 +441,7 @@ export default {
     },
 
     watchPoolIntents() {
-      this.withdrawQueueService.observePoolIntents().subscribe(poolIntents => {
+      this.poolWithdrawQueueService.observePoolIntents().subscribe(poolIntents => {
         console.log('------___---__--------__---___POOL INTENTS--------___---__---__--___--____');
         console.log(poolIntents);
         this.poolIntents = poolIntents;
@@ -451,7 +451,7 @@ export default {
     },
 
     watchQueueData() {
-      this.withdrawQueueService.observeQueueData().subscribe(queueData => {
+      this.poolWithdrawQueueService.observeQueueData().subscribe(queueData => {
         this.queueData = queueData;
         this.$forceUpdate();
         this.$refs.withdrawalQueue.refresh();

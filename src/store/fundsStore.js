@@ -7,6 +7,7 @@ import {
 } from '../utils/blockchain';
 import SMART_LOAN from '@artifacts/contracts/interfaces/SmartLoanGigaChadInterface.sol/SmartLoanGigaChadInterface.json';
 import ABI_WOMBAT_DYNAMIC_POOL_V2 from '../abis/WombatDynamicPoolV2.json';
+import WITHDRAWAL_FACET_ABI from '../abis/IWithdrawalFacet.json';
 import {formatUnits, fromWei, parseUnits, toWei} from '@/utils/calculate';
 import config from '@/config';
 import redstone from 'redstone-api';
@@ -791,7 +792,9 @@ export default {
       }
 
 
-      const smartLoanContract = new ethers.Contract(smartLoanAddress, SMART_LOAN.abi, provider.getSigner());
+      const primeAccountAbi = SMART_LOAN.abi;
+      primeAccountAbi.push(...WITHDRAWAL_FACET_ABI)
+      const smartLoanContract = new ethers.Contract(smartLoanAddress, primeAccountAbi, provider.getSigner());
 
       let readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
       const readSmartLoanContract = new ethers.Contract(smartLoanAddress, SMART_LOAN.abi, readProvider);

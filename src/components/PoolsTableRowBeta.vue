@@ -180,7 +180,7 @@ export default {
       'progressBarService',
       'providerService',
       'globalActionsDisableService',
-      'withdrawQueueService'
+      'poolWithdrawQueueService'
     ]),
   },
 
@@ -286,7 +286,7 @@ export default {
     },
 
     watchWithdrawalIntents() {
-      this.withdrawQueueService.observePoolIntents().subscribe(intents => {
+      this.poolWithdrawQueueService.observePoolIntents().subscribe(intents => {
         console.log('ROW_----------___--____-___--___---');
         console.log(intents);
         this.intents = intents[this.pool.asset.symbol];
@@ -431,7 +431,7 @@ export default {
         // }).then(() => {
         // });
 
-        this.withdrawQueueService.createWithdrawalIntent(this.pool.asset.symbol, withdrawEvent.value)
+        this.poolWithdrawQueueService.createWithdrawalIntent(this.pool.asset.symbol, withdrawEvent.value)
 
       });
     },

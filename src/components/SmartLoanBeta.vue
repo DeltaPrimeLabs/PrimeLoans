@@ -12,6 +12,15 @@
           :healthLoading="healthLoading">
       </StatsBarBeta>
 
+      <WithdrawalQueue v-if="queueData && assetIntents"
+                       ref="withdrawalQueue"
+                       :all-queues="assetIntents"
+                       :pending-count="queueData.totalPending"
+                       :ready-count="queueData.totalReady"
+                       :soon="queueData.soonestIntent"
+                       class="withdrawal-queue">
+      </WithdrawalQueue>
+
       <SPrimePanel v-if="afterLaunchTime" :is-prime-account="true" :user-address="account" :total-deposits-or-borrows="noSmartLoanInternal ? 0 : debt"></SPrimePanel>
 
       <InfoBubble v-if="noSmartLoanInternal === false" cacheKey="ACCOUNT-READY">
@@ -103,6 +112,7 @@ import LPTab from "./LPTab.vue";
 import Zaps from "./Zaps.vue";
 import LTIPStatsBar from './RTKNStatsBar.vue';
 import SPrimePanel from './SPrimePanel.vue';
+import WithdrawalQueue from "./withdrawal-queue/WithdrawalQueue.vue";
 
 const TABS = [
   {
@@ -133,6 +143,7 @@ const LAUNCH_TIME = 1719853200000;
 export default {
   name: 'SmartLoanBeta',
   components: {
+    WithdrawalQueue,
     SPrimePanel,
     LTIPStatsBar,
     Zaps,
@@ -188,7 +199,8 @@ export default {
       'collateralService',
       'debtService',
       'ggpIncentivesService',
-      'ltipService'
+      'ltipService',
+      'paWithdrawQueueService',
     ]),
     ...mapState('network', ['account']),
     primeAccountsBlocked() {
@@ -246,7 +258,9 @@ export default {
       showLPTab: Object.keys(config.TRADERJOEV2_LP_ASSETS_CONFIG).length || Object.keys(config.CONCENTRATED_LP_ASSETS_CONFIG).length || Object.keys(config.LP_ASSETS_CONFIG).length,
       showFarmsTab: Object.keys(config.FARMED_TOKENS_CONFIG).length,
       tabsRefs: [],
-      isArbitrum: false
+      isArbitrum: false,
+      assetIntents: null,
+      queueData: {},
     };
   },
 
@@ -260,6 +274,8 @@ export default {
     this.setupVideoVisibility();
     this.initAccountApr();
     this.initStoresWhenProviderAndAccountCreated();
+    this.watchAssetIntents();
+    this.watchQueueData();
   },
   methods: {
     ...mapActions('fundsStore', ['fundsStoreSetup', 'getAccountApr']),
@@ -426,6 +442,22 @@ export default {
       const videoWasClosed = window.localStorage.getItem(TUTORIAL_VIDEO_CLOSED_LOCALSTORAGE_KEY);
       this.videoVisible = !videoWasClosed;
     },
+
+    watchAssetIntents() {
+      this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
+        this.assetIntents = intents;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
+      })
+    },
+
+    watchQueueData() {
+      this.paWithdrawQueueService.observeQueueData().subscribe(queueData => {
+        this.queueData = queueData;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
+      })
+    },
   },
 };
 </script>
@@ -468,4 +500,7 @@ export default {
   }
 }
 
+.withdrawal-queue {
+  margin-top: 30px;
+}
 </style>
