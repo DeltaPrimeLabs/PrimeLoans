@@ -241,6 +241,10 @@ export default {
   actions: {
     async fundsStoreSetup({state, rootState, dispatch, commit}) {
       console.log('fundsStoreSetup')
+      rootState.serviceRegistry.fundsService.observeRequestUpdateFunds().subscribe(() => {
+        dispatch('updateFunds');
+      });
+
       if (!rootState.network.provider) return;
       await dispatch('loadDeployments');
       await dispatch('setupContracts');

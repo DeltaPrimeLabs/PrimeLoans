@@ -8,7 +8,7 @@
       <div class="amount">
         <div class="double-value staked-balance">
           <div class="double-value__pieces">
-            <img v-if="availableToWithdraw < entry.amount"
+            <img v-if="mode === 'POOLS' && availableToWithdraw < entry.amount"
                  src="src/assets/icons/warning.svg"
                  v-tooltip="{content: `This withdraw will likely fail, available withdrawal amount is less than the intent`, classes: 'info-tooltip long'}">
             {{ formatTokenBalanceWithLessThan(entry.amount, 8) }}
@@ -62,6 +62,7 @@ export default {
     entry: {},
     index: {},
     availableToWithdraw: {},
+    mode: {}
   },
 
   data() {
@@ -83,7 +84,8 @@ export default {
 
   computed: {
     ...mapState('serviceRegistry', [
-      'poolWithdrawQueueService'
+      'poolWithdrawQueueService',
+      'paWithdrawQueueService'
     ]),
   },
 
@@ -92,12 +94,21 @@ export default {
       this.$emit('selectionChange', isSelected);
     },
     onWithdrawClick() {
-      this.withdrawQueueService.executeWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+      if (this.mode === 'POOLS') {
+        this.poolWithdrawQueueService.executeWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+      } else {
+        this.paWithdrawQueueService.executeWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+      }
     },
 
     onCancelClick() {
       console.log('cancel');
-      this.withdrawQueueService.cancelWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+      if (this.mode === 'POOLS') {
+        this.poolWithdrawQueueService.cancelWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+      } else {
+        this.paWithdrawQueueService.cancelWithdrawalIntent(this.assetSymbol, [this.entry.id]);
+
+      }
 
     },
     selectionFromParentChange(isSelected) {

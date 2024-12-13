@@ -287,10 +287,7 @@ export default {
 
     watchWithdrawalIntents() {
       this.poolWithdrawQueueService.observePoolIntents().subscribe(intents => {
-        console.log('ROW_----------___--____-___--___---');
-        console.log(intents);
         this.intents = intents[this.pool.asset.symbol];
-        console.log(this.intents);
       })
     },
 
@@ -417,20 +414,7 @@ export default {
       modalInstance.queue = queue;
       modalInstance.extraIntents = extraIntents;
       modalInstance.$on('WITHDRAW', withdrawEvent => {
-        const withdrawRequest = {
-          assetSymbol: this.pool.asset.symbol,
-          amount: withdrawEvent.value,
-          withdrawNativeToken: withdrawEvent.withdrawNativeToken,
-        };
         console.log(withdrawEvent);
-        // this.handleTransaction(this.withdraw, {withdrawRequest: withdrawRequest}, () => {
-        //   this.pool.deposit = Number(this.pool.deposit) - withdrawRequest.amount;
-        //   this.$forceUpdate();
-        // }, (error) => {
-        //   this.handleTransactionError(error);
-        // }).then(() => {
-        // });
-
         this.poolWithdrawQueueService.createWithdrawalIntent(this.pool.asset.symbol, withdrawEvent.value)
 
       });

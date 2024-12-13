@@ -33,12 +33,14 @@ import AvalancheBoostService from '../services/avalancheBoostService';
 import RtknService from '../services/rtknService';
 import PoolWithdrawQueueService from '../services/poolWithdrawQueueService';
 import PAWithdrawQueueService from '../services/paWithdrawQueueService';
+import FundsService from '../services/fundsService';
 
 const providerService = new ProviderService();
 const accountService = new AccountService();
 const progressBarService = new ProgressBarService();
 const modalService = new ModalService();
 const poolService = new PoolService();
+const fundsService = new FundsService();
 
 export default {
   namespaced: true,
@@ -77,6 +79,7 @@ export default {
     avalancheBoostService: new AvalancheBoostService(),
     rtknService: new RtknService(providerService, accountService, progressBarService, modalService),
     poolWithdrawQueueService: new PoolWithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
-    paWithdrawQueueService: new PAWithdrawQueueService(providerService, accountService, progressBarService, modalService),
+    paWithdrawQueueService: new PAWithdrawQueueService(providerService, accountService, progressBarService, modalService, fundsService),
+    fundsService: fundsService
   },
 };

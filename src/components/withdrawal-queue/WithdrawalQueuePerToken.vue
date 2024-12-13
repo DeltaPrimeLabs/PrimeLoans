@@ -49,6 +49,7 @@
               :asset-price="assetPrice"
               :index="index"
               :available-to-withdraw="availableToWithdraw"
+              :mode="mode"
             ></WithdrawalQueuePerTokenRow>
           </div>
         </div>
@@ -77,6 +78,7 @@ export default {
   props: {
     assetSymbol: {},
     entries: [],
+    mode: {}
   },
 
   data() {
@@ -112,7 +114,7 @@ export default {
   },
 
   computed: {
-    ...mapState('serviceRegistry', ['poolService', 'poolWithdrawQueueService', 'priceService']),
+    ...mapState('serviceRegistry', ['poolService', 'poolWithdrawQueueService', 'priceService', 'paWithdrawQueueService']),
     selectAllDisabled() {
       return this.entries.filter(({isPending}) => !isPending).length === 0
     },
@@ -135,7 +137,7 @@ export default {
       })
       this.selectedRows = newSelectedRows
       this.currentTableHeight = this.isExpanded ? (this.entries.length * 63 + 53) + 'px' : '0px'
-      this.withdrawQueueService.getIntents();
+      this.poolWithdrawQueueService.getIntents();
     },
     rowSelectionChanged(index, isSelected) {
       if (isSelected) {
@@ -184,8 +186,11 @@ export default {
     },
 
     withdrawAll() {
-
-      this.withdrawQueueService.executeWithdrawalIntent(this.assetSymbol, this.selectedIds);
+      if (this.mode === 'POOLS') {
+        this.poolWithdrawQueueService.executeWithdrawalIntent(this.assetSymbol, this.selectedIds);
+      } else {
+        this.paWithdrawQueueService.executeWithdrawalIntent(this.assetSymbol, this.selectedIds);
+      }
     },
 
     refresh() {

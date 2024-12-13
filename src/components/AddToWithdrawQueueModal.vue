@@ -57,11 +57,6 @@
             :size="15"></DeltaIcon>
         </div>-->
       </div>
-
-      <div class="toggle-container" v-if="asset.symbol === toggleOptions[0]">
-        <Toggle v-on:change="assetToggleChange" :options="toggleOptions"></Toggle>
-      </div>
-
       <div class="button-wrapper">
         <Button :label="'Add to queue'"
                 v-on:click="submit()"

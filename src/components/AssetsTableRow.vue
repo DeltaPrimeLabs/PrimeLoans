@@ -184,6 +184,7 @@ import {BigNumber} from 'ethers';
 import SwapDebtModal from './SwapDebtModal.vue';
 import MintCAIModal from './MintCAIModal.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
+import AddToWithdrawQueueModal from './AddToWithdrawQueueModal.vue';
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -221,6 +222,8 @@ export default {
     this.watchFarmRefreshEvent();
     this.watchLtipMaxBoostUpdate();
     this.watchActionDisabling();
+    this.watchWithdrawalIntents();
+
   },
   data() {
     return {
@@ -242,6 +245,7 @@ export default {
       currentlyOpenModalInstance: null,
       boostApy: 0,
       isActionDisabledRecord: {},
+      intents: null,
     };
   },
   computed: {
@@ -286,6 +290,7 @@ export default {
       'farmService',
       'ltipService',
       'globalActionsDisableService',
+      'paWithdrawQueueService'
     ]),
 
     loanValue() {
@@ -942,66 +947,26 @@ export default {
     },
 
     openWithdrawModal() {
-      const modalInstance = this.openModal(WithdrawModal);
-      modalInstance.asset = this.asset;
+      const modalInstance = this.openModal(AddToWithdrawQueueModal);
+      let queue = [];
+      let extraIntents = 0
+      if (this.intents && this.intents.length > 0) {
+        queue = this.intents.slice(0, 2).map(intent => ({
+          amount: intent.amount,
+          symbol: this.asset.symbol,
+          status: intent.isPending ? 'PENDING' : 'READY',
+          date: intent.isPending ? intent.actionableAt : intent.expiresAt
+        }));
+        extraIntents = this.intents.length - queue.length;
+      }
       modalInstance.assetBalance = this.assetBalances[this.asset.symbol];
-      modalInstance.assets = this.assets;
-      modalInstance.assetBalances = this.assetBalances;
-      modalInstance.debtsPerAsset = this.debtsPerAsset;
-      modalInstance.lpAssets = this.lpAssets;
-      modalInstance.concentratedLpAssets = this.concentratedLpAssets;
-      modalInstance.traderJoeV2LpAssets = this.traderJoeV2LpAssets;
-      modalInstance.levelLpAssets = this.levelLpAssets;
-      modalInstance.levelLpBalances = this.levelLpBalances;
-      modalInstance.lpBalances = this.lpBalances;
-      modalInstance.concentratedLpBalances = this.concentratedLpBalances;
-      modalInstance.gmxV2Assets = this.gmxV2Assets;
-      modalInstance.gmxV2Balances = this.gmxV2Balances;
-      modalInstance.penpieLpAssets = this.penpieLpAssets;
-      modalInstance.penpieLpBalances = this.penpieLpBalances;
-      modalInstance.wombatLpAssets = this.wombatLpAssets;
-      modalInstance.wombatLpBalances = this.wombatLpBalances;
-      modalInstance.wombatYYFarmsBalances = this.wombatYYFarmsBalances;
-      modalInstance.balancerLpBalances = this.balancerLpBalances;
-      modalInstance.balancerLpAssets = this.balancerLpAssets;
-      modalInstance.farms = this.farms;
-      modalInstance.health = this.fullLoanStatus.health;
-      modalInstance.debt = this.fullLoanStatus.debt;
-      modalInstance.thresholdWeightedValue = this.fullLoanStatus.thresholdWeightedValue ? this.fullLoanStatus.thresholdWeightedValue : 0;
-
+      modalInstance.asset = config.ASSETS_CONFIG[this.asset.symbol];
+      modalInstance.queue = queue;
+      modalInstance.extraIntents = extraIntents;
       modalInstance.$on('WITHDRAW', withdrawEvent => {
-        const value = Number(withdrawEvent.value).toFixed(config.DECIMALS_PRECISION);
-        if (withdrawEvent.withdrawAsset === this.nativeAssetOptions[0]) {
-          const withdrawRequest = {
-            asset: withdrawEvent.withdrawAsset,
-            value: value,
-            assetDecimals: config.ASSETS_CONFIG[this.asset.symbol].decimals,
-            type: 'ASSET',
-          };
-          this.handleTransaction(this.withdrawNativeToken, {withdrawRequest: withdrawRequest}, () => {
-            this.$forceUpdate();
-          }, (error) => {
-            this.handleTransactionError(error);
-          })
-            .then(() => {
-            });
-        } else {
-          const withdrawRequest = {
-            asset: this.asset.symbol,
-            assetAddress: this.asset.address,
-            value: value,
-            assetDecimals: config.ASSETS_CONFIG[this.asset.symbol].decimals,
-            type: 'ASSET',
-            assetInactive: this.asset.unsupported || this.asset.inactive
-          };
-          this.handleTransaction(this.withdraw, {withdrawRequest: withdrawRequest}, () => {
-            this.$forceUpdate();
-          }, (error) => {
-            this.handleTransactionError(error);
-          })
-            .then(() => {
-            });
-        }
+        console.log(withdrawEvent);
+        this.paWithdrawQueueService.createWithdrawalIntent(this.asset.symbol, withdrawEvent.value)
+
       });
     },
 
@@ -1298,6 +1263,12 @@ export default {
           this.isActionDisabledRecord = isActionDisabledRecord;
           this.setupActionsConfiguration();
         })
+    },
+
+    watchWithdrawalIntents() {
+      this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
+        this.intents = intents[this.asset.symbol];
+      })
     },
 
     setupAvailableFarms() {

@@ -18,7 +18,8 @@
                          :all-queues="poolIntents"
                          :pending-count="queueData.totalPending"
                          :ready-count="queueData.totalReady"
-                         :soon="queueData.soonestIntent">
+                         :soon="queueData.soonestIntent"
+                         :mode="'POOLS'">
         </WithdrawalQueue>
 
         <!--        <WithdrawalQueuePerToken ref="tokenQueue" v-if="poolIntents['MCK']" :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>-->

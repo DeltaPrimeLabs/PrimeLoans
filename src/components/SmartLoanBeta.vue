@@ -18,6 +18,7 @@
                        :pending-count="queueData.totalPending"
                        :ready-count="queueData.totalReady"
                        :soon="queueData.soonestIntent"
+                       :mode="'PRIME_ACCOUNT'"
                        class="withdrawal-queue">
       </WithdrawalQueue>
 

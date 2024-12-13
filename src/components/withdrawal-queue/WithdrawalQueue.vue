@@ -29,7 +29,7 @@
       </div>
       <div class="body">
         <div class="queue-per-token" v-for="(entries, asset) in allQueues">
-          <WithdrawalQueuePerToken ref="tokenQueue" :asset-symbol="asset" :entries="entries"></WithdrawalQueuePerToken>
+          <WithdrawalQueuePerToken ref="tokenQueue" :asset-symbol="asset" :entries="entries" :mode="mode"></WithdrawalQueuePerToken>
         </div>
       </div>
     </div>
@@ -53,6 +53,7 @@ export default {
     pendingCount: {},
     readyCount: {},
     soon: {},
+    mode: {}
   },
 
   data() {

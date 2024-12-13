@@ -1,24 +1,22 @@
 import { BehaviorSubject, combineLatest, filter } from 'rxjs';
-import POOL from '../abis/Pool.json';
-import ERC_20_ABI from '../../test/abis/ERC20.json';
-import {formatUnits, parseUnits} from '../utils/calculate';
+import {formatUnits, mergeArrays, parseUnits} from '../utils/calculate';
 import config from '../config';
-import {BigNumber} from 'ethers';
-import SMART_LOAN from '@artifacts/contracts/interfaces/SmartLoanGigaChadInterface.sol/SmartLoanGigaChadInterface.json';
-import {awaitConfirmation} from '../utils/blockchain';
+import {awaitConfirmation, wrapContract} from '../utils/blockchain';
 
 
 const ethers = require('ethers');
 const toBytes32 = require('ethers').utils.formatBytes32String;
+const fromBytes32 = require('ethers').utils.parseBytes32String;
 
 export default class PAWithdrawQueueService {
 
   progressBarService;
   modalService;
+  fundsService;
 
   provider;
   account;
-  primeAccountContract;
+  smartLoanContract;
   assetIntents = {};
   assetIntents$ = new BehaviorSubject({});
   totalReady = 0;
@@ -26,15 +24,16 @@ export default class PAWithdrawQueueService {
   soonestIntent;
   queueData$ = new BehaviorSubject({});
 
-  constructor(providerService, accountService, progressBarService, modalService) {
+  constructor(providerService, accountService, progressBarService, modalService, fundsService) {
     this.progressBarService = progressBarService;
     this.modalService = modalService;
+    this.fundsService = fundsService;
     combineLatest([providerService.observeProviderCreated(), accountService.observeAccountLoaded(), accountService.observeSmartLoanContract()])
     .pipe(filter(([,, primeAccountContract]) => primeAccountContract))
       .subscribe(async ([provider, account, primeAccountContract]) => {
         this.provider = provider;
         this.account = account;
-        this.primeAccountContract = primeAccountContract;
+        this.smartLoanContract = primeAccountContract;
         this.getIntents();
       });
   }
@@ -67,15 +66,10 @@ export default class PAWithdrawQueueService {
     })
   }
 
-  async createIntent() {
-    await this.primeAccountContract.createWithdrawalIntent(toBytes32('BNB'), parseUnits('0.05', 6));
-    this.getIntents()
-  }
-
   async getIntentsPerAsset(assetSymbol) {
     let assetIntents = []
     try {
-      assetIntents = await this.primeAccountContract.getUserIntents(toBytes32(assetSymbol))
+      assetIntents = await this.smartLoanContract.getUserIntents(toBytes32(assetSymbol))
     } catch (e) {
       console.error('error while getting intents for ' + assetSymbol)
     }
@@ -126,6 +120,81 @@ export default class PAWithdrawQueueService {
         : lowest;
     }, null);
   }
+
+  async createWithdrawalIntent(assetSymbol, amount) {
+    this.progressBarService.requestProgressBar();
+    this.modalService.closeModal();
+    try {
+      const transaction = await this.smartLoanContract
+        .createWithdrawalIntent(
+          toBytes32(assetSymbol),
+          parseUnits(amount.toString(),
+            config.ASSETS_CONFIG[assetSymbol].decimals)
+        );
+      await awaitConfirmation(transaction, this.provider, 'createWithdrawalIntent');
+
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.getIntents();
+      }, config.refreshDelay);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  async executeWithdrawalIntent(assetSymbol, ids) {
+    const loanAssets = mergeArrays([(
+      await this.smartLoanContract.getAllOwnedAssets()).map(el => fromBytes32(el)),
+      (await this.smartLoanContract.getStakedPositions()).map(position => fromBytes32(position.symbol)),
+      Object.keys(config.POOLS_CONFIG),
+      'PRIME'
+    ]);
+
+    console.log(assetSymbol);
+    console.log(ids);
+    ids = ids.sort();
+    this.progressBarService.requestProgressBar();
+    const wrappedContract = await wrapContract(this.smartLoanContract, loanAssets);
+
+    try {
+      const transaction = await
+        wrappedContract.executeWithdrawalIntent(toBytes32(assetSymbol), ids, {gasLimit: 1000000});
+
+      await awaitConfirmation(transaction, this.provider, 'execute withdrawal intent');
+
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.getIntents();
+        this.fundsService.requestUpdateFunds();
+      }, config.refreshDelay);
+    } catch (error) {
+      console.error(error)
+      this.handleError(error)
+    }
+  }
+
+  async cancelWithdrawalIntent(assetSymbol, id) {
+    this.progressBarService.requestProgressBar();
+
+    try {
+      const transaction = await
+        this.smartLoanContract
+          .cancelWithdrawalIntent(toBytes32(assetSymbol), id, {gasLimit: 1000000});
+
+      await awaitConfirmation(transaction, this.provider, 'cancel withdrawal intent');
+
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.getIntents();
+      }, config.refreshDelay);
+    } catch (error) {
+      this.handleError(error)
+    }
+  }
+
 
   handleError(error) {
     switch (error.code) {

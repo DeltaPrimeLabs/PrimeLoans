@@ -27,7 +27,7 @@ export default class GlobalActionsDisableService {
     SWAP_DEBT: false,
     WRAP: false,
     CLAIM_GLP_REWARDS: false,
-    WITHDRAW: true,
+    WITHDRAW: false,
     BRIDGE_COLLATERAL: true,
   });
   poolsActions$ = new BehaviorSubject({
