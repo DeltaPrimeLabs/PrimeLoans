@@ -364,7 +364,6 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address yyLpToken = _getYRT(yyLpAsset);
 
         amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
-        require(_getAvailableBalance(yyLpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         IYYWombatPool(yyLpToken).withdraw(amount);
@@ -467,7 +466,6 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address yyLpToken = _getYRT(yyLpAsset);
 
         amount = Math.min(amount, IERC20Metadata(yyLpToken).balanceOf(address(this)));
-        require(_getAvailableBalance(yyLpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         IYYWombatPool(yyLpToken).withdraw(amount);

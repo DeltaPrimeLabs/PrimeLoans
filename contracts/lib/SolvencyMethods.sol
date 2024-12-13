@@ -10,9 +10,9 @@ import "../DiamondHelper.sol";
 // TODO Rename to contract instead of lib
 contract SolvencyMethods is DiamondHelper, ProxyConnector {
     // This function executes WithdrawalIntentFacet.getAvailableBalance()
-    function _getAvailableBalance(bytes32 _asset) internal view virtual returns (uint256) {
+    function _getAvailableBalance(bytes32 _asset) internal virtual returns (uint256) {
         return abi.decode(
-            proxyCalldataView(
+            proxyDelegateCalldata(
                 DiamondHelper._getFacetAddress(IWithdrawalIntentFacet.getAvailableBalance.selector),
                 abi.encodeWithSelector(IWithdrawalIntentFacet.getAvailableBalance.selector, _asset)
             ),

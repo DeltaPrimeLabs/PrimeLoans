@@ -9,7 +9,6 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import {DiamondStorageLib} from "../lib/DiamondStorageLib.sol";
 
-
 contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak, SolvencyMethods {
     using TransferHelper for address;
 
