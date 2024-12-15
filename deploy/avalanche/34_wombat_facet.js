@@ -20,6 +20,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         `WombatFacet implementation deployed at address: ${WombatFacet.address}`
     );
 
+    await new Promise(r => setTimeout(r, 10000));
+
     await verifyContract(hre,
         {
             address: WombatFacet.address,

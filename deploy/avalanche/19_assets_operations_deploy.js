@@ -20,7 +20,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     );
 
     // sleep 5 seconds
-    await new Promise(r => setTimeout(r, 20000));
+    await new Promise(r => setTimeout(r, 10000));
 
     await verifyContract(hre,
         {
