@@ -20,6 +20,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         `YieldYakFacetArbi implementation deployed at address: ${YieldYakFacetArbi.address}`
     );
 
+    await new Promise(r => setTimeout(r, 10000));
+
     await verifyContract(hre,
         {
             address: YieldYakFacetArbi.address,

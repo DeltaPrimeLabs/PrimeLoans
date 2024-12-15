@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 65136a418b6f93ab386bcb536b847bd1de0caf3a;
+// Last deployed from commit: 59a88715535c304ec9a5c035f3e455606a3c9d7a;
 pragma solidity 0.8.17;
 
 //This path is updated during deployment
