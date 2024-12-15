@@ -20,6 +20,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         `YieldYakSwapArbitrumFacet implementation deployed at address: ${YieldYakSwapArbitrumFacet.address}`
     );
 
+    await new Promise(r => setTimeout(r, 10000));
+
     await verifyContract(hre,
         {
             address: YieldYakSwapArbitrumFacet.address,

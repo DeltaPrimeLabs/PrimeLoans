@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let GLPFacetArbi = await deploy("GLPFacetArbi", {
         from: deployer,
-        gasLimit: 50000000,
         args: [],
     });
 
@@ -20,6 +19,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     console.log(
         `GLPFacetArbi implementation deployed at address: ${GLPFacetArbi.address}`
     );
+
+    await new Promise(r => setTimeout(r, 10000));
 
     await verifyContract(hre,
         {

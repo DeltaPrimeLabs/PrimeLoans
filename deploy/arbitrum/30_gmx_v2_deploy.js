@@ -10,32 +10,31 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     embedCommitHash("GmxV2FacetArbitrum", "./contracts/facets/arbitrum");
     embedCommitHash("GmxV2PlusFacetArbitrum", "./contracts/facets/arbitrum");
-    embedCommitHash("GmxV2CallbacksFacetArbitrum", "./contracts/facets/arbitrum");
+    // embedCommitHash("GmxV2CallbacksFacetArbitrum", "./contracts/facets/arbitrum");
 
-    let GmxV2CallbacksFacetArbitrum = await deploy("GmxV2CallbacksFacetArbitrum", {
-        from: deployer,
-        gasLimit: 100000000,
-        args: [],
-    });
-
-
-    console.log(
-        `GmxV2CallbacksFacetArbitrum implementation deployed at address: ${GmxV2CallbacksFacetArbitrum.address}`
-    );
-
-    await new Promise(r => setTimeout(r, 5000));
-
-    await verifyContract(hre,
-        {
-            address: GmxV2CallbacksFacetArbitrum.address,
-            contract: `contracts/facets/arbitrum/GmxV2CallbacksFacetArbitrum.sol:GmxV2CallbacksFacetArbitrum`,
-            constructorArguments: []
-        });
-    console.log(`Verified GmxV2CallbacksFacetArbitrum`);
+    // let GmxV2CallbacksFacetArbitrum = await deploy("GmxV2CallbacksFacetArbitrum", {
+    //     from: deployer,
+    //     gasLimit: 100000000,
+    //     args: [],
+    // });
+    //
+    //
+    // console.log(
+    //     `GmxV2CallbacksFacetArbitrum implementation deployed at address: ${GmxV2CallbacksFacetArbitrum.address}`
+    // );
+    //
+    // await new Promise(r => setTimeout(r, 5000));
+    //
+    // await verifyContract(hre,
+    //     {
+    //         address: GmxV2CallbacksFacetArbitrum.address,
+    //         contract: `contracts/facets/arbitrum/GmxV2CallbacksFacetArbitrum.sol:GmxV2CallbacksFacetArbitrum`,
+    //         constructorArguments: []
+    //     });
+    // console.log(`Verified GmxV2CallbacksFacetArbitrum`);
 
     let GmxV2PlusFacetArbitrum = await deploy("GmxV2PlusFacetArbitrum", {
         from: deployer,
-        gasLimit: 100000000,
         args: [],
     });
 
@@ -56,7 +55,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let GmxV2FacetArbitrum = await deploy("GmxV2FacetArbitrum", {
         from: deployer,
-        gasLimit: 100000000,
         args: [],
     });
 
