@@ -36,6 +36,23 @@ const NETWORKS = {
     }
 };
 
+// Helper function to get selectors from contract interface
+function getSelectors(contractInterface) {
+    const signatures = Object.keys(contractInterface.functions);
+    return signatures.reduce((acc, signature) => {
+        // Skip init function as it's special
+        if (signature !== 'init(bytes)') {
+            const selector = contractInterface.getSighash(signature);
+            acc.push({
+                signature,
+                selector,
+                name: signature.split('(')[0]
+            });
+        }
+        return acc;
+    }, []);
+}
+
 // Helper function to recursively find all JSON files
 function findJsonFiles(startPath) {
     let results = [];
@@ -140,30 +157,40 @@ async function selectNetwork() {
     return networks[selectedIndex];
 }
 
-async function getDiamondState(network, provider, contract) {
+async function getDiamondState(network, provider, contractArtifact) {
     const diamond = new ethers.Contract(NETWORKS[network].diamond, DIAMOND_LOUPE_ABI, provider);
+    const contractInterface = new ethers.utils.Interface(contractArtifact.abi);
 
     const existingSelectors = new Map();
     const selectorToFunction = new Map();
     const selectorToAddress = new Map();
+    const selectorToSignature = new Map();
 
-    for (const func of contract.abi.filter(item => item.type === 'function')) {
-        const types = func.inputs.map(input => input.type);
-        const selector = ethers.utils.id(`${func.name}(${types.join(',')})`).slice(0, 10);
+    // Get all selectors using the interface method
+    const selectors = getSelectors(contractInterface);
+
+    // Check each selector against the diamond
+    for (const { selector, signature, name } of selectors) {
         const facetAddress = await diamond.facetAddress(selector);
 
         if (facetAddress === ethers.constants.AddressZero) {
             existingSelectors.set(selector, false);
-            selectorToFunction.set(selector, func.name);
+            selectorToFunction.set(selector, name);
             selectorToAddress.set(selector, 'Not in diamond');
         } else {
             existingSelectors.set(selector, facetAddress);
-            selectorToFunction.set(selector, func.name);
+            selectorToFunction.set(selector, name);
             selectorToAddress.set(selector, facetAddress);
         }
+        selectorToSignature.set(selector, signature);
     }
 
-    return { existingSelectors, selectorToFunction, selectorToAddress };
+    return {
+        existingSelectors,
+        selectorToFunction,
+        selectorToAddress,
+        selectorToSignature
+    };
 }
 
 async function prepareProtocolUpgradeWithTimelock() {
@@ -200,7 +227,12 @@ async function prepareProtocolUpgradeWithTimelock() {
         );
         const selectedContract = matches[selectedIndex];
 
-        const { existingSelectors, selectorToFunction, selectorToAddress } = await getDiamondState(network, provider, selectedContract);
+        const {
+            existingSelectors,
+            selectorToFunction,
+            selectorToAddress,
+            selectorToSignature
+        } = await getDiamondState(network, provider, selectedContract);
 
         const cuts = [];
         const rollbackCuts = [];
@@ -209,19 +241,20 @@ async function prepareProtocolUpgradeWithTimelock() {
         // Keep track of skipped functions for reporting
         const automaticallySkipped = [];
 
-        for (const func of selectedContract.abi.filter(item => item.type === 'function')) {
-            const types = func.inputs.map(input => input.type);
-            const selector = ethers.utils.id(`${func.name}(${types.join(',')})`).slice(0, 10);
+        // Iterate through selectors instead of ABI
+        for (const [selector, exists] of existingSelectors) {
+            const functionName = selectorToFunction.get(selector);
 
             // Check if function should be automatically skipped
-            if (EXCLUDED_FUNCTIONS.includes(func.name)) {
-                automaticallySkipped.push(func.name);
+            if (EXCLUDED_FUNCTIONS.includes(functionName)) {
+                automaticallySkipped.push(functionName);
                 continue;
             }
 
-            console.log(`\nFunction: ${func.name}`);
+            console.log(`\nFunction: ${functionName}`);
+            console.log(`Signature: ${selectorToSignature.get(selector)}`);
             console.log(`Selector: ${selector}`);
-            console.log(`Current status: ${existingSelectors.get(selector) === false ?
+            console.log(`Current status: ${exists === false ?
                 'Not in diamond' :
                 `Exists in diamond at ${selectorToAddress.get(selector)}`}`);
 
@@ -232,14 +265,13 @@ async function prepareProtocolUpgradeWithTimelock() {
 
             if (action === 0) continue;
 
-            const exists = existingSelectors.get(selector) !== false;
-            if (action === 1 && exists) {
+            if (action === 1 && exists !== false) {
                 cuts.push({ selector, action: 1 });
                 rollbackCuts.push({ selector, action: 1, prevAddress: selectorToAddress.get(selector) });
-            } else if (action === 1 && !exists) {
+            } else if (action === 1 && exists === false) {
                 cuts.push({ selector, action: 0 });
                 rollbackCuts.push({ selector, action: 2 });
-            } else if (action === 2 && exists) {
+            } else if (action === 2 && exists !== false) {
                 cuts.push({ selector, action: 2 });
                 rollbackCuts.push({ selector, action: 0, prevAddress: selectorToAddress.get(selector) });
             } else {
@@ -393,7 +425,7 @@ async function prepareProtocolUpgradeWithTimelock() {
 
         // Format the report content
         const timestamp = Math.floor(Date.now() / 1000);
-        const filename = `diamond-cut-timelock-${timestamp}.md`;
+        const filename = `${network}-${contractName}-protocol-upgrade-${timestamp}.md`;
         const fileContent = `# Timelock Protocol Upgrade Operation Report
 > Generated on: ${new Date().toISOString()}
 
