@@ -3,6 +3,43 @@ const path = require('path');
 const ethers = require('ethers');
 const readline = require('readline');
 
+// ABI for Diamond Loupe interface
+const DIAMOND_LOUPE_ABI = [
+    "function facets() external view returns (tuple(address facetAddress, bytes4[] functionSelectors)[] memory facets_)",
+    "function facetFunctionSelectors(address _facet) external view returns (bytes4[] memory)",
+    "function facetAddresses() external view returns (address[] memory)",
+    "function facetAddress(bytes4 _functionSelector) external view returns (address)"
+];
+
+// Network configurations
+const NETWORKS = {
+    avalanche: {
+        rpc: "https://api.avax.network/ext/bc/C/rpc",
+        diamond: "0x2916B3bf7C35bd21e63D01C93C62FB0d4994e56D"
+    },
+    arbitrum: {
+        rpc: "https://arb1.arbitrum.io/rpc",
+        diamond: "0x62Cf82FB0484aF382714cD09296260edc1DC0c6c"
+    }
+};
+
+// Helper function to get selectors from contract interface
+function getSelectors(contractInterface) {
+    const signatures = Object.keys(contractInterface.functions);
+    return signatures.reduce((acc, signature) => {
+        // Skip init function as it's special
+        if (signature !== 'init(bytes)') {
+            const selector = contractInterface.getSighash(signature);
+            acc.push({
+                signature,
+                selector,
+                name: signature.split('(')[0]
+            });
+        }
+        return acc;
+    }, []);
+}
+
 // Helper function to recursively find all JSON files
 function findJsonFiles(startPath) {
     let results = [];
@@ -18,12 +55,12 @@ function findJsonFiles(startPath) {
             } else if (file.endsWith('.json')) {
                 try {
                     const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                    // Check if file is a contract artifact (should have an ABI)
                     if (content.abi) {
                         results.push({
                             path: filePath,
                             name: file.replace('.json', ''),
-                            fullPath: filePath
+                            fullPath: filePath,
+                            abi: content.abi
                         });
                     }
                 } catch (e) {
@@ -54,146 +91,136 @@ function fuzzyMatch(pattern, str) {
         strIdx++;
     }
 
-    // Return a score based on matches and length difference
     return {
         score: score,
         lengthDiff: Math.abs(pattern.length - str.length)
     };
 }
 
-// Helper function to get function selector
-function getFunctionSelector(functionName, types) {
-    const signature = `${functionName}(${types.join(',')})`;
-    return ethers.utils.id(signature).slice(0, 10);
+// Create readline interface for prompts
+function createInterface() {
+    return readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
 }
 
-// Create readline interface
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal: false  // Disable terminal mode to prevent double echo
-});
-
-async function promptUser(matches) {
-    console.log('\nMultiple matching contracts found:');
-    matches.forEach((match, index) => {
-        console.log(`[${index}] ${match.name} (${match.path})`);
-    });
+async function promptUser(message, choices = null) {
+    const rl = createInterface();
 
     return new Promise((resolve) => {
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-            terminal: true // Add this line
-        });
+        if (choices) {
+            console.log('\n' + message);
+            choices.forEach((choice, index) => {
+                console.log(`[${index}] ${choice}`);
+            });
 
-        const handleAnswer = (answer) => {
-            const selection = parseInt(answer.trim());
-
-            if (Number.isInteger(selection) && selection >= 0 && selection < matches.length) {
+            rl.question('\nPlease select by number: ', (answer) => {
                 rl.close();
-                resolve(matches[selection]);
-            } else {
-                console.log(`Invalid selection. Please enter a number between 0 and ${matches.length - 1}`);
-                rl.question('Please select a contract by number: ', handleAnswer);
-            }
-        };
-
-        rl.question('\nPlease select a contract by number: ', handleAnswer);
-
-        // Add error handler
-        rl.on('error', (err) => {
-            console.error('readline error:', err);
-            rl.close();
-            process.exit(1);
-        });
+                resolve(parseInt(answer.trim()));
+            });
+        } else {
+            rl.question(message + ' ', (answer) => {
+                rl.close();
+                resolve(answer.trim());
+            });
+        }
     });
 }
 
-// Make sure main process handles cleanup
-process.on('SIGINT', () => {
-    console.log('\nExiting...');
-    process.exit(0);
-});
-
-async function getContractSelectors(contractNamePattern) {
+async function findContractSelectors(contractPatternName = null) {
     try {
-        // Find all contract artifacts
         const artifactsPath = path.join(process.cwd(), 'artifacts/contracts');
+        const contractName = contractPatternName || await promptUser('Enter the contract name pattern:');
+
         const contractFiles = findJsonFiles(artifactsPath);
 
-        // Find matching contracts
         const matches = contractFiles
             .map(file => ({
                 ...file,
-                matchScore: fuzzyMatch(contractNamePattern, file.name)
+                matchScore: fuzzyMatch(contractName, file.name)
             }))
             .filter(file => file.matchScore.score > 0)
             .sort((a, b) => {
-                // Sort by score (descending) and then by length difference (ascending)
+                // First sort by score
                 if (b.matchScore.score !== a.matchScore.score) {
                     return b.matchScore.score - a.matchScore.score;
                 }
+                // Then by length difference (prefer closer length matches)
                 return a.matchScore.lengthDiff - b.matchScore.lengthDiff;
             })
-            .slice(0, 5); // Limit to top 5 matches
+            .slice(0, 5);
 
         if (matches.length === 0) {
             console.error('No matching contracts found');
-            process.exit(1);
+            return;
         }
 
-        // If multiple matches, prompt user to select one
-        const selectedContract = matches.length === 1 ?
-            matches[0] :
-            await promptUser(matches);
+        // If we have an exact match and a pattern was provided, use it directly
+        let selectedContract;
+        if (contractPatternName && matches.length > 0 && matches[0].name.toLowerCase() === contractPatternName.toLowerCase()) {
+            selectedContract = matches[0];
+            console.log(`Found exact match: ${selectedContract.name}`);
+        } else {
+            const selectedIndex = await promptUser(
+                'Select the contract:',
+                matches.map(m => `${m.name} (${m.path})`)
+            );
+            selectedContract = matches[selectedIndex];
+        }
 
-        // Read and parse the selected contract
-        const artifact = JSON.parse(fs.readFileSync(selectedContract.fullPath, 'utf8'));
-        const abi = artifact.abi;
+        const contractInterface = new ethers.utils.Interface(selectedContract.abi);
+        const selectors = getSelectors(contractInterface);
 
-        // Process functions and get their selectors
-        const functionSelectors = abi
-            .filter(item => item.type === 'function')
-            .map(func => {
-                const types = func.inputs.map(input => input.type);
-                const selector = getFunctionSelector(func.name, types);
-
-                return {
-                    name: func.name,
-                    signature: `${func.name}(${types.join(',')})`,
-                    selector: selector,
-                    stateMutability: func.stateMutability,
-                    inputs: func.inputs,
-                    outputs: func.outputs
-                };
-            });
-
-        console.log(`\nFunction selectors for ${selectedContract.name}:`);
-        console.log('----------------------------------------');
-        functionSelectors.forEach(func => {
-            console.log(`\nFunction: ${func.name}`);
-            console.log(`Signature: ${func.signature}`);
-            console.log(`Selector: ${func.selector}`);
-            console.log(`State Mutability: ${func.stateMutability}`);
-            console.log('Inputs:', func.inputs.map(input => `${input.type} ${input.name}`).join(', ') || 'none');
-            console.log('Outputs:', func.outputs.map(output => output.type).join(', ') || 'none');
+        console.log('\nFunction Selectors:');
+        console.log('-------------------');
+        selectors.forEach(({ signature, selector, name }) => {
+            console.log(`\nFunction: ${name}`);
+            console.log(`Signature: ${signature}`);
+            console.log(`Selector: ${selector}`);
         });
 
-        rl.close();
-        return functionSelectors;
+        // Optional: Check if these selectors exist in a deployed diamond
+        const checkDiamond = await promptUser('\nWould you like to check these selectors against a deployed diamond? (y/n)');
+
+        if (checkDiamond.toLowerCase() === 'y') {
+            const networks = Object.keys(NETWORKS);
+            const selectedNetworkIndex = await promptUser('Select network:', networks);
+            const network = networks[selectedNetworkIndex];
+
+            const provider = new ethers.providers.JsonRpcProvider(NETWORKS[network].rpc);
+            const diamond = new ethers.Contract(NETWORKS[network].diamond, DIAMOND_LOUPE_ABI, provider);
+
+            console.log('\nChecking selectors against diamond...');
+            console.log('-----------------------------------');
+
+            for (const { signature, selector, name } of selectors) {
+                const facetAddress = await diamond.facetAddress(selector);
+                const status = facetAddress === ethers.constants.AddressZero ?
+                    'Not in diamond' :
+                    `Exists in diamond at ${facetAddress}`;
+
+                console.log(`\nFunction: ${name}`);
+                console.log(`Signature: ${signature}`);
+                console.log(`Selector: ${selector}`);
+                console.log(`Status: ${status}`);
+            }
+        }
+
     } catch (error) {
-        console.error('Error:', error.message);
-        process.exit(1);
+        console.error('Error:', error);
+        throw error;
     }
 }
 
-// Check if contract name pattern is provided as command line argument
-if (process.argv.length < 3) {
-    console.error('Please provide the contract name pattern as an argument');
-    console.error('Usage: node find-contract-selectors.js ContractNamePattern');
-    process.exit(1);
+if (require.main === module) {
+    const contractName = process.argv[2];
+    findContractSelectors(contractName)
+        .then(() => process.exit(0))
+        .catch(error => {
+            console.error('Error:', error);
+            process.exit(1);
+        });
 }
 
-const contractNamePattern = process.argv[2];
-getContractSelectors(contractNamePattern);
+module.exports = { findContractSelectors };
