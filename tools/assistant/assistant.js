@@ -57,7 +57,7 @@ const SCRIPTS = {
             return potentialContract ? [potentialContract] : null;
         }
     },
-    'proptocol-upgrade-with-timelock': {
+    'protocol-upgrade-with-timelock': {
         path: path.join(__dirname, 'scripts', 'prepare-protocol-upgrade-with-timelock.js'),
         description: 'Prepares protocol upgrade data, including diamondCut calldata, timelock calldata and final report',
         patterns: [
@@ -67,7 +67,7 @@ const SCRIPTS = {
             'upgrade facet',
             'diamond upgrade',
             'diamond cut',
-            'timelock' +
+            'timelock',
             'prepare timelock',
             'upgrade',
             'protocol upgrade'
@@ -100,6 +100,34 @@ const SCRIPTS = {
             return ['all']; // Default to all networks if none specified
         }
     },
+    'compare-contracts': {
+        path: path.join(__dirname, 'scripts', 'compare-contracts.js'),
+        description: 'Compares verified contract code between two addresses on a method-by-method basis',
+        patterns: [
+            'compare contracts',
+            'compare implementations',
+            'compare code',
+            'diff contracts',
+            'show differences',
+            'show changes',
+            'contract diff',
+            'implementation diff',
+            'code differences',
+            'compare addresses'
+        ],
+        extractParams: (text) => {
+            // Try to find two addresses in the text
+            const addressRegex = /0x[a-fA-F0-9]{40}/g;
+            const addresses = text.match(addressRegex);
+
+            if (addresses && addresses.length >= 2) {
+                return [addresses[0], addresses[1]];
+            }
+
+            // If we can't find two addresses, return null to trigger interactive mode
+            return null;
+        }
+    }
 };
 
 // Create readline interface
