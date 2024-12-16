@@ -4,6 +4,9 @@
       <div class="modal__title">
         Add to Withdrawal Queue
       </div>
+      <div class="modal-top-info-bar">
+        <b>Queued amount cannot be used, as long as the corresponding withdrawal intent is active. Attempts to use queued assets will result in failed transactions.</b>
+      </div>
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
         <div class="top-info__value">

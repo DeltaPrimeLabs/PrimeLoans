@@ -73,11 +73,6 @@ export default {
         "PNP": {name: "PNP", symbol: "PNP", logoExt: "png", decimals: 18, address: addresses.PNP},
         "SILO": {name: "SILO", symbol: "SILO", logoExt: "png", decimals: 18, address: addresses.SILO},
     },
-    AVAILABLE_ASSETS_PER_DEX: {
-        YakSwap: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'GLP', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'WOO', 'GRAIL', 'JOE'],
-        ParaSwap: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'WOO', 'GRAIL', 'JOE']
-    },
-
     SWAP_DEXS_CONFIG: {
         // ParaSwapV2: {
         //     displayName: 'ParaSwap',
@@ -86,7 +81,7 @@ export default {
         // },
         YakSwap: {
             displayName: 'YakSwap',
-            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'GLP', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
+            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
             slippageMargin: 0.02
         },
         // Level: {

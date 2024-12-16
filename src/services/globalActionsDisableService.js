@@ -46,16 +46,16 @@ export default class GlobalActionsDisableService {
   });
   stakingProtocolWombatActions$ = new BehaviorSubject({
     DEPOSIT: true,
-    DEPOSIT_AND_STAKE: true,
+    DEPOSIT_AND_STAKE: false,
     MIGRATE: true,
-    WITHDRAW: true,
+    WITHDRAW: false,
     UNSTAKE_AND_WITHDRAW: true,
   });
   lpActions$ = new BehaviorSubject({
     ADD_FROM_WALLET: true,
-    PROVIDE_LIQUIDITY: true,
+    PROVIDE_LIQUIDITY: false,
     WITHDRAW: true,
-    REMOVE_LIQUIDITY: true,
+    REMOVE_LIQUIDITY: false,
   });
   gmxV2Actions$ = new BehaviorSubject({
     ADD_FROM_WALLET: true,
@@ -98,10 +98,10 @@ export default class GlobalActionsDisableService {
   balancerLpActions$ = new BehaviorSubject({
     FUND_AND_STAKE: true,
     STAKE: true,
-    PROVIDE_LIQUIDITY: true,
+    PROVIDE_LIQUIDITY: false,
     UNSTAKE_AND_WITHDRAW: true,
     WITHDRAW: true,
-    REMOVE_LIQUIDITY: true,
+    REMOVE_LIQUIDITY: false,
     CLAIM_REWARDS: true,
   });
   concentratedLpActions$ = new BehaviorSubject({

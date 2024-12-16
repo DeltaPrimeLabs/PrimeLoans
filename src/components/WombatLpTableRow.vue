@@ -274,7 +274,7 @@ export default {
           {
             key: 'CREATE_LP',
             name: 'Create LP position',
-            disabled: true,
+            disabled: this.disableAllButtons || this.isActionDisabledRecord['CREATE_LP'],
           },
         ]
       }
@@ -298,7 +298,7 @@ export default {
           {
             key: 'UNWIND',
             name: 'Unwind LP position',
-            disabled: true,
+            disabled: this.disableAllButtons || this.isActionDisabledRecord['UNWIND'],
           },
         ]
       }

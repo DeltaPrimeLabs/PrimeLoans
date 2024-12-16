@@ -106,7 +106,7 @@ export default {
         // },
         YakSwap: {
             displayName: 'YakSwap',
-            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'GLP', 'sAVAX', 'GMX', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
+            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'sAVAX', 'GMX', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
             slippageMargin: 0.02
         },
         GLP_DIRECT: {
