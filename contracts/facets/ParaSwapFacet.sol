@@ -184,10 +184,15 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         }
     }
 
+    /// @notice function to swap funds via ParaSwap, the DEX aggregator
+    /// @param selector the function selector of the ParaSwap method that will be called
+    /// @param data the data that is passed to the ParaSwap method
+    /// @dev paraSwap API returns both selector and data, which is being passed on here
+    /// @dev on chain validations of the data is done in the internal functions before praSwap method gets called
     function paraSwapV2(
         bytes4 selector,
         bytes calldata data,
-        ///@dev changing data from memory to calldata for slicing
+        /// @dev changing data from memory to calldata for slicing
         address fromToken,
         /// parameters from here on out are not used in the function, but keeping them for the test file.
         uint256 fromAmount,
@@ -253,6 +258,9 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         );
     }
 
+    /// @notice internal function that decodes the data returned by ParaSwap API for SwapExactAmountInOnUniV3 method
+    /// @param _data the data to be decoded
+    /// @dev the different scope of the internal function helps avoid Stack Too Deep errors
     function _decodeSwapExactAmountInOnUniV3Data(bytes calldata _data)
         internal
         pure
@@ -271,6 +279,10 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         return (_uniswapV3Data.srcToken, _uniswapV3Data.destToken, _uniswapV3Data.fromAmount, _uniswapV3Data.toAmount);
     }
 
+    /// @notice internal function that decodes the data returned by ParaSwap API for SwapExactAmountIn method
+    /// @param _data the data to be decoded
+    /// @dev the different scope of the internal function helps avoid Stack Too Deep errors
+    /// @dev _data gets sliced according to the SwapExactAmountIn struct declaration
     function _decodeSwapExactAmountInData(bytes calldata _data)
         internal
         pure
@@ -291,6 +303,9 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         return (executor, _genericData.srcToken, _genericData.destToken, _genericData.fromAmount, _genericData.toAmount);
     }
 
+    /// @notice internal function that decodes the GenericData struct, subset of SwapExactAmountIn
+    /// @param _data the data to be decoded
+    /// @dev the different scope here is crucial to avoid Stack Too Deep errors
     function _decodeGenericData(bytes memory _data) internal pure returns (GenericData memory) {
         GenericData memory genericData = abi.decode(_data, (GenericData));
         console.log("genericData Struct Decoded ");
@@ -312,6 +327,9 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         return genericData;
     }
 
+    /// @notice internal function that validates the executor address returned by the ParaSwap API
+    /// @param _executorAddress the address of the executor
+    /// @dev the executor addresses are available at https://api.paraswap.io/adapters/contract-takers?network=43114
     function _checkExecutorAddress(address _executorAddress) internal pure returns (bool) {
         console.log("Inside _checkExecutorAddress");
         if (_executorAddress == EXECUTOR_3) return true; //most likely executor, checks first
