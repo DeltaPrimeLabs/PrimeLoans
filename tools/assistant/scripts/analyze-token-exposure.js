@@ -75,7 +75,7 @@ async function getRedstonePrices(tokenSymbols, networkConfig) {
 }
 
 async function getMultipleChoices(validTokens) {
-    console.log("\nSelect tokens to analyze (enter numbers separated by commas, or 'all' for all tokens):");
+    console.log("\nSelect tokens to analyze (options: numbers separated by commas, ranges like '1-4', or 'all'):");
     validTokens.forEach((token, i) => {
         console.log(`[${i}] ${token.symbol} (${token.address})`);
     });
@@ -85,12 +85,28 @@ async function getMultipleChoices(validTokens) {
         return validTokens;
     }
 
-    const selectedIndices = answer.split(',')
-        .map(s => s.trim())
-        .map(s => parseInt(s))
-        .filter(n => !isNaN(n) && n >= 0 && n < validTokens.length);
+    const selections = answer.split(',').map(part => part.trim());
+    const selectedIndices = new Set();
 
-    return selectedIndices.map(i => validTokens[i]);
+    for (const selection of selections) {
+        if (selection.includes('-')) {
+            const [start, end] = selection.split('-').map(num => parseInt(num));
+            if (!isNaN(start) && !isNaN(end) && start <= end) {
+                for (let i = start; i <= end; i++) {
+                    if (i >= 0 && i < validTokens.length) {
+                        selectedIndices.add(i);
+                    }
+                }
+            }
+        } else {
+            const index = parseInt(selection);
+            if (!isNaN(index) && index >= 0 && index < validTokens.length) {
+                selectedIndices.add(index);
+            }
+        }
+    }
+
+    return Array.from(selectedIndices).sort((a, b) => a - b).map(i => validTokens[i]);
 }
 
 async function analyzeToken(tokenContract, selectedToken, primeAccounts, totalAccounts, tokenPrice) {
