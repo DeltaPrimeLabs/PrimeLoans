@@ -1,9 +1,17 @@
+const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 const ethers = require('ethers');
 const diff = require('diff');
 const readline = require('readline');
+const Anthropic = require('@anthropic-ai/sdk');
 
-// We'll create a simple color function in case chalk import fails
+// Initialize Anthropic client
+const anthropic = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+// Simple color functions for terminals without chalk
 const colors = {
     red: (text) => `\x1b[31m${text}\x1b[0m`,
     green: (text) => `\x1b[32m${text}\x1b[0m`,
@@ -98,26 +106,201 @@ async function getVerifiedContract(address, network) {
     }
 }
 
-// Helper function to parse function body from source code
-function extractFunctionBody(sourceCode, functionName) {
-    // This is a simplified version - in practice, you'd want to use a proper Solidity parser
-    const functionRegex = new RegExp(`function\\s+${functionName}\\s*\\([^{]*{([^}]*)}`, 'g');
-    const match = functionRegex.exec(sourceCode);
-    return match ? match[1].trim() : null;
+async function analyzeChangesWithClaude(oldCode, newCode) {
+    try {
+        // First, get a basic diff to identify changed areas
+        const changes = diff.structuredPatch('old.sol', 'new.sol', oldCode, newCode);
+
+        // Extract relevant parts around changes
+        let relevantChanges = [];
+        changes.hunks.forEach(hunk => {
+            const context = [];
+
+            // Add some lines before the change for context
+            const beforeStart = Math.max(hunk.oldStart - 5, 0);
+            for (let i = beforeStart; i < hunk.oldStart; i++) {
+                const line = oldCode.split('\n')[i];
+                if (line) context.push(`Context: ${line}`);
+            }
+
+            // Add the changes
+            hunk.lines.forEach(line => {
+                if (line.startsWith('+')) {
+                    context.push(`Added: ${line.substring(1)}`);
+                } else if (line.startsWith('-')) {
+                    context.push(`Removed: ${line.substring(1)}`);
+                }
+            });
+
+            relevantChanges.push(context.join('\n'));
+        });
+
+        const prompt = `You are a smart contract security expert. I will show you the changes between two versions of a Solidity smart contract.
+The contract name is ${changes.oldHeader}. Here are the relevant changes:
+
+${relevantChanges.join('\n\n')}
+
+Please analyze these changes and provide:
+1. A summary of key functional changes
+2. Potential security implications
+3. Any timing or access control modifications
+4. Gas efficiency impacts
+5. Breaking changes that might affect integrating contracts
+
+Focus on the most important changes and their implications.`;
+
+        const message = await anthropic.messages.create({
+            model: "claude-3-opus-20240229",
+            max_tokens: 4000,
+            messages: [{
+                role: "user",
+                content: prompt
+            }],
+        });
+
+        return message.content;
+
+    } catch (error) {
+        console.error('Error calling Claude API:', error.message);
+        if (error.message.includes('too long')) {
+            // If still too long, try with even less context
+            try {
+                const basicChangesPrompt = `You are a smart contract security expert. Here's a high-level summary of changes between two versions of a Solidity contract:
+
+Key changes found:
+${diff.createPatch('contract', oldCode, newCode)
+                    .split('\n')
+                    .filter(line => line.startsWith('+') || line.startsWith('-'))
+                    .slice(0, 100) // Limit to first 100 changes
+                    .join('\n')}
+
+Please analyze these changes focusing on:
+1. Security implications
+2. Access control changes
+3. Critical functional changes
+4. Potential risks`;
+
+                const fallbackMessage = await anthropic.messages.create({
+                    model: "claude-3-opus-20240229",
+                    max_tokens: 4000,
+                    messages: [{
+                        role: "user",
+                        content: basicChangesPrompt
+                    }],
+                });
+
+                return fallbackMessage.content;
+            } catch (fallbackError) {
+                throw new Error('Failed to analyze changes even with reduced context: ' + fallbackError.message);
+            }
+        }
+        throw error;
+    }
 }
 
-// Rest of the functions remain the same, just update the color usage
-async function compareContracts(address1, address2, network) {
-    console.log(`\nFetching and comparing contracts...`);
+function createLineDiffs(oldLines, newLines) {
+    // Create array of line objects with state
+    let lineMap = [];
+    let i = 0, j = 0;
 
-    const contract1 = await getVerifiedContract(address1, network);
-    const contract2 = await getVerifiedContract(address2, network);
+    while (i < oldLines.length || j < newLines.length) {
+        if (i < oldLines.length && j < newLines.length && oldLines[i] === newLines[j]) {
+            lineMap.push({ type: 'unchanged', content: oldLines[i], lineNum: i });
+            i++;
+            j++;
+        } else {
+            let foundMatch = false;
+            let lookAhead = 1;
+            const MAX_LOOKAHEAD = 5;
 
+            while (!foundMatch && lookAhead <= MAX_LOOKAHEAD) {
+                if (i + lookAhead < oldLines.length &&
+                    j < newLines.length &&
+                    oldLines[i + lookAhead] === newLines[j]) {
+                    for (let k = 0; k < lookAhead; k++) {
+                        lineMap.push({ type: 'removed', content: oldLines[i + k], lineNum: i + k });
+                    }
+                    i += lookAhead;
+                    foundMatch = true;
+                } else if (i < oldLines.length &&
+                    j + lookAhead < newLines.length &&
+                    oldLines[i] === newLines[j + lookAhead]) {
+                    for (let k = 0; k < lookAhead; k++) {
+                        lineMap.push({ type: 'added', content: newLines[j + k], lineNum: j + k });
+                    }
+                    j += lookAhead;
+                    foundMatch = true;
+                }
+                lookAhead++;
+            }
+
+            if (!foundMatch) {
+                if (i < oldLines.length) {
+                    lineMap.push({ type: 'removed', content: oldLines[i], lineNum: i });
+                    i++;
+                }
+                if (j < newLines.length) {
+                    lineMap.push({ type: 'added', content: newLines[j], lineNum: j });
+                    j++;
+                }
+            }
+        }
+    }
+    return lineMap;
+}
+
+async function compareContracts(contract1, contract2) {
     console.log('\nContract Information:');
-    console.log('--------------------');
-    console.log(`Contract 1: ${contract1.contractName} (${address1})`);
-    console.log(`Contract 2: ${contract2.contractName} (${address2})`);
+    console.log('====================');
+    console.log(`Contract 1: ${contract1.contractName}`);
+    console.log(`Contract 2: ${contract2.contractName}`);
     console.log(`Compiler: ${contract1.compilerVersion} -> ${contract2.compilerVersion}`);
+
+    const CONTEXT_LINES = 2; // Number of lines to show before and after changes
+
+    function extractFunctionBody(sourceCode, functionName) {
+        const functionRegex = new RegExp(`function\\s+${functionName}\\s*\\([^{]*{([^}]*)}`, 'g');
+        const match = functionRegex.exec(sourceCode);
+        return match ? match[1].trim() : null;
+    }
+
+    function printDiffWithContext(funcSig, oldContent, newContent) {
+        console.log(`\nFunction: ${funcSig}`);
+        console.log('─'.repeat(funcSig.length + 10));
+
+        const oldLines = oldContent.split('\n');
+        const newLines = newContent.split('\n');
+        const lineDiffs = createLineDiffs(oldLines, newLines);
+
+        let lastPrinted = -1;
+        let inChange = false;
+
+        for (let i = 0; i < lineDiffs.length; i++) {
+            const line = lineDiffs[i];
+
+            if (line.type !== 'unchanged') {
+                if (!inChange) {
+                    console.log('');
+                    const contextStart = Math.max(0, i - CONTEXT_LINES);
+                    for (let j = contextStart; j < i; j++) {
+                        console.log(`  ${lineDiffs[j].content}`);
+                    }
+                }
+
+                const prefix = line.type === 'added' ? '+' : '-';
+                const color = line.type === 'added' ? colors.green : colors.red;
+                console.log(color(`${prefix} ${line.content}`));
+
+                inChange = true;
+                lastPrinted = i;
+            } else if (inChange && i <= lastPrinted + CONTEXT_LINES) {
+                console.log(`  ${line.content}`);
+                lastPrinted = i;
+            } else {
+                inChange = false;
+            }
+        }
+    }
 
     // Compare interfaces
     const interface1 = new ethers.utils.Interface(contract1.abi);
@@ -132,88 +315,80 @@ async function compareContracts(address1, address2, network) {
     const commonFunctions = functions1.filter(f => functions2.includes(f));
 
     // Print interface changes
-    console.log('\nInterface Changes:');
-    console.log('------------------');
+    if (addedFunctions.length > 0 || removedFunctions.length > 0) {
+        console.log('\nInterface Changes:');
+        console.log('==================');
 
-    if (addedFunctions.length > 0) {
-        console.log('\nAdded Functions:');
-        addedFunctions.forEach(f => {
-            console.log(colors.green(`+ ${f}`));
-        });
-    }
+        if (addedFunctions.length > 0) {
+            console.log('\nAdded Functions:');
+            addedFunctions.forEach(f => console.log(colors.green(`+ ${f}`)));
+        }
 
-    if (removedFunctions.length > 0) {
-        console.log('\nRemoved Functions:');
-        removedFunctions.forEach(f => {
-            console.log(colors.red(`- ${f}`));
-        });
+        if (removedFunctions.length > 0) {
+            console.log('\nRemoved Functions:');
+            removedFunctions.forEach(f => console.log(colors.red(`- ${f}`)));
+        }
     }
 
     // Compare implementation of common functions
     console.log('\nFunction Implementation Changes:');
-    console.log('-------------------------------');
+    console.log('===============================');
 
     for (const funcSig of commonFunctions) {
-        const funcName = funcSig.split('(')[0];
-        const body1 = extractFunctionBody(contract1.sourcecode, funcName);
-        const body2 = extractFunctionBody(contract2.sourcecode, funcName);
+        const body1 = extractFunctionBody(contract1.sourcecode, funcSig.split('(')[0]);
+        const body2 = extractFunctionBody(contract2.sourcecode, funcSig.split('(')[0]);
 
         if (body1 && body2 && body1 !== body2) {
-            console.log(`\nFunction: ${funcSig}`);
-            console.log('Changes:');
+            printDiffWithContext(funcSig, body1, body2);
+        }
+    }
+}
 
-            const changes = diff.diffLines(body1, body2);
-            changes.forEach(change => {
-                const text = change.value.replace(/\n$/, '');
-                if (change.added) {
-                    console.log(colors.green(`+ ${text}`));
-                } else if (change.removed) {
-                    console.log(colors.red(`- ${text}`));
-                } else {
-                    console.log(`  ${text}`);
-                }
-            });
+async function analyzeContract(address1, address2, network) {
+    const contract1 = await getVerifiedContract(address1, network);
+    const contract2 = await getVerifiedContract(address2, network);
+
+    if (process.env.ANTHROPIC_API_KEY) {
+        console.log('\nFetching semantic analysis from Claude...');
+        try {
+            const analysis = await analyzeChangesWithClaude(
+                contract1.sourcecode,
+                contract2.sourcecode
+            );
+
+            console.log('\nClaude\'s Analysis:');
+            console.log('=================\n');
+            console.log(analysis);
+        } catch (error) {
+            console.error('Failed to get analysis from Claude:', error);
+            console.log('Proceeding with standard diff comparison...');
         }
     }
 
-    // Overall contract diff
-    console.log('\nOverall Contract Changes:');
-    console.log('------------------------');
-
-    const changes = diff.diffLines(contract1.sourcecode, contract2.sourcecode);
-    changes.forEach(change => {
-        if (change.added || change.removed) {
-            const text = change.value.replace(/\n$/, '');
-            if (change.added) {
-                console.log(colors.green(`+ ${text}`));
-            } else {
-                console.log(colors.red(`- ${text}`));
-            }
-        }
-    });
+    // Perform regular diff comparison
+    await compareContracts(contract1, contract2);
 }
-
 
 async function main() {
     try {
-        // Check if addresses were passed as command line arguments
         const [,, address1, address2] = process.argv;
-
         let selectedNetwork;
         let contractAddress1;
         let contractAddress2;
 
+        if (!process.env.ANTHROPIC_API_KEY) {
+            console.warn('\nWarning: ANTHROPIC_API_KEY not found in environment variables.');
+            console.warn('Claude analysis will be skipped.\n');
+        }
+
         if (address1 && address2) {
-            // Use provided addresses
             contractAddress1 = address1;
             contractAddress2 = address2;
 
-            // For provided addresses, default to avalanche network or let user choose
             const networks = Object.keys(EXPLORERS);
             const selectedNetworkIndex = await promptUser('Select network:', networks);
             selectedNetwork = networks[selectedNetworkIndex];
         } else {
-            // If no addresses provided, go into interactive mode
             const networks = Object.keys(EXPLORERS);
             const selectedNetworkIndex = await promptUser('Select network:', networks);
             selectedNetwork = networks[selectedNetworkIndex];
@@ -222,7 +397,7 @@ async function main() {
             contractAddress2 = await promptUser('Enter second contract address:');
         }
 
-        await compareContracts(contractAddress1, contractAddress2, selectedNetwork);
+        await analyzeContract(contractAddress1, contractAddress2, selectedNetwork);
 
     } catch (error) {
         console.error('Error:', error.message);
@@ -239,4 +414,4 @@ if (require.main === module) {
         });
 }
 
-module.exports = { compareContracts };
+module.exports = { analyzeContract };
