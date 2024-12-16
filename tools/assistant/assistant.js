@@ -127,6 +127,25 @@ const SCRIPTS = {
             // If we can't find two addresses, return null to trigger interactive mode
             return null;
         }
+    },
+    'analyze-token-exposure': {
+        path: path.join(__dirname, 'scripts', 'analyze-token-exposure.js'),
+        description: 'Analyzes token holdings across all Prime Accounts, showing total exposure and top holders',
+        patterns: [
+            'analyze token exposure',
+            'check token exposure',
+            'show token exposure',
+            'token distribution',
+            'token holders',
+            'token balances',
+            'analyze holdings',
+            'check holdings',
+            'token analysis',
+            'exposure analysis',
+            'analyze exposure',
+            'check exposure'
+        ],
+        extractParams: (text) => [] // No params needed as script handles all prompts interactively
     }
 };
 
