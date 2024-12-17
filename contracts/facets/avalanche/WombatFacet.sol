@@ -526,7 +526,6 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 pid = IWombatMaster(WOMBAT_MASTER).getAssetPid(address(tokensDetailsWithNative.lpToken));
 
         amount = Math.min(amount, getLpTokenBalance(lpAsset));
-        require(_getAvailableBalance(lpAsset) >= amount, "Insufficient balance");
         require(amount > 0, "Cannot withdraw 0 tokens");
 
         RewardSnapshot[] memory snapshots = _captureRewardSnapshots(pid);
