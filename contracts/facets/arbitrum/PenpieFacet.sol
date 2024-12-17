@@ -311,8 +311,6 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         if (pendingPenpie > 0 && tokenManager.isTokenAssetActive(PNP)) {
             _increaseExposure(tokenManager, PNP, pendingPenpie);
-        } else if (pendingPenpie > 0) {
-            PNP.safeTransfer(owner, pendingPenpie);
         }
 
         uint256 len = bonusTokenAddresses.length;
@@ -325,8 +323,6 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
             if (tokenManager.isTokenAssetActive(bonusToken)) {
                 _increaseExposure(tokenManager, bonusToken, pendingReward);
-            } else {
-                bonusToken.safeTransfer(owner, pendingReward);
             }
         }
     }
