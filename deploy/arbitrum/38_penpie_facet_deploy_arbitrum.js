@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let PenpieFacet = await deploy("PenpieFacet", {
         from: deployer,
-        gasLimit: 100000000,
         args: [],
     });
 
@@ -20,6 +19,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     console.log(
         `PenpieFacet implementation deployed at address: ${PenpieFacet.address}`
     );
+
+    // sleep for 5 seconds to let the tx be mined
+    await new Promise((r) => setTimeout(r, 5000));
 
     await verifyContract(hre,
         {
