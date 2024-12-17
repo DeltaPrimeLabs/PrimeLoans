@@ -247,6 +247,8 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     }
 
     function claimRewards(address market) external onlyOwner {
+        _getPenpieLpToken(market); // validate market
+
         (
             uint256 pendingPenpie,
             address[] memory bonusTokenAddresses,
