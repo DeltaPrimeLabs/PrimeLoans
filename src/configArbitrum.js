@@ -92,10 +92,10 @@ export default {
             availableAssets: [],
             slippageMargin: 0.1
         },
-        // Penpie: {
-        //     availableAssets: [],
-        //     slippageMargin: 0.02
-        // }
+        Penpie: {
+            availableAssets: [],
+            slippageMargin: 0.02
+        }
     },
     SWAP_MODAL_SLIPPAGE_OPTIONS: {
         low: {value: 0.5, name: 'Low', imgSrc: 'src/assets/icons/check.png', tooltip: 'Ideal for stable market conditions and highly liquid tokens. High chance of transaction failing.'},

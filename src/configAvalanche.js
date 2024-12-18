@@ -119,10 +119,10 @@ export default {
             availableAssets: [],
             slippageMargin: 0.5
         },
-        // Wombat: {
-        //     availableAssets: [],
-        //     slippageMargin: 0.02
-        // }
+        Wombat: {
+            availableAssets: [],
+            slippageMargin: 0.02
+        }
     },
 
     SWAP_MODAL_SLIPPAGE_OPTIONS: {

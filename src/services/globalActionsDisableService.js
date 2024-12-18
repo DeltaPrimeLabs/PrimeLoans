@@ -70,15 +70,15 @@ export default class GlobalActionsDisableService {
     CREATE_LP: true,
     EXPORT_LP: true,
     UNSTAKE_AND_EXPORT: true,
-    UNWIND: true,
-    CLAIM_REWARDS: true,
+    UNWIND: false,
+    CLAIM_REWARDS: false,
   });
   wombatLpActions$ = new BehaviorSubject({
     ADD_FROM_WALLET: true,
     CREATE_LP: true,
     EXPORT_LP: true,
-    UNWIND: true,
-    CLAIM_REWARDS: true,
+    UNWIND: false,
+    CLAIM_REWARDS: false,
   });
   traderJoeLpActions$ = new BehaviorSubject({
     ADD_FROM_WALLET: false,
