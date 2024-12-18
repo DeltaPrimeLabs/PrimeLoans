@@ -190,6 +190,7 @@ export default {
       'lpBalances',
       'smartLoanContract',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'penpieLpBalances',
@@ -404,11 +405,12 @@ export default {
       modalInstance.swapDebtMode = false;
       modalInstance.slippageMargin = 0;
       modalInstance.sourceAsset = initSourceAsset;
-      modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[initSourceAsset];
       modalInstance.assets = this.assets;
       modalInstance.sourceAssets = [initSourceAsset];
       modalInstance.targetAssetsConfig = config.WOMBAT_LP_ASSETS;
       modalInstance.targetAssets = [this.lpToken.symbol];
+      modalInstance.assetBalances = this.assetAvailableBalances;
       modalInstance.assetBalances = {...this.assetBalances, ...this.wombatLpBalances};
       modalInstance.debtsPerAsset = this.debtsPerAsset;
       modalInstance.lpAssets = this.lpAssets;

@@ -68,6 +68,8 @@ export default {
     wrappedTokenContract: null,
     multicallContract: null,
     assetBalances: null,
+    assetIntentsBalances: null,
+    assetAvailableBalances: null,
     balancerLpBalances: null,
     lpBalances: null,
     concentratedLpBalances: null,
@@ -161,6 +163,14 @@ export default {
 
     setAssetBalances(state, assetBalances) {
       state.assetBalances = assetBalances;
+    },
+
+    setAssetIntentsBalances(state, assetIntentsBalances) {
+      state.assetIntentsBalances = assetIntentsBalances;
+    },
+
+    setAssetAvailableBalances(state, assetAvailableBalances) {
+      state.assetAvailableBalances = assetAvailableBalances;
     },
 
     setSingleAssetBalance(state, assetBalanceChange) {
@@ -1132,6 +1142,7 @@ export default {
       await commit('setPenpieLpBalances', penpieLpBalances);
       await commit('setWombatLpBalances', wombatLpBalances);
       await commit('setWombatYYFarmsBalances', wombatFarmsBalances);
+      await dispatch('recalculateAssetsAvailableBalances')
       await dispatch('setupConcentratedLpUnderlyingBalances');
       await dispatch('setupTraderJoeV2LpUnderlyingBalancesAndRewardsAndLiquidity');
       const refreshEvent = {assetBalances: balances, lpBalances: lpBalances};
@@ -4379,7 +4390,23 @@ export default {
       setTimeout(async () => {
         await dispatch('updateFunds');
       }, config.refreshDelay);
-    }
+    },
 
+    async recalculateAssetsAvailableBalances({state, commit}) {
+      const newAvailable = { ...state.assetBalances }
+      for (const assetSymbol in state.assetIntentsBalances) {
+        newAvailable[assetSymbol] = (parseFloat(newAvailable[assetSymbol]) - state.assetIntentsBalances[assetSymbol]).toString()
+      }
+      await commit('setAssetAvailableBalances', newAvailable)
+    },
+
+    async updateAssetIntents({commit, dispatch}, intents) {
+      const intentsBalances = {}
+      for (const assetSymbol in intents) {
+        intentsBalances[assetSymbol] = intents[assetSymbol].reduce((acc, current) => acc + Number(current.amount), 0)
+      }
+      await commit('setAssetIntentsBalances', intentsBalances)
+      await dispatch('recalculateAssetsAvailableBalances')
+    }
   }
 };

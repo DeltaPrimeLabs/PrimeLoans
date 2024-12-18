@@ -241,6 +241,7 @@ export default {
       'assets',
       'health',
       'assetBalances',
+      'assetAvailableBalances',
       'smartLoanContract',
       'readSmartLoanContract',
       'debtsPerAsset',
@@ -516,8 +517,8 @@ export default {
       modalInstance.lpToken = this.lpToken;
       modalInstance.firstAsset = this.firstAsset;
       modalInstance.secondAsset = this.secondAsset;
-      modalInstance.firstAssetBalance = this.assetBalances[this.lpToken.primary];
-      modalInstance.secondAssetBalance = this.assetBalances[this.lpToken.secondary];
+      modalInstance.firstAssetBalance = this.assetAvailableBalances[this.lpToken.primary];
+      modalInstance.secondAssetBalance = this.assetAvailableBalances[this.lpToken.secondary];
       modalInstance.activeId = this.activeId;
       modalInstance.activePrice = this.activePrice;
       modalInstance.binStep = this.lpToken.binStep;

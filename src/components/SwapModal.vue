@@ -324,6 +324,7 @@ export default {
       marketDeviation: 0,
       MIN_ALLOWED_HEALTH: config.MIN_ALLOWED_HEALTH,
       healthAfterTransaction: 0,
+      assetAvailableBalances: {},
       assetBalances: {},
       assets: {},
       debtsPerAsset: {},
@@ -722,7 +723,7 @@ export default {
     },
 
     calculateSourceAssetBalance() {
-      const sourceAssetBalance = this.assetBalances[this.sourceAsset];
+      const sourceAssetBalance = this.assetAvailableBalances && this.assetAvailableBalances[this.sourceAsset] ? this.assetAvailableBalances[this.sourceAsset] : this.assetBalances[this.sourceAsset];
       this.sourceAssetBalance = sourceAssetBalance;
     },
 
@@ -756,7 +757,7 @@ export default {
         {
           validate: async (value) => {
             if (!this.swapDebtMode) {
-              if (value > parseFloat(this.assetBalances[this.sourceAsset])) {
+              if (value > parseFloat(this.assetAvailableBalances && this.assetAvailableBalances[this.sourceAsset] ? this.assetAvailableBalances[this.sourceAsset] : this.assetBalances[this.sourceAsset])) {
                 return 'Amount exceeds the current balance.';
               }
             } else {

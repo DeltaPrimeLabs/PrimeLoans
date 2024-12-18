@@ -179,6 +179,7 @@ export default {
       'fullLoanStatus',
       'debtsPerAsset',
       'assets',
+      'assetAvailableBalances',
       'lpAssets',
       'concentratedLpAssets',
       'concentratedLpBalances',
@@ -348,7 +349,7 @@ export default {
 
       const modalInstance = this.openModal(StakeModal);
       modalInstance.apy = this.apy;
-      modalInstance.available = this.asset.secondary ? this.lpBalances[this.asset.symbol] : this.assetBalances[this.asset.symbol];
+      modalInstance.available = this.asset.secondary ? this.lpBalances[this.asset.symbol] : this.assetAvailableBalances[this.asset.symbol];
       modalInstance.underlyingTokenStaked = this.underlyingTokenStaked;
       modalInstance.rewards = this.rewards;
       modalInstance.asset = this.asset;
