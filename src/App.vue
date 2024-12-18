@@ -248,6 +248,7 @@ export default {
     this.checkTerms();
     this.watchHasDeprecatedAssets();
     this.watchPrimeAccountLoaded();
+    this.watchIntents();
     setTimeout(() => {
       this.checkWallet();
     }, 500)
@@ -262,12 +263,14 @@ export default {
       'accountService',
       'poolService',
       'deprecatedAssetsService',
-      'globalActionsDisableService'
+      'globalActionsDisableService',
+      'paWithdrawQueueService',
     ]),
     ...mapState('poolStore', ['pools'])
   },
   methods: {
     ...mapActions('network', ['initNetwork']),
+    ...mapActions('fundsStore', ['updateAssetIntents']),
     async checkConnectedChain() {
       const chainId = await ethereum.request({method: 'eth_chainId'});
 
@@ -394,6 +397,13 @@ export default {
         // ].map(el => el.toLowerCase()).includes(this.smartLoanContract && this.smartLoanContract.address.toLowerCase())) {
         //   this.showAffectedPrimeAccountBanner = true;
         // }
+      })
+    },
+
+    watchIntents() {
+      this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
+        console.log('asdfasfdadf', intents);
+        this.updateAssetIntents(intents)
       })
     },
 

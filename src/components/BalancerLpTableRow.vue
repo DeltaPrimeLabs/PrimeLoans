@@ -196,6 +196,7 @@ export default {
       'smartLoanContract',
       'fullLoanStatus',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'lpAssets',
@@ -497,8 +498,8 @@ export default {
       modalInstance.lpToken = this.lpToken;
       console.log(this.balancerLpBalances);
       modalInstance.lpTokenBalance = Number(this.balancerLpBalances[this.lpToken.symbol]);
-      modalInstance.firstAssetBalance = this.assetBalances[this.lpToken.primary];
-      modalInstance.secondAssetBalance = this.assetBalances[this.lpToken.secondary];
+      modalInstance.firstAssetBalance = this.assetAvailableBalances[this.lpToken.primary];
+      modalInstance.secondAssetBalance = this.assetAvailableBalances[this.lpToken.secondary];
       modalInstance.areAmountsLinked = false;
       modalInstance.$on('PROVIDE_LIQUIDITY', provideLiquidityEvent => {
         if (this.smartLoanContract) {

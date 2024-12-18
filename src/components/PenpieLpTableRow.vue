@@ -164,6 +164,7 @@ export default {
       'lpBalances',
       'smartLoanContract',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'penpieLpBalances',
@@ -434,7 +435,7 @@ export default {
       modalInstance.swapDebtMode = false;
       modalInstance.slippageMargin = 0;
       modalInstance.sourceAsset = initSourceAsset;
-      modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[initSourceAsset];
       modalInstance.assets = {...this.assets};
       modalInstance.sourceAssets = [initSourceAsset];
       modalInstance.targetAssetsConfig = {

@@ -191,6 +191,7 @@ export default {
       'fullLoanStatus',
       'debtsPerAsset',
       'assets',
+      'assetAvailableBalances',
       'assetBalances',
       'lpAssets',
       'concentratedLpAssets',
@@ -290,7 +291,7 @@ export default {
 
       const modalInstance = this.openModal(StakeModal);
       modalInstance.apy = this.farm.apy / 100;
-      modalInstance.available = this.assetBalances[initSourceAsset];
+      modalInstance.available = this.assetAvailableBalances[initSourceAsset];
       modalInstance.underlyingTokenStaked = this.totalStaked;
       modalInstance.rewards = [];
       modalInstance.asset = config.ASSETS_CONFIG[initSourceAsset];

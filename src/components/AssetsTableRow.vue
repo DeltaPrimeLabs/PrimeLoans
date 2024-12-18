@@ -253,6 +253,7 @@ export default {
       'smartLoanContract',
       'health',
       'assetBalances',
+      'assetAvailableBalances',
       'fullLoanStatus',
       'debtsPerAsset',
       'assets',
@@ -725,7 +726,8 @@ export default {
       modalInstance.swapDex = Object.entries(config.SWAP_DEXS_CONFIG).filter(([k, v]) => v.availableAssets.includes(this.asset.symbol))[0][0];
       modalInstance.swapDebtMode = false;
       modalInstance.sourceAsset = this.asset.symbol;
-      modalInstance.sourceAssetBalance = this.assetBalances[this.asset.symbol];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[this.asset.symbol];
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.assets = this.assets;
       modalInstance.assetBalances = this.assetBalances;
       modalInstance.debtsPerAsset = this.debtsPerAsset;
@@ -808,7 +810,8 @@ export default {
       modalInstance.swapDebtMode = true;
       modalInstance.slippageMargin = 0.2;
       modalInstance.sourceAsset = this.asset.symbol;
-      modalInstance.sourceAssetBalance = this.assetBalances[this.asset.symbol];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[this.asset.symbol];
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.sourceAssetDebt = this.debtsPerAsset[this.asset.symbol].debt;
       modalInstance.assets = this.assets;
       modalInstance.sourceAssets = this.borrowable;
@@ -959,7 +962,7 @@ export default {
         }));
         extraIntents = this.intents.length - queue.length;
       }
-      modalInstance.assetBalance = this.assetBalances[this.asset.symbol];
+      modalInstance.assetBalance = this.assetAvailableBalances[this.asset.symbol];
       modalInstance.asset = config.ASSETS_CONFIG[this.asset.symbol];
       modalInstance.queue = queue;
       modalInstance.extraIntents = extraIntents;
@@ -985,6 +988,7 @@ export default {
       modalInstance.asset = this.asset;
       modalInstance.assets = this.assets;
       modalInstance.assetBalances = this.assetBalances;
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.debtsPerAsset = this.debtsPerAsset;
       modalInstance.lpAssets = this.lpAssets;
       modalInstance.lpBalances = this.lpBalances;

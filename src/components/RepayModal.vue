@@ -7,7 +7,7 @@
 
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
-        <div class="top-info__value"> {{assetBalances[asset.symbol] | smartRound(10, true)}}</div>
+        <div class="top-info__value"> {{assetAvailableBalances[asset.symbol] | smartRound(10, true)}}</div>
         <div class="top-info__divider"></div>
         <div class="top-info__label">Debt:</div>
         <div class="top-info__value"> {{assetDebt | smartRound(10, true)}}</div>
@@ -90,6 +90,7 @@ export default {
     thresholdWeightedValue: {},
     assetDebt: {},
     assetBalances: {},
+    assetAvailableBalances: {},
     assets: {},
     debtsPerAsset: {},
     lpAssets: {},
@@ -133,8 +134,8 @@ export default {
 
   computed: {
     calculateMaxRepay() {
-      const assetBalance = this.assetBalances[this.asset.symbol];
-      return this.isMaxFromDebt ? this.assetDebt : assetBalance;
+      const assetBalance = this.assetAvailableBalances[this.asset.symbol];
+      return this.assetDebt < assetBalance ? this.assetDebt : assetBalance;
     },
 
     isMaxFromDebt() {
@@ -275,7 +276,7 @@ export default {
       this.validators = [
         {
           validate: (value) => {
-            if (value > this.assetBalances[this.asset.symbol]) {
+            if (value > this.assetAvailableBalances[this.asset.symbol]) {
               return `Not enough funds to repay`;
             }
           }

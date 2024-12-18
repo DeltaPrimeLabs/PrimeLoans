@@ -276,6 +276,7 @@ export default {
       'smartLoanContract',
       'fullLoanStatus',
       'assetBalances',
+      'assetAvailableBalances',
       'concentratedLpBalances',
       'levelLpBalances',
       'gmxV2Balances',
@@ -711,7 +712,8 @@ export default {
       modalInstance.swapDebtMode = false;
       modalInstance.slippageMargin = 0.5;
       modalInstance.sourceAsset = initSourceAsset;
-      modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[initSourceAsset];
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.assets = {...this.assets};
       modalInstance.sourceAssets = this.lpToken.isGMXPlus ? [this.lpToken.longToken] : [this.lpToken.shortToken, this.lpToken.longToken];
       modalInstance.targetAssetsConfig = config.GMX_V2_ASSETS_CONFIG;
