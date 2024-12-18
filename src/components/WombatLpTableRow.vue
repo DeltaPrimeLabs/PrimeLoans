@@ -275,7 +275,7 @@ export default {
           {
             key: 'CREATE_LP',
             name: 'Create LP position',
-            disabled: true,
+            disabled: this.disableAllButtons || this.isActionDisabledRecord['CREATE_LP'],
           },
         ]
       }
@@ -299,7 +299,7 @@ export default {
           {
             key: 'UNWIND',
             name: 'Unwind LP position',
-            disabled: true,
+            disabled: this.disableAllButtons || this.isActionDisabledRecord['UNWIND'],
           },
         ]
       }
@@ -314,7 +314,7 @@ export default {
           {
             key: 'CLAIM_REWARDS',
             name: 'Claim rewards',
-            disabled: true,
+            disabled: this.disableAllButtons || !Object.values(this.wombatLpAssets).some(lpAsset => lpAsset.rewards.length !== 0) || this.isActionDisabledRecord['CLAIM_REWARDS'],
             disabledInfo: 'You don\'t have any claimable rewards yet.',
           }
         ]
