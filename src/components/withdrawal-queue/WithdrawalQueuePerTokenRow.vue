@@ -11,7 +11,7 @@
             <img v-if="mode === 'POOLS' && availableToWithdraw < entry.amount"
                  src="src/assets/icons/warning.svg"
                  v-tooltip="{content: `This withdraw will likely fail, available withdrawal amount is less than the intent`, classes: 'info-tooltip long'}">
-            <img v-if="mode !== 'POOLS' && !canRepayAllDebts()"
+            <img v-if="mode !== 'POOLS' && (!canRepayAllDebts() || !canRepayAfterWithdrawal())"
                  src="src/assets/icons/warning.svg"
                  v-tooltip="{content: `To withdraw from your Prime Account, borrowed amount needs to be covered with balance.`, classes: 'info-tooltip long'}">
             {{ formatTokenBalanceWithLessThan(entry.amount, 8) }}
@@ -33,7 +33,7 @@
         <div v-else class="no-value-dash"></div>
       </div>
       <div>
-        <FlatButton v-tooltip="canRepayAllDebts() ? null : {content: `To withdraw from your Prime Account, borrowed amount needs to be covered with balance.`, classes: 'info-tooltip long'}" :active="!entry.isPending && canRepayAllDebts()" v-on:buttonClick="onWithdrawClick()">withdraw</FlatButton>
+        <FlatButton v-tooltip="canRepayAllDebts() || !canRepayAfterWithdrawal() ? null : {content: `To withdraw from your Prime Account, borrowed amount needs to be covered with balance.`, classes: 'info-tooltip long'}" :active="!entry.isPending && canRepayAllDebts() && canRepayAfterWithdrawal()" v-on:buttonClick="onWithdrawClick()">withdraw</FlatButton>
       </div>
       <div v-on:click="onCancelClick()">
         <DeltaIcon class="cross-icon" :icon-src="'src/assets/icons/cross.svg'" :size="19"></DeltaIcon>
@@ -111,6 +111,13 @@ export default {
             return parseFloat(debt.debt) <= balance;
           }
         );
+      }
+    },
+    canRepayAfterWithdrawal() {
+      if (this.mode === 'POOLS') {
+        return true
+      } else {
+        return (parseFloat(this.assetBalances[this.assetSymbol]) - parseFloat(this.debtsPerAsset[this.assetSymbol].debt)) >= this.entry.amount
       }
     },
     onWithdrawClick() {
