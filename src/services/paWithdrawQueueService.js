@@ -159,7 +159,7 @@ export default class PAWithdrawQueueService {
 
     try {
       const transaction = await
-        wrappedContract.executeWithdrawalIntent(toBytes32(assetSymbol), ids, {gasLimit: 1000000});
+        wrappedContract.executeWithdrawalIntent(toBytes32(assetSymbol), ids);
 
       await awaitConfirmation(transaction, this.provider, 'execute withdrawal intent');
 
