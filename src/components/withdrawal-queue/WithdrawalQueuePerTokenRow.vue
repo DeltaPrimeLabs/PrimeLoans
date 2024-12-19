@@ -11,7 +11,7 @@
             <img v-if="mode === 'POOLS' && availableToWithdraw < entry.amount"
                  src="src/assets/icons/warning.svg"
                  v-tooltip="{content: `This withdraw will likely fail, available withdrawal amount is less than the intent`, classes: 'info-tooltip long'}">
-            <img v-if="mode !== 'POOLS' && !canWithdraw()"
+            <img v-if="mode !== 'POOLS' && !canRepayAllDebts()"
                  src="src/assets/icons/warning.svg"
                  v-tooltip="{content: `To withdraw from your Prime Account, borrowed amount needs to be covered with balance.`, classes: 'info-tooltip long'}">
             {{ formatTokenBalanceWithLessThan(entry.amount, 8) }}
@@ -100,11 +100,14 @@ export default {
     selectionChanged(isSelected) {
       this.$emit('selectionChange', isSelected);
     },
-    canWithdraw() {
-      if (this.debtsPerAsset[this.assetSymbol] === undefined || this.debtsPerAsset[this.assetSymbol].debt === undefined) {
-        return true
-      }
-      return (parseFloat(this.debtsPerAsset[this.assetSymbol].debt) <= parseFloat(this.assetBalances[this.assetSymbol]));
+    canRepayAllDebts() {
+      return Object.values(this.debtsPerAsset).every(
+          debt => {
+            let balance = parseFloat(this.assetBalances[debt.asset]);
+
+            return parseFloat(debt.debt) <= balance;
+          }
+      );
     },
     onWithdrawClick() {
       if (this.mode === 'POOLS') {
