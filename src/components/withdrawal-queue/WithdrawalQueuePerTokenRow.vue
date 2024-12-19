@@ -101,13 +101,17 @@ export default {
       this.$emit('selectionChange', isSelected);
     },
     canRepayAllDebts() {
-      return Object.values(this.debtsPerAsset).every(
+      if (this.mode === 'POOLS') {
+        return true;
+      } else {
+        return Object.values(this.debtsPerAsset).every(
           debt => {
             let balance = parseFloat(this.assetBalances[debt.asset]);
 
             return parseFloat(debt.debt) <= balance;
           }
-      );
+        );
+      }
     },
     onWithdrawClick() {
       if (this.mode === 'POOLS') {
