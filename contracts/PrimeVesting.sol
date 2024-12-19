@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 9f5befa18a7b2a78efc746df4a7feaaf7856b8ac;
+// Last deployed from commit: 2cb7ae0c6c9d6355e5b5aa7266150bcf83cb70bd;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";

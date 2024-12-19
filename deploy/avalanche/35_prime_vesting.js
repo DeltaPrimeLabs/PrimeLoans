@@ -22,7 +22,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     embedCommitHash("PrimeVesting", "./contracts");
 
-    let participants = await readJsonFile('deploy/avalanche/data/primeVesting2.json');
+    let participants = await readJsonFile('deploy/avalanche/data/primeVesting3.json');
 
     const participantsAddresses = participants.map(participant => participant.walletAddress);
     const vestingInfos = participants.map(participant => {
@@ -35,7 +35,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     });
 
     const PRIME_TOKEN_ADDRESS_AVALANCHE = "0x33C8036E99082B0C395374832FECF70c42C7F298";
-    const START_TIME = 1719946800; // 2024-07-02 21:00:00 CET
+    const START_TIME = 1734618600; // 2024-12-19 15:30:00 CET
     const _args = [
         PRIME_TOKEN_ADDRESS_AVALANCHE,
         START_TIME
@@ -43,7 +43,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let PrimeVesting = await deploy("PrimeVesting", {
         from: deployer,
-        gasLimit: 15000000,
         args: _args,
     });
 
@@ -67,7 +66,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     let primeVestingContract = new ethers.Contract(PrimeVesting.address, (await hre.artifacts.readArtifact("PrimeVesting")).abi, hre.ethers.provider.getSigner(deployer));
 
     const batchSize = 200;
-    const useBatch = true;
+    const useBatch = false;
 
     if(useBatch) {
         for (let i = 0; i < vestingInfos.length; i += batchSize) {
