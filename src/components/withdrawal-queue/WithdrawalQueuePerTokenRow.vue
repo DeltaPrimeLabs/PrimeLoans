@@ -11,6 +11,9 @@
             <img v-if="mode === 'POOLS' && availableToWithdraw < entry.amount"
                  src="src/assets/icons/warning.svg"
                  v-tooltip="{content: `This withdraw will likely fail, available withdrawal amount is less than the intent`, classes: 'info-tooltip long'}">
+            <img v-if="mode !== 'POOLS' && !canWithdraw()"
+                 src="src/assets/icons/warning.svg"
+                 v-tooltip="{content: `To withdraw from your Prime Account, borrowed amount needs to be covered with balance.`, classes: 'info-tooltip long'}">
             {{ formatTokenBalanceWithLessThan(entry.amount, 8) }}
           </div>
           <div class="double-value__usd">{{ entry.amount * assetPrice | usd }}</div>
@@ -87,11 +90,21 @@ export default {
       'poolWithdrawQueueService',
       'paWithdrawQueueService'
     ]),
+    ...mapState('fundsStore', [
+      'debtsPerAsset',
+      'assetBalances',
+    ]),
   },
 
   methods: {
     selectionChanged(isSelected) {
       this.$emit('selectionChange', isSelected);
+    },
+    canWithdraw() {
+      if (this.debtsPerAsset[this.assetSymbol] === undefined || this.debtsPerAsset[this.assetSymbol].debt === undefined) {
+        return true
+      }
+      return (parseFloat(this.debtsPerAsset[this.assetSymbol].debt) <= parseFloat(this.assetBalances[this.assetSymbol]));
     },
     onWithdrawClick() {
       if (this.mode === 'POOLS') {
