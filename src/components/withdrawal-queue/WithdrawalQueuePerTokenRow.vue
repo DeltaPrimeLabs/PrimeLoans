@@ -33,7 +33,7 @@
         <div v-else class="no-value-dash"></div>
       </div>
       <div>
-        <FlatButton :active="!entry.isPending" v-on:buttonClick="onWithdrawClick()">withdraw</FlatButton>
+        <FlatButton v-tooltip="canRepayAllDebts() ? null : {content: `To withdraw from your Prime Account, borrowed amount needs to be covered with balance.`, classes: 'info-tooltip long'}" :active="!entry.isPending && canRepayAllDebts()" v-on:buttonClick="onWithdrawClick()">withdraw</FlatButton>
       </div>
       <div v-on:click="onCancelClick()">
         <DeltaIcon class="cross-icon" :icon-src="'src/assets/icons/cross.svg'" :size="19"></DeltaIcon>
