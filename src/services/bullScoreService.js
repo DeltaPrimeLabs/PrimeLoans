@@ -118,7 +118,7 @@ export default class BullScoreService{
         })
       }
       for (const assetSymbol in result) {
-        result[assetSymbol] = Math.min(Math.max(result[assetSymbol] / dividers[assetSymbol], -1), 1)
+        result[assetSymbol] = Math.min(Math.max(result[assetSymbol] / (dividers[assetSymbol] === 0 ? 1 : dividers[assetSymbol]), -1), 1)
       }
       return result
     })
@@ -144,7 +144,7 @@ export default class BullScoreService{
         })
       }
       assetsToCalculate.forEach(assetSymbol => {
-        finalBullScore += bullScorePerAsset[assetSymbol] * sumVolatileAssets[assetSymbol] / sumVolatileAssets.ALL
+        finalBullScore += bullScorePerAsset[assetSymbol] * sumVolatileAssets[assetSymbol] / (sumVolatileAssets.ALL === 0 ? 1 : sumVolatileAssets.ALL)
       })
       return finalBullScore
     })
@@ -207,7 +207,7 @@ export default class BullScoreService{
       const oi = newAssetsEntry.openInterest
       const assetToAdd = {
         ...newAssetsEntry,
-        oiHedgeNecessary: -(oi - (1 - oi)) * 100
+        oiHedgeNecessary: (-(oi - (1 - oi))) * (newAssetsEntry.shortToken.value + newAssetsEntry.longToken.value)
       }
       const currentTokens = this._tokens$.value
       const entryIndex = currentTokens[type].findIndex(entries => entries.id === assetToAdd.id)

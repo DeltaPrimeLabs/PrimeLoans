@@ -104,13 +104,13 @@ export default {
       if (this.mode === 'POOLS') {
         return true;
       } else {
-        return Object.values(this.debtsPerAsset).every(
+        return this.debtsPerAsset ? Object.values(this.debtsPerAsset).every(
           debt => {
             let balance = parseFloat(this.assetBalances[debt.asset]);
 
             return parseFloat(debt.debt) <= balance;
           }
-        );
+        ) : true
       }
     },
     canRepayAfterWithdrawal() {

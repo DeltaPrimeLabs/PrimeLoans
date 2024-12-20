@@ -45,7 +45,7 @@ export default {
   methods: {
     smartRound,
     calculateValueColor(value) {
-      this.gaugeHandRotation = ((value + 100) / 2) * 1.7 + 270
+      this.gaugeHandRotation = ((value + 100) / 2) * 1.7 + 275
       const breakpoints = [0, 0.12, 0.26, 0.37, 0.5, 0.63]
       const percentage = (value + 100) / 200
       this.valueColor = getThemeVariable(`--mini-percentage-gauge__gradient-color-${breakpoints.findLastIndex(breakpoint => breakpoint <= percentage) + 1}`)
