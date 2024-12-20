@@ -11,7 +11,7 @@
       <Dropdown class="bullscore-dropdown" v-if="allValues"
                 :options="availableOptions"
                 @dropdownSelected="handleDropdownOption"></Dropdown>
-      <percentage-gauge v-if="allValues" :percentage-value="selectedValue"></percentage-gauge>
+      <percentage-gauge v-if="allValues" :percentage-value="valueToShow(selectedOption)"></percentage-gauge>
     </div>
   </StatsSection>
 </template>
@@ -35,9 +35,7 @@ export default {
           this.availableOptions.push({name: bullScoreType, value: bullScoreType})
         }
       }
-      if (!this.selectedValue) {
-        this.handleDropdownOption({value: 'ALL'})
-      }
+      this.$forceUpdate()
     })
   },
   computed: {
@@ -47,13 +45,17 @@ export default {
   },
   methods: {
     handleDropdownOption(option) {
-      this.selectedValue = Math.round(this.allValues[option.value] * 100)
+      this.selectedOption = option.value
+      this.$forceUpdate()
+    },
+    valueToShow(option) {
+      return Math.round(this.allValues[option] * 100)
     }
   },
   data() {
     return {
       availableOptions: [{name: 'Total', value: 'ALL'}],
-      selectedValue: null,
+      selectedOption: 'ALL',
       allValues: null,
     }
   },
