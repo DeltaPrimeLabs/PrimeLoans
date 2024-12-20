@@ -117,9 +117,14 @@ export default {
       if (this.mode === 'POOLS') {
         return true
       } else {
-        return (parseFloat(this.assetBalances[this.assetSymbol]) - parseFloat(this.debtsPerAsset[this.assetSymbol].debt)) >= this.entry.amount
+        if (!this.debtsPerAsset[this.assetSymbol]) {
+          return true
+        } else {
+          return (parseFloat(this.assetBalances[this.assetSymbol]) - parseFloat(this.debtsPerAsset[this.assetSymbol].debt)) >= this.entry.amount
+        }
       }
     },
+
     onWithdrawClick() {
       if (this.mode === 'POOLS') {
         this.poolWithdrawQueueService.executeWithdrawalIntent(this.assetSymbol, [this.entry.id]);
