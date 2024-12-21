@@ -25,6 +25,18 @@ Chart.controllers.GradientLine = Chart.controllers.line.extend({
       ctx.strokeStyle = getThemeVariable('--chart__active-point-line-color');
       ctx.stroke();
     }
+    if (this.chart.config.options.showLineAtZeroY) {
+      const ctx = this.chart.ctx
+      const lineY = this.chart.scales['y-axis-0'].getPixelForValue(0)
+      const right = this.chart.scales['x-axis-0'].right;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(30, lineY - 4);
+      ctx.lineTo(right, lineY);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = getThemeVariable('--chart__active-point-line-color');
+      ctx.stroke();
+    }
   }
 })
 

@@ -7,7 +7,7 @@
       <template v-if="chartSelectedData">
         <div class="toggles">
           <div class="toggle--data">
-            <Toggle v-on:change="onOptionChange" :options="['Total Value', 'Collateral', 'Borrowed']"
+            <Toggle v-on:change="onOptionChange" :options="['Total Value', 'Collateral', 'Borrowed', 'PnL']"
                     :initial-option="0"></Toggle>
           </div>
           <div class="toggle--metadata">
@@ -41,6 +41,7 @@ const valuesNameForOptions = {
   'Total Value': 'totalValue',
   'Collateral': 'collateral',
   'Borrowed': 'borrowed',
+  'PnL': 'pnl',
 }
 
 const valuesNameForPeriod = {
@@ -77,6 +78,10 @@ export default {
         this.weekData = this.processData(loanHistory.week)
         this.monthData = this.processData(loanHistory.month)
         this.allData = this.processData(loanHistory.all)
+        this.updateChartData();
+      })
+      this.loanHistoryService.getPnLData(this.smartLoanContract.address).then(pnlData => {
+        this.pnlData = pnlData
         this.updateChartData();
       })
     },
@@ -116,31 +121,47 @@ export default {
       this.updateChartData()
     },
     updateChartData() {
-      const selectedDataset = this[this.selectedPeriod];
-      this.chartSelectedData = selectedDataset.timestamps.map((timestamp, index) => {
-        const valueForTimestamp = selectedDataset[this.selectedOption][this.selectedCurrency][index];
-        if (index === 0) {
-          this.chartMin = valueForTimestamp;
-          this.chartMax = valueForTimestamp;
-        } else if (this.chartMin > valueForTimestamp) {
-          this.chartMin = valueForTimestamp
-        } else if (this.chartMax < valueForTimestamp) {
-          this.chartMax = valueForTimestamp
-        }
+      if (this.selectedOption === 'pnl') {
+        this.chartSelectedData = this.pnlData[this.selectedPeriod].map(({timestamp, pnl}, index) => {
+          if (index === 0) {
+            this.chartMin = pnl;
+            this.chartMax = pnl;
+          } else if (this.chartMin > pnl) {
+            this.chartMin = pnl
+          } else if (this.chartMax < pnl) {
+            this.chartMax = pnl
+          }
+          return {
+            x: timestamp,
+            y: pnl
+          }
+        })
+      } else {
+        const selectedDataset = this[this.selectedPeriod];
+        this.chartSelectedData = selectedDataset.timestamps.map((timestamp, index) => {
+          const valueForTimestamp = selectedDataset[this.selectedOption][this.selectedCurrency][index];
+          if (index === 0) {
+            this.chartMin = valueForTimestamp;
+            this.chartMax = valueForTimestamp;
+          } else if (this.chartMin > valueForTimestamp) {
+            this.chartMin = valueForTimestamp
+          } else if (this.chartMax < valueForTimestamp) {
+            this.chartMax = valueForTimestamp
+          }
 
-        return {
-          x: timestamp,
-          y: valueForTimestamp,
-          event: selectedDataset.events[index] && selectedDataset.events[index].length > 0 ? selectedDataset.events[index] : null
-        }
-      })
+          return {
+            x: timestamp,
+            y: valueForTimestamp,
+            event: selectedDataset.events[index] && selectedDataset.events[index].length > 0 ? selectedDataset.events[index] : null
+          }
+        })
+
+        this.chartPointRadius = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 4 : 0)
+        this.chartPointHoverBorderWidth = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 3 : 0)
+      }
       if (this.chartMin === this.chartMax) {
         this.chartMax += 1
       }
-
-      this.chartPointRadius = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 4 : 0)
-      this.chartPointRadius = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 4 : 0)
-      this.chartPointHoverBorderWidth = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 3 : 0)
       setTimeout(() => {
         if (this.$refs.chart) {
           this.$refs.chart.rerender();
@@ -166,6 +187,7 @@ export default {
       return {
         height: 256,
         width: 960,
+        showLineAtZeroY: this.selectedOption === 'pnl',
         hover: {
           intersect: false,
           mode: "index",
@@ -262,7 +284,7 @@ export default {
             fill: false,
             data: this.chartSelectedData,
             borderWidth: 5,
-            pointRadius: this.chartPointRadius,
+            pointRadius: this.selectedOption === 'pnl' ? 0 : this.chartPointRadius,
             pointHoverRadius: this.chartPointHoverRadius,
             pointBorderWidth: 0,
             pointHoverBorderWidth: this.chartPointHoverBorderWidth,
@@ -294,6 +316,7 @@ export default {
       selectedOption: 'totalValue',
       selectedPeriod: 'allData',
       selectedCurrency: 'usd',
+      pnlData: null,
     }
   },
   watch: {
