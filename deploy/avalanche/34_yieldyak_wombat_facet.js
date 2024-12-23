@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let YieldYakWombatFacet = await deploy("YieldYakWombatFacet", {
         from: deployer,
-        gasLimit: 8000000,
         args: [],
     });
 

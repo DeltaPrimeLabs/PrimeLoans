@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 27cd66e44ee3173909b12be0e3aebbca7f8c6a14;
+// Last deployed from commit: 70b36afc5a8b248fa8852d29a59352bc4fdd0209;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
@@ -57,6 +57,10 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
     function stakeAVAXYak(uint256 amount) public onlyOwner noBorrowInTheSameBlock nonReentrant remainsSolvent {
         require(amount > 0, "Cannot stake 0 tokens");
         amount = Math.min(IWrappedNativeToken(AVAX_TOKEN).balanceOf(address(this)), amount);
+
+        require(_getAvailableBalance("AVAX") >= amount, "Insufficient balance");
+
+
         IERC20Metadata yrtToken = IERC20Metadata(YY_AAVE_AVAX);
         uint256 initialYRTBalance = yrtToken.balanceOf(address(this));
 
@@ -199,6 +203,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         amount = Math.min(yakStakingContract.balanceOf(address(this)), amount);
 
+        require(_getAvailableBalance("YY_AAVE_AVAX") >= amount, "Insufficient balance");
+
         yakStakingContract.withdraw(amount);
 
         uint256 depositTokenBalanceAfterWithdrawal = address(this).balance;
@@ -338,6 +344,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         stakingDetails.amount = Math.min(IERC20Metadata(stakingDetails.tokenAddress).balanceOf(address(this)), stakingDetails.amount);
         require(stakingDetails.amount > 0, "Cannot stake 0 tokens");
+        require(_getAvailableBalance(stakingDetails.tokenSymbol) >= stakingDetails.amount, "Insufficient balance");
+
         // _ACTIVE = 2
         require(tokenManager.tokenToStatus(stakingDetails.tokenAddress) == 2, "Token not supported");
         require(tokenManager.tokenToStatus(stakingDetails.vaultAddress) == 2, "Vault token not supported");
@@ -369,6 +377,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
         IERC20Metadata depositToken = IERC20Metadata(stakingDetails.tokenAddress);
         uint256 initialDepositTokenBalance = depositToken.balanceOf(address(this));
         stakingDetails.amount = Math.min(vaultContract.balanceOf(address(this)), stakingDetails.amount);
+
+        require(_getAvailableBalance(stakingDetails.vaultTokenSymbol) >= stakingDetails.amount, "Insufficient balance");
 
         vaultContract.withdraw(stakingDetails.amount);
 

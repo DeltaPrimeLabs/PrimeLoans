@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: c51781736b1271190a139ff19e31f691283eb37f;
+// Last deployed from commit: 70b36afc5a8b248fa8852d29a59352bc4fdd0209;
 pragma solidity 0.8.17;
 
 import "../AssetsOperationsFacet.sol";
@@ -32,23 +32,23 @@ contract AssetsOperationsAvalancheFacet is AssetsOperationsFacet {
         emit Funded(msg.sender, "GLP", _amount, block.timestamp);
     }
 
-    /**
-        * Withdraws specified amount of a GLP
-        * @param _amount to be withdrawn
-    **/
+//    /**
+//        * Withdraws specified amount of a GLP
+//        * @param _amount to be withdrawn
+//    **/
     function withdrawGLP(uint256 _amount) public override onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
-        IERC20Metadata token = getERC20TokenInstance("GLP", true);
-        IERC20Metadata stakedGlpToken = IERC20Metadata(0xaE64d55a6f09E4263421737397D1fdFA71896a69);
-        _amount = Math.min(token.balanceOf(address(this)), _amount);
-
-        address(stakedGlpToken).safeTransfer(msg.sender, _amount);
-        if (token.balanceOf(address(this)) == 0) {
-            DiamondStorageLib.removeOwnedAsset("GLP");
-        }
-
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        tokenManager.decreaseProtocolExposure("GLP", _amount);
-
-        emit Withdrawn(msg.sender, "GLP", _amount, block.timestamp);
+//        IERC20Metadata token = getERC20TokenInstance("GLP", true);
+//        IERC20Metadata stakedGlpToken = IERC20Metadata(0xaE64d55a6f09E4263421737397D1fdFA71896a69);
+//        _amount = Math.min(token.balanceOf(address(this)), _amount);
+//
+//        address(stakedGlpToken).safeTransfer(msg.sender, _amount);
+//        if (token.balanceOf(address(this)) == 0) {
+//            DiamondStorageLib.removeOwnedAsset("GLP");
+//        }
+//
+//        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+//        tokenManager.decreaseProtocolExposure("GLP", _amount);
+//
+//        emit Withdrawn(msg.sender, "GLP", _amount, block.timestamp);
     }
 }

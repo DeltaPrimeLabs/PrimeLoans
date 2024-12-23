@@ -151,15 +151,15 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
     * @param _amount to be withdrawn
     **/
     function withdraw(bytes32 _withdrawnAsset, uint256 _amount) public virtual onlyOwner nonReentrant canRepayDebtFully remainsSolvent {
-        IERC20Metadata token = getERC20TokenInstance(_withdrawnAsset, true);
-        _amount = Math.min(_amount, token.balanceOf(address(this)));
-
-        address(token).safeTransfer(msg.sender, _amount);
-
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-
-        _decreaseExposure(tokenManager, address(token), _amount);
-        emit Withdrawn(msg.sender, _withdrawnAsset, _amount, block.timestamp);
+//        IERC20Metadata token = getERC20TokenInstance(_withdrawnAsset, true);
+//        _amount = Math.min(_amount, token.balanceOf(address(this)));
+//
+//        address(token).safeTransfer(msg.sender, _amount);
+//
+//        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+//
+//        _decreaseExposure(tokenManager, address(token), _amount);
+//        emit Withdrawn(msg.sender, _withdrawnAsset, _amount, block.timestamp);
     }
 
     /**
@@ -167,16 +167,16 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         * @param _amount to be withdrawn
     **/
     function withdrawGLP(uint256 _amount) public virtual onlyOwner nonReentrant canRepayDebtFully remainsSolvent{
-        IERC20Metadata token = getERC20TokenInstance("GLP", true);
-        IERC20Metadata stakedGlpToken = IERC20Metadata(0xaE64d55a6f09E4263421737397D1fdFA71896a69);
-        _amount = Math.min(token.balanceOf(address(this)), _amount);
-        
-        address(stakedGlpToken).safeTransfer(msg.sender, _amount);
-        
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-
-        _decreaseExposure(tokenManager, address(stakedGlpToken), _amount);
-        emit Withdrawn(msg.sender, "GLP", _amount, block.timestamp);
+//        IERC20Metadata token = getERC20TokenInstance("GLP", true);
+//        IERC20Metadata stakedGlpToken = IERC20Metadata(0xaE64d55a6f09E4263421737397D1fdFA71896a69);
+//        _amount = Math.min(token.balanceOf(address(this)), _amount);
+//
+//        address(stakedGlpToken).safeTransfer(msg.sender, _amount);
+//
+//        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+//
+//        _decreaseExposure(tokenManager, address(stakedGlpToken), _amount);
+//        emit Withdrawn(msg.sender, "GLP", _amount, block.timestamp);
     }
 
     /**
@@ -208,6 +208,8 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
      **/
     function repay(bytes32 _asset, uint256 _amount) public payable nonReentrant {
         IERC20Metadata token = getERC20TokenInstance(_asset, true);
+
+        require(_getAvailableBalance(_asset) >= _amount, "Insufficient balance");
 
         if (_isSolvent()) {
             DiamondStorageLib.enforceIsContractOwner();

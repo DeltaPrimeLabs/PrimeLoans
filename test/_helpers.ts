@@ -683,6 +683,21 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         hardhatConfig
     )
 
+    await deployFacet(
+        "WithdrawalIntentFacet",
+        diamondAddress,
+        [
+            'createWithdrawalIntent',
+            'executeWithdrawalIntent',
+            'cancelWithdrawalIntent',
+            'clearExpiredIntents',
+            'getUserIntents',
+            'getTotalIntentAmount',
+            'getAvailableBalance'
+        ],
+        hardhatConfig
+    )
+
     if (mock) {
         await deployFacet("HealthMeterFacetMock", diamondAddress, ['getHealthMeter'], hardhatConfig);
     } else {
@@ -861,38 +876,34 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         ],
         hardhatConfig);
 
-        // await deployFacet("WombatFacet", diamondAddress, [
-        //     'depositSavaxToAvaxSavax',
-        //     'withdrawSavaxFromAvaxSavax',
-        //     'sAvaxBalanceAvaxSavax',
-        //     'depositGgavaxToAvaxGgavax',
-        //     'withdrawGgavaxFromAvaxGgavax',
-        //     'ggAvaxBalanceAvaxGgavax',
-        //     'depositAvaxToAvaxSavax',
-        //     'withdrawAvaxFromAvaxSavax',
-        //     'avaxBalanceAvaxSavax',
-        //     'depositAvaxToAvaxGgavax',
-        //     'withdrawAvaxFromAvaxGgavax',
-        //     'avaxBalanceAvaxGgavax',
-        //     'withdrawSavaxFromAvaxSavaxInOtherToken',
-        //     'withdrawGgavaxFromAvaxGgavaxInOtherToken',
-        //     'withdrawAvaxFromAvaxSavaxInOtherToken',
-        //     'withdrawAvaxFromAvaxGgavaxInOtherToken',
-        //     'depositAndStakeAvaxSavaxLpSavax',
-        //     'unstakeAndWithdrawAvaxSavaxLpSavax',
-        //     'depositAndStakeAvaxSavaxLpAvax',
-        //     'unstakeAndWithdrawAvaxSavaxLpAvax',
-        //     'depositAvaxGgavaxLpGgavax',
-        //     'unstakeAndWithdrawAvaxGgavaxLpGgavax',
-        //     'depositAndStakeAvaxGgavaxLpAvax',
-        //     'unstakeAndWithdrawAvaxGgavaxLpAvax',
-        //     'claimAllWombatRewards',
-        //     'pendingRewardsForAvaxSavaxLpSavax',
-        //     'pendingRewardsForAvaxSavaxLpAvax',
-        //     'pendingRewardsForAvaxGgavaxLpGgavax',
-        //     'pendingRewardsForAvaxGgavaxLpAvax',
-        // ],
-        // hardhatConfig);
+        await deployFacet("WombatFacet", diamondAddress, [
+            'depositSavaxToAvaxSavax',
+            'withdrawSavaxFromAvaxSavax',
+            'sAvaxBalanceAvaxSavax',
+            'depositGgavaxToAvaxGgavax',
+            'withdrawGgavaxFromAvaxGgavax',
+            'ggAvaxBalanceAvaxGgavax',
+            'depositAvaxToAvaxSavax',
+            'withdrawAvaxFromAvaxSavax',
+            'avaxBalanceAvaxSavax',
+            'depositAvaxToAvaxGgavax',
+            'withdrawAvaxFromAvaxGgavax',
+            'avaxBalanceAvaxGgavax',
+            'withdrawSavaxFromAvaxSavaxInOtherToken',
+            'withdrawGgavaxFromAvaxGgavaxInOtherToken',
+            'withdrawAvaxFromAvaxSavaxInOtherToken',
+            'withdrawAvaxFromAvaxGgavaxInOtherToken',
+            'depositAndStakeAvaxSavaxLpSavax',
+            'depositAndStakeAvaxSavaxLpAvax',
+            'depositAvaxGgavaxLpGgavax',
+            'depositAndStakeAvaxGgavaxLpAvax',
+            'claimAllWombatRewards',
+            'pendingRewardsForAvaxSavaxLpSavax',
+            'pendingRewardsForAvaxSavaxLpAvax',
+            'pendingRewardsForAvaxGgavaxLpGgavax',
+            'pendingRewardsForAvaxGgavaxLpAvax',
+        ],
+        hardhatConfig);
 
         await deployFacet("YieldYakWombatFacet", diamondAddress, [
                 'depositSavaxToAvaxSavaxYY',
@@ -912,17 +923,9 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
                 'withdrawAvaxFromAvaxSavaxInOtherTokenYY',
                 'withdrawAvaxFromAvaxGgavaxInOtherTokenYY',
                 'depositAndStakeAvaxSavaxLpSavaxYY',
-                'unstakeAndWithdrawAvaxSavaxLpSavaxYY',
                 'depositAndStakeAvaxSavaxLpAvaxYY',
-                'unstakeAndWithdrawAvaxSavaxLpAvaxYY',
                 'depositAvaxGgavaxLpGgavaxYY',
-                'unstakeAndWithdrawAvaxGgavaxLpGgavaxYY',
                 'depositAndStakeAvaxGgavaxLpAvaxYY',
-                'unstakeAndWithdrawAvaxGgavaxLpAvaxYY',
-                // 'migrateAvaxSavaxLpSavaxFromWombatToYY',
-                // 'migrateAvaxGgavaxLpGgavaxFromWombatToYY',
-                // 'migrateAvaxSavaxLpAvaxFromWombatToYY',
-                // 'migrateAvaxGgavaxLpAvaxFromWombatToYY',
             ],
             hardhatConfig
         );
@@ -1281,7 +1284,6 @@ export async function syncTime() {
 }
 
 export async function deployAndInitializeLendingPool(owner: any, tokenName: string, smartLoansFactoryAddress: string, tokenAirdropList: any, chain = 'AVAX', rewarder: string = '', tokenManagerAddress: string = '') {
-
     const mockVariableUtilisationRatesCalculator = (await deployContract(owner, VariableUtilisationRatesCalculatorArtifact)) as MockVariableUtilisationRatesCalculator;
     let pool = (await deployContract(owner, PoolArtifact)) as Pool;
     let tokenContract: any;
@@ -1357,7 +1359,6 @@ export async function deployAndInitializeLendingPool(owner: any, tokenName: stri
     }
 
     rewarder = rewarder !== '' ? rewarder : ethers.constants.AddressZero;
-
     const depositIndex = (await deployContract(owner, LinearIndexArtifact, [])) as LinearIndex;
     await depositIndex.initialize(pool.address);
     const borrowingIndex = (await deployContract(owner, LinearIndexArtifact, [])) as LinearIndex;

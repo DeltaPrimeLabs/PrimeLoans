@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 47cac92e2aae18ac8937139ac1f8de17bc62f581;
+// Last deployed from commit: 70b36afc5a8b248fa8852d29a59352bc4fdd0209;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -99,6 +99,7 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
 
         _amountIn = Math.min(swapTokensDetails.soldToken.balanceOf(address(this)), _amountIn);
         require(_amountIn > 0, "Amount of tokens to sell has to be greater than 0");
+        require(_getAvailableBalance(swapTokensDetails.tokenSoldSymbol) >= _amountIn, "Insufficient balance");
 
         address(swapTokensDetails.soldToken).safeApprove(YY_ROUTER(), 0);
         address(swapTokensDetails.soldToken).safeApprove(YY_ROUTER(), _amountIn);

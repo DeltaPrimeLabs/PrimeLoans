@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 19d9982858f4feeff1ca98cbf31b07304a79ac7f;
+// Last deployed from commit: 59a88715535c304ec9a5c035f3e455606a3c9d7a;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -52,8 +52,12 @@ contract GLPFacetArbi is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         require(tokenManager.isTokenAssetActive(GLP_TOKEN_ADDRESS), "GLP not supported.");
         require(tokenManager.isTokenAssetActive(_token), "Asset not supported.");
 
+
         IERC20Metadata tokenToMintWith = IERC20Metadata(_token);
         bytes32 tokenToMintWithSymbol = tokenManager.tokenAddressToSymbol(_token);
+
+        require(_getAvailableBalance(tokenToMintWithSymbol) >= _amount, "Insufficient balance");
+
         IGLPRewarder glpRewarder = IGLPRewarder(GLP_REWARD_ROUTER_ADDRESS);
         IERC20Metadata glpToken = IERC20Metadata(GLP_TOKEN_ADDRESS);
 
@@ -96,6 +100,7 @@ contract GLPFacetArbi is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 redeemedTokenInitialBalance = redeemedToken.balanceOf(address(this));
         _glpAmount = Math.min(glpToken.balanceOf(address(this)), _glpAmount);
 
+        require(_getAvailableBalance("GLP") >= _glpAmount, "Insufficient balance");
         require(_glpAmount > 0, "Amount of GLP to redeem has to be greater than 0");
 
         uint256 redeemedAmount = glpRewarder.unstakeAndRedeemGlp(_tokenOut, _glpAmount, _minOut, address(this));

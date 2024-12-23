@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let TraderJoeV2AvalancheFacet = await deploy("TraderJoeV2AvalancheFacet", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 

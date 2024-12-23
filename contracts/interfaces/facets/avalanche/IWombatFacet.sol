@@ -71,25 +71,11 @@ interface IWombatFacet {
 
     function depositAndStakeAvaxSavaxLpSavax(uint256 amount) external;
 
-    function unstakeAndWithdrawAvaxSavaxLpSavax(uint256 amount) external;
-
     function depositAndStakeAvaxSavaxLpAvax(uint256 amount) external;
-
-    function unstakeAndWithdrawAvaxSavaxLpAvax(
-        uint256 amount
-    ) external returns (uint256 amountOut);
 
     function depositAvaxGgavaxLpGgavax(uint256 amount) external;
 
-    function unstakeAndWithdrawAvaxGgavaxLpGgavax(
-        uint256 amount
-    ) external returns (uint256 amountOut);
-
     function depositAndStakeAvaxGgavaxLpAvax(uint256 amount) external;
-
-    function unstakeAndWithdrawAvaxGgavaxLpAvax(
-        uint256 amount
-    ) external returns (uint256 amountOut);
 
     function claimAllWombatRewards() external;
 

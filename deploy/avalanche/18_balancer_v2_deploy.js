@@ -12,7 +12,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let BalancerV2Facet = await deploy("BalancerV2Facet", {
         from: deployer,
-        gasLimit: 15000000,
         args: [],
     });
 
@@ -20,6 +19,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     console.log(
         `BalancerV2Facet implementation deployed at address: ${BalancerV2Facet.address}`
     );
+
+    await new Promise(r => setTimeout(r, 10000));
 
     await verifyContract(hre,
         {

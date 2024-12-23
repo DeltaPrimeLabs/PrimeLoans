@@ -29,6 +29,8 @@ abstract contract GmxV2Facet is GmxV2FacetCommon {
             ? IERC20(depositedToken).balanceOf(address(this))
             : tokenAmount;
 
+        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(depositedToken)) >= tokenAmount, "Insufficient balance");
+
         bytes[] memory data = new bytes[](3);
         data[0] = abi.encodeWithSelector(
             IGmxV2Router.sendWnt.selector,
@@ -131,6 +133,9 @@ abstract contract GmxV2Facet is GmxV2FacetCommon {
         gmAmount = IERC20(gmToken).balanceOf(address(this)) < gmAmount
             ? IERC20(gmToken).balanceOf(address(this))
             : gmAmount;
+
+        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(gmToken)) >= gmAmount, "Insufficient balance");
+
 
         bytes[] memory data = new bytes[](3);
         data[0] = abi.encodeWithSelector(
