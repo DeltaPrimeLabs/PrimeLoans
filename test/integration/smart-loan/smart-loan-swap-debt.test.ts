@@ -103,6 +103,12 @@ describe("Smart loan", () => {
                     SmartLoansFactoryArtifact
                 )) as SmartLoansFactory;
 
+                let tokenManager = (await deployContract(
+                    owner,
+                    MockTokenManagerArtifact,
+                    []
+                )) as MockTokenManager;
+
                 await deployPools(
                     smartLoansFactory,
                     poolNameAirdropList,
@@ -110,8 +116,13 @@ describe("Smart loan", () => {
                     poolContracts,
                     lendingPools,
                     owner,
-                    depositor
+                    depositor,
+                    1000,
+                    'AVAX',
+                    [],
+                    tokenManager.address
                 );
+
                 tokensPrices = await getTokensPricesMap(
                     assetsList,
                     "avalanche",
@@ -122,12 +133,6 @@ describe("Smart loan", () => {
                 addMissingTokenContracts(tokenContracts, assetsList);
 
                 let diamondAddress = await deployDiamond();
-
-                let tokenManager = (await deployContract(
-                    owner,
-                    MockTokenManagerArtifact,
-                    []
-                )) as MockTokenManager;
 
                 await tokenManager
                     .connect(owner)
@@ -305,6 +310,7 @@ describe("Smart loan", () => {
             let AVAX_PRICE = tokensPrices.get("AVAX")!;
             let repayAmount = parseUnits("400.1", BigNumber.from("6"));
             let borrowAmount = toWei(((400 *1.01) / AVAX_PRICE).toFixed(18));
+
             const queryRes = await query(
                 TOKEN_ADDRESSES["AVAX"],
                 TOKEN_ADDRESSES["USDC"],
