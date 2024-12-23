@@ -19,6 +19,7 @@ interface IWithdrawalIntentFacet {
     function getUserIntents(bytes32 _asset) external view returns (IntentInfo[] memory);
     function getTotalIntentAmount(bytes32 _asset) external view returns (uint256);
     function getAvailableBalance(bytes32 _asset) external view returns (uint256);
+    function getAvailableBalancePayable(bytes32 _asset) external payable returns (uint256);
 
     event WithdrawalIntentCreated(bytes32 indexed asset, uint256 amount, uint256 actionableAt, uint256 expiresAt);
     event WithdrawalIntentExecuted(bytes32 indexed asset, uint256 amount, uint256 timestamp);

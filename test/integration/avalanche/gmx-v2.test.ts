@@ -86,18 +86,20 @@ describe('Smart loan', () => {
 
             smartLoansFactory = await deployContract(owner, SmartLoansFactoryArtifact) as SmartLoansFactory;
 
-            await deployPools(smartLoansFactory, poolNameAirdropList, tokenContracts, poolContracts, lendingPools, owner, depositor, 1000, 'AVAX');
+            let tokenManager = await deployContract(
+                owner,
+                MockTokenManagerArtifact,
+                []
+            ) as MockTokenManager;
+
+            await deployPools(smartLoansFactory, poolNameAirdropList, tokenContracts, poolContracts, lendingPools, owner, depositor, 1000, 'AVAX', [], tokenManager.address);
 
             tokensPrices = await getTokensPricesMap(assetsList, "avalanche", getRedstonePrices, [{symbol: 'LVL', value: 1}]);
             MOCK_PRICES = convertTokenPricesMapToMockPrices(tokensPrices);
             addMissingTokenContracts(tokenContracts, assetsList, 'AVAX');
             supportedAssets = convertAssetsListToSupportedAssets(assetsList, [], 'AVAX');
 
-            let tokenManager = await deployContract(
-                owner,
-                MockTokenManagerArtifact,
-                []
-            ) as MockTokenManager;
+
 
             getContractSelectors(tokenManager);
 

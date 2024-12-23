@@ -177,6 +177,10 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
         return balance > pendingWithdrawals ? balance - pendingWithdrawals : 0;
     }
 
+    function getAvailableBalancePayable(bytes32 _asset) external payable returns (uint256) {
+        return getAvailableBalance(_asset);
+    }
+
     modifier onlyOwner() {
         DiamondStorageLib.enforceIsContractOwner();
         _;

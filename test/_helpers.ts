@@ -693,7 +693,8 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
             'clearExpiredIntents',
             'getUserIntents',
             'getTotalIntentAmount',
-            'getAvailableBalance'
+            'getAvailableBalance',
+            'getAvailableBalancePayable'
         ],
         hardhatConfig
     )
