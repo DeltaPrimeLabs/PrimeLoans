@@ -20,6 +20,17 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
         );
     }
 
+    // This function executes WithdrawalIntentFacet.getAvailableBalancePayable()
+    function _getAvailableBalancePayable(bytes32 _asset) internal virtual returns (uint256) {
+        return abi.decode(
+            proxyDelegateCalldata(
+                DiamondHelper._getFacetAddress(IWithdrawalIntentFacet.getAvailableBalancePayable.selector),
+                abi.encodeWithSelector(IWithdrawalIntentFacet.getAvailableBalancePayable.selector, _asset)
+            ),
+            (uint256)
+        );
+    }
+
     // This function executes SolvencyFacetProd.getDebt()
     function _getDebt() internal virtual returns (uint256 debt) {
         debt = abi.decode(
