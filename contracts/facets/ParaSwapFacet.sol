@@ -19,14 +19,8 @@ import "hardhat/console.sol";
 contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     using TransferHelper for address;
 
-    address private constant PARA_TRANSFER_PROXY = 0x216B4B4Ba9F3e719726886d34a177484278Bfcae;
     ///@dev paraSwap v6.2 router
     address private constant PARA_ROUTER = 0x6A000F20005980200259B80c5102003040001068;
-
-    ///@notice selectors for paraSwapV2 data decoding
-    bytes4 private constant DIRECT_UNI_V3_SELECTOR = 0xa6886da9;
-    bytes4 private constant SIMPLESWAP_SELECTOR = 0x54e3f31b;
-    bytes4 private constant MULTISWAP_SELECTOR = 0xa94e78ef;
 
     ///@notice selectors for paraSwapV6 data decoding
     bytes4 private constant SWAP_EXACT_AMOUNT_IN_SELECTOR = 0xe3ead59e;
@@ -148,8 +142,8 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         require(minOut > 0, "minOut needs to be > 0");
         require(fromAmount > 0, "Amount of tokens to sell has to be greater than 0");
 
-        address(swapTokensDetails.soldToken).safeApprove(PARA_TRANSFER_PROXY, 0);
-        address(swapTokensDetails.soldToken).safeApprove(PARA_TRANSFER_PROXY, fromAmount);
+        address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, 0);
+        address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, fromAmount);
 
         (bool success,) = PARA_ROUTER.call((abi.encodePacked(selector, data)));
         require(success, "Swap failed");
