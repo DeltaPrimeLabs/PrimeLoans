@@ -94,6 +94,14 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         bytes pools;
     }
 
+    /// @notice FullData struct for swapExactAmountInOnUniswapV3
+    /// @dev from the deployed contract https://snowtrace.deth.net/address/0x6a000f20005980200259b80c5102003040001068
+    struct UniswapV3FullData {
+        UniswapV3Data uniData;
+        uint256 partnerAndFee;
+        bytes permit;
+    }
+
     function getInitialTokensDetails(address _soldTokenAddress, address _boughtTokenAddress)
         internal
         view
