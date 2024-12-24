@@ -333,7 +333,6 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         emit Transfer(account, recipient, amount);
 
         notifyVPrimeController(msg.sender);
-        notifyVPrimeController(recipient);
 
         return true;
     }
@@ -401,7 +400,6 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         emit Transfer(sender, recipient, amount);
 
         notifyVPrimeController(sender);
-        notifyVPrimeController(recipient);
 
         return true;
     }
@@ -443,8 +441,6 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
         }
 
         emit DepositOnBehalfOf(msg.sender, _of, _amount, block.timestamp);
-
-        notifyVPrimeController(_of);
     }
 
     function _transferToPool(address from, uint256 amount) internal virtual {

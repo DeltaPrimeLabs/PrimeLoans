@@ -740,7 +740,6 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     ) internal virtual override {
         if(from != address(0) && to != address(0)) {
             notifyVPrimeController(from);
-            notifyVPrimeController(to);
         }
     }
 

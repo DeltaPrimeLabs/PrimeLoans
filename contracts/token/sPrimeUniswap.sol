@@ -854,7 +854,6 @@ contract sPrimeUniswap is
                 userTokenId[to] = newTokenId;
             }
             notifyVPrimeController(from);
-            notifyVPrimeController(to);
         }
     }
 
