@@ -281,6 +281,37 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         return (_uniswapV3Data.srcToken, _uniswapV3Data.destToken, _uniswapV3Data.fromAmount, _uniswapV3Data.toAmount);
     }
 
+    /// @notice internal function that decodes partnerAndFee element from UniswapV3FullData
+    /// @dev uses assembly since pools will be a dynamic array and can't know the size beforehand
+    /// @dev not tested properly, and not incorporated yet.
+    function _decodePartnerAndFeeForUniFullData(bytes calldata data) internal pure {
+        console.log("Inside _decodePartnerAndFeeForUniFullData");
+        uint256 partnerAndFee;
+        assembly {
+            // Get pointer to UniswapV3Data
+            let uniDataPtr := add(data.offset, 32)
+            // partnerAndFee comes after all UniswapV3Data fields
+            let partnerAndFeePtr := add(uniDataPtr, 256) // (7 fields * 32) + 32 for pools pointer
+            partnerAndFee := mload(partnerAndFeePtr)
+        }
+        console.log("PartnerAndFee From The Assembly Function: ");
+        console.log(partnerAndFee);
+    }
+
+    /// @dev from paraswap's code, copied as is
+    /// @dev not incorporated yet, but will need to for validation
+    function _parsePartnerAndFeeData(uint256 partnerAndFee)
+        internal
+        pure
+        returns (address payable partner, uint256 feeData)
+    {
+        // solhint-disable-next-line no-inline-assembly
+        assembly ("memory-safe") {
+            partner := shr(96, partnerAndFee)
+            feeData := and(partnerAndFee, 0xFFFFFFFFFFFFFFFFFFFFFFFF)
+        }
+    }
+
     /// @notice internal function that decodes the data returned by ParaSwap API for SwapExactAmountIn method
     /// @param _data the data to be decoded
     /// @dev the different scope of the internal function helps avoid Stack Too Deep errors
