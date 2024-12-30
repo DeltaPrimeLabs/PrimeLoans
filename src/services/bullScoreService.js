@@ -30,7 +30,11 @@ export class AssetsEntry {
   }
 }
 
-export default class BullScoreService{
+export default class BullScoreService {
+  LS_TOKENS = {
+    AVAX: ['sAVAX', 'yyAVAX', 'ggAVAX'],
+    ETH: ['wstETH', 'ezETH', 'weETH', 'rsETH'],
+  }
   TOKENS_TO_CALCULATE_AVAX = [
     TokenType.WOMBAT,
     TokenType.GMXV2,
@@ -59,15 +63,44 @@ export default class BullScoreService{
 
   assets$ = this._assets$.pipe(filter(Boolean), debounceTime(1000))
   collateral$ = this._collateral$.pipe(filter(Boolean), debounceTime(1000))
-  assetsBalances$ = this._assetsBalances$.pipe(filter(Boolean), debounceTime(1000))
-  debtsPerAsset$ = this._debtsPerAsset$.pipe(filter(Boolean), debounceTime(1000))
   tokens$ = this._tokens$.pipe(filter(Boolean), debounceTime(1000))
+  assetsBalancesWithLSTs$ = this._assetsBalances$.pipe(filter(Boolean), debounceTime(1000), map(assetsBalances => {
+    const balances = { ...assetsBalances }
+    Object.entries(this.LS_TOKENS).forEach(([assetSymbol, lstokens]) => {
+      if (assetsBalances[assetSymbol]) {
+        lstokens.forEach(lstSymbol => {
+          if (assetsBalances[lstSymbol]) {
+            balances[assetSymbol] += assetsBalances[lstSymbol]
+          }
+        })
+      }
+    })
+    return balances
+  }))
+  debtsPerAsset$WithLSTs$ = this._debtsPerAsset$.pipe(filter(Boolean), debounceTime(1000), map(debtsPerAsset => {
+    const debts = { ...debtsPerAsset }
+    Object.entries(this.LS_TOKENS).forEach(([assetSymbol, lstokens]) => {
+      if (debtsPerAsset[assetSymbol]) {
+        lstokens.forEach(lstSymbol => {
+          if (debtsPerAsset[lstSymbol]) {
+            debts[assetSymbol] += debtsPerAsset[lstSymbol]
+          }
+        })
+      }
+    })
+    return debts
+  }))
 
-  netBorrowed$ = combineLatest(this.assets$, this.assetsBalances$, this.debtsPerAsset$, this.collateral$, this.stablesToCalculate$, this.assetsToCalculate$).pipe(
+  netBorrowed$ = combineLatest(this.assets$, this.assetsBalancesWithLSTs$, this.debtsPerAsset$WithLSTs$, this.collateral$, this.stablesToCalculate$, this.assetsToCalculate$).pipe(
     map(([assets, assetsBalances, debtsPerAsset, collateral, stablesToCalculate, assetsToCalculate]) => {
       const result = {}
       assetsToCalculate.forEach(assetSymbol => {
         result[assetSymbol] = (debtsPerAsset[assetSymbol].debt - assetsBalances[assetSymbol]) * assets[assetSymbol].price
+        if (this.LS_TOKENS[assetSymbol]) {
+          this.LS_TOKENS[assetSymbol].forEach(lsSymbol => {
+            result[assetSymbol]
+          })
+        }
       })
 
       result.STABLES = stablesToCalculate.reduce((previousValue, currentValue) => {
@@ -98,7 +131,7 @@ export default class BullScoreService{
     })
   )
 
-  bullScorePerAsset$ = combineLatest(this.assetsToCalculate$, this.assetsBalances$, this.assets$, this.tokens$, this.hedgedNonStableValues$).pipe(
+  bullScorePerAsset$ = combineLatest(this.assetsToCalculate$, this.assetsBalancesWithLSTs$, this.assets$, this.tokens$, this.hedgedNonStableValues$).pipe(
     map(([assetsToCalculate, assetsBalances, assets, tokens, hedgedNonStableValues]) => {
       const result = {}
       const dividers = {}
