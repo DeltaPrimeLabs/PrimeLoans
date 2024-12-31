@@ -55,8 +55,8 @@ export default {
     ]),
   },
   mounted() {
-    this.bullScoreService.bullScore$.subscribe(score => {
-      this.bullScore = score
+    this.bullScoreService.allHedgeScores$.subscribe(score => {
+      this.bullScore = score ? score.ALL : null
     })
   }
 };

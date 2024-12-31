@@ -27,7 +27,7 @@ export default {
   name: "StatsBullScoreSection",
   components: {Dropdown, PercentageGauge, StatsSectionHeader, StatsSection},
   mounted() {
-    this.bullScoreService.allBullScores$.subscribe(allBullScores => {
+    this.bullScoreService.allHedgeScores$.subscribe(allBullScores => {
       this.allValues = allBullScores;
       this.availableOptions = [{name: 'Total', value: 'ALL'}]
       for (const bullScoreType in allBullScores) {

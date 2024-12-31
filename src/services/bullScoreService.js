@@ -66,24 +66,30 @@ export default class BullScoreService {
   tokens$ = this._tokens$.pipe(filter(Boolean), debounceTime(1000))
   assetsBalancesWithLSTs$ = this._assetsBalances$.pipe(filter(Boolean), debounceTime(1000), map(assetsBalances => {
     const balances = { ...assetsBalances }
+    Object.keys(balances).forEach(key => {
+      balances[key] = parseFloat(balances[key])
+    })
     Object.entries(this.LS_TOKENS).forEach(([assetSymbol, lstokens]) => {
       if (assetsBalances[assetSymbol]) {
         lstokens.forEach(lstSymbol => {
           if (assetsBalances[lstSymbol]) {
-            balances[assetSymbol] += assetsBalances[lstSymbol]
+            balances[assetSymbol] += parseFloat(assetsBalances[lstSymbol])
           }
         })
       }
     })
     return balances
   }))
-  debtsPerAsset$WithLSTs$ = this._debtsPerAsset$.pipe(filter(Boolean), debounceTime(1000), map(debtsPerAsset => {
+  debtsPerAssetWithLSTs$ = this._debtsPerAsset$.pipe(filter(Boolean), debounceTime(1000), map(debtsPerAsset => {
     const debts = { ...debtsPerAsset }
+    Object.keys(debts).forEach(key => {
+      debts[key].debt = parseFloat(debts[key].debt)
+    })
     Object.entries(this.LS_TOKENS).forEach(([assetSymbol, lstokens]) => {
       if (debtsPerAsset[assetSymbol]) {
         lstokens.forEach(lstSymbol => {
           if (debtsPerAsset[lstSymbol]) {
-            debts[assetSymbol] += debtsPerAsset[lstSymbol]
+            debts[assetSymbol].debt += parseFloat(debtsPerAsset[lstSymbol].debt)
           }
         })
       }
@@ -91,16 +97,11 @@ export default class BullScoreService {
     return debts
   }))
 
-  netBorrowed$ = combineLatest(this.assets$, this.assetsBalancesWithLSTs$, this.debtsPerAsset$WithLSTs$, this.collateral$, this.stablesToCalculate$, this.assetsToCalculate$).pipe(
+  netBorrowed$ = combineLatest(this.assets$, this.assetsBalancesWithLSTs$, this.debtsPerAssetWithLSTs$, this.collateral$, this.stablesToCalculate$, this.assetsToCalculate$).pipe(
     map(([assets, assetsBalances, debtsPerAsset, collateral, stablesToCalculate, assetsToCalculate]) => {
       const result = {}
       assetsToCalculate.forEach(assetSymbol => {
         result[assetSymbol] = (debtsPerAsset[assetSymbol].debt - assetsBalances[assetSymbol]) * assets[assetSymbol].price
-        if (this.LS_TOKENS[assetSymbol]) {
-          this.LS_TOKENS[assetSymbol].forEach(lsSymbol => {
-            result[assetSymbol]
-          })
-        }
       })
 
       result.STABLES = stablesToCalculate.reduce((previousValue, currentValue) => {
@@ -180,6 +181,19 @@ export default class BullScoreService {
         finalBullScore += bullScorePerAsset[assetSymbol] * sumVolatileAssets[assetSymbol] / (sumVolatileAssets.ALL === 0 ? 1 : sumVolatileAssets.ALL)
       })
       return finalBullScore
+    })
+  )
+
+  allHedgeScores$ = combineLatest(this.hedgedNonStableValues$, this.collateral$, this.assetsToCalculate$).pipe(
+    map(([hedgedNonStableValues, collateral, assetsToCalculate]) => {
+      const result = {}
+      let sumHedgedNonStableValues = 0
+      assetsToCalculate.forEach(assetSymbol => {
+        result[assetSymbol] = hedgedNonStableValues[assetSymbol] / collateral
+        sumHedgedNonStableValues += hedgedNonStableValues[assetSymbol]
+      })
+      result['ALL'] = sumHedgedNonStableValues / collateral
+      return result
     })
   )
 
