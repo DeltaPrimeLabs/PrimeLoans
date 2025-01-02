@@ -14,10 +14,10 @@
       <div class="center"></div>
       <div class="labels">
         <div>
-          -100%
+          -{{ range }}%
         </div>
         <div>
-          100%
+          {{ range }}%
         </div>
       </div>
     </div>
@@ -29,7 +29,8 @@
 export default {
   name: 'PercentageGauge',
   props: {
-    percentageValue: null
+    percentageValue: null,
+    range: null,
   },
   data() {
     return {
@@ -43,7 +44,7 @@ export default {
   },
   methods: {
     calculateIndicatorRotation(value) {
-      this.gaugeHandRotation = ((value + 100) / 2) * 2.25 + 247.5
+      this.gaugeHandRotation = (((value / this.range * 100) + 100) / 2) * 2.25 + 247.5
       const radians = (90 - this.gaugeHandRotation) * (Math.PI / 180);
 
       const BASE_R = 102.5
@@ -79,8 +80,10 @@ export default {
 <style scoped lang="scss">
 .wrapper {
   position: relative;
-  width: 280px;
+  width: 300px;
   height: 200px;
+  margin-left: -10px;
+  margin-right: -10px;
 }
 
 .range__mask, .number {

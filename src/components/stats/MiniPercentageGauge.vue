@@ -12,7 +12,7 @@
       <div class="center"></div>
     </div>
     <div class="value" v-bind:style="{color: valueColor}">
-      {{ smartRound(percentageValue, 2) }}%
+      {{ roundWithPrecision(percentageValue, 2) }}%
     </div>
   </div>
 </template>
@@ -20,13 +20,14 @@
 <script>
 
 import { getThemeVariable } from "../../utils/style-themes";
-import { smartRound } from "../../utils/calculate";
+import { roundWithPrecision } from "../../utils/calculate";
 import { mapState } from "vuex";
 
 export default {
   name: 'MiniPercentageGauge',
   props: {
-    percentageValue: null
+    percentageValue: null,
+    range: null
   },
   data() {
     return {
@@ -43,11 +44,11 @@ export default {
     })
   },
   methods: {
-    smartRound,
+    roundWithPrecision,
     calculateValueColor(value) {
-      this.gaugeHandRotation = ((value + 100) / 2) * 1.7 + 275
+      this.gaugeHandRotation = (((value / this.range * 100) + 100) / 2) * 1.7 + 275
       const breakpoints = [0, 0.12, 0.26, 0.37, 0.5, 0.63]
-      const percentage = (value + 100) / 200
+      const percentage = ((value / this.range * 100) + 100) / 200
       this.valueColor = getThemeVariable(`--mini-percentage-gauge__gradient-color-${breakpoints.findLastIndex(breakpoint => breakpoint <= percentage) + 1}`)
     }
   },

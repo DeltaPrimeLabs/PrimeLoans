@@ -23,7 +23,7 @@
     </div>
     <div class="divider"></div>
     <div class="bull-meter-section">
-      <MiniPercentageGauge v-if="bullScore !== undefined && bullScore !== null" :percentage-value="bullScore * 100"></MiniPercentageGauge>
+      <MiniPercentageGauge v-if="bullScore !== undefined && bullScore !== null" :percentage-value="bullScore * 100" :range="500"></MiniPercentageGauge>
       <div v-else>
         <vue-loaders-ball-beat color="#A6A3FF" scale="0.5"></vue-loaders-ball-beat>
       </div>

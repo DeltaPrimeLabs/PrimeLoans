@@ -11,7 +11,7 @@
       <Dropdown class="bullscore-dropdown" v-if="allValues"
                 :options="availableOptions"
                 @dropdownSelected="handleDropdownOption"></Dropdown>
-      <percentage-gauge v-if="allValues" :percentage-value="valueToShow(selectedOption)"></percentage-gauge>
+      <percentage-gauge v-if="allValues" :percentage-value="valueToShow(selectedOption)" :range="500"></percentage-gauge>
     </div>
   </StatsSection>
 </template>
