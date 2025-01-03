@@ -23,7 +23,10 @@
     </div>
     <div class="divider"></div>
     <div class="bull-meter-section">
-      <MiniPercentageGauge v-if="bullScore !== undefined && bullScore !== null" :percentage-value="bullScore * 100" :range="500"></MiniPercentageGauge>
+      <template v-if="bullScore !== undefined && bullScore !== null">
+        <MiniPercentageGauge :percentage-value="bullScore * 100" :range="500"></MiniPercentageGauge>
+        <InfoIcon :size="16" class="bull-meter-section__info-icon" :tooltip="'The percentage change of your collateral value if all volatile assets appreciate with 100%; your bullishness on the cryptomarket. This Feature is currently in <b>Beta</b>, and excludes liquidation effects.'"></InfoIcon>
+      </template>
       <div v-else>
         <vue-loaders-ball-beat color="#A6A3FF" scale="0.5"></vue-loaders-ball-beat>
       </div>
@@ -127,9 +130,16 @@ export default {
 }
 
 .bull-meter-section {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+
+  &__info-icon {
+    position: absolute;
+    top: -5px;
+    right: 10px;
+  }
 }
 
 </style>
