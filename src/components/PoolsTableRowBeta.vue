@@ -27,15 +27,6 @@
         </template>
       </div>
 
-      <div class="table__cell avalanche-boost" v-if="isAvalanche">
-        <div class="avalanche-boost-unclaimed" v-if="pool.hasAvalancheBoost">
-          <LoadedValue :check="() => pool.unclaimed !== null && pool.unclaimedOld !== null"
-                       :value="(pool.hasAvalancheBoost ? Number(pool.unclaimed) + Number(pool.unclaimedOld) : 0) | smartRound(5, false)"></LoadedValue>
-          <img class="asset__icon" v-if="pool.avalancheBoostRewardToken"
-               :src="getAssetIcon(pool.avalancheBoostRewardToken)">
-        </div>
-      </div>
-
       <div class="table__cell sprime">
         <div>
           <LoadedValue :check="() => pool.sPrime !== null" :value="pool.sPrime | usd"></LoadedValue>
@@ -563,7 +554,7 @@ export default {
 
   .table__row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr) 135px 135px 135px 135px 70px 110px 22px;
+    grid-template-columns: 1fr repeat(5, 160px) 70px 110px 22px;
     height: 60px;
     border-style: solid;
     border-width: 0 0 2px 0;

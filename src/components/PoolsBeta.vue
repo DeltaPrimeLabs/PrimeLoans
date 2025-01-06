@@ -199,20 +199,7 @@ export default {
               this.poolsList[poolIndex].hasAvalancheBoost = true;
               this.poolsList[poolIndex].avalancheBoostRewardToken = config.AVALANCHE_BOOST_CONFIG[poolAsset].rewardToken;
               let secondsInYear = 3600 * 24 * 365;
-              this.poolsList[poolIndex].miningApy = rates[poolAsset] * secondsInYear / (this.poolsList[poolIndex].tvl * this.poolsList[poolIndex].assetPrice);
-
-              if (poolAsset == 'BTC') {
-                this.poolsList[poolIndex].miningApy = 0.0523;
-              }
-              if (poolAsset == 'AVAX') {
-                this.poolsList[poolIndex].miningApy = 0.0497;
-              }
-              if (poolAsset == 'USDC') {
-                this.poolsList[poolIndex].miningApy = 0.069;
-              }
-              if (poolAsset == 'USDT') {
-                this.poolsList[poolIndex].miningApy = 0.0914;
-              }
+              this.poolsList[poolIndex].miningApy = 0;
             }
           );
         }
@@ -366,7 +353,7 @@ export default {
           }
           :
           {
-            gridTemplateColumns: 'repeat(3, 1fr) 135px 135px 135px 135px 70px 110px 22px',
+            gridTemplateColumns: '1fr repeat(5, 160px) 70px 110px 22px',
             cells: [
               {
                 label: 'Asset',
@@ -381,13 +368,6 @@ export default {
                 sortable: false,
                 class: 'deposit',
                 id: 'DEPOSIT',
-              },
-              {
-                label: 'Rewards',
-                sortable: false,
-                class: 'deposit',
-                id: 'BOOST',
-                tooltip: `Your unclaimed rewards from the Boost Program`
               },
               {
                 label: 'sPRIME',
