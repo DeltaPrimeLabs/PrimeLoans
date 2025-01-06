@@ -483,23 +483,7 @@ contract sPrimeUniswap is
         bool isRebalance,
         uint256 swapSlippage
     ) public nonReentrant {
-        _transferTokens(_msgSender(), address(this), amountX, amountY);
-
-        if (swapSlippage > _MAX_SLIPPAGE) {
-            revert SlippageTooHigh();
-        }
-
-        _deposit(
-            _msgSender(),
-            tickDesired,
-            tickSlippage,
-            amountX,
-            amountY,
-            desiredAmountX,
-            desiredAmountY,
-            isRebalance,
-            swapSlippage
-        );
+        revert("Paused");
     }
 
     function _deposit(
@@ -524,7 +508,7 @@ contract sPrimeUniswap is
             if (isRebalance) {
                 // Withdraw Position For Rebalance
                 (uint256 amountXBefore, uint256 amountYBefore) = positionManagerRemove(tokenId, liquidity, address(this), 0, 0);
-                
+
                 if(getToken0() != tokenX) {
                     (amountXBefore, amountYBefore) = (amountYBefore, amountXBefore);
                 }
@@ -571,33 +555,7 @@ contract sPrimeUniswap is
      * @param share Amount to withdraw
      */
     function withdraw(uint256 share, uint256 amountXMin, uint256 amountYMin) external nonReentrant {
-        address msgSender = _msgSender();
-        uint256 tokenId = userTokenId[msgSender];
-        if (tokenId == 0) {
-            revert NoPositionToWithdraw();
-        }
-
-        (, , , , , , , uint128 liquidity, , , , ) = positionManager.positions(
-            tokenId
-        );
-
-        uint256 balance = balanceOf(msgSender);
-        if (balance < share + getLockedBalance(msgSender)) {
-            revert BalanceLocked();
-        }
-
-        (amountXMin, amountYMin) = tokenSequence ? (amountYMin, amountXMin) : (amountXMin, amountYMin);
-        positionManagerRemove(tokenId, uint128((liquidity * share) / balance), msgSender, amountXMin, amountYMin);
-
-        // Burn Position NFT
-        if (balance == share) {
-            positionManager.burn(tokenId);
-            delete userTokenId[msgSender];
-        }
-
-        _burn(msgSender, share);
-
-        notifyVPrimeController(msgSender);
+        revert("Paused");
     }
 
     /**
@@ -725,24 +683,7 @@ contract sPrimeUniswap is
         int24 tickSlippage,
         uint256 swapSlippage
     ) public nonReentrant {
-        if(positionManager.ownerOf(tokenId) != _msgSender()) {
-            revert NoPosition();
-        }
-
-        (, , , , , , , uint128 liquidity , , , ,) = positionManager.positions(tokenId);
-
-        (uint256 amountX, uint256 amountY) = positionManagerRemove(tokenId, liquidity, address(this), 0, 0);
-
-        if(getToken0() != tokenX) {
-            (amountX, amountY) = (amountY, amountX);
-        }
-        positionManager.burn(tokenId);
-
-        if (swapSlippage > _MAX_SLIPPAGE) {
-            revert SlippageTooHigh();
-        }
-
-        _deposit(_msgSender(), tickDesired, tickSlippage, amountX, amountY, 0, 0, true, swapSlippage);
+        revert("Paused");
     }
 
     /**
@@ -751,23 +692,7 @@ contract sPrimeUniswap is
      * @param lockPeriod The duration for which the balance will be locked.
      */
     function lockBalance(uint256 amount, uint256 lockPeriod) public nonReentrant {
-        address msgSender = _msgSender();
-        uint256 lockedBalance = getLockedBalance(msgSender);
-        if (balanceOf(msgSender) < amount + lockedBalance) {
-            revert InsufficientBalanceToLock();
-        }
-        if (lockPeriod > MAX_LOCK_TIME) {
-            revert LockPeriodExceeded();
-        }
-        locks[msgSender].push(
-            LockDetails({
-                lockPeriod: lockPeriod,
-                amount: amount,
-                unlockTime: block.timestamp + lockPeriod
-            })
-        );
-
-        notifyVPrimeController(msgSender);
+        revert("Paused");
     }
 
     /** Overrided Functions */
@@ -779,13 +704,7 @@ contract sPrimeUniswap is
     * @param amount The amount to transfer.
     */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        if (from != address(0) && to != address(0)) {
-            uint256 lockedBalance = getLockedBalance(from);
-            uint256 fromBalance = balanceOf(from);
-            if (fromBalance < amount + lockedBalance) {
-                revert InsufficientBalance();
-            }
-        }
+        revert("Paused");
     }
 
     /**

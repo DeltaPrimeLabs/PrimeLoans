@@ -491,11 +491,7 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param swapSlippage Slippage for the rebalance.
     */
     function deposit(uint256 activeIdDesired, uint256 idSlippage, uint256 amountX, uint256 amountY, bool isRebalance, uint256 swapSlippage) public nonReentrant {
-        _transferTokens(_msgSender(), address(this), amountX, amountY);
-
-        _deposit(_msgSender(), activeIdDesired, idSlippage, amountX, amountY, isRebalance, swapSlippage);
-
-        notifyVPrimeController(_msgSender());
+        revert("Paused");
     }
 
 
@@ -595,14 +591,7 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param swapSlippage Slippage for the rebalance.
     */
     function migrateLiquidity(uint256[] calldata ids, uint256[] calldata amounts, uint256 activeIdDesired, uint256 idSlippage, uint256 swapSlippage) public nonReentrant {
-        uint256 balanceXBefore = tokenX.balanceOf(address(this));
-        uint256 balanceYBefore = tokenY.balanceOf(address(this));
-
-        lbPair.burn(_msgSender(), address(this), ids, amounts);
-
-        _deposit(_msgSender(), activeIdDesired, idSlippage, tokenX.balanceOf(address(this)) - balanceXBefore, tokenY.balanceOf(address(this)) - balanceYBefore, true, swapSlippage);
-
-        notifyVPrimeController(_msgSender());
+        revert("Paused");
     }
 
     /**
@@ -610,41 +599,7 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param share Amount to withdraw
     */
     function withdraw(uint256 share, uint256 amountXMin, uint256 amountYMin) external nonReentrant {
-        uint256 tokenId = getUserTokenId(_msgSender());
-        if (tokenId == 0) {
-            revert NoPosition();
-        }
-
-        (,,,, uint256 centerId, uint256[] memory liquidityMinted) = positionManager.positions(tokenId);
-        IPositionManager.DepositConfig memory depositConfig = positionManager.getDepositConfig(centerId);
-
-        uint256 lockedBalance = getLockedBalance(_msgSender());
-        if (balanceOf(_msgSender()) < share + lockedBalance) {
-            revert BalanceIsLocked();
-        }
-
-        (uint256 amountX, uint256 amountY, uint256[] memory liquidityAmounts) = _withdrawFromLB(_msgSender(), depositConfig.depositIds, liquidityMinted, share);
-        if(amountX < amountXMin || amountY < amountYMin) {
-            revert SlippageTooHigh();
-        }
-        positionManager.update(IPositionManager.UpdateParams({
-            tokenId: tokenId,
-            share: share,
-            liquidityAmounts: liquidityAmounts,
-            isAdd: false
-        }));
-
-        // Burn Position NFT
-        if(balanceOf(_msgSender()) == share) {
-            positionManager.burn(tokenId);
-        }
-
-        // Send the tokens to the user.
-        _transferTokens(address(this), _msgSender(), amountX, amountY);
-
-        _burn(_msgSender(), share);
-
-        notifyVPrimeController(_msgSender());
+        revert("Paused");
     }
 
     /**
@@ -653,20 +608,8 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param lockPeriod The duration for which the balance will be locked.
     */
     function lockBalance(uint256 amount, uint256 lockPeriod) public nonReentrant {
-        uint256 lockedBalance = getLockedBalance(_msgSender());
-        if (balanceOf(_msgSender()) < amount + lockedBalance) {
-            revert InsufficientBalance();
-        }
-        if (lockPeriod > MAX_LOCK_TIME) {
-            revert MaxLockTimeExceeded();
-        }
-        locks[_msgSender()].push(LockDetails({
-            lockPeriod: lockPeriod,
-            amount: amount,
-            unlockTime: block.timestamp + lockPeriod
-        }));
+        revert("Paused");
 
-        notifyVPrimeController(_msgSender());
     }
 
     /**
@@ -692,44 +635,7 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param amount The amount to transfer.
     */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        if(from != address(0) && to != address(0)) {
-            uint256 lockedBalance = getLockedBalance(from);
-            uint256 fromBalance = balanceOf(from);
-            if (fromBalance < amount + lockedBalance) {
-                revert InsufficientBalance();
-            }
-            if (getUserTokenId(to) != 0) {
-                revert UserAlreadyHasPosition();
-            }
-            
-            uint256 tokenId = getUserTokenId(from);
-
-            if(fromBalance == amount) {
-                positionManager.forceTransfer(from, to, tokenId);
-            } else {
-                (,,,,uint256 centerId, uint256[] memory liquidityMinted) = positionManager.positions(tokenId);
-                IPositionManager.DepositConfig memory depositConfig = positionManager.getDepositConfig(centerId);
-                for(uint256 i = 0 ; i < liquidityMinted.length ; i ++) {
-                    liquidityMinted[i] = FullMath.mulDiv(liquidityMinted[i], amount, fromBalance);
-                }
-
-                positionManager.update(IPositionManager.UpdateParams({
-                    tokenId: tokenId,
-                    share: amount,
-                    liquidityAmounts: liquidityMinted,
-                    isAdd: false
-                }));
-
-                positionManager.mint(IPositionManager.MintParams({
-                    recipient: to,
-                    totalShare: amount,
-                    centerId: centerId,
-                    liquidityMinted: liquidityMinted,
-                    liquidityConfigs: depositConfig.liquidityConfigs,
-                    depositIds: depositConfig.depositIds
-                }));
-            }
-        }
+        revert("Paused");
     }
 
     function _afterTokenTransfer(
