@@ -142,18 +142,22 @@ export default {
         AVAX: {
             address: '0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4',
             tokenAddress: addresses.AVAX,
+            hasAvalancheBoost: false
         },
         USDC: {
             address: '0x8027e004d80274FB320e9b8f882C92196d779CE8',
             tokenAddress: addresses.USDC,
+            hasAvalancheBoost: false
         },
         USDT: {
             address: '0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e',
             tokenAddress: addresses.USDT,
+            hasAvalancheBoost: false
         },
         BTC: {
             address: '0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738',
             tokenAddress: addresses.BTC,
+            hasAvalancheBoost: false
         },
         ETH: {
             address: '0x2A84c101F3d45610595050a622684d5412bdf510',
@@ -273,7 +277,7 @@ export default {
         'TJLB_USDT-USDC_2_2': { primary: 'USDT', secondary: 'USDC', name: 'USDT-USDC', dex: 'TraderJoe', version: '2.2',  symbol: 'TJLB_USDT-USDC_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.01', address: addresses['TJLB_USDT-USDC_2_2'], hooksSimpleRewarder: "0x90014c5E78Bd8a3E2bbBaA8e5a0Aee2C1D2131CD", rewardToken: 'AVAX', binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/avalanche/pool/v22/0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7/0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E/1", isIncentivized: true},
         'TJLB_AVAX-USDC': { primary: 'AVAX', secondary: 'USDC', name: 'AVAX-USDC', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_AVAX-USDC', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.002', address: addresses['TJLB_AVAX-USDC'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/avalanche/pool/v21/AVAX/0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e/20"},
         'TJLB_ETH-AVAX': { primary: 'ETH', secondary: 'AVAX', name: 'ETH-AVAX', dex: 'TraderJoe', symbol: 'TJLB_ETH-AVAX', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.001', address: addresses['TJLB_ETH-AVAX'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: 'https://lfj.gg/avalanche/pool/v21/0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab/AVAX/10'},
-        'TJLB_BTC.b-AVAX': { primary: 'BTC', secondary: 'AVAX', name: 'BTC-AVAX', dex: 'TraderJoe', symbol: 'TJLB_BTCB-AVAX', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.1', address: addresses['TJLB_BTC.b-AVAX'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: 'https://lfj.gg/avalanche/pool/v21/0x152b9d0fdc40c096757f570a51e494bd4b943e50/AVAX/10'},
+        'TJLB_BTC.b-AVAX': { primary: 'BTC', secondary: 'AVAX', name: 'BTC-AVAX', dex: 'TraderJoe', symbol: 'TJLB_BTCB-AVAX', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.1', address: addresses['TJLB_BTC.b-AVAX'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: 'https://traderjoexyz.com/avalanche/pool/v21/0x152b9d0fdc40c096757f570a51e494bd4b943e50/AVAX/10'},
     },
     LEVEL_LP_ASSETS_CONFIG: {},
     GMX_V2_ASSETS_CONFIG: {
