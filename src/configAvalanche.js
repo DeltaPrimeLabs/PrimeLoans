@@ -142,22 +142,22 @@ export default {
         AVAX: {
             address: '0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4',
             tokenAddress: addresses.AVAX,
-            hasAvalancheBoost: false
+            hasAvalancheBoost: true
         },
         USDC: {
             address: '0x8027e004d80274FB320e9b8f882C92196d779CE8',
             tokenAddress: addresses.USDC,
-            hasAvalancheBoost: false
+            hasAvalancheBoost: true
         },
         USDT: {
             address: '0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e',
             tokenAddress: addresses.USDT,
-            hasAvalancheBoost: false
+            hasAvalancheBoost: true
         },
         BTC: {
             address: '0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738',
             tokenAddress: addresses.BTC,
-            hasAvalancheBoost: false
+            hasAvalancheBoost: true
         },
         ETH: {
             address: '0x2A84c101F3d45610595050a622684d5412bdf510',
