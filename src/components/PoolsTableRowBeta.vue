@@ -212,6 +212,7 @@ export default {
     },
 
     setupMoreActionsConfiguration() {
+      const poolsWithClaim = ['AVAX', 'USDC', 'USDT', 'BTC'];
       this.moreActionsConfig = {
         iconSrc: 'src/assets/icons/icon_a_more.svg',
         tooltip: 'More',
@@ -223,7 +224,7 @@ export default {
             disabled: this.isActionDisabledRecord['SWAP_DEPOSIT'],
           }
           ,
-          this.pool.hasAvalancheBoost ? {
+          poolsWithClaim.includes(this.pool.asset.symbol) ? {
             key: 'CLAIM_AVALANCHE_BOOST',
             name: 'Claim rewards',
             disabled: this.isActionDisabledRecord['CLAIM_AVALANCHE_BOOST'],
