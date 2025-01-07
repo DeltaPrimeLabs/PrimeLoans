@@ -6,11 +6,6 @@
         <div class="asset__info">
           <div class="asset__name">{{ pool.asset.symbol }}</div>
         </div>
-        <div v-if="pool.hasAvalancheBoost">
-          <img
-            v-tooltip="{content: `This pool is incentivized with Boost Program.`, classes: 'info-tooltip'}"
-            src="src/assets/icons/stars.png" class="stars-icon">
-        </div>
       </div>
       <div class="table__cell table__cell--double-value deposit">
         <template>
