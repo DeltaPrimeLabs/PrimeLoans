@@ -78,30 +78,38 @@ contract RtknToPrimeConverter is Initializable, IRtknToPrimeConverter, OwnableUp
         emit Pledged(msg.sender, amount);
     }
 
-    // Add new function to cancel pledge
-    function cancelPledge() external nonReentrant {
+    function cancelPledge(uint256 amount) external nonReentrant {
         require(currentPhase == Phase.Phase1, "Can only cancel pledge in Phase 1");
+        require(amount > 0, "Amount must be greater than zero");
+
         uint256 pledgedAmount = userrTKNPledged[msg.sender];
         require(pledgedAmount > 0, "No pledge to cancel");
+        require(amount <= pledgedAmount, "Cannot cancel more than pledged");
 
-        // Reset user's pledge
-        userrTKNPledged[msg.sender] = 0;
-        totalrTKNPledged -= pledgedAmount;
+        // Update total pledged amount
+        totalrTKNPledged -= amount;
 
-        // Transfer tokens back to user
-        rTKN.safeTransfer(msg.sender, pledgedAmount);
-
-        // Remove user from users array if they have no remaining pledge
-        // Note: This is an O(n) operation but necessary to maintain accurate user list
-        for (uint256 i = 0; i < users.length; i++) {
-            if (users[i] == msg.sender) {
-                users[i] = users[users.length - 1];
-                users.pop();
-                break;
+        // Update user's pledge
+        if (amount == pledgedAmount) {
+            // Full cancellation
+            userrTKNPledged[msg.sender] = 0;
+            // Remove user from users array
+            for (uint256 i = 0; i < users.length; i++) {
+                if (users[i] == msg.sender) {
+                    users[i] = users[users.length - 1];
+                    users.pop();
+                    break;
+                }
             }
+        } else {
+            // Partial cancellation
+            userrTKNPledged[msg.sender] = pledgedAmount - amount;
         }
 
-        emit PledgeCancelled(msg.sender, pledgedAmount);
+        // Transfer tokens back to user
+        rTKN.safeTransfer(msg.sender, amount);
+
+        emit PledgeCancelled(msg.sender, amount);
     }
 
     function burnRTKNs() external onlyOwner {

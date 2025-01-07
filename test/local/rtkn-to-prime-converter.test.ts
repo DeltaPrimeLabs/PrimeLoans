@@ -211,122 +211,194 @@ describe("RtknToPrimeConverter Contract", function () {
         });
 
         describe("Pledge Cancellation", function () {
-            it("Should allow users to cancel their pledge in Phase 1", async function () {
+            it("Should allow users to fully cancel their pledge", async function () {
                 const pledgeAmount = ethers.utils.parseEther("100");
                 await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount);
                 await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount);
 
                 const balanceBefore = await rtkn.balanceOf(addr1.address);
+                const userListBefore = await rtknToPrimeConverter.getTotalUsers();
 
-                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge())
+                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge(pledgeAmount))
                     .to.emit(rtknToPrimeConverter, "PledgeCancelled")
                     .withArgs(addr1.address, pledgeAmount);
 
                 const balanceAfter = await rtkn.balanceOf(addr1.address);
+                const userListAfter = await rtknToPrimeConverter.getTotalUsers();
 
                 expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address)).to.equal(0);
                 expect(await rtknToPrimeConverter.totalrTKNPledged()).to.equal(0);
                 expect(balanceAfter.sub(balanceBefore)).to.equal(pledgeAmount);
-                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(0);
+                expect(userListAfter).to.equal(userListBefore - 1);
+            });
+
+            it("Should allow partial pledge cancellation", async function () {
+                const pledgeAmount = ethers.utils.parseEther("100");
+                const cancelAmount = ethers.utils.parseEther("40");
+
+                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount);
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount);
+
+                const balanceBefore = await rtkn.balanceOf(addr1.address);
+                const userListBefore = await rtknToPrimeConverter.getTotalUsers();
+
+                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge(cancelAmount))
+                    .to.emit(rtknToPrimeConverter, "PledgeCancelled")
+                    .withArgs(addr1.address, cancelAmount);
+
+                const balanceAfter = await rtkn.balanceOf(addr1.address);
+                const userListAfter = await rtknToPrimeConverter.getTotalUsers();
+
+                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address))
+                    .to.equal(pledgeAmount.sub(cancelAmount));
+                expect(await rtknToPrimeConverter.totalrTKNPledged())
+                    .to.equal(pledgeAmount.sub(cancelAmount));
+                expect(balanceAfter.sub(balanceBefore)).to.equal(cancelAmount);
+                // User should still be in the list for partial cancellation
+                expect(userListAfter).to.equal(userListBefore);
+            });
+
+            it("Should allow multiple partial cancellations", async function () {
+                const pledgeAmount = ethers.utils.parseEther("100");
+                const firstCancel = ethers.utils.parseEther("30");
+                const secondCancel = ethers.utils.parseEther("20");
+
+                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount);
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount);
+
+                await rtknToPrimeConverter.connect(addr1).cancelPledge(firstCancel);
+                await rtknToPrimeConverter.connect(addr1).cancelPledge(secondCancel);
+
+                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address))
+                    .to.equal(pledgeAmount.sub(firstCancel).sub(secondCancel));
+                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(1);
+            });
+
+            it("Should handle mix of full and partial cancellations from multiple users", async function () {
+                const pledge1 = ethers.utils.parseEther("100");
+                const pledge2 = ethers.utils.parseEther("200");
+                const pledge3 = ethers.utils.parseEther("300");
+
+                // Setup pledges
+                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledge1);
+                await rtkn.connect(addr2).approve(rtknToPrimeConverter.address, pledge2);
+                await rtkn.connect(addr3).approve(rtknToPrimeConverter.address, pledge3);
+
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledge1);
+                await rtknToPrimeConverter.connect(addr2).pledgerTKN(pledge2);
+                await rtknToPrimeConverter.connect(addr3).pledgerTKN(pledge3);
+
+                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(3);
+
+                // Addr1 cancels partially
+                const partialCancel = ethers.utils.parseEther("40");
+                await rtknToPrimeConverter.connect(addr1).cancelPledge(partialCancel);
+
+                // Addr2 cancels fully
+                await rtknToPrimeConverter.connect(addr2).cancelPledge(pledge2);
+
+                // Verify states
+                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address))
+                    .to.equal(pledge1.sub(partialCancel));
+                expect(await rtknToPrimeConverter.userrTKNPledged(addr2.address))
+                    .to.equal(0);
+                expect(await rtknToPrimeConverter.userrTKNPledged(addr3.address))
+                    .to.equal(pledge3);
+                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(2);
+                expect(await rtknToPrimeConverter.totalrTKNPledged())
+                    .to.equal(pledge1.sub(partialCancel).add(pledge3));
+            });
+
+            it("Should not allow cancelling more than pledged amount", async function () {
+                const pledgeAmount = ethers.utils.parseEther("100");
+                const cancelAmount = ethers.utils.parseEther("101");
+
+                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount);
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount);
+
+                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge(cancelAmount))
+                    .to.be.revertedWith("Cannot cancel more than pledged");
+            });
+
+            it("Should not allow cancelling zero amount", async function () {
+                const pledgeAmount = ethers.utils.parseEther("100");
+                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount);
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount);
+
+                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge(0))
+                    .to.be.revertedWith("Amount must be greater than zero");
             });
 
             it("Should not allow cancellation if user has no pledge", async function () {
-                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge())
+                const cancelAmount = ethers.utils.parseEther("1");
+                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge(cancelAmount))
                     .to.be.revertedWith("No pledge to cancel");
             });
 
             it("Should not allow cancellation in Phase 2", async function () {
                 const pledgeAmount = ethers.utils.parseEther("100");
+                const cancelAmount = ethers.utils.parseEther("40");
+
                 await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount);
                 await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount);
 
                 await rtknToPrimeConverter.connect(owner).startPhase2();
 
-                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge())
+                await expect(rtknToPrimeConverter.connect(addr1).cancelPledge(cancelAmount))
                     .to.be.revertedWith("Can only cancel pledge in Phase 1");
             });
 
-            it("Should handle multiple users' pledges and cancellations correctly", async function () {
-                const pledgeAmount1 = ethers.utils.parseEther("100");
-                const pledgeAmount2 = ethers.utils.parseEther("200");
-                const pledgeAmount3 = ethers.utils.parseEther("300");
+            it("Should allow pledge after partial cancellation", async function () {
+                const initialPledge = ethers.utils.parseEther("100");
+                const cancelAmount = ethers.utils.parseEther("40");
+                const additionalPledge = ethers.utils.parseEther("50");
 
-                // Three users pledge
-                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount1);
-                await rtkn.connect(addr2).approve(rtknToPrimeConverter.address, pledgeAmount2);
-                await rtkn.connect(addr3).approve(rtknToPrimeConverter.address, pledgeAmount3);
+                // Initial pledge
+                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, initialPledge.add(additionalPledge));
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(initialPledge);
 
-                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount1);
-                await rtknToPrimeConverter.connect(addr2).pledgerTKN(pledgeAmount2);
-                await rtknToPrimeConverter.connect(addr3).pledgerTKN(pledgeAmount3);
+                // Partial cancel
+                await rtknToPrimeConverter.connect(addr1).cancelPledge(cancelAmount);
 
-                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(3);
-                expect(await rtknToPrimeConverter.totalrTKNPledged())
-                    .to.equal(pledgeAmount1.add(pledgeAmount2).add(pledgeAmount3));
+                // Additional pledge
+                await rtknToPrimeConverter.connect(addr1).pledgerTKN(additionalPledge);
 
-                // Middle user cancels
-                const addr2BalanceBefore = await rtkn.balanceOf(addr2.address);
-                await rtknToPrimeConverter.connect(addr2).cancelPledge();
-                const addr2BalanceAfter = await rtkn.balanceOf(addr2.address);
-
-                expect(addr2BalanceAfter.sub(addr2BalanceBefore)).to.equal(pledgeAmount2);
-                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(2);
-                expect(await rtknToPrimeConverter.totalrTKNPledged())
-                    .to.equal(pledgeAmount1.add(pledgeAmount3));
-
-                // Verify remaining users are still intact
-                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address)).to.equal(pledgeAmount1);
-                expect(await rtknToPrimeConverter.userrTKNPledged(addr2.address)).to.equal(0);
-                expect(await rtknToPrimeConverter.userrTKNPledged(addr3.address)).to.equal(pledgeAmount3);
-            });
-
-            it("Should allow user to pledge again after cancelling", async function () {
-                const pledgeAmount1 = ethers.utils.parseEther("100");
-                const pledgeAmount2 = ethers.utils.parseEther("150");
-
-                await rtkn.connect(addr1).approve(rtknToPrimeConverter.address, pledgeAmount1.add(pledgeAmount2));
-
-                // First pledge
-                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount1);
-                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address)).to.equal(pledgeAmount1);
-
-                // Cancel
-                await rtknToPrimeConverter.connect(addr1).cancelPledge();
-                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address)).to.equal(0);
-
-                // Pledge again
-                await rtknToPrimeConverter.connect(addr1).pledgerTKN(pledgeAmount2);
-                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address)).to.equal(pledgeAmount2);
+                expect(await rtknToPrimeConverter.userrTKNPledged(addr1.address))
+                    .to.equal(initialPledge.sub(cancelAmount).add(additionalPledge));
                 expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(1);
-                expect(await rtknToPrimeConverter.totalrTKNPledged()).to.equal(pledgeAmount2);
             });
 
-            it("Should handle cancellation with very large number of users", async function () {
-                // Add 200 users (arbitrary large number below gas limit constraint)
-                const userCount = 15;
-                const pledgeAmount = ethers.utils.parseEther("1");
+            it("Should handle large number of users with mixed cancellations", async function () {
+                // Add 12 users with varying pledges
+                const baseAmount = ethers.utils.parseEther("1");
+                const users = 12;
 
-                // Make pledges from many users
-                for(let i = 0; i < userCount; i++) {
+                for(let i = 0; i < users; i++) {
                     const signer = addrs[i];
+                    const pledgeAmount = baseAmount.mul(i + 1); // Different amount for each user
                     await rtkn.transfer(signer.address, pledgeAmount);
                     await rtkn.connect(signer).approve(rtknToPrimeConverter.address, pledgeAmount);
                     await rtknToPrimeConverter.connect(signer).pledgerTKN(pledgeAmount);
                 }
 
-                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(userCount);
+                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(users);
 
-                // Cancel pledge for first user
-                const targetSigner = addrs[0];
-                const balanceBefore = await rtkn.balanceOf(targetSigner.address);
+                // Mix of full and partial cancellations
+                for(let i = 0; i < users; i += 2) {
+                    const signer = addrs[i];
+                    const pledged = baseAmount.mul(i + 1);
+                    if (i % 4 === 0) {
+                        // Full cancellation for every 4th user
+                        await rtknToPrimeConverter.connect(signer).cancelPledge(pledged);
+                    } else {
+                        // Partial cancellation for others
+                        await rtknToPrimeConverter.connect(signer).cancelPledge(pledged.div(2));
+                    }
+                }
 
-                await rtknToPrimeConverter.connect(targetSigner).cancelPledge();
-
-                const balanceAfter = await rtkn.balanceOf(targetSigner.address);
-
-                expect(balanceAfter.sub(balanceBefore)).to.equal(pledgeAmount);
-                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(userCount - 1);
-                expect(await rtknToPrimeConverter.userrTKNPledged(targetSigner.address)).to.equal(0);
+                // Verify final state
+                const expectedRemainingUsers = users - Math.floor(users/4);
+                expect(await rtknToPrimeConverter.getTotalUsers()).to.equal(expectedRemainingUsers);
             });
         });
     });
