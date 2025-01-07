@@ -27,9 +27,13 @@ contract RtknToPrimeConverter is Initializable, IRtknToPrimeConverter, OwnableUp
     uint256 public scalingFactor; // Scaled by 1e18 for precision
     uint256 public currentBatchIndex;
 
+    // Add new event for pledge cancellation
+    event PledgeCancelled(address indexed user, uint256 amount);
+
     function initialize(
         address _rTKNAddress,
-        uint256 _rRTKNMaxCap
+        uint256 _rRTKNMaxCap,
+        address _owner
     ) external initializer {
         require(_rTKNAddress != address(0), "Invalid token address");
         require(_rRTKNMaxCap > 0, "Max cap must be greater than zero");
@@ -37,7 +41,7 @@ contract RtknToPrimeConverter is Initializable, IRtknToPrimeConverter, OwnableUp
         __Ownable_init();
         __ReentrancyGuard_init();
 
-        _transferOwnership(0xDfA6706FC583b635CD6daF0E3915901A2fBaBAaD);
+        _transferOwnership(_owner);
 
         rTKN = ERC20BurnableUpgradeable(_rTKNAddress);
         rRTKNMaxCap = _rRTKNMaxCap;
@@ -49,7 +53,8 @@ contract RtknToPrimeConverter is Initializable, IRtknToPrimeConverter, OwnableUp
     }
 
     function setRTKNMaxCap(uint256 _newMaxCap) external onlyOwner {
-        require(currentPhase == Phase.Phase1 && totalrTKNPledged == 0, "Cannot change cap after pledging has started");
+        require(currentPhase == Phase.Phase1, "Can only change cap in Phase 1");
+        require(_newMaxCap > 0, "Max cap must be greater than zero");
         emit MaxCapSet(rRTKNMaxCap, _newMaxCap);
         rRTKNMaxCap = _newMaxCap;
     }
@@ -71,6 +76,32 @@ contract RtknToPrimeConverter is Initializable, IRtknToPrimeConverter, OwnableUp
         totalrTKNPledged += amount;
 
         emit Pledged(msg.sender, amount);
+    }
+
+    // Add new function to cancel pledge
+    function cancelPledge() external nonReentrant {
+        require(currentPhase == Phase.Phase1, "Can only cancel pledge in Phase 1");
+        uint256 pledgedAmount = userrTKNPledged[msg.sender];
+        require(pledgedAmount > 0, "No pledge to cancel");
+
+        // Reset user's pledge
+        userrTKNPledged[msg.sender] = 0;
+        totalrTKNPledged -= pledgedAmount;
+
+        // Transfer tokens back to user
+        rTKN.safeTransfer(msg.sender, pledgedAmount);
+
+        // Remove user from users array if they have no remaining pledge
+        // Note: This is an O(n) operation but necessary to maintain accurate user list
+        for (uint256 i = 0; i < users.length; i++) {
+            if (users[i] == msg.sender) {
+                users[i] = users[users.length - 1];
+                users.pop();
+                break;
+            }
+        }
+
+        emit PledgeCancelled(msg.sender, pledgedAmount);
     }
 
     function burnRTKNs() external onlyOwner {
