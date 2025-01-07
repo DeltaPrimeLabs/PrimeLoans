@@ -36,7 +36,7 @@ export default class GlobalActionsDisableService {
     BRIDGE_DEPOSIT: true,
     WITHDRAW: false,
     SWAP_DEPOSIT: true,
-    CLAIM_AVALANCHE_BOOST: true,
+    CLAIM_AVALANCHE_BOOST: false,
   });
   stakingProtocolActions$ = new BehaviorSubject({
     ADD_FROM_WALLET: true,
