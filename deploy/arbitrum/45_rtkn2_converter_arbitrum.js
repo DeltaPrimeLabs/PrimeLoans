@@ -14,8 +14,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     // DEPLOY RtknToPrimeConverter
 
-    const ARBITRUM_OWNER_MULTISIG = 0xDfA6706FC583b635CD6daF0E3915901A2fBaBAaD;
-    const ARBITRUM_ADMIN_MULTISIG = 0xa9Ca8462aB2949ADa86297904e09Ab4Eb12cdCf0;
+    const ARBITRUM_OWNER_MULTISIG = "0xDfA6706FC583b635CD6daF0E3915901A2fBaBAaD";
+    const ARBITRUM_ADMIN_MULTISIG = "0xa9Ca8462aB2949ADa86297904e09Ab4Eb12cdCf0";
 
     let RtknToPrimeConverter = await deploy("RtknToPrimeConverter", {
         from: deployer,
@@ -38,7 +38,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     // DEPLOY rTknConverterTUP
 
     const rTKN2ArbitrumAddress = "0x47f655e3B4D0b686D26FBAD9C6378f66D6388af7";
-    const rTKN2ArbitrumMaxCap = "0"; // We will update this value before going into the Phase 2
+    const rTKN2ArbitrumMaxCap = "1"; // We will update this value before going into the Phase 2
 
     const calldata = web3Abi.encodeFunctionCall(
         rTknConverterArtifact.abi.find((method) => method.name === "initialize"),
@@ -47,6 +47,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
 
     let rTknConverterTUP = await deploy("rTknConverterTUP", {
         from: deployer,
+        contract: "contracts/proxies/tup/arbitrum/rTknConverterTUP.sol:rTknConverterTUP",
         args: [RtknToPrimeConverter.address, ARBITRUM_ADMIN_MULTISIG, calldata],
     });
 
