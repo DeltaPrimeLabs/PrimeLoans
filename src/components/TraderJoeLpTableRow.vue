@@ -1052,6 +1052,7 @@ export default {
     width: 22px;
     border-radius: 50%;
     margin-right: 9px;
+    opacity: var(--asset-table-row__icon-opacity);
   }
 
   .bin-step {

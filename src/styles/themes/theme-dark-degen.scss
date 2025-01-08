@@ -24,6 +24,7 @@
   --account-apr-widget-component__widget-value-color: #{$deep-blue};
   --account-apr-widget-component__no-smart-loan-dash-color: #{$degen-light-4};
   --account-apr-widget-component__widget-comment-color: #{$degen-light-4};
+  --account-apr-widget-component__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
   // endregion
 
   // region Wallet
@@ -37,13 +38,13 @@
   --stats-bar-beta__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
   // endregion
 
-  // region LTIPStatsBar
-  --ltip-stats-bar__background: #{$degen-dark-4}80;
-  --ltip-stats-bar__box-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
-  --ltip-stats-bar__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
-  --ltip-stats-bar-text__color: #{$degen-light-3};
-  --ltip-stats-bar-value__color: #{$degen-light-1};
-  --ltip-stats-bar-value-icon: url("/src/assets/icons/shine_dark.svg");
+  // region RTKNStatsBar
+  --rtkn-stats-bar__background: #{$degen-dark-4}80;
+  --rtkn-stats-bar__box-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
+  --rtkn-stats-bar__divider-background: linear-gradient(to bottom, #{$fuchsia} 19%, #{$pale-plum} 95%);
+  --rtkn-stats-bar-text__color: #{$degen-light-3};
+  --rtkn-stats-bar-value__color: #{$degen-light-1};
+  --rtkn-stats-bar-value-icon: url("/src/assets/icons/shine_dark.svg");
   // endregion
 
   // region StatsBarElementBeta
@@ -710,6 +711,78 @@
   // endregion
 
   // region SprimeModal
-  --sprime-modal__text-color: #{$light-purple}
+  --sprime-modal__text-color: #{$light-purple};
+  // endregion
+
+  // region AddToWithdrawQueue
+  --add-to-withdraw-queue__queue-border: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  --add-to-withdraw-queue__queue-background: #{$degen-dark-4};
+  --add-to-withdraw-queue__queue-title-color: #{$degen-light-4};
+  --add-to-withdraw-queue__queue-divider-background: #{$mist-space};
+  --add-to-withdraw-queue__queue-color: #{$degen-light-2};
+  --add-to-withdraw-queue__queue-status-color--ready: #{$pale-green};
+  --add-to-withdraw-queue__queue-status-color--pending: #{$orange};
+  --add-to-withdraw-queue__queue-cta-color: #{$pale-lilac};
+  // endregion
+
+  // region WithdrawalQueuePerToken
+  --withdrawal-queue-per-token__asset-color: #{$degen-light-1};
+  --withdrawal-queue-per-token__header-background: #{$degen-dark-3}99;
+  --withdrawal-queue-per-token__header-border: #{$degen-dark-6};
+  --withdrawal-queue-per-token__header-chevron-background: #{$pale-lilac};
+  --withdrawal-queue-per-token__summary-label-color: #{$degen-light-3};
+  --withdrawal-queue-per-token__summary-value-color: #{$degen-light-1};
+  --withdrawal-queue-per-token__summary-additional-info-color: #{$degen-light-4};
+  --withdrawal-queue-per-token__summary-divider-background: #{$degen-light-7};
+  --withdrawal-queue-per-token__body-background: #{$degen-dark-4}b3;
+  --withdrawal-queue-per-token__body-border: #{$degen-dark-6};
+  --withdrawal-queue-per-token__table-header-color: #{$degen-light-3};
+  --withdrawal-queue-per-token__divider-background: linear-gradient(to right, #{$degen-stroke-4} 19%, #{$degen-stroke-5} 57%, #{$degen-stroke-6} 88%);
+  // endregion
+
+  // region WithdrawalQueuePerTokenRow
+  --withdrawal-queue-per-token-row__status-label-background--ready: #{$green-5};
+  --withdrawal-queue-per-token-row__status-label-border--ready: #{$green-4};
+  --withdrawal-queue-per-token-row__status-label-color--ready: #{$pale-green};
+  --withdrawal-queue-per-token-row__status-label-background--pending: #{$orange-4};
+  --withdrawal-queue-per-token-row__status-label-border--pending: #{$orange-3};
+  --withdrawal-queue-per-token-row__status-label-color--pending: #{$orange};
+  --withdrawal-queue-per-token-row__no-value-dash-background: #{$degen-light-4};
+  --withdrawal-queue-per-token-row__cross-icon-background: #{$degen-light-4};
+  // endregion
+
+  // region WithdrawQueue
+  --withdrawal-queue__withdraw-accordion-background: #{$degen-dark-4}80;
+  --withdrawal-queue__withdraw-accordion-shadow: 7px 7px 30px 0 #{$degen-dark-8}66;
+  // endregion
+
+  // region Checkbox
+  --checkbox__background: #{$degen-dark-4};
+  --checkbox__border: #{$degen-light-5};
+  --checkbox__background--disabled: #{$degen-dark-3};
+  --checkbox__border--disabled: #{$new-navy};
+  // endregion
+
+  // region PercentageGauge
+  --percentage-gauge__gradient: conic-gradient(from -0.33turn, #{$pale-red}, #{$paler-red} 0.13turn, #{$not-vivid-pink} 0.26turn, #{$purplish-pink} 0.37turn, #{$deep-lilac} 0.5turn, #{$deep-blue} 0.63turn, #{$pale-red});
+  --percentage-gauge__shadow: drop-shadow(1px 1px 8px #{$degen-dark-8}cc);
+  --percentage-gauge__number-color: #{$purplish-pink};
+  --percentage-gauge__indicator-color: #{$pale-fuchsia};
+  --percentage-gauge__indicator-shadow: 0.7px 0.7px 4.1px 0 #{$degen-dark-8}b2;
+  --percentage-gauge__labels-color: #{$degen-light-4};
+  // endregion
+
+  // region MiniPercentageGauge
+  --mini-percentage-gauge__gradient-color-1: #{$pale-red};
+  --mini-percentage-gauge__gradient-color-2: #{$paler-red};
+  --mini-percentage-gauge__gradient-color-3: #{$not-vivid-pink};
+  --mini-percentage-gauge__gradient-color-4: #{$purplish-pink};
+  --mini-percentage-gauge__gradient-color-5: #{$deep-lilac};
+  --mini-percentage-gauge__gradient-color-6: #{$deep-blue};
+  --mini-percentage-gauge__gradient-color-7: #{$pale-red};
+  --mini-percentage-gauge__hand-pointer-shadow: 0.7px 0.7px 4.1px 0 #{$degen-dark-8}b2;
+  --mini-percentage-gauge__shadow: drop-shadow(1px 1px 8px #{$degen-dark-8}cc);
+  --mini-percentage-gauge__indicator-color: #{$pale-fuchsia};
+  --mini-percentage-gauge__indicator-shadow:  0.7px 0.7px 4.1px 0 #{$degen-dark-8}b2;
   // endregion
 }

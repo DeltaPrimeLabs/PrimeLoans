@@ -829,6 +829,7 @@ export default {
           height: 22px;
           width: 22px;
           border-radius: 50%;
+          opacity: var(--asset-table-row__icon-opacity);
         }
       }
 

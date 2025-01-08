@@ -496,6 +496,7 @@ export default {
     height: 18px;
     width: 18px;
     margin-right: 6px;
+    opacity: var(--asset-table-row__icon-opacity);
   }
 }
 
