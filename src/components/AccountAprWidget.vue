@@ -1,24 +1,15 @@
 <template>
   <div class="account-apr-widget-component">
     <div class="apr-section">
-      <img src="src/assets/images/apr-sign.svg" class="apr-sign">
+      <div class="apr-widget__title">
+        Points
+      </div>
       <div class="apr-widget__value">
-        <template v-if="accountApr != null">
+        <template>
           <div class="value">
-            <ColoredValueBeta :value="accountApr" :formatting="'percent'"
-                              :percentage-rounding-precision="1" :big="true"></ColoredValueBeta>
-            <InfoIcon class="info__icon"
-                      :tooltip="{content: 'How much you annually yield on your collateral. This number includes any inherent asset price appreciation, and borrowing interest.', placement: 'top', classes: 'info-tooltip'}"
-                      :classes="'info-tooltip'"></InfoIcon>
+            328
           </div>
         </template>
-        <div v-else>
-          <div class="no-smart-loan-dash" v-if="noSmartLoan">
-          </div>
-          <div v-else>
-            <vue-loaders-ball-beat color="#A6A3FF" scale="0.5"></vue-loaders-ball-beat>
-          </div>
-        </div>
       </div>
     </div>
     <div class="divider"></div>
@@ -41,12 +32,12 @@ export default {
   name: 'AccountAprWidget',
   components: {MiniPercentageGauge, InfoIcon, ColoredValueBeta},
   props: {
-    accountApr: 0,
     noSmartLoan: {},
   },
   data() {
     return {
-      bullScore: null
+      bullScore: 0.8,
+      accountApr: 92,
     }
   },
   computed: {
@@ -55,9 +46,6 @@ export default {
     ]),
   },
   mounted() {
-    this.bullScoreService.bullScore$.subscribe(score => {
-      this.bullScore = score
-    })
   }
 };
 </script>
@@ -85,6 +73,15 @@ export default {
 
   .apr-widget__value {
     margin-bottom: 2px;
+
+    .value {
+      font-size: 17px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      line-height: 0.8;
+      color: var(--account-apr-widget-component__widget-value-color);
+    }
 
     .no-smart-loan-dash {
       margin: 14px 0;

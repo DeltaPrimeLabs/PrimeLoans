@@ -428,6 +428,9 @@ export default {
           assets[assetSymbol].price = redstonePriceData[assetSymbol][0].dataPoints[0].value;
         } else {
           assets[assetSymbol].price = 0
+          if (assetSymbol == 'TOSHI') assets[assetSymbol].price = 0.0001733;
+          if (assetSymbol == 'DEGEN') assets[assetSymbol].price = 0.01228;
+          if (assetSymbol == 'BRETT') assets[assetSymbol].price = 0.1383;
         }
       });
       commit('setAssets', assets);

@@ -27,7 +27,7 @@
       <div v-if="queue && queue.length > 0" class="queue">
         <div class="queue__border">
           <div class="queue__content">
-            <div class="queue__title">{{ asset.symbol }} Withdrawal Queue</div>
+            <div class="queue__title">{{ asset.symbol }} I am Lame Queue</div>
             <div class="queue__entry" v-for="entry in queue">
               <div class="queue__divider"></div>
               <div class="queue__row">

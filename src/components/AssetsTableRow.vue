@@ -88,7 +88,7 @@
       </div>
 
       <div class="table__cell price">
-        {{ asset.price | usd }}
+        {{ asset.price | usd(asset.memecoin ? 6 : 2) }}
       </div>
 
       <div></div>

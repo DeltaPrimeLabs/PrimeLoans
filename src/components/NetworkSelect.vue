@@ -47,6 +47,11 @@ export default {
         },
         {
           chainId: 42161,
+          chainName: 'Base',
+          logoSrc: 'src/assets/icons/base-icon.svg',
+        },
+        {
+          chainId: 42161,
           chainName: 'Arbitrum',
           logoSrc: 'src/assets/icons/arb-icon.svg',
         },
@@ -66,7 +71,7 @@ export default {
         },
         {
           chainId: this.toHex(42161),
-          chainName: 'Arbitrum',
+          chainName: 'Base',
           rpcUrls: ['https://arbitrum-mainnet.core.chainstack.com/9a30fb13b2159a76c8e143c52d5579bf'],
           nativeCurrency: {
             name: 'ETH',

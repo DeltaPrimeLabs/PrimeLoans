@@ -4,15 +4,6 @@
       <div class="main-content">
         <SPrimePanel class="sprime-panel" :is-prime-account="false" :user-address="account"
                      :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
-        <RTKNStatsBar v-if="arbitrumChain"
-                      :max-cap="rtknData.maxCap"
-                      :total-pledged="rtknData.totalPledged"
-                      :total-users="rtknData.totalUsers"
-                      :your-pledge="rtknData.yourPledge"
-                      :eligible-prime="rtknData.eligiblePrime"
-                      :available="rtknData.rtknBalance"
-                      :conversion-ratio="rtknData.conversionRatio">
-        </RTKNStatsBar>
 
         <WithdrawalQueue ref="withdrawalQueue"
                          :all-queues="poolIntents"

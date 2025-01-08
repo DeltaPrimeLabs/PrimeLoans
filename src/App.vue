@@ -71,13 +71,13 @@
 <!--    <Banner v-if="showAvalancheDepositorBanner || showArbitrumDepositorBanner" :closable="true" background="green">-->
 <!--      Savings will be unpaused this Saturday 7:30pm.-->
 <!--    </Banner>-->
-    <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
-      The Prime Account is granularly being unpaused.
-      <a class="banner-link"
-         href="https://discord.com/channels/889510301421166643/912702114252329060/1309493526601662484"
-         target="_blank"><b>Read more.</b>
-      </a>
-    </Banner>
+<!--    <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">-->
+<!--      The Prime Account is granularly being unpaused.-->
+<!--      <a class="banner-link"-->
+<!--         href="https://discord.com/channels/889510301421166643/912702114252329060/1309493526601662484"-->
+<!--         target="_blank"><b>Read more.</b>-->
+<!--      </a>-->
+<!--    </Banner>-->
     <div class="content">
       <div class="top-bar">
         <div class="top-bar__left-part">
@@ -87,13 +87,6 @@
           </a>
           <AppToggle v-if="!isClaimPage" class="top-bar__app-toggle"></AppToggle>
           <ThemeToggle v-if="!isClaimPage && !isDegen" class="top-bar__theme-toggle delta-only"></ThemeToggle>
-          <div v-if="isSavingsPage" class="protocol-insurance">
-            <span>Reserve Fund:</span>
-            <span class="insurance-value">$800,000</span>
-            <InfoIcon class="info__icon"
-                      :tooltip="{content: 'Atomica insurance pools.', classes: 'info-tooltip'}"
-                      :classes="'info-tooltip'"></InfoIcon>
-          </div>
         </div>
         <!--      <div class="connect" v-if="!account" v-on:click="initNetwork()">Connect to wallet</div>-->
         <Wallet :is-claim-page="isClaimPage" class="wallet"/>

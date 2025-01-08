@@ -8,20 +8,20 @@
 <!--                          :lp-token="lpToken" :lp-tokens="wombatLpTokens"></WombatLpTableRow>-->
       </div>
     </div>
-    <div class="lp-tokens" v-if="Object.keys(penpieLpTokens).length">
-      <div class="lp-table">
-        <TableHeader :config="penpieLpTableHeaderConfig"></TableHeader>
-        <PenpieLpTableRow v-for="(lpToken, index) in penpieLpTokens" v-bind:key="index" :index="index"
-                          :lp-token="lpToken" :lp-tokens="penpieLpTokens"></PenpieLpTableRow>
-      </div>
-    </div>
-    <div class="lp-tokens" v-if="Object.keys(gmxV2LpTokens).length">
-      <div class="lp-table level" v-if="gmxV2LpTokens">
-        <TableHeader :config="gmxV2LpTableHeaderConfig"></TableHeader>
-        <GmxV2LpTableRow v-for="(lpToken, index) in gmxV2LpTokens" v-bind:key="index" :index="index"
-                         :lp-token="lpToken" :openInterestData="openInterestData[lpToken.symbol]"></GmxV2LpTableRow>
-      </div>
-    </div>
+<!--    <div class="lp-tokens" v-if="Object.keys(penpieLpTokens).length">-->
+<!--      <div class="lp-table">-->
+<!--        <TableHeader :config="penpieLpTableHeaderConfig"></TableHeader>-->
+<!--        <PenpieLpTableRow v-for="(lpToken, index) in penpieLpTokens" v-bind:key="index" :index="index"-->
+<!--                          :lp-token="lpToken" :lp-tokens="penpieLpTokens"></PenpieLpTableRow>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    <div class="lp-tokens" v-if="Object.keys(gmxV2LpTokens).length">-->
+<!--      <div class="lp-table level" v-if="gmxV2LpTokens">-->
+<!--        <TableHeader :config="gmxV2LpTableHeaderConfig"></TableHeader>-->
+<!--        <GmxV2LpTableRow v-for="(lpToken, index) in gmxV2LpTokens" v-bind:key="index" :index="index"-->
+<!--                         :lp-token="lpToken" :openInterestData="openInterestData[lpToken.symbol]"></GmxV2LpTableRow>-->
+<!--      </div>-->
+<!--    </div>-->
     <div class="lp-tokens">
       <div class="lp-table" v-if="traderJoeLpTokens">
         <TableHeader :config="traderJoeLpTableHeaderConfig"></TableHeader>
@@ -259,22 +259,15 @@ export default {
     },
     setupTraderJoeLpTableHeaderConfig() {
       this.traderJoeLpTableHeaderConfig = {
-        gridTemplateColumns: '200px 90px 90px 210px 110px 70px 110px 115px 30px 80px',
+        gridTemplateColumns: '200px 90px 210px 110px 70px 110px 115px 30px 80px',
         cells: [
           {
-            label: 'TraderJoe V2',
+            label: 'Aerodrome',
             sortable: false,
             class: 'token',
             id: 'TOKEN',
-            tooltip: `The TraderJoe V2 LP-asset name. These names are simplified for a smoother UI.
+            tooltip: `The Aerodrome LP-asset name. These names are simplified for a smoother UI.
                                        <a href='https://docs.deltaprime.io/integrations/tokens' target='_blank'>More information</a>.`
-          },
-          {
-            label: 'Your Bins',
-            sortable: false,
-            class: 'balance',
-            id: 'LIQUIDITY',
-            tooltip: `Your liquidity distributed among bins.`
           },
           {
             label: 'Stats',

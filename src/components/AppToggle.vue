@@ -1,9 +1,9 @@
 <template>
   <div class="app-toggle" v-on:click="onClick()"
-       :class="{'app-toggle--pa': current === 'Prime Account', 'app-toggle--savings': current === 'Savings'}">
+       :class="{'app-toggle--pa': current === 'Degen Account', 'app-toggle--savings': current === 'Savings'}">
     <div class="app-toggle__switch">
       <div class="app-name">
-        <div class="app-name__name app-name__name--pa">Prime Account</div>
+        <div class="app-name__name app-name__name--pa">Degen Account</div>
         <div class="app-name__name app-name__name--savings">Savings</div>
       </div>
     </div>
@@ -14,12 +14,12 @@
 export default {
   name: "AppToggle",
   mounted() {
-    this.current = window.location.href.includes('prime-account') ? 'Prime Account' : 'Savings';
+    this.current = window.location.href.includes('prime-account') ? 'Degen Account' : 'Savings';
   },
   methods: {
     onClick() {
-      this.current = this.current === 'Prime Account' ? 'Savings' : 'Prime Account';
-      this.$router.push({ path: this.current === 'Prime Account' ? '/prime-account' : '/pools' })
+      this.current = this.current === 'Degen Account' ? 'Savings' : 'Degen Account';
+      this.$router.push({ path: this.current === 'Degen Account' ? '/prime-account' : '/pools' })
       setTimeout(() => {
         window.location.reload();
       }, 500)
@@ -136,7 +136,7 @@ export default {
   transform: translate(-50%, -50%);
 
   &.app-name__name--pa {
-    width: 110px;
+    width: 120px;
   }
 }
 </style>

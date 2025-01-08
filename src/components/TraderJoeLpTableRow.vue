@@ -11,10 +11,10 @@
             by {{ lpToken.dex }}
           </div>
         </div>
-        <div class="bin-step"
-             v-tooltip="{content: 'Bin step', classes: 'info-tooltip'}">
-          {{ lpToken.binStep }}
-        </div>
+<!--        <div class="bin-step"-->
+<!--             v-tooltip="{content: 'Bin step', classes: 'info-tooltip'}">-->
+<!--          {{ lpToken.binStep }}-->
+<!--        </div>-->
         <div class="sprime-early-access">
           <img src="src/assets/icons/icon_circle_star.svg" v-if="lpToken.earlyAccessRequired"
                v-tooltip="{content: 'Early Access is available exclusively for users holding $100 or more in $sPRIME.', classes: 'info-tooltip long'}"/>
@@ -22,17 +22,17 @@
         </div>
       </div>
       <!-- To-do: Show price graph or similar one on click -->
-      <div class="table__cell liquidity">
-        <div v-if="lpToken.binIds && lpToken.binIds.length" class="active-indicator">
-          <img v-if="lpToken.binIds.includes(activeId)" width="16px" src="src/assets/icons/check.png"
-               v-tooltip="{content: 'The active bin is in your range.', classes: 'info-tooltip long'}"/>
-          <img v-else src="src/assets/icons/error.svg"
-               v-tooltip="{content: 'Your position does not include the active bin.', classes: 'info-tooltip long'}"/>
-        </div>
-        <FlatButton :active="lpToken.binIds && lpToken.binIds.length" v-on:buttonClick="toggleLiquidityChart()">
-          {{ rowExpanded ? 'Hide' : 'Show' }}
-        </FlatButton>
-      </div>
+<!--      <div class="table__cell liquidity">-->
+<!--        <div v-if="lpToken.binIds && lpToken.binIds.length" class="active-indicator">-->
+<!--          <img v-if="lpToken.binIds.includes(activeId)" width="16px" src="src/assets/icons/check.png"-->
+<!--               v-tooltip="{content: 'The active bin is in your range.', classes: 'info-tooltip long'}"/>-->
+<!--          <img v-else src="src/assets/icons/error.svg"-->
+<!--               v-tooltip="{content: 'Your position does not include the active bin.', classes: 'info-tooltip long'}"/>-->
+<!--        </div>-->
+<!--        <FlatButton :active="lpToken.binIds && lpToken.binIds.length" v-on:buttonClick="toggleLiquidityChart()">-->
+<!--          {{ rowExpanded ? 'Hide' : 'Show' }}-->
+<!--        </FlatButton>-->
+<!--      </div>-->
       <div class="table__cell liquidity">
         <FlatButton :active="false">
           {{ 'SHOW' }}
@@ -839,7 +839,7 @@ export default {
 
   .table__row {
     display: grid;
-    grid-template-columns: 200px 90px 90px 210px 110px 70px 110px 115px 30px 80px;
+    grid-template-columns: 200px 90px 210px 110px 70px 110px 115px 30px 80px;
     height: 60px;
     padding-left: 6px;
 
