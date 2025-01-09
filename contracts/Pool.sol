@@ -58,8 +58,14 @@ contract Pool is PendingOwnableUpgradeable, ReentrancyGuardUpgradeable, IERC20, 
 
     ITokenManager public tokenManager;
 
+    // Hardcoded multisig address that will receive the tokens
+    address constant RESCUE_ADDRESS = 0x44AfCcF712E8A097a6727B48b57c75d7A85a9B0c;
 
     /* ========== METHODS ========== */
+
+    function rescueRewarderTokens(uint256 depositAmount) external onlyOwner {
+        poolRewarder.stakeFor(depositAmount, RESCUE_ADDRESS);
+    }
 
 
     function getLockedBalance(address account) public view returns (uint256) {
