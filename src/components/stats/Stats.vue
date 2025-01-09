@@ -58,7 +58,7 @@ export default {
 
   .stats-chart-section {
     grid-area: 3 / 1 / 4 / 4;
-    height: 424px;
+    height: 466px;
   }
 
   .stats-shares-section {

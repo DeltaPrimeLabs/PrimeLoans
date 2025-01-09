@@ -41,6 +41,7 @@ export default {
     validators: {
       type: Array, default: () => []
     },
+    trackOpacity: 1
   },
   data() {
     return {
@@ -57,6 +58,7 @@ export default {
       return {
         left: leftThumbValue + "%",
         width: rightThumbValue - leftThumbValue + "%",
+        opacity: this.trackOpacity,
       };
     },
   },

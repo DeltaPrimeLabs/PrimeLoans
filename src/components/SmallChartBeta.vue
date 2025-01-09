@@ -18,6 +18,7 @@ export default {
     stepped: 'none',
     isStableCoin: false,
     positiveChange: false,
+    forceColor: false,
   },
   data() {
     return {
@@ -56,7 +57,7 @@ export default {
           {
             fill: false,
             data: this.dataPoints,
-            borderColor: getThemeVariable(this.positiveChange ? '--small-chart-beta__line-color--positive' : '--small-chart-beta__line-color--negative'),
+            borderColor: getThemeVariable(this.forceColor ? '--small-chart-beta__line-forced-color' : this.positiveChange ? '--small-chart-beta__line-color--positive' : '--small-chart-beta__line-color--negative'),
             borderWidth: this.lineWidth,
             pointRadius: 0
           }
