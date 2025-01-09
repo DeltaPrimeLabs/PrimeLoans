@@ -33,18 +33,17 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Helper to format balance with decimals
+// Helper functions remain the same...
 function formatBalance(balance, decimals) {
     return ethers.utils.formatUnits(balance, decimals);
 }
 
-// Helper to format percentages
 function formatPercentage(part, whole) {
     if (whole.isZero()) return '0.00%';
     return `${part.mul(10000).div(whole).toNumber() / 100}%`;
 }
 
-// Function to get prices from Redstone
+// Function to get prices from Redstone remains the same...
 async function getRedstonePrices(tokenSymbols, networkConfig) {
     const REDSTONE_CACHE_LAYER_URLS = [
         "https://oracle-gateway-1.a.redstone.finance",
@@ -74,13 +73,33 @@ async function getRedstonePrices(tokenSymbols, networkConfig) {
     return result;
 }
 
-async function getMultipleChoices(validTokens) {
-    console.log("\nSelect tokens to analyze (options: numbers separated by commas, ranges like '1-4', or 'all'):");
+// Modified function to handle custom token addresses
+async function getMultipleChoices(validTokens, provider) {
+    console.log("\nSelect tokens to analyze:");
+    console.log("[C] Enter custom token address");
     validTokens.forEach((token, i) => {
         console.log(`[${i}] ${token.symbol} (${token.address})`);
     });
 
-    const answer = await question("\nEnter your selection: ");
+    const answer = await question("\nEnter your selection (options: numbers separated by commas, ranges like '1-4', 'all', or 'C' for custom): ");
+
+    if (answer.toLowerCase() === 'c') {
+        const customAddress = await question("Enter token address: ");
+        try {
+            const customToken = new ethers.Contract(customAddress, ERC20_ABI, provider);
+            const symbol = await customToken.symbol();
+            const decimals = await customToken.decimals();
+            return [{
+                address: customAddress,
+                symbol,
+                decimals
+            }];
+        } catch (error) {
+            console.error("Error loading custom token:", error.message);
+            return [];
+        }
+    }
+
     if (answer.toLowerCase() === 'all') {
         return validTokens;
     }
@@ -109,6 +128,7 @@ async function getMultipleChoices(validTokens) {
     return Array.from(selectedIndices).sort((a, b) => a - b).map(i => validTokens[i]);
 }
 
+// Analysis functions remain the same...
 async function analyzeToken(tokenContract, selectedToken, primeAccounts, totalAccounts, tokenPrice) {
     const BATCH_SIZE = 100;
     const balances = new Map();
@@ -208,6 +228,7 @@ async function displayTokenAnalysis(tokenData, selectedToken, totalAccounts, tok
     }
 }
 
+// Modified main function to handle custom tokens
 async function analyzeTokenExposure() {
     try {
         // 1. Select network
@@ -264,8 +285,8 @@ async function analyzeTokenExposure() {
         // Filter out any failed token fetches
         const validTokens = tokens.filter(token => token !== null);
 
-        // 3. Get token selection from user
-        const selectedTokens = await getMultipleChoices(validTokens);
+        // 3. Get token selection from user (now includes custom token option)
+        const selectedTokens = await getMultipleChoices(validTokens, provider);
         if (selectedTokens.length === 0) {
             console.log("No valid tokens selected.");
             return;
