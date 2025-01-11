@@ -8,7 +8,7 @@
              :style="{'width': barGaugeValueWidth + 'px'}">
         </div>
       </div>
-      <div v-if="overflowMode" class="overflow">
+      <div v-if="overflowMode && value > max" class="overflow">
         <div class="overflow__needle"></div>
         <div class="overflow__label">{{formatPercent(value / max, 0)}}</div>
       </div>
