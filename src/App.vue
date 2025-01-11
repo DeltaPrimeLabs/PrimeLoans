@@ -404,13 +404,11 @@ export default {
 
     watchIntents() {
       this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
-        console.log('asdfasfdadf', intents);
         this.updateAssetIntents(intents)
       })
     },
 
     checkTerms() {
-      console.log('checking terms');
       combineLatest([
         this.accountService.observeAccountLoaded(),
         this.accountService.observeSmartLoanContract(),
@@ -418,10 +416,6 @@ export default {
         this.getCountry()
       ])
         .subscribe(([walletAddress, smartLoanContract, pools, country]) => {
-          console.warn('-_---__---__---__---___--__CHECK TERMS--___--___--__---__---___---');
-          console.log('account', walletAddress);
-          console.log('smartLoanContract', smartLoanContract);
-          console.log('pools', pools);
           const isSavingsPage = window.location.href.includes('pools');
           const isCountryRestricted = config.restrictedCountries.includes(country.country);
 
@@ -429,24 +423,22 @@ export default {
             forkJoin(pools.map(pool => pool.contract.balanceOf(walletAddress)))
               .subscribe(bigNumberBalances => {
                 const balances = bigNumberBalances.map(balance => fromWei(balance));
-                console.log(balances);
                 if (balances.every(balance => balance === 0)) {
-                  console.log('SAVINGS PAGE - no deposits - terms not required');
+                  // console.log('SAVINGS PAGE - no deposits - terms not required');
                   if (isCountryRestricted) {
                     this.restrictApp(false);
                   } else {
                     this.openBuySPrimeModal();
                   }
                 } else {
-                  console.log('SAVINGS PAGE - some deposit - checking terms');
+                  // console.log('SAVINGS PAGE - some deposit - checking terms');
                   if (isCountryRestricted) {
                     this.restrictApp(true);
                   } else {
                     this.termsService.checkTerms(walletAddress).then(signedTerms => {
                       const termsForCurrentPage = signedTerms.find(terms => terms.type === 'SAVINGS');
-                      console.log(termsForCurrentPage);
                       if (termsForCurrentPage === undefined || termsForCurrentPage.termsVersion !== TermsService.CURRENT_TERMS_VERSION) {
-                        console.log('SAVINGS PAGE - some deposit - terms not signed');
+                        // console.log('SAVINGS PAGE - some deposit - terms not signed');
                         if (!this.signingTermsInProgress) {
                           this.handleTermsSign(walletAddress, true);
                         }
@@ -458,17 +450,16 @@ export default {
                 }
               });
           } else {
-            console.log('PA PAGE - checking PA contract');
-            console.log(smartLoanContract);
+            // console.log('PA PAGE - checking PA contract');
             if (smartLoanContract && smartLoanContract.address === NULL_ADDRESS) {
-              console.log('PA PAGE - no account - terms not required');
+              // console.log('PA PAGE - no account - terms not required');
               if (isCountryRestricted) {
                 this.restrictApp(false);
               } else {
                 this.openBuySPrimeModal();
               }
             } else {
-              console.log('PA PAGE - account created - checking terms');
+              // console.log('PA PAGE - account created - checking terms');
               if (isCountryRestricted) {
                 this.restrictApp(true);
               } else {
@@ -476,12 +467,12 @@ export default {
                   console.log(signedTerms);
                   const termsForCurrentPage = signedTerms.find(terms => terms.type === 'PRIME_ACCOUNT');
                   if (termsForCurrentPage === undefined || termsForCurrentPage.termsVersion !== TermsService.CURRENT_TERMS_VERSION) {
-                    console.log('PA PAGE - account created - terms not signed');
+                    // console.log('PA PAGE - account created - terms not signed');
                     if (!this.signingTermsInProgress && smartLoanContract) {
                       this.handleTermsSign(walletAddress, false, smartLoanContract.address);
                     }
                   } else {
-                    console.log('PA PAGE - account created - terms signed');
+                    // console.log('PA PAGE - account created - terms signed');
                     this.openBuySPrimeModal();
                   }
                 });
@@ -504,7 +495,6 @@ export default {
 
     watchHasDeprecatedAssets() {
       this.deprecatedAssetsService.observeHasDeprecatedAssets().subscribe(hasDeprecatedAssets => {
-        console.warn('DEPRECATED ASSETS', hasDeprecatedAssets);
         if (hasDeprecatedAssets) {
           this.showDeprecatedAssetsBanner = true;
         }
@@ -512,19 +502,14 @@ export default {
     },
 
     checkWallet() {
-      console.warn('--------__---__------___--___--__---___checking wallet--------___---___-___--___---__--___--__');
-      console.log('this.provider', this.provider);
       if (this.provider && this.provider.provider) {
-        console.log('provider', this.provider.provider)
         if (this.provider.provider.isRabby) {
-          console.warn('RABBY');
           window.isRabby = true;
           window.isMetaMask = false;
           return;
         }
 
         if (this.provider.provider.isMetaMask && !this.provider.provider.isRabby) {
-          console.warn('METAMASK');
           window.isMetaMask = true;
           window.isRabby = false;
           return;
@@ -533,11 +518,8 @@ export default {
     },
 
     async getCountry() {
-      console.warn('get country');
       const countryRequest = await fetch('https://geo-service-frtt8nrlk-deltaprimelabs.vercel.app/api/hello');
       const countryResponse = await countryRequest.json();
-      console.warn('----___---___--__---___--___countryResponse-_--___---___--___---__--____-----');
-      console.warn(countryResponse);
       return countryResponse;
     },
 
@@ -601,7 +583,6 @@ export default {
           const sprimeModalInstance = this.openModal(SPrimeModal);
           this.buySPrimeModalOpened = true;
           sprimeModalInstance.$on('CLOSE', () => {
-            console.log('modal closed');
             localStorage.setItem(BUY_SPRIME_MODAL_CLOSED, 'true');
           })
         }

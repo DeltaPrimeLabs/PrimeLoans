@@ -4,14 +4,7 @@
       <div class="main-content">
         <SPrimePanel class="sprime-panel" :is-prime-account="false" :user-address="account"
                      :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
-        <RTKNStatsBar v-if="arbitrumChain"
-                      :max-cap="rtknData.maxCap"
-                      :total-pledged="rtknData.totalPledged"
-                      :total-users="rtknData.totalUsers"
-                      :your-pledge="rtknData.yourPledge"
-                      :eligible-prime="rtknData.eligiblePrime"
-                      :available="rtknData.rtknBalance"
-                      :conversion-ratio="rtknData.conversionRatio">
+        <RTKNStatsBar v-if="arbitrumChain" :data="rtknData">
         </RTKNStatsBar>
 
         <WithdrawalQueue ref="withdrawalQueue"
@@ -68,6 +61,7 @@ import SPrimePanel from './SPrimePanel.vue';
 import RTKNStatsBar from './RTKNStatsBar.vue';
 import WithdrawalQueuePerToken from './withdrawal-queue/WithdrawalQueuePerToken.vue';
 import WithdrawalQueue from './withdrawal-queue/WithdrawalQueue.vue';
+import Vue from 'vue';
 
 const ethers = require('ethers');
 
@@ -413,7 +407,7 @@ export default {
     setupRTKN() {
       this.rtknService.observeData().subscribe(data => {
         console.log(data);
-        this.rtknData = data;
+        Vue.set(this, 'rtknData', data);
         this.$forceUpdate();
         setTimeout(() => {
           this.$forceUpdate();
@@ -423,8 +417,6 @@ export default {
 
     watchPoolIntents() {
       this.poolWithdrawQueueService.observePoolIntents().subscribe(poolIntents => {
-        console.log('------___---__--------__---___POOL INTENTS--------___---__---__--___--____');
-        console.log(poolIntents);
         this.poolIntents = poolIntents;
         this.$forceUpdate();
         this.$refs.withdrawalQueue.refresh();

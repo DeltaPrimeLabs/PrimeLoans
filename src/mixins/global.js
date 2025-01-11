@@ -59,8 +59,9 @@ export default {
       }
     },
 
-    formatPercent(value) {
-      return `${Math.round(value * 10000) / 100}%`;
+    formatPercent(value, decimalPlaces = 2) {
+      const multiplier = Math.pow(10, decimalPlaces);
+      return `${Math.round(value * multiplier * 100) / multiplier}%`;
     },
 
     async handleTransaction(fun, args, onSuccess, onFail) {

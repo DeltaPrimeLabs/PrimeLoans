@@ -44,6 +44,7 @@
   --rtkn-stats-bar-text__color: #{$dark-gray};
   --rtkn-stats-bar-value__color: #{$black};
   --rtkn-stats-bar-value-icon: url("/src/assets/icons/shine_light.svg");
+  --rtkn-stats-bar-cancel-icon-color: #{$medium-gray};
   // endregion
 
   // region StatsBarElementBeta
@@ -62,6 +63,8 @@
   --bar__value-background-image: linear-gradient(to right, #{$delta-cloudy} 17%, #{$washed-lilac} 91%);
   --bar__value-background-image--completion: linear-gradient(120deg, #{$lime-green} 0%, #{$pale-green} 100%);
   --bar__value-background-image--error: #{$red};
+  --bar__overflow-needle-color: #{$steel-gray};
+  --bar__overflow-color: #{$steel-gray};
   // endregion
 
   // region NameValueBadgeBeta
