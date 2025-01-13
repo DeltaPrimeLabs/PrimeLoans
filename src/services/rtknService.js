@@ -97,10 +97,11 @@ export default class RtknService {
     const totalPledged = Number(formatUnits(await rtknConfig.converterContract.totalrTKNPledged(), 18))
     const totalUsers = Number(formatUnits(await rtknConfig.converterContract.getTotalUsers(), 0))
     const yourPledge = Number(formatUnits(await rtknConfig.converterContract.userrTKNPledged(this.account), 18))
-    const eligiblePrime = Number(formatUnits(await rtknConfig.converterContract.previewFuturePrimeAmountBasedOnPledgedAmountForUser(this.account), 18))
     const rtknBalance = formatUnits(await rtknConfig.tokenContract.balanceOf(this.account), 18);
 
     const rtknUtilized = (1 / (totalPledged / maxCap)) * yourPledge;
+    const eligiblePrime = rtknUtilized / 1.4 / 0.884;
+
 
     return {
       maxCap,
@@ -124,14 +125,18 @@ export default class RtknService {
     const converterContract = this.rtknsConfig.find(config => config.symbol === tokenSymbol).converterContract;
 
     await tokenContract.connect(this.provider.getSigner()).approve(converterContract.address, parseUnits(amount.toString(), 18));
-    const contractConnected = await converterContract.connect(this.provider.getSigner());
-    const transaction = await contractConnected.pledgerTKN(parseUnits(amount.toString(), 18));
-    const tx = await awaitConfirmation(transaction, this.provider, 'pledge rTKN');
-    this.progressBarService.emitProgressBarInProgressState();
-    setTimeout(() => {
-      this.progressBarService.emitProgressBarSuccessState();
-      this.loadData();
-    }, 1000);
+    try {
+      const contractConnected = await converterContract.connect(this.provider.getSigner());
+      const transaction = await contractConnected.pledgerTKN(parseUnits(amount.toString(), 18));
+      const tx = await awaitConfirmation(transaction, this.provider, 'pledge rTKN');
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.loadData();
+      }, 1000);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   async cancel(amount, tokenSymbol) {
@@ -139,17 +144,30 @@ export default class RtknService {
     this.modalService.closeModal();
     const converterContract = this.rtknsConfig.find(config => config.symbol === tokenSymbol).converterContract;
 
-    const transaction = await converterContract.connect(this.provider.getSigner()).cancelPledge(parseUnits(amount.toString(), 18));
-    const tx = await awaitConfirmation(transaction, this.provider, 'cancel rTKN pledge');
-
-    this.progressBarService.emitProgressBarInProgressState();
-    setTimeout(() => {
-      this.progressBarService.emitProgressBarSuccessState();
-      this.loadData();
-    }, 1000);
+    try {
+      const transaction = await converterContract.connect(this.provider.getSigner()).cancelPledge(parseUnits(amount.toString(), 18));
+      const tx = await awaitConfirmation(transaction, this.provider, 'cancel rTKN pledge');
+      this.progressBarService.emitProgressBarInProgressState();
+      setTimeout(() => {
+        this.progressBarService.emitProgressBarSuccessState();
+        this.loadData();
+      }, 1000);
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
   observeData() {
     return this.data$.asObservable();
+  }
+
+  handleError(error) {
+    switch (error.code) {
+      case 4001:
+        this.progressBarService.emitProgressBarCancelledState()
+        break;
+      default:
+        this.progressBarService.emitProgressBarErrorState();
+    }
   }
 }

@@ -23,7 +23,12 @@
         <div class="">
           {{rtknData.yourPledge | smartRound(3, true)}} {{ rtknData.symbol }}
         </div>
-        <div>{{ rtknData.rtknUtilized | smartRound(3, true) }} {{ rtknData.symbol}}</div>
+        <div>
+          {{ rtknData.rtknUtilized | smartRound(3, true) }} {{ rtknData.symbol}}
+          <InfoIcon class="info__icon"
+                    :tooltip="{content: 'The rTKNs that are not utilized will be returned to your wallet.', classes: 'info-tooltip'}"
+                    :classes="'info-tooltip'"></InfoIcon>
+        </div>
         <div>{{ rtknData.eligiblePrime | smartRound(5, true) }}</div>
         <div>
           <BarGaugeBeta
@@ -222,6 +227,10 @@ export default {
   .cross-icon {
     background: var(--rtkn-stats-bar-cancel-icon-color);
     cursor: pointer;
+  }
+
+  .info__icon {
+    margin-left: 5px;
   }
 }
 

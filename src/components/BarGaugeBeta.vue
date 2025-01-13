@@ -173,13 +173,17 @@ export default {
       right: -7px;
 
       .overflow__needle {
+        position: absolute;
+        right: 17px;
         width: 1px;
         height: 20px;
         background-color: var(--bar__overflow-needle-color);
       }
 
       .overflow__label {
-        margin-left: 9px;
+        position: absolute;
+        top: 18px;
+        right: -4px;
         font-size: $font-size-xxxs;
         color: var(--bar__overflow-color);
       }
