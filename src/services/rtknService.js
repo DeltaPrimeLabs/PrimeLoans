@@ -124,8 +124,8 @@ export default class RtknService {
     const tokenContract = this.rtknsConfig.find(config => config.symbol === tokenSymbol).tokenContract;
     const converterContract = this.rtknsConfig.find(config => config.symbol === tokenSymbol).converterContract;
 
-    await tokenContract.connect(this.provider.getSigner()).approve(converterContract.address, parseUnits(amount.toString(), 18));
     try {
+      await tokenContract.connect(this.provider.getSigner()).approve(converterContract.address, parseUnits(amount.toString(), 18));
       const contractConnected = await converterContract.connect(this.provider.getSigner());
       const transaction = await contractConnected.pledgerTKN(parseUnits(amount.toString(), 18));
       const tx = await awaitConfirmation(transaction, this.provider, 'pledge rTKN');
