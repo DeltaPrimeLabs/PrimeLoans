@@ -68,9 +68,9 @@
     <Banner v-if="showDeprecatedAssetsBanner">
       We are dropping support to some tokens of your Prime Account. Please review your portfolio
     </Banner>
-<!--    <Banner v-if="showAvalancheDepositorBanner || showArbitrumDepositorBanner" :closable="true" background="green">-->
-<!--      Savings will be unpaused this Saturday 7:30pm.-->
-<!--    </Banner>-->
+    <Banner v-if="showAvalancheDepositorBanner" :closable="true" background="green">
+      THe Boost airdrop will begin on Monday 6PM CET.
+    </Banner>
     <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
       The Prime Account is granularly being unpaused.
       <a class="banner-link"
@@ -226,7 +226,7 @@ export default {
 
     if (config.chainId === 43114) {
       if (window.location.href.includes('pools')) {
-        // this.showAvalancheDepositorBanner = true;
+        this.showAvalancheDepositorBanner = true;
       }
       if (window.location.href.includes('prime-account')) {
         // this.showAvalanchePrimeAccountBanner = true;
