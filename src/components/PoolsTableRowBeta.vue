@@ -125,9 +125,6 @@ export default {
     this.watchLifi();
     this.watchActionDisabling();
     this.watchWithdrawalIntents();
-    setTimeout(() => {
-      console.log(this.isActionDisabledRecord);
-    }, 4000)
   },
 
   data() {
@@ -178,7 +175,6 @@ export default {
     },
 
     setupActionsConfiguration() {
-      console.warn('WITHDRAW', this.isActionDisabledRecord['WITHDRAW']);
       this.actionsConfig = [
         {
           iconSrc: 'src/assets/icons/plus.svg',
@@ -244,7 +240,6 @@ export default {
       const poolAssetsPrices = {};
       const poolContracts = {};
       this.poolService.observePools().subscribe(pools => {
-        console.log('PoolsTableRow', pools);
         pools.forEach(pool => {
           poolDepositBalances[pool.asset.symbol] = pool.deposit;
           poolAssetsPrices[pool.asset.symbol] = pool.assetPrice;
@@ -325,10 +320,6 @@ export default {
       modalInstance.miningApy = this.pool.miningApy;
       modalInstance.rewardToken = this.pool.avalancheBoostRewardToken;
 
-      console.log('pool: ', this.pool)
-      console.log('this.pool.miningApy: ', this.pool.miningApy)
-      console.log('modalInstance.miningApy: ', modalInstance.miningApy)
-      console.log('modalInstance.rewardToken: ', modalInstance.rewardToken)
 
       modalInstance.$on('DEPOSIT', depositEvent => {
         const depositRequest = {
@@ -401,7 +392,6 @@ export default {
       modalInstance.queue = queue;
       modalInstance.extraIntents = extraIntents;
       modalInstance.$on('WITHDRAW', withdrawEvent => {
-        console.log(withdrawEvent);
         this.poolWithdrawQueueService.createWithdrawalIntent(this.pool.asset.symbol, withdrawEvent.value)
 
       });
@@ -482,7 +472,6 @@ export default {
       modalInstance.header = 'Claim Boost rewards'
 
       modalInstance.$on('CLAIM', () => {
-        console.log('claim');
         const claimBoostRequest = {
           depositRewarderAddress: config.AVALANCHE_BOOST_CONFIG[this.pool.asset.symbol].depositRewarderAddress
         };
@@ -496,7 +485,6 @@ export default {
       });
 
       modalInstance.$on('CLAIM_OLD', () => {
-        console.log('claim old');
         const claimBoostRequest = {
           depositRewarderAddress: config.AVALANCHE_BOOST_CONFIG[this.pool.asset.symbol].depositRewarderOldAddress
         };

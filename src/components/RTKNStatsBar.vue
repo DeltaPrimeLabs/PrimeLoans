@@ -1,65 +1,57 @@
 <template>
-<div class="rtkn-stats-bar-component">
-  <div class="rtkn__title">rTKN conversion program</div>
-  <div class="stats-row">
-    <div class="stat__entry">
-      <div class="stat-label">
-        Total rTKN Cap
-        <InfoIcon class="info__icon"
-                  :tooltip="{content: 'The maximum number of rTKNs that can be committed by all participants', classes: 'info-tooltip'}"
-                  :classes="'info-tooltip'">
-        </InfoIcon>
-      </div>
-      <div class="stat-value">{{ maxCap }} rTKN</div>
-    </div>
-    <div class="stat__entry">
-      <div class="stat-label">
-        Filled
-        <InfoIcon class="info__icon"
-                  :tooltip="{content: 'Currently committed rTKNs. If this crosses 100%, every participant will be commit a portion of their committed rTKNs, equal to their share of the total commitments.', classes: 'info-tooltip'}"
-                  :classes="'info-tooltip'">
-        </InfoIcon>
-      </div>
-      <div class="stat-value">
-        <bar-gauge-beta v-tooltip="{content: `Filled ${totalPledged | smartRound(2, true)} / ${maxCap} rTKN`, classes: 'info-tooltip'}"
-                        :min="0" :max="maxCap" :value="totalPledged" :width="108" :green-on-completion="true"></bar-gauge-beta>
+  <div class="rtkn-stats-bar-component">
+    <div class="rtkn__title">
+      Prime Conversion Program
+      <div class="gauge">
+        <BarGaugeBeta
+          v-tooltip="{content: `Subscription status <br> <b>${data[0].totalPledged | smartRound(2, true)} / ${data[0].maxCap} rTKN</b>`, classes: 'info-tooltip'}"
+          :min="0"
+          :max="data[0].maxCap"
+          :value="data[0].totalPledged"
+          :width="80"
+          :green-on-completion="true"
+          :medium="true"
+          :overflow-mode="true">
+        </BarGaugeBeta>
       </div>
     </div>
-    <div class="stat__entry">
-      <div class="stat-label">
-        Total participants
+    <TableHeader :config="rtknTableHeader"></TableHeader>
+
+    <div class="rtkn-table">
+      <div v-for="rtknData in data" :key="rtknData.symbol" class="rtkn-row">
+        <div>{{ rtknData.launchDate }}</div>
+        <div class="">
+          {{rtknData.yourPledge | smartRound(3, true)}} {{ rtknData.symbol }}
+        </div>
+        <div>
+          {{ rtknData.rtknUtilized | smartRound(3, true) }} {{ rtknData.symbol}}
+          <InfoIcon class="info__icon"
+                    :tooltip="{content: 'The rTKNs that are not utilized will be returned to your wallet.', classes: 'info-tooltip'}"
+                    :classes="'info-tooltip'"></InfoIcon>
+        </div>
+        <div>{{ rtknData.eligiblePrime | smartRound(5, true) }}</div>
+        <div>
+          <BarGaugeBeta
+            v-tooltip="{content: `Subscription status <br> <b>${rtknData.totalPledged | smartRound(2, true)} / ${rtknData.maxCap} rTKN</b>`, classes: 'info-tooltip'}"
+            :min="0"
+            :max="rtknData.maxCap"
+            :value="rtknData.totalPledged"
+            :width="80"
+            :green-on-completion="true"
+            :medium="true"
+            :overflow-mode="true">
+          </BarGaugeBeta>
+        </div>
+        <div>{{ rtknData.totalUsers }}</div>
+        <div>
+          <FlatButton v-on:buttonClick="openPledgeModal(rtknData)" :active="true">Commit</FlatButton>
+        </div>
+        <div v-on:click="openCancelModal(rtknData)">
+          <DeltaIcon class="cross-icon" :icon-src="'src/assets/icons/cross.svg'" :size="19"></DeltaIcon>
+        </div>
       </div>
-      <div class="stat-value">{{ totalUsers }}</div>
-    </div>
-    <div class="stat__entry">
-      <div class="stat-label">
-        my committed rTKNs
-        <InfoIcon class="info__icon"
-                  :tooltip="{content: 'The number of rTKNs you redeem if 100% of your rTKNs are sold', classes: 'info-tooltip'}"
-                  :classes="'info-tooltip'">
-        </InfoIcon>
-      </div>
-      <div class="stat-value">
-        {{ yourPledge }}
-      </div>
-    </div>
-    <div class="stat__entry">
-      <div class="stat-label">
-        PRIME received
-        <InfoIcon class="info__icon"
-                  :tooltip="{content: 'The number of vested PRIME you receive if 100% of your rTKNs are sold', classes: 'info-tooltip'}"
-                  :classes="'info-tooltip'">
-        </InfoIcon>
-      </div>
-      <div class="stat-value">
-        {{ eligiblePrime | smartRound(5, true) }}
-      </div>
-    </div>
-    <div class="stat__entry">
-      <Button :label="'Convert'" :variant="'slim'" v-on:click="openPledgeModal()"></Button>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -67,51 +59,105 @@
 
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import InfoIcon from './InfoIcon.vue';
-import config from "../config";
+import config from '../config';
 import Button from './Button.vue';
 import erc20ABI from '../../test/abis/ERC20.json';
 import RtknPledgeModal from './RtknPledgeModal.vue';
 import {mapState} from 'vuex';
 import {smartRound} from '../utils/calculate';
+import TableHeader from './TableHeader.vue';
+import FlatButton from './FlatButton.vue';
+import DeltaIcon from './DeltaIcon.vue';
+import RtknCancelModal from './RtknCancelModal.vue';
+
 const ethers = require('ethers');
 
 
 export default {
   name: 'RTKNStatsBar',
-  components: {Button, InfoIcon, BarGaugeBeta},
+  components: {DeltaIcon, FlatButton, TableHeader, Button, InfoIcon, BarGaugeBeta},
   data() {
     return {
+      rtknTableHeader: null,
     }
   },
   props: {
-    maxCap: {},
-    totalPledged: {},
-    totalUsers: {},
-    yourPledge: {},
-    eligiblePrime: {},
-    available: {},
-    conversionRatio: {},
+    data: {}
   },
   mounted() {
+    this.setupHeader();
   },
   computed: {
     ...mapState('serviceRegistry', ['accountService', 'rtknService']),
   },
   methods: {
     smartRound,
-    async openPledgeModal() {
+    async openPledgeModal(rtknData) {
       console.log('test');
       const modalInstance = this.openModal(RtknPledgeModal);
-      modalInstance.available = this.available;
-      modalInstance.yourPledge = this.yourPledge;
-      modalInstance.rtknCap = this.maxCap;
-      modalInstance.totalPledge = this.totalPledged;
-      modalInstance.conversionRatio = this.conversionRatio;
-      modalInstance.totalUsers = this.totalUsers;
+      modalInstance.available = rtknData.rtknBalance;
+      modalInstance.yourPledge = rtknData.yourPledge;
+      modalInstance.conversionRatio = rtknData.conversionRatio;
+      modalInstance.totalPledged = rtknData.totalPledged;
+      modalInstance.maxCap = rtknData.maxCap;
 
       modalInstance.$on('PLEDGE', (pledgeEvent) => {
-        this.rtknService.pledge(pledgeEvent.value);
+        this.rtknService.pledge(pledgeEvent.value, rtknData.symbol);
       });
+    },
+
+    async openCancelModal(rtknData) {
+      const modalInstance = this.openModal(RtknCancelModal);
+      console.log(this.yourPledge);
+      modalInstance.available = rtknData.yourPledge;
+      modalInstance.conversionRatio = rtknData.conversionRatio;
+
+      modalInstance.$on('CANCEL', (cancelEvent) => {
+        this.rtknService.cancel(cancelEvent.value, rtknData.symbol);
+      });
+    },
+
+    setupHeader() {
+      this.rtknTableHeader = {
+        gridTemplateColumns: 'repeat(6, 1fr) 80px 60px 17px',
+        cells: [
+          {
+            label: 'Launch Date',
+            class: 'justify-content-flex-start'
+          },
+          {
+            label: 'Commited',
+            class: 'justify-content-center'
+          },
+          {
+            label: 'Utilized',
+            class: 'justify-content-center'
+          },
+          {
+            label: 'PRIME expected',
+            class: 'justify-content-center'
+          },
+          {
+            label: 'Filled',
+            class: 'justify-content-center'
+          },
+          {
+            label: 'Participants',
+            class: 'justify-content-center'
+          },
+          {
+            label: 'Commit',
+            class: 'justify-content-center'
+          },
+          {
+            label: 'Cancel',
+            class: 'justify-content-flex-end'
+          },
+          {
+            label: '',
+          },
+        ]
+      }
     },
   },
 };
@@ -123,7 +169,6 @@ export default {
 .rtkn-stats-bar-component {
   display: flex;
   flex-direction: column;
-  height: 130px;
   margin-top: 30px;
   margin-bottom: 30px;
   padding: 0 53px;
@@ -140,75 +185,52 @@ export default {
     color: var(--rtkn-stats-bar-text__color);
     font-size: $font-size-sm;
     font-weight: 600;
-    padding: 6px 0;
-    border-style: solid;
-    border-width: 0 0 2px 0;
-    border-image-source: var(--asset-table-row__border);
-    border-image-slice: 1;
+    padding: 14px 0 20px 0;
+
+    .gauge {
+      margin-left: 14px;
+    }
   }
 
-  .stats-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 22px 0 27px 0;
-    margin: 0 -40px;
+  .rtkn-table {
+    padding: 0 7px;
 
-    .stat__entry {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: $font-size-xsm;
-      font-weight: 500;
-      color: var(--rtkn-stats-bar-text__color);
-      width: 100%;
+    .rtkn-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr) 80px 60px;
+      padding: 21px 10px;
 
-      .stat-label {
+      div {
         display: flex;
         flex-direction: row;
         align-items: center;
-        font-size: $font-size-xsm;
+        justify-content: center;
         font-weight: 500;
-        color: var(--rtkn-stats-bar-text__color);
-        margin-bottom: 12px;
-
-        .info__icon {
-          margin-left: 5px;
-        }
       }
 
-      .stat-value {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        font-size: $font-size-xsm;
-        font-weight: 600;
-        color: var(--rtkn-stats-bar-value__color);
+      div:first-child {
+        justify-content: flex-start;
+      }
 
-        .incentives-icon {
-          width: 16px;
-          height: 16px;
-          margin-left: 5px;
-        }
+      div:last-child {
+        justify-content: flex-end;
+      }
 
-        .shine-icon {
-          width: 20px;
-          height: 20px;
-          margin-left: 5px;
-          background-image: var(--rtkn-stats-bar-value-icon);
-        }
-        .speed-bonus {
-          opacity: 50%;
-
-          &.speed-bonus-active {
-            opacity: 100%;
-            color: var(--colored-value-beta__color--positive);
-          }
-        }
+      &:first-child {
+        //border-style: solid;
+        //border-width: 0 0 2px 0;
+        //border-image-source: var(--asset-table-row__border);
+        //border-image-slice: 1;
       }
     }
+  }
+  .cross-icon {
+    background: var(--rtkn-stats-bar-cancel-icon-color);
+    cursor: pointer;
+  }
+
+  .info__icon {
+    margin-left: 5px;
   }
 }
 

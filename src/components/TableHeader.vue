@@ -163,6 +163,18 @@ export default {
       padding-right: 22px;
     }
 
+    &.justify-content-flex-start {
+      justify-content: flex-start;
+    }
+
+    &.justify-content-center {
+      justify-content: center;
+    }
+
+    &.justify-content-flex-end {
+      justify-content: flex-end;
+    }
+
     .info__icon {
       margin-left: 5px;
     }

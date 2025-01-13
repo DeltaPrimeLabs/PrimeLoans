@@ -177,7 +177,6 @@ export default {
         })
       } else {
         const selectedDataset = this.allData;
-        debugger
         const timestampsStart = selectedDataset.timestamps[0]
         const timestampsEnd = selectedDataset.timestamps[selectedDataset.timestamps.length - 1]
         const timestampsLength = selectedDataset.timestamps.length

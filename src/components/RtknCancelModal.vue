@@ -1,16 +1,8 @@
 <template>
-  <div id="modal" class="rtkn-pledge-modal-component modal-component">
+  <div id="modal" class="rtkn-cancel-modal-component modal-component">
     <Modal>
       <div class="modal__title">
-        rTKN conversion
-      </div>
-
-      <div class="modal-top-info-bar-wrapper">
-        <div class="modal-top-info-bar">
-          Currently committed rTKNs. If more than 100% is committed, each participant will receive a reduced amount of PRIME,
-          proportional to the percentage over 100%. For example: If double the allotted rTKNs is committed (200%),
-          each participant will have 50% of their rTKNs converted to PRIME. They will retain the other 50% as rTKNs.
-        </div>
+        rTKN cancelation
       </div>
 
       <div class="modal-top-info">
@@ -18,17 +10,11 @@
         </div>
       </div>
 
-      <CurrencyInput v-on:newValue="pledgeValueChange"
+      <CurrencyInput v-on:newValue="cancelValueChange"
                      :symbol="'rTKN'"
                      :logo="'rtkn.svg'"
                      :validators="validators">
       </CurrencyInput>
-
-      <div class="reverse-swap-button">
-        <DeltaIcon class="reverse-swap-icon" :size="22" :icon-src="'src/assets/icons/swap-arrow.svg'"></DeltaIcon>
-      </div>
-
-      <CurrencyInput ref="primeInput" :symbol="'PRIME'" :disabled="true" :logo="'prime.svg'"></CurrencyInput>
 
       <div class="transaction-summary-wrapper">
         <TransactionResultSummaryBeta>
@@ -43,29 +29,18 @@
               </div>
               <div class="value__wrapper">
                 <div class="summary__value">
-                  {{ yourPledge + pledgeValue | smartRound(3, true) }} rTKN
+                  {{ (available - cancelValue > 0 ? available - cancelValue : 0) | smartRound(5, true) }} rTKN
                 </div>
               </div>
             </div>
-            <div class="summary__divider divider--super-long"></div>
+            <div class="summary__divider divider--long"></div>
             <div class="summary__value__pair">
               <div class="summary__label">
-                expected rTKNs returned:
+                PRIME received
               </div>
               <div class="value__wrapper">
                 <div class="summary__value">
-                  {{ (yourPledge + pledgeValue) - (1 / (totalPledged / maxCap)) * (yourPledge + pledgeValue) | smartRound(3, true)}} rTKN
-                </div>
-              </div>
-            </div>
-            <div class="summary__divider divider--super-long"></div>
-            <div class="summary__value__pair">
-              <div class="summary__label">
-                PRIME received:
-              </div>
-              <div class="value__wrapper">
-                <div class="summary__value">
-                  {{ (yourPledge + pledgeValue) * conversionRatio | smartRound(3, true) }} PRIME
+                  {{ (available - cancelValue > 0 ? (available - cancelValue) * conversionRatio : 0 ) | smartRound(5, true) }} PRIME
                 </div>
               </div>
             </div>
@@ -74,7 +49,7 @@
       </div>
 
       <div class="button-wrapper">
-        <Button :label="'Commit'"
+        <Button :label="'Cancel'"
                 v-on:click="submit()"
                 :waiting="transactionOngoing"
                 :disabled="inputValidationError">
@@ -94,7 +69,7 @@ import BarGaugeBeta from './BarGaugeBeta.vue';
 import DeltaIcon from './DeltaIcon.vue';
 
 export default {
-  name: 'RtknPledgeModal',
+  name: 'RtknCancelModal',
   components: {
     DeltaIcon,
     BarGaugeBeta,
@@ -106,18 +81,17 @@ export default {
   },
 
   props: {
-    pledge: 0,
+    cancel: 0,
     assetSymbol: null,
     available: null,
-    yourPledge: null,
+    yourCancel: null,
+    rtknCap: null,
     conversionRatio: null,
-    totalPledged: null,
-    maxCap: null,
   },
 
   data() {
     return {
-      pledgeValue: 0,
+      cancelValue: 0,
       validators: [],
       transactionOngoing: false,
       inputValidationError: false,
@@ -131,18 +105,17 @@ export default {
   methods: {
     submit() {
       this.transactionOngoing = true;
-      const pledgeEvent = {
-        value: this.pledgeValue,
+      const cancelEvent = {
+        value: this.cancelValue,
       };
-      this.$emit('PLEDGE', pledgeEvent);
+      this.$emit('CANCEL', cancelEvent);
     },
 
-    pledgeValueChange(event) {
+    cancelValueChange(event) {
       console.log(event);
-      this.pledgeValue = Number(event.value);
+      this.cancelValue = Number(event.value);
       const expectedPrime = event.value * this.conversionRatio;
       console.log(expectedPrime);
-      this.$refs.primeInput.setValue(expectedPrime);
       this.inputValidationError = event.error;
     },
 
@@ -151,7 +124,7 @@ export default {
         {
           validate: (value) => {
             if (value > this.available) {
-              return 'Exceeds balance';
+              return 'Exceeds commited rTKNs';
             }
           }
         }
@@ -165,7 +138,7 @@ export default {
 @import "~@/styles/variables";
 @import "~@/styles/modal";
 
-.rtkn-pledge-modal-component {
+.rtkn-cancel-modal-component {
   .value__wrapper {
     display: flex;
     flex-direction: row;
@@ -178,8 +151,8 @@ export default {
       opacity: var(--asset-table-row__icon-opacity);
     }
 
-    .summary__value {
-      margin: 5px 0;
+    .summary__value:last-child {
+      margin-left: 5px;
     }
   }
 

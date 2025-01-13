@@ -1,8 +1,16 @@
 <template>
   <div class="bar-gauge-beta-component" v-bind:class="{'bar-gauge-beta-component--inline': displayInline}">
     <div class="bar-gauge">
-      <div class="bar" v-bind:class="{'bar--slim': slim, 'bar--zero': value === 0}">
-        <div v-if="value > 0" class="bar__value" v-bind:class="{'bar__value--completion': value >= max && greenOnCompletion}" :style="{'width': barGaugeValueWidth + 'px'}"></div>
+      <div class="bar" v-bind:class="{'bar--slim': slim, 'bar--medium': medium, 'bar--zero': value === 0}">
+        <div v-if="value > 0"
+             class="bar__value"
+             v-bind:class="{'bar__value--completion': value >= max && greenOnCompletion, 'bar__value--overflow-mode': overflowMode}"
+             :style="{'width': barGaugeValueWidth + 'px'}">
+        </div>
+      </div>
+      <div v-if="overflowMode && value > max" class="overflow">
+        <div class="overflow__needle"></div>
+        <div class="overflow__label">{{formatPercent(value / max, 0)}}</div>
       </div>
       <div v-if="!slim && min && max" class="range">
         <div>{{min | percent(0)}}</div>
@@ -30,6 +38,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    medium: {
+      type: Boolean,
+      default: false,
+    },
     displayInline: {
       type: Boolean,
       default: false,
@@ -37,7 +49,11 @@ export default {
     greenOnCompletion: {
       type: Boolean,
       default: false,
-    }
+    },
+    overflowMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     barGaugeElementWidth() {
@@ -47,7 +63,11 @@ export default {
       if (this.value < this.min) {
         return 0
       } else if (this.value > this.max) {
-        return this.barGaugeElementWidth;
+        if (!this.overflowMode) {
+          return this.barGaugeElementWidth;
+        } else {
+          return this.barGaugeElementWidth - 6;
+        }
       } else {
         return this.barGaugeElementWidth * ((this.value - this.min) / (this.max - this.min));
       }
@@ -70,6 +90,7 @@ export default {
   }
 
   .bar-gauge {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -90,6 +111,16 @@ export default {
         .bar__value {
           height: 11px;
           min-width: 11px;
+        }
+      }
+
+      &.bar--medium {
+        width: 80px;
+        height: 14px;
+
+        .bar__value {
+          height: 14px;
+          min-width: 14px;
         }
       }
 
@@ -115,6 +146,10 @@ export default {
         &.bar__value--completion {
           background-image: var(--bar__value-background-image--completion);
         }
+
+        &.bar__value--overflow-mode {
+          border-radius: 9.5px 0 0 9.5px;
+        }
       }
     }
 
@@ -127,6 +162,31 @@ export default {
       margin-top: 2px;
       color: $steel-gray;
       font-size: $font-size-xxs;
+    }
+
+    .overflow {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      top: -3px;
+      right: -7px;
+
+      .overflow__needle {
+        position: absolute;
+        right: 17px;
+        width: 1px;
+        height: 20px;
+        background-color: var(--bar__overflow-needle-color);
+      }
+
+      .overflow__label {
+        position: absolute;
+        top: 18px;
+        right: -4px;
+        font-size: $font-size-xxxs;
+        color: var(--bar__overflow-color);
+      }
     }
   }
 }

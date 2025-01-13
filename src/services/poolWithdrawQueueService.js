@@ -61,7 +61,6 @@ export default class PoolWithdrawQueueService {
           }
         })
         this.poolIntents$.next(this.poolIntents);
-        console.log(JSON.stringify(this.poolIntents));
         this.soonestIntent = this.findMostRecentIntent(this.poolIntents);
 
         this.queueData$.next({
@@ -114,9 +113,7 @@ export default class PoolWithdrawQueueService {
   }
 
   async getWithdrawalIntents(poolContract, poolSymbol) {
-    console.log(poolContract);
     const userIntents = await poolContract.getUserIntents(this.account);
-    console.log(userIntents);
     const intents = userIntents.map((intent, index) => ({
       id: index,
       amount: formatUnits(intent.amount, config.ASSETS_CONFIG[poolSymbol].decimals),
@@ -127,8 +124,6 @@ export default class PoolWithdrawQueueService {
       isExpired: intent.isExpired,
       isPending: intent.isPending,
     })).filter(intent => !intent.isExpired);
-
-    console.log(intents);
 
     this.totalReady += intents.filter(intent => intent.isActionable).length;
     this.totalPending += intents.filter(intent => intent.isPending).length;
