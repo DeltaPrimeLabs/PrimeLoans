@@ -69,7 +69,7 @@
       We are dropping support to some tokens of your Prime Account. Please review your portfolio
     </Banner>
     <Banner v-if="showAvalancheDepositorBanner" :closable="true" background="green">
-      THe Boost airdrop will begin on Monday 6PM CET.
+      Boost airdrop incoming!
     </Banner>
     <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
       The Prime Account is granularly being unpaused.
