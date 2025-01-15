@@ -4,7 +4,7 @@
       <div class="main-content">
         <SPrimePanel class="sprime-panel" :is-prime-account="false" :user-address="account"
                      :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
-        <RTKNStatsBar v-if="arbitrumChain" :data="rtknData">
+        <RTKNStatsBar :data="rtknData" :cross-chain-data="crossChainData">
         </RTKNStatsBar>
 
         <WithdrawalQueue ref="withdrawalQueue"
@@ -103,6 +103,7 @@ export default {
       poolsTableHeaderConfig: null,
       depositAssetsWalletBalances$: new BehaviorSubject({}),
       rtknData: {},
+      crossChainData: {},
       arbitrumChain: false,
       poolIntents: [],
       queueData: {},
@@ -177,46 +178,6 @@ export default {
         this.setupTotalDeposit();
         this.$forceUpdate();
         this.setupWalletDepositAssetBalances(pools);
-        if (window.chain === 'avalanche') {
-          this.watchAvalancheBoostData();
-        }
-      });
-    },
-
-    watchAvalancheBoostData() {
-      this.avalancheBoostService.observeAvalancheBoostRates().subscribe(rates => {
-        if (rates) {
-          const incentivizedPools = Object.keys(rates);
-          incentivizedPools.forEach(
-            poolAsset => {
-              const poolIndex = this.poolsList.findIndex(pool => pool.asset.symbol === poolAsset);
-              this.poolsList[poolIndex].hasAvalancheBoost = true;
-              this.poolsList[poolIndex].avalancheBoostRewardToken = config.AVALANCHE_BOOST_CONFIG[poolAsset].rewardToken;
-              let secondsInYear = 3600 * 24 * 365;
-              this.poolsList[poolIndex].miningApy = 0;
-            }
-          );
-        }
-      });
-
-      this.avalancheBoostService.observeAvalancheBoostUnclaimed().subscribe(unclaimed => {
-        const incentivizedPools = Object.keys(unclaimed);
-        incentivizedPools.forEach(
-          poolAsset => {
-            const poolIndex = this.poolsList.findIndex(pool => pool.asset.symbol === poolAsset);
-            this.poolsList[poolIndex].unclaimed = unclaimed[poolAsset];
-          }
-        );
-      });
-
-      this.avalancheBoostService.observeAvalancheBoostUnclaimedOld().subscribe(unclaimedOld => {
-        const incentivizedPools = Object.keys(unclaimedOld);
-        incentivizedPools.forEach(
-          poolAsset => {
-            const poolIndex = this.poolsList.findIndex(pool => pool.asset.symbol === poolAsset);
-            this.poolsList[poolIndex].unclaimedOld = unclaimedOld[poolAsset];
-          }
-        );
       });
     },
 
@@ -408,6 +369,14 @@ export default {
       this.rtknService.observeData().subscribe(data => {
         console.log(data);
         Vue.set(this, 'rtknData', data);
+        this.$forceUpdate();
+        setTimeout(() => {
+          this.$forceUpdate();
+        }, 100);
+      });
+
+      this.rtknService.observeCrossChainData().subscribe(crossChainData => {
+        Vue.set(this, 'crossChainData', crossChainData);
         this.$forceUpdate();
         setTimeout(() => {
           this.$forceUpdate();

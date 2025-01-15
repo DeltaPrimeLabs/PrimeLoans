@@ -4,10 +4,10 @@
       Prime Conversion Program
       <div class="gauge">
         <BarGaugeBeta
-          v-tooltip="{content: `Subscription status <br> <b>${data[0].totalPledged | smartRound(2, true)} / ${data[0].maxCap} rTKN</b>`, classes: 'info-tooltip'}"
+          v-tooltip="{content: `Subscription status <br> <b>${crossChainData.totalPledged | smartRound(2, true)} / ${crossChainData.maxCap} rTKN</b>`, classes: 'info-tooltip'}"
           :min="0"
-          :max="data[0].maxCap"
-          :value="data[0].totalPledged"
+          :max="crossChainData.maxCap"
+          :value="crossChainData.totalPledged"
           :width="80"
           :green-on-completion="true"
           :medium="true"
@@ -82,7 +82,8 @@ export default {
     }
   },
   props: {
-    data: {}
+    data: {},
+    crossChainData: {},
   },
   mounted() {
     this.setupHeader();

@@ -50,22 +50,22 @@
             <div class="summary__divider divider--super-long"></div>
             <div class="summary__value__pair">
               <div class="summary__label">
-                expected rTKNs returned:
+                utilized rTKNs:
               </div>
               <div class="value__wrapper">
                 <div class="summary__value">
-                  {{ (yourPledge + pledgeValue) - (1 / (totalPledged / maxCap)) * (yourPledge + pledgeValue) | smartRound(3, true)}} rTKN
+                  {{ (1 / (totalPledged / maxCap)) * (yourPledge + pledgeValue) | smartRound(3, true)}} rTKN
                 </div>
               </div>
             </div>
             <div class="summary__divider divider--super-long"></div>
             <div class="summary__value__pair">
               <div class="summary__label">
-                PRIME received:
+                PRIME expected:
               </div>
               <div class="value__wrapper">
                 <div class="summary__value">
-                  {{ (yourPledge + pledgeValue) * conversionRatio | smartRound(3, true) }} PRIME
+                  {{ (1 / (totalPledged / maxCap)) * (yourPledge + pledgeValue) * conversionRatio | smartRound(3, true) }} PRIME
                 </div>
               </div>
             </div>
