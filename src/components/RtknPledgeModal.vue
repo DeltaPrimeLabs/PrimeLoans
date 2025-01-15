@@ -53,8 +53,11 @@
                 utilized rTKNs:
               </div>
               <div class="value__wrapper">
-                <div class="summary__value">
+                <div v-if="totalPledged > maxCap" class="summary__value">
                   {{ (1 / (totalPledged / maxCap)) * (yourPledge + pledgeValue) | smartRound(3, true)}} rTKN
+                </div>
+                <div v-if="totalPledged < maxCap" class="summary__value">
+                  {{ yourPledge + pledgeValue | smartRound(3, true)}} rTKN
                 </div>
               </div>
             </div>
@@ -64,8 +67,11 @@
                 PRIME expected:
               </div>
               <div class="value__wrapper">
-                <div class="summary__value">
+                <div v-if="totalPledged > maxCap" class="summary__value">
                   {{ (1 / (totalPledged / maxCap)) * (yourPledge + pledgeValue) * conversionRatio | smartRound(3, true) }} PRIME
+                </div>
+                <div v-if="totalPledged < maxCap" class="summary__value">
+                  {{ (yourPledge + pledgeValue) * conversionRatio | smartRound(3, true) }} PRIME
                 </div>
               </div>
             </div>

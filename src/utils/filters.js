@@ -111,6 +111,10 @@ export default function setupFilters() {
     return smartRound(value, precision, toFixed)
   });
 
+  Vue.filter('nonNegative', function (value) {
+    return Number(value) > 0 ? value : 0;
+  });
+
   Vue.filter('formatWithSpaces', function (value) {
     const integerPart = value.split('.')[0];
     const decimalPart = value.split('.')[1];

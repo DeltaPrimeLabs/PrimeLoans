@@ -112,6 +112,8 @@ export default {
       console.log(this.yourPledge);
       modalInstance.available = rtknData.yourPledge;
       modalInstance.conversionRatio = rtknData.conversionRatio;
+      modalInstance.totalPledged = rtknData.totalPledged;
+      modalInstance.maxCap = rtknData.maxCap;
 
       modalInstance.$on('CANCEL', (cancelEvent) => {
         this.rtknService.cancel(cancelEvent.value, rtknData.symbol);

@@ -28,8 +28,11 @@
                 my committed rTKNs:
               </div>
               <div class="value__wrapper">
-                <div class="summary__value">
-                  {{ (available - cancelValue > 0 ? available - cancelValue : 0) | smartRound(5, true) }} rTKN
+                <div v-if="totalPledged > maxCap" class="summary__value">
+                  {{ (available - cancelValue > 0 ? available - cancelValue : 0) | nonNegative | smartRound(5, true) }} rTKN
+                </div>
+                <div v-if="totalPledged < maxCap" class="summary__value">
+                  {{ available - cancelValue | nonNegative | smartRound(5, true) }} rTKN
                 </div>
               </div>
             </div>
@@ -39,8 +42,11 @@
                 PRIME received
               </div>
               <div class="value__wrapper">
-                <div class="summary__value">
-                  {{ (available - cancelValue > 0 ? (available - cancelValue) * conversionRatio : 0 ) | smartRound(5, true) }} PRIME
+                <div v-if="totalPledged > maxCap" class="summary__value">
+                  {{ (1 / (totalPledged / maxCap)) * (available - cancelValue) * conversionRatio | nonNegative | smartRound(3, true) }} PRIME
+                </div>
+                <div v-if="totalPledged < maxCap" class="summary__value">
+                  {{ (available - cancelValue) * conversionRatio | nonNegative | smartRound(3, true) }} PRIME
                 </div>
               </div>
             </div>
@@ -87,6 +93,8 @@ export default {
     yourCancel: null,
     rtknCap: null,
     conversionRatio: null,
+    maxCap: null,
+    totalPledged: null,
   },
 
   data() {
