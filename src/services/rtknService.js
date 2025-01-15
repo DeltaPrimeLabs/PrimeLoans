@@ -159,7 +159,8 @@ export default class RtknService {
     const converterContract = this.rtknsConfig[this.chain].find(config => config.symbol === tokenSymbol).converterContract;
 
     try {
-      await tokenContract.connect(this.provider.getSigner()).approve(converterContract.address, parseUnits(amount.toString(), 18));
+      const approveTx = await tokenContract.connect(this.provider.getSigner()).approve(converterContract.address, parseUnits(amount.toString(), 18));
+      await awaitConfirmation(approveTx, this.provider, 'approve rTKN');
       const contractConnected = await converterContract.connect(this.provider.getSigner());
       const transaction = await contractConnected.pledgerTKN(parseUnits(amount.toString(), 18));
       const tx = await awaitConfirmation(transaction, this.provider, 'pledge rTKN');
@@ -169,6 +170,7 @@ export default class RtknService {
         this.loadData(this.crossChainData);
       }, 1000);
     } catch (error) {
+      console.log(error);
       this.handleError(error);
     }
   }
