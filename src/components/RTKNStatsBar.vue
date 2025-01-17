@@ -46,9 +46,6 @@
         <div>
           <FlatButton v-on:buttonClick="openPledgeModal(rtknData)" :active="true">Commit</FlatButton>
         </div>
-        <div v-on:click="openCancelModal(rtknData)">
-          <DeltaIcon class="cross-icon" :icon-src="'src/assets/icons/cross.svg'" :size="19"></DeltaIcon>
-        </div>
       </div>
     </div>
   </div>
@@ -59,16 +56,13 @@
 
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import InfoIcon from './InfoIcon.vue';
-import config from '../config';
 import Button from './Button.vue';
-import erc20ABI from '../../test/abis/ERC20.json';
 import RtknPledgeModal from './RtknPledgeModal.vue';
 import {mapState} from 'vuex';
 import {smartRound} from '../utils/calculate';
 import TableHeader from './TableHeader.vue';
 import FlatButton from './FlatButton.vue';
 import DeltaIcon from './DeltaIcon.vue';
-import RtknCancelModal from './RtknCancelModal.vue';
 
 const ethers = require('ethers');
 
@@ -107,22 +101,9 @@ export default {
       });
     },
 
-    async openCancelModal(rtknData) {
-      const modalInstance = this.openModal(RtknCancelModal);
-      console.log(this.yourPledge);
-      modalInstance.available = rtknData.yourPledge;
-      modalInstance.conversionRatio = rtknData.conversionRatio;
-      modalInstance.totalPledged = rtknData.totalPledged;
-      modalInstance.maxCap = rtknData.maxCap;
-
-      modalInstance.$on('CANCEL', (cancelEvent) => {
-        this.rtknService.cancel(cancelEvent.value, rtknData.symbol);
-      });
-    },
-
     setupHeader() {
       this.rtknTableHeader = {
-        gridTemplateColumns: 'repeat(6, 1fr) 80px 60px 17px',
+        gridTemplateColumns: 'repeat(6, 1fr) 80px 17px',
         cells: [
           {
             label: 'Launch Date',
@@ -151,10 +132,6 @@ export default {
           {
             label: 'Commit',
             class: 'justify-content-center'
-          },
-          {
-            label: 'Cancel',
-            class: 'justify-content-flex-end'
           },
           {
             label: '',
@@ -200,7 +177,7 @@ export default {
 
     .rtkn-row {
       display: grid;
-      grid-template-columns: repeat(6, 1fr) 80px 60px;
+      grid-template-columns: repeat(6, 1fr) 80px;
       padding: 21px 10px;
 
       div {
@@ -226,10 +203,6 @@ export default {
         //border-image-slice: 1;
       }
     }
-  }
-  .cross-icon {
-    background: var(--rtkn-stats-bar-cancel-icon-color);
-    cursor: pointer;
   }
 
   .info__icon {
