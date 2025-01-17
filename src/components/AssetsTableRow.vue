@@ -168,7 +168,7 @@ import YAK_ROUTER_ABI
   from '../../test/abis/YakRouter.json';
 import YAK_WRAP_ROUTER
   from '../../artifacts/contracts/interfaces/IYakWrapRouter.sol/IYakWrapRouter.json';
-import {formatUnits, fromWei, parseUnits, smartRound} from '../utils/calculate';
+import { formatUnits, fromWei, parseUnits, smartRound, toWei } from '../utils/calculate';
 import GLP_REWARD_ROUTER
   from '../../artifacts/contracts/interfaces/facets/avalanche/IRewardRouterV2.sol/IRewardRouterV2.json';
 import GLP_REWARD_TRACKER
@@ -762,6 +762,7 @@ export default {
         let swapMethod = () => {
         }
         let swapRequest = {}
+        console.log(toWei(swapEvent.sourceAsset));
         if (swapEvent.swapDex === 'GLP_DIRECT') {
           if (swapEvent.sourceAsset === 'GLP') {
             swapRequest = {
@@ -787,6 +788,7 @@ export default {
           };
           swapMethod = swapDexSwapMethodMap[swapRequest.swapDex]
         }
+        console.log(swapRequest);
 
         this.handleTransaction(swapMethod, {swapRequest: swapRequest}, () => {
           this.$forceUpdate();
