@@ -296,7 +296,7 @@ export default {
       modalInstance.rewards = [];
       modalInstance.asset = config.ASSETS_CONFIG[initSourceAsset];
       modalInstance.isLP = this.false;
-      modalInstance.$on('STAKE', async (stakeValue) => {
+      modalInstance.$on('STAKE', async ({stakeValue, forceTransaction}) => {
         console.log('stakeValue', stakeValue);
         const minOutResponse = await this.contract.getSharesForDepositTokens(toWei(stakeValue))
         const minOut = BigNumber.from(minOutResponse);
@@ -308,6 +308,7 @@ export default {
           minLpOut: fromWei(minOut),
           depositMethod: this.farm.depositMethod,
           decimals: this.farm.decimals,
+          forceTransaction: forceTransaction
         };
 
         this.handleTransaction(this.depositToWombatYY, {depositRequest: depositRequest}, () => {
@@ -335,7 +336,7 @@ export default {
       modalInstance.forceAssetName = this.farm.name;
       modalInstance.asset = this.wombatLpAssets[initSourceAsset];
       modalInstance.isLP = this.false;
-      modalInstance.$on('STAKE', async (stakeValue) => {
+      modalInstance.$on('STAKE', async ({stakeValue}) => {
         const depositRequest = {
           yyToken: this.farm.yyToken,
           sourceAsset: initSourceAsset,

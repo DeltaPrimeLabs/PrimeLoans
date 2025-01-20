@@ -355,7 +355,7 @@ export default {
       modalInstance.asset = this.asset;
       modalInstance.protocol = this.protocol;
       modalInstance.isLP = this.isLP;
-      modalInstance.$on('STAKE', (stakeValue) => {
+      modalInstance.$on('STAKE', ({stakeValue}) => {
         const stakeRequest = {
           feedSymbol: this.farm.feedSymbol,
           assetSymbol: this.asset.symbol,

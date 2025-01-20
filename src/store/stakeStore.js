@@ -296,10 +296,12 @@ export default {
           BigNumber.from(depositRequest.decimals.toString())),
         parseUnits(String(depositRequest.minLpOut),
           BigNumber.from(depositRequest.decimals.toString())),
+        depositRequest.forceTransaction ? {gasLimit: 9999999} : {}
       ) : await (await wrapContract(smartLoanContract, loanAssets))[depositRequest.depositMethod]
       (
         parseUnits(String(depositRequest.amount),
           BigNumber.from(depositRequest.decimals.toString())),
+        depositRequest.forceTransaction ? {gasLimit: 9999999} : {}
       );
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
