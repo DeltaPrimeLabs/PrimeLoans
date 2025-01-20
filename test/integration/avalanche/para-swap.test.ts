@@ -104,8 +104,12 @@ describe("ParaSwap", () => {
           srcAmount: priceRoute.srcAmount,
           slippage: slippage,
           priceRoute,
-          // deadline: Math.floor(Date.now() / 1000) + 3000,
+          deadline: Math.floor(Date.now() / 1000) + 300, // 500 minutes deadline
           userAddress: wrappedLoan.address,
+          includeContractMethods: [
+            "swapExactAmountIn",
+            "swapExactAmountInOnUniswapV3",
+          ],
           partnerAddress: "0x8995d790169023Ee4fF67621948EBDFe7383f59e",
           partnerFeeBps: 1,
           partner: "deltaprime",
