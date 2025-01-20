@@ -14,8 +14,6 @@ import "../interfaces/ITokenManager.sol";
 //This path is updated during deployment
 import "../lib/local/DeploymentConstants.sol";
 
-import "hardhat/console.sol";
-
 contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     using TransferHelper for address;
 
@@ -41,6 +39,16 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         IERC20Metadata boughtToken;
         uint256 initialSoldTokenBalance;
         uint256 initialBoughtTokenBalance;
+    }
+
+    struct ParaSwapDecodedData {
+        address executor;
+        address srcToken;
+        address destToken;
+        uint256 fromAmount;
+        uint256 toAmount;
+        address partner;
+        address payable beneficiary;
     }
 
     ////////////////////****** PARASWAPV6 STRUCTS *////////////////////
@@ -137,53 +145,125 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
 
     function paraSwapBeforeLiquidation(
         bytes4 selector,
-        bytes memory data,
-        address fromToken,
-        uint256 fromAmount,
-        address toToken,
-        uint256 minOut
+        bytes calldata data
     ) external nonReentrant onlyWhitelistedLiquidators noBorrowInTheSameBlock {
+        // Liquidation-specific check
         require(!_isSolvent(), "Cannot perform on a solvent account");
 
-        SwapTokensDetails memory swapTokensDetails = getInitialTokensDetails(fromToken, toToken);
-        require(swapTokensDetails.initialSoldTokenBalance >= fromAmount, "Insufficient balance");
-        require(minOut > 0, "minOut needs to be > 0");
-        require(fromAmount > 0, "Amount of tokens to sell has to be greater than 0");
+        ParaSwapDecodedData memory paraSwapDecodedData;
 
+        // Decode data based on selector
+        if (selector == SWAP_EXACT_AMOUNT_IN_SELECTOR) {
+            (
+                paraSwapDecodedData.executor,
+                paraSwapDecodedData.srcToken,
+                paraSwapDecodedData.destToken,
+                paraSwapDecodedData.fromAmount,
+                paraSwapDecodedData.toAmount,
+                paraSwapDecodedData.partner,
+                paraSwapDecodedData.beneficiary
+            ) = _decodeSwapExactAmountInData(data);
+
+            // Validate executor address
+            require(_checkExecutorAddress(paraSwapDecodedData.executor), "Executor address is wrong");
+        } else if (selector == SWAP_EXACT_AMOUNT_IN_ON_UNI_V3_SELECTOR) {
+            (
+                paraSwapDecodedData.srcToken,
+                paraSwapDecodedData.destToken,
+                paraSwapDecodedData.fromAmount,
+                paraSwapDecodedData.toAmount,
+                paraSwapDecodedData.partner,
+                paraSwapDecodedData.beneficiary
+            ) = _decodeSwapExactAmountInOnUniV3Data(data);
+        } else {
+            revert("Invalid selector");
+        }
+
+        // Validate partner address
+        require(
+            paraSwapDecodedData.partner == DeploymentConstants.getFeesRedistributionAddress(),
+            "Invalid partner address"
+        );
+
+        // Validate beneficiary address
+        require(
+            paraSwapDecodedData.beneficiary == address(this) || paraSwapDecodedData.beneficiary == address(0),
+            "Invalid beneficiary address"
+        );
+
+        // Validate token addresses
+        require(paraSwapDecodedData.srcToken != address(0), "Source token cannot be zero address");
+        require(paraSwapDecodedData.destToken != address(0), "Destination token cannot be zero address");
+        require(paraSwapDecodedData.srcToken != paraSwapDecodedData.destToken, "Source and destination tokens must be different");
+
+        // Validate amounts
+        require(paraSwapDecodedData.fromAmount > 0 && paraSwapDecodedData.toAmount > 0, "Invalid amounts");
+        require(paraSwapDecodedData.fromAmount <= type(uint128).max, "Amount too large");
+
+        // Get initial token details
+        SwapTokensDetails memory swapTokensDetails = getInitialTokensDetails(
+            paraSwapDecodedData.srcToken,
+            paraSwapDecodedData.destToken
+        );
+
+        // Validate balances and allowance
+        require(
+            swapTokensDetails.soldToken.balanceOf(address(this)) >= paraSwapDecodedData.fromAmount,
+            "Insufficient balance"
+        );
+
+        // Approve tokens for ParaSwap router
         address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, 0);
-        address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, fromAmount);
+        address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, paraSwapDecodedData.fromAmount);
 
-        (bool success,) = PARA_ROUTER.call((abi.encodePacked(selector, data)));
+        require(
+            swapTokensDetails.soldToken.allowance(address(this), PARA_ROUTER) >= paraSwapDecodedData.fromAmount,
+            "Insufficient allowance"
+        );
+
+        // Execute swap
+        (bool success,) = PARA_ROUTER.call(abi.encodePacked(selector, data));
         require(success, "Swap failed");
 
-        uint256 boughtTokenFinalAmount =
-            swapTokensDetails.boughtToken.balanceOf(address(this)) - swapTokensDetails.initialBoughtTokenBalance;
-        require(boughtTokenFinalAmount >= minOut, "Too little received");
+        // Calculate final amounts
+        uint256 boughtTokenFinalAmount = swapTokensDetails.boughtToken.balanceOf(address(this))
+            - swapTokensDetails.initialBoughtTokenBalance;
+        require(boughtTokenFinalAmount >= paraSwapDecodedData.toAmount, "Too little received");
 
-        uint256 soldTokenFinalAmount =
-            swapTokensDetails.initialSoldTokenBalance - swapTokensDetails.soldToken.balanceOf(address(this));
-        require(soldTokenFinalAmount == fromAmount, "Too much sold");
+        uint256 soldTokenFinalAmount = swapTokensDetails.initialSoldTokenBalance
+            - swapTokensDetails.soldToken.balanceOf(address(this));
 
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _decreaseExposure(tokenManager, fromToken, soldTokenFinalAmount);
-        _increaseExposure(tokenManager, toToken, boughtTokenFinalAmount);
+        // Liquidation-specific check: Ensure exact amount was sold
+        require(soldTokenFinalAmount == paraSwapDecodedData.fromAmount, "Too much sold");
 
+        // Slippage protection
         bytes32[] memory symbols = new bytes32[](2);
         symbols[0] = swapTokensDetails.tokenSoldSymbol;
         symbols[1] = swapTokensDetails.tokenBoughtSymbol;
         uint256[] memory prices = getPrices(symbols);
 
-        uint256 soldTokenDollarValue =
-            prices[0] * soldTokenFinalAmount * 10 ** 10 / 10 ** swapTokensDetails.soldToken.decimals();
-        uint256 boughtTokenDollarValue =
-            prices[1] * boughtTokenFinalAmount * 10 ** 10 / 10 ** swapTokensDetails.boughtToken.decimals();
+        uint256 soldTokenDollarValue = prices[0] * soldTokenFinalAmount * 10**10 / 10**swapTokensDetails.soldToken.decimals();
+        uint256 boughtTokenDollarValue = prices[1] * boughtTokenFinalAmount * 10**10 / 10**swapTokensDetails.boughtToken.decimals();
+
         if (soldTokenDollarValue > boughtTokenDollarValue) {
-            // If the sold token is more valuable than the bought token, we need to check the slippage
-            // If the slippage is too high, we revert the transaction
-            // Slippage = (soldTokenDollarValue - boughtTokenDollarValue) * 100 / soldTokenDollarValue
             uint256 slippage = (soldTokenDollarValue - boughtTokenDollarValue) * 100 / soldTokenDollarValue;
-            require(slippage < 2, "Slippage too high"); // MAX 2% slippage
+            require(slippage < 2, "Slippage too high"); // MAX 2% slippage for liquidation (stricter than normal swaps)
         }
+
+        // Update token exposures
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        _decreaseExposure(tokenManager, address(swapTokensDetails.soldToken), soldTokenFinalAmount);
+        _increaseExposure(tokenManager, address(swapTokensDetails.boughtToken), boughtTokenFinalAmount);
+
+        // Emit swap event
+        emit Swap(
+            msg.sender,
+            swapTokensDetails.tokenSoldSymbol,
+            swapTokensDetails.tokenBoughtSymbol,
+            soldTokenFinalAmount,
+            boughtTokenFinalAmount,
+            block.timestamp
+        );
     }
 
     /// @notice function to swap funds via ParaSwap, the DEX aggregator
@@ -193,63 +273,112 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     /// @dev on chain validations of the data is done in the internal functions before praSwap method gets called
     function paraSwapV2(
         bytes4 selector,
-        bytes calldata data,
-        /// @dev changing data from memory to calldata for slicing
-        address fromToken,
-        /// parameters from here on out are not used in the function, but keeping them for the test file.
-        uint256 fromAmount,
-        address toToken,
-        uint256 minOut
+        bytes calldata data
     ) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
-        uint256 fromTokenAmount;
-        uint256 toTokenAmount;
-        address fromTokenAddress;
-        address toTokenAddress;
+        ParaSwapDecodedData memory paraSwapDecodedData;
+
+        // Decode data based on selector
         if (selector == SWAP_EXACT_AMOUNT_IN_SELECTOR) {
-            address executorAddress;
-            bool isRightExecutor;
-            console.log("Got SwapExactAmountIn Selector!");
-            console.log("Data length: ");
-            console.log(data.length);
-            (executorAddress, fromTokenAddress, toTokenAddress, fromTokenAmount, toTokenAmount) =
-                _decodeSwapExactAmountInData(data);
-            isRightExecutor = _checkExecutorAddress(executorAddress);
-            require(isRightExecutor, "Executor address is wrong");
+            (
+                paraSwapDecodedData.executor,
+                paraSwapDecodedData.srcToken,
+                paraSwapDecodedData.destToken,
+                paraSwapDecodedData.fromAmount,
+                paraSwapDecodedData.toAmount,
+                paraSwapDecodedData.partner,
+                paraSwapDecodedData.beneficiary
+            ) = _decodeSwapExactAmountInData(data);
+
+            // Validate executor address
+            require(_checkExecutorAddress(paraSwapDecodedData.executor), "Executor address is wrong");
         } else if (selector == SWAP_EXACT_AMOUNT_IN_ON_UNI_V3_SELECTOR) {
-            console.log("Got SwapExactAmountInOnUniV3 Selector!");
-            console.log("Data length: ");
-            console.log(data.length);
-            (fromTokenAddress, toTokenAddress, fromTokenAmount, toTokenAmount) =
-                _decodeSwapExactAmountInOnUniV3Data(data);
+            (
+                paraSwapDecodedData.srcToken,
+                paraSwapDecodedData.destToken,
+                paraSwapDecodedData.fromAmount,
+                paraSwapDecodedData.toAmount,
+                paraSwapDecodedData.partner,
+                paraSwapDecodedData.beneficiary
+            ) = _decodeSwapExactAmountInOnUniV3Data(data);
         } else {
-            console.log("Not My Selector!");
+            revert("Invalid selector");
         }
-        SwapTokensDetails memory swapTokensDetails = getInitialTokensDetails(fromTokenAddress, toTokenAddress);
 
-        require(swapTokensDetails.soldToken.balanceOf(address(this)) >= fromTokenAmount, "Insufficient balance");
-        /// @dev do we really need this check? In what scenario would ParaSwap API return minOut as 0
-        /// @dev toTokenAmount is data.toAmount, which is minOut, as per paraSwap docs
-        require(toTokenAmount > 0, "minOut needs to be > 0");
-        /// @dev do we really need this check, again.
-        require(fromTokenAmount > 0, "Amount of tokens to sell has to be greater than 0");
 
+        // Validate partner address
+        require(
+            paraSwapDecodedData.partner == DeploymentConstants.getFeesRedistributionAddress(),
+            "Invalid partner address"
+        );
+
+        // Validate beneficiary address
+        require(
+            paraSwapDecodedData.beneficiary == address(this) || paraSwapDecodedData.beneficiary == address(0),
+            "Invalid beneficiary address"
+        );
+
+        // Validate token addresses
+        require(paraSwapDecodedData.srcToken != address(0), "Source token cannot be zero address");
+        require(paraSwapDecodedData.destToken != address(0), "Destination token cannot be zero address");
+        require(paraSwapDecodedData.srcToken != paraSwapDecodedData.destToken, "Source and destination tokens must be different");
+
+        // Validate amounts
+        require(paraSwapDecodedData.fromAmount > 0 && paraSwapDecodedData.toAmount > 0, "Invalid amounts");
+        require(paraSwapDecodedData.fromAmount <= type(uint128).max, "Amount too large");
+
+        // Get initial token details
+        SwapTokensDetails memory swapTokensDetails = getInitialTokensDetails(
+            paraSwapDecodedData.srcToken,
+            paraSwapDecodedData.destToken
+        );
+
+        // Validate balances and allowance
+        require(
+            swapTokensDetails.soldToken.balanceOf(address(this)) >= paraSwapDecodedData.fromAmount,
+            "Insufficient balance"
+        );
+
+        // Approve tokens for ParaSwap router
         address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, 0);
-        address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, fromTokenAmount);
+        address(swapTokensDetails.soldToken).safeApprove(PARA_ROUTER, paraSwapDecodedData.fromAmount);
 
+        require(
+            swapTokensDetails.soldToken.allowance(address(this), PARA_ROUTER) >= paraSwapDecodedData.fromAmount,
+            "Insufficient allowance"
+        );
+
+        // Execute swap
         (bool success,) = PARA_ROUTER.call(abi.encodePacked(selector, data));
         require(success, "Swap failed");
 
-        uint256 boughtTokenFinalAmount =
-            swapTokensDetails.boughtToken.balanceOf(address(this)) - swapTokensDetails.initialBoughtTokenBalance;
-        require(boughtTokenFinalAmount >= toTokenAmount, "Too little received");
+        // Calculate final amounts
+        uint256 boughtTokenFinalAmount = swapTokensDetails.boughtToken.balanceOf(address(this))
+            - swapTokensDetails.initialBoughtTokenBalance;
+        require(boughtTokenFinalAmount >= paraSwapDecodedData.toAmount, "Too little received");
 
-        uint256 soldTokenFinalAmount =
-            swapTokensDetails.initialSoldTokenBalance - swapTokensDetails.soldToken.balanceOf(address(this));
+        uint256 soldTokenFinalAmount = swapTokensDetails.initialSoldTokenBalance
+            - swapTokensDetails.soldToken.balanceOf(address(this));
 
+        // Slippage protection
+        bytes32[] memory symbols = new bytes32[](2);
+        symbols[0] = swapTokensDetails.tokenSoldSymbol;
+        symbols[1] = swapTokensDetails.tokenBoughtSymbol;
+        uint256[] memory prices = getPrices(symbols);
+
+        uint256 soldTokenDollarValue = prices[0] * soldTokenFinalAmount * 10**10 / 10**swapTokensDetails.soldToken.decimals();
+        uint256 boughtTokenDollarValue = prices[1] * boughtTokenFinalAmount * 10**10 / 10**swapTokensDetails.boughtToken.decimals();
+
+        if (soldTokenDollarValue > boughtTokenDollarValue) {
+            uint256 slippage = (soldTokenDollarValue - boughtTokenDollarValue) * 100 / soldTokenDollarValue;
+            require(slippage < 5, "Slippage too high"); // MAX 5% slippage
+        }
+
+        // Update token exposures
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         _decreaseExposure(tokenManager, address(swapTokensDetails.soldToken), soldTokenFinalAmount);
         _increaseExposure(tokenManager, address(swapTokensDetails.boughtToken), boughtTokenFinalAmount);
 
+        // Emit swap event
         emit Swap(
             msg.sender,
             swapTokensDetails.tokenSoldSymbol,
@@ -266,49 +395,39 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     function _decodeSwapExactAmountInOnUniV3Data(bytes calldata _data)
         internal
         pure
-        returns (address srcToken, address destToken, uint256 fromAmount, uint256 toAmount)
+        returns (address srcToken, address destToken, uint256 fromAmount, uint256 toAmount, address partner, address payable beneficiary)
     {
-        console.log("Inside _decodeSwapExactAmountInOnUniV3Data, about to decode");
         UniswapV3Data memory _uniswapV3Data = abi.decode(_data, (UniswapV3Data));
-        console.log("Src Token: ");
-        console.log(_uniswapV3Data.srcToken);
-        console.log("Dest Token: ");
-        console.log(_uniswapV3Data.destToken);
-        console.log("From Amount: ");
-        console.log(_uniswapV3Data.fromAmount);
-        console.log("To Amount: ");
-        console.log(_uniswapV3Data.toAmount);
-        return (_uniswapV3Data.srcToken, _uniswapV3Data.destToken, _uniswapV3Data.fromAmount, _uniswapV3Data.toAmount);
+
+        uint256 partnerAndFee = _decodePartnerAndFeeForUniFullData(_data);
+        (address payable partner, uint256 fee) = _parsePartnerAndFeeData(partnerAndFee);
+
+    return (_uniswapV3Data.srcToken, _uniswapV3Data.destToken, _uniswapV3Data.fromAmount, _uniswapV3Data.toAmount, partner, _uniswapV3Data.beneficiary);
     }
 
     /// @notice internal function that decodes partnerAndFee element from UniswapV3FullData
-    /// @dev uses assembly since pools will be a dynamic array and can't know the size beforehand
-    /// @dev not tested properly, and not incorporated yet.
-    function _decodePartnerAndFeeForUniFullData(bytes calldata data) internal pure {
-        console.log("Inside _decodePartnerAndFeeForUniFullData");
-        uint256 partnerAndFee;
+    function _decodePartnerAndFeeForUniFullData(bytes calldata data) internal pure returns (uint256 partnerAndFee) {
+        require(data.length >= 288, "Invalid UniV3 data length");
+
         assembly {
-            // Get pointer to UniswapV3Data
-            let uniDataPtr := add(data.offset, 32)
-            // partnerAndFee comes after all UniswapV3Data fields
-            let partnerAndFeePtr := add(uniDataPtr, 256) // (7 fields * 32) + 32 for pools pointer
-            partnerAndFee := mload(partnerAndFeePtr)
+        // partnerAndFee is at position 32 in the UniswapV3FullData struct
+            partnerAndFee := calldataload(add(data.offset, 32))
         }
-        console.log("PartnerAndFee From The Assembly Function: ");
-        console.log(partnerAndFee);
+
+        (address payable partner, uint256 fee) = _parsePartnerAndFeeData(partnerAndFee);
+        return partnerAndFee;
     }
 
-    /// @dev from paraswap's code, copied as is
-    /// @dev not incorporated yet, but will need to for validation
     function _parsePartnerAndFeeData(uint256 partnerAndFee)
-        internal
-        pure
-        returns (address payable partner, uint256 feeData)
+    public
+    pure
+    returns (address payable partner, uint256 feeBps)
     {
-        // solhint-disable-next-line no-inline-assembly
         assembly ("memory-safe") {
-            partner := shr(96, partnerAndFee)
-            feeData := and(partnerAndFee, 0xFFFFFFFFFFFFFFFFFFFFFFFF)
+        // Get partner address from last 20 bytes
+            partner := and(shr(96, partnerAndFee), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+        // Get fee directly in basis points using 14-bit mask
+            feeBps := and(partnerAndFee, 0x3FFF)
         }
     }
 
@@ -319,21 +438,20 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     function _decodeSwapExactAmountInData(bytes calldata _data)
         internal
         pure
-        returns (address executorAddress, address srcToken, address destToken, uint256 fromAmount, uint256 toAmount)
+        returns (address executorAddress, address srcToken, address destToken, uint256 fromAmount, uint256 toAmount, address partner, address payable beneficiary)
     {
-        console.log("Inside _decodeSwapExactAmountInData, about to decode with SwapExactAmountIn");
         address executor;
         bytes memory executorBytes = _data[:32];
         (executor) = abi.decode(executorBytes, (address));
-        console.log("Executor Address: ");
-        console.log(executor);
+
         /// @dev generic data size is 224. So the entire struct would be from 32 to 224+32 positions
         bytes memory genericDataBytes = _data[32:256];
         GenericData memory _genericData = _decodeGenericData(genericDataBytes);
+
         (uint256 partnerAndFee) = abi.decode(_data[256:288], (uint256));
-        console.log("Partner And Fee: ");
-        console.log(partnerAndFee);
-        return (executor, _genericData.srcToken, _genericData.destToken, _genericData.fromAmount, _genericData.toAmount);
+        (address payable partner, uint256 fee) = _parsePartnerAndFeeData(partnerAndFee);
+
+        return (executor, _genericData.srcToken, _genericData.destToken, _genericData.fromAmount, _genericData.toAmount, partner, _genericData.beneficiary);
     }
 
     /// @notice internal function that decodes the GenericData struct, subset of SwapExactAmountIn
@@ -341,22 +459,7 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     /// @dev the different scope here is crucial to avoid Stack Too Deep errors
     function _decodeGenericData(bytes memory _data) internal pure returns (GenericData memory) {
         GenericData memory genericData = abi.decode(_data, (GenericData));
-        console.log("genericData Struct Decoded ");
-        console.log("Source Token: ");
-        console.log(genericData.srcToken);
-        console.log("Destination Token: ");
-        console.log(genericData.destToken);
-        console.log("From Amount: ");
-        console.log(genericData.fromAmount);
-        console.log("To Amount: ");
-        console.log(genericData.toAmount);
-        console.log("Quoted Amount: ");
-        console.log(genericData.quotedAmount);
-        console.log("Metadata: ");
         bytes memory metadata = abi.encodePacked(genericData.metadata);
-        console.logBytes(metadata);
-        console.log("Beneficiary: ");
-        console.log(genericData.beneficiary);
         return genericData;
     }
 
@@ -364,7 +467,6 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     /// @param _executorAddress the address of the executor
     /// @dev the executor addresses are available at https://api.paraswap.io/adapters/contract-takers?network=43114
     function _checkExecutorAddress(address _executorAddress) internal pure returns (bool) {
-        console.log("Inside _checkExecutorAddress");
         if (_executorAddress == EXECUTOR_3) return true; //most likely executor, checks first
         if (_executorAddress == EXECUTOR_2) return true;
         if (_executorAddress == EXECUTOR_4) return true;
