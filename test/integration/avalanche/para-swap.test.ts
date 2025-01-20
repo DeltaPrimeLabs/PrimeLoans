@@ -55,7 +55,7 @@ const { expect } = chai;
 
 describe("ParaSwap", () => {
   before("Synchronize blockchain time", async () => {
-    // await syncTime();
+    await syncTime();
   });
 
   describe("Test buying and selling an asset", () => {
@@ -81,24 +81,21 @@ describe("ParaSwap", () => {
       srcAmount: any,
       slippage: any = 100 // default to 1%
     ) => {
+      console.log(`USING SLIIPAGE: ${slippage}`);
       const priceRoute = await paraSwapMin.swap.getRate({
         srcToken: TOKEN_ADDRESSES[srcToken],
         destToken: TOKEN_ADDRESSES[destToken],
         amount: srcAmount.toString(),
         userAddress: wrappedLoan.address,
         side: SwapSide.SELL,
-        /// forcing API to always give a multiSwap route. For testing multiSwap swapData dea
-        // https://github.com/paraswap/paraswap-sdk/blob/17c2c2162fac8a5cb18aaa9588c44c0c6545f8f7/src/methods/swap/rates.ts#L74
         // excludeContractMethods: ["swapExactAmountIn", "swapExactAmountInOnUniswapV3"],  swapExactAmountIn, uniV3 v6.2: swapExactAmountInOnUniswapV3
         includeContractMethods: [
           "swapExactAmountIn",
           "swapExactAmountInOnUniswapV3",
         ],
-        // includeContractMethods: "swapExactAmountIn",
         // version specification
         // https://github.com/paraswap/paraswap-sdk/blob/17c2c2162fac8a5cb18aaa9588c44c0c6545f8f7/src/methods/swap/rates.ts#L129
         version: 6.2,
-        // excludeDEXS: "UniswapV3",
       });
       const txParams = await paraSwapMin.swap.buildTx(
         {
@@ -110,14 +107,13 @@ describe("ParaSwap", () => {
           // deadline: Math.floor(Date.now() / 1000) + 3000,
           userAddress: wrappedLoan.address,
           partnerAddress: "0x8995d790169023Ee4fF67621948EBDFe7383f59e",
-          partnerFeeBps: 200,
+          partnerFeeBps: 1,
           partner: "deltaprime",
         },
         {
           ignoreChecks: true,
         }
       );
-      console.log("Raw txParams:", JSON.stringify(txParams, null, 2));
 
       const swapData = parseParaSwapRouteData(txParams);
       return swapData;
@@ -246,7 +242,7 @@ describe("ParaSwap", () => {
 
     it("should fail to swap as a non-owner", async () => {
       // changing getSwapData to getNonOwnerSwapData to pass nonOwnerWrappedLoad address
-      const swapData = await getSwapData("AVAX", "USDC", toWei("10"), 200);
+      const swapData = await getSwapData("AVAX", "USDC", toWei("10"), 300);
       await expect(
         nonOwnerWrappedLoan.paraSwapV2(
           swapData.selector,
@@ -262,8 +258,8 @@ describe("ParaSwap", () => {
 
       expect(await loanOwnsAsset("USDC")).to.be.false;
 
-      let minOut = parseUnits((tokensPrices.get("AVAX")! * 9.8).toFixed(6), 6);
-      const swapData = await getSwapData("AVAX", "USDC", toWei("10"), 200);
+      let minOut = parseUnits((tokensPrices.get("AVAX")! * 9.7).toFixed(6), 6);
+      const swapData = await getSwapData("AVAX", "USDC", toWei("10"), 300);
       console.log("MinOut for AVAX -> USDC: ", minOut);
       await wrappedLoan.paraSwapV2(
         swapData.selector,
@@ -295,9 +291,9 @@ describe("ParaSwap", () => {
       let minOut =
         (formatUnits(usdcBalance, 6) * tokensPrices.get("USDC")!) /
         tokensPrices.get("AVAX")!;
-      minOut = toWei((minOut * 0.98).toString()); // 1% slippage
+      minOut = toWei((minOut * 0.97).toString()); // 3% slippage
       console.log("MinOut for USDC -> AVAX: ", minOut);
-      const swapData = await getSwapData("USDC", "AVAX", usdcBalance, 200);
+      const swapData = await getSwapData("USDC", "AVAX", usdcBalance, 300);
       await wrappedLoan.paraSwapV2(
         swapData.selector,
         swapData.data
@@ -331,11 +327,11 @@ describe("ParaSwap", () => {
       let minOut = parseUnits(
         (
           (tokensPrices.get("AVAX")! / tokensPrices.get("ETH")!) *
-          9.8
+          9.7
         ).toString(),
         18
       );
-      const swapData = await getSwapData("AVAX", "ETH", toWei("10"), 200);
+      const swapData = await getSwapData("AVAX", "ETH", toWei("10"), 300);
       console.log("MinOut for AVAX -> ETH: ", minOut);
       await wrappedLoan.paraSwapV2(
         swapData.selector,
@@ -370,8 +366,8 @@ describe("ParaSwap", () => {
       // let swapAmount = ethBalance.div(2);
 
       let minOut: any = formatUnits(ethBalance, 18) * tokensPrices.get("ETH")!;
-      minOut = parseUnits((minOut * 0.98).toFixed(6), 6);
-      const swapData = await getSwapData("ETH", "USDC", ethBalance, 200);
+      minOut = parseUnits((minOut * 0.97).toFixed(6), 6);
+      const swapData = await getSwapData("ETH", "USDC", ethBalance, 300);
       console.log("MinOut for ETH -> USDC: ", minOut);
 
       await wrappedLoan.paraSwapV2(
@@ -403,17 +399,13 @@ describe("ParaSwap", () => {
       let minOut =
         (formatUnits(usdcBalance, 6) * tokensPrices.get("USDC")!) /
         tokensPrices.get("ETH")!;
-      minOut = toWei((minOut * 0.98).toString()); // 98%
+      minOut = toWei((minOut * 0.97).toString()); // 98%
 
-      const swapData = await getSwapData("USDC", "ETH", usdcBalance, 200);
+      const swapData = await getSwapData("USDC", "ETH", usdcBalance, 300);
 
       await wrappedLoan.paraSwapV2(
         swapData.selector,
-        swapData.data,
-        TOKEN_ADDRESSES["USDC"],
-        usdcBalance,
-        TOKEN_ADDRESSES["ETH"],
-        minOut
+        swapData.data
       );
 
       expect(await loanOwnsAsset("USDC")).to.be.false;
@@ -443,16 +435,12 @@ describe("ParaSwap", () => {
       let swapAmount = ethBalance.div(2);
 
       let minOut: any = formatUnits(swapAmount, 18) * tokensPrices.get("ETH")!;
-      minOut = parseUnits((minOut * 0.98).toFixed(6), 6);
-      const swapData = await getSwapData("ETH", "USDC", swapAmount, 200);
+      minOut = parseUnits((minOut * 0.97).toFixed(6), 6);
+      const swapData = await getSwapData("ETH", "USDC", swapAmount, 300);
 
       await wrappedLoan.paraSwapV2(
         swapData.selector,
-        swapData.data,
-        TOKEN_ADDRESSES["ETH"],
-        swapAmount,
-        TOKEN_ADDRESSES["USDC"],
-        minOut
+        swapData.data
       );
 
       expect(await loanOwnsAsset("ETH")).to.be.true;
@@ -477,16 +465,12 @@ describe("ParaSwap", () => {
       let ethBalance = await wrappedLoan.getBalance(toBytes32("ETH"));
 
       let minOut = formatUnits(ethBalance, 18) * tokensPrices.get("ETH")!;
-      parseUnits((minOut * 0.98).toFixed(6), 6);
-      const swapData = await getSwapData("ETH", "USDC", ethBalance, 200);
+      parseUnits((minOut * 0.97).toFixed(6), 6);
+      const swapData = await getSwapData("ETH", "USDC", ethBalance, 300);
 
       await wrappedLoan.paraSwapV2(
         swapData.selector,
-        swapData.data,
-        TOKEN_ADDRESSES["ETH"],
-        ethBalance,
-        TOKEN_ADDRESSES["USDC"],
-        minOut
+        swapData.data
       );
 
       expect(await loanOwnsAsset("ETH")).to.be.false;
