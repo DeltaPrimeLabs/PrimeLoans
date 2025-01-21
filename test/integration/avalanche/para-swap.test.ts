@@ -248,7 +248,7 @@ describe("ParaSwap", () => {
       // changing getSwapData to getNonOwnerSwapData to pass nonOwnerWrappedLoad address
       const swapData = await getSwapData("AVAX", "USDC", toWei("10"), 300);
       await expect(
-        nonOwnerWrappedLoan.paraSwapV2(
+        nonOwnerWrappedLoan.paraSwapV6(
           swapData.selector,
           swapData.data,
         )
@@ -265,7 +265,7 @@ describe("ParaSwap", () => {
       let minOut = parseUnits((tokensPrices.get("AVAX")! * 9.7).toFixed(6), 6);
       const swapData = await getSwapData("AVAX", "USDC", toWei("10"), 300);
       console.log("MinOut for AVAX -> USDC: ", minOut);
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data
       );
@@ -298,7 +298,7 @@ describe("ParaSwap", () => {
       minOut = toWei((minOut * 0.97).toString()); // 3% slippage
       console.log("MinOut for USDC -> AVAX: ", minOut);
       const swapData = await getSwapData("USDC", "AVAX", usdcBalance, 300);
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data
       );
@@ -337,7 +337,7 @@ describe("ParaSwap", () => {
       );
       const swapData = await getSwapData("AVAX", "ETH", toWei("10"), 300);
       console.log("MinOut for AVAX -> ETH: ", minOut);
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data
       );
@@ -374,7 +374,7 @@ describe("ParaSwap", () => {
       const swapData = await getSwapData("ETH", "USDC", ethBalance, 300);
       console.log("MinOut for ETH -> USDC: ", minOut);
 
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data,
       );
@@ -407,7 +407,7 @@ describe("ParaSwap", () => {
 
       const swapData = await getSwapData("USDC", "ETH", usdcBalance, 300);
 
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data
       );
@@ -442,7 +442,7 @@ describe("ParaSwap", () => {
       minOut = parseUnits((minOut * 0.97).toFixed(6), 6);
       const swapData = await getSwapData("ETH", "USDC", swapAmount, 300);
 
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data
       );
@@ -472,7 +472,7 @@ describe("ParaSwap", () => {
       parseUnits((minOut * 0.97).toFixed(6), 6);
       const swapData = await getSwapData("ETH", "USDC", ethBalance, 300);
 
-      await wrappedLoan.paraSwapV2(
+      await wrappedLoan.paraSwapV6(
         swapData.selector,
         swapData.data
       );
