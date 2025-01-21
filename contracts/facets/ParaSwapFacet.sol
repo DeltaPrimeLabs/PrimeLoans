@@ -288,7 +288,7 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         executeSwap(selector, data, details, paraSwapDecodedData, true);
     }
 
-    function paraSwapV2(
+    function paraSwapV6(
         bytes4 selector,
         bytes calldata data
     ) external nonReentrant onlyOwner noBorrowInTheSameBlock remainsSolvent {
