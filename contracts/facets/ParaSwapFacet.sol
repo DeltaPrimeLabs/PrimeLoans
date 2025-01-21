@@ -10,8 +10,6 @@ import "./SmartLoanLiquidationFacet.sol";
 import "../interfaces/ITokenManager.sol";
 import "../lib/local/DeploymentConstants.sol";
 
-import "hardhat/console.sol";
-
 contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     using TransferHelper for address;
 
@@ -224,16 +222,6 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         // Verify results
         uint256 boughtAmount = details.boughtToken.balanceOf(address(this)) - details.initialBoughtTokenBalance;
 
-        console.log('after swap, bought');
-        console.log(details.boughtToken.balanceOf(address(this)));
-        console.log(boughtAmount);
-
-        console.log('after swap, sold');
-        console.log(details.soldToken.balanceOf(address(this)));
-        console.log(details.initialSoldTokenBalance);
-
-        console.log("boughtAmount", boughtAmount);
-        console.log("swapData.toAmount", swapData.toAmount);
         if (boughtAmount < swapData.toAmount) revert TooLittleReceived();
 
         uint256 soldAmount = details.initialSoldTokenBalance - details.soldToken.balanceOf(address(this));
@@ -312,14 +300,6 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
             paraSwapDecodedData.srcToken,
             paraSwapDecodedData.destToken
         );
-
-        console.logBytes32(details.tokenBoughtSymbol);
-        console.logBytes32(details.tokenSoldSymbol);
-        console.log(address(details.boughtToken));
-        console.log(address(details.soldToken));
-        console.log(details.initialBoughtTokenBalance);
-        console.log(details.initialSoldTokenBalance);
-
 
         executeSwap(selector, data, details, paraSwapDecodedData, false);
     }
