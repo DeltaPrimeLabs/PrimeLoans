@@ -21,6 +21,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         `ParaSwapFacet implementation deployed at address: ${ParaSwapFacet.address}`
     );
 
+    // sleep 5 seconds
+    await new Promise(r => setTimeout(r, 5000));
+
     await verifyContract(hre,
         {
             address: ParaSwapFacet.address,

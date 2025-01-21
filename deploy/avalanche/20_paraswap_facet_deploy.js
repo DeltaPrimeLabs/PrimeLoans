@@ -29,4 +29,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     console.log(`Verified ParaSwapFacet`);
 };
 
-module.exports.tags = ["avalanche-paraswap"];
+module.exports.tags = ["avalanche-paraswap1"];
