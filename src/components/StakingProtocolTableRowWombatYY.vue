@@ -308,7 +308,8 @@ export default {
           minLpOut: fromWei(minOut),
           depositMethod: this.farm.depositMethod,
           decimals: this.farm.decimals,
-          forceTransaction: forceTransaction
+          forceTransaction: forceTransaction,
+          lpAssetToken: this.farm.lpAssetToken,
         };
 
         this.handleTransaction(this.depositToWombatYY, {depositRequest: depositRequest}, () => {
@@ -344,6 +345,7 @@ export default {
           depositMethod: this.farm.depositLpMethod,
           decimals: this.farm.decimals,
           requireApproval: true,
+          lpAssetToken: this.farm.lpAssetToken,
         };
 
         this.handleTransaction(this.depositToWombatYY, {depositRequest: depositRequest}, () => {
