@@ -6,8 +6,6 @@
                      :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
         <RTKNPanel v-if="rtknData" :data="rtknData" :prime-price="primePrice"
                    :cross-chain-data="crossChainData"></RTKNPanel>
-        <RTKNStatsBar :data="rtknData" :cross-chain-data="crossChainData">
-        </RTKNStatsBar>
 
         <WithdrawalQueue ref="withdrawalQueue"
                          :all-queues="poolIntents"
