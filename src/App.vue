@@ -226,7 +226,7 @@ export default {
 
     if (config.chainId === 43114) {
       if (window.location.href.includes('pools')) {
-        this.showAvalancheDepositorBanner = true;
+        // this.showAvalancheDepositorBanner = true;
       }
       if (window.location.href.includes('prime-account')) {
         // this.showAvalanchePrimeAccountBanner = true;
