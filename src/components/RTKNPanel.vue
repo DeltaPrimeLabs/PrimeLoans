@@ -8,7 +8,7 @@
     </div>
     <div class="rtkn-panel__actions rtkn-panel__actions--collapsed">
       <div class="sprime">
-        <img v-if="!data[1].fake" class="sprime-logo"
+        <img class="sprime-logo"
              :src="`src/assets/logo/rtkn.svg`"/>
         <img class="sprime-logo"
              :src="`src/assets/logo/rtkn-2.svg`"/>
@@ -74,10 +74,10 @@
         <div class="stat">
           <div class="stat__title">My rTKNs
             <InfoIcon class="stat__info-icon" :size="16"
-                      :tooltip="{ content: 'Total $ value of your sPRIME.'}"></InfoIcon>
+                      :tooltip="{ content: 'These are the rTKNs you currently have. Every rTKN you keep will be redeemable for its equivalent in USDC as DeltaPrime continues to make revenue.'}"></InfoIcon>
           </div>
           <div class="stat__value">
-            {{ (Number(data[0].rtknBalance) + Number(data[1].rtknBalance)) | smartRound(2, true) }}
+            {{ (Number(data[0].rtknBalance) + Number(data[1].rtknBalance)) | smartRound(2, false ) }}
             <span class="stat__value--secondary">
               ({{ data[0].rtknBalance | smartRound(2, true) }}
               <img v-if="!data[1].fake" class="sprime-logo"
@@ -89,9 +89,9 @@
           </div>
         </div>
         <div class="stat">
-          <div class="stat__title">PRIME Expected
+          <div class="stat__title">PRIME to receive
             <InfoIcon class="stat__info-icon" :size="16"
-                      :tooltip="{ content: 'DeltaPrime fees distributed to your sPRIME. You are eligible for fees only when your sPRIME is active.'}"></InfoIcon>
+                      :tooltip="{ content: 'The PRIME you will receive starting July 1st, 2025. You will receive a daily amount of 1/730th of this PRIME for two years.'}"></InfoIcon>
           </div>
           <div class="stat__value">
             {{ (Number(data[0].eligiblePrime) + Number(data[1].eligiblePrime)) | smartRound(3, true) }}
@@ -104,8 +104,7 @@
           <div class="discount">
             <div class="discount__label">
               Distribution
-              <InfoIcon class="stat__info-icon" :size="16"
-                        :tooltip="{ content: 'DeltaPrime fees distributed'}"></InfoIcon>
+              <InfoIcon class="stat__info-icon" :size="16"></InfoIcon>
             </div>
             <div v-if="!data[1].fake" class="discount__value">
               1 rTKN = {{ data[0].conversionRatio | smartRound(3, true) }} PRIME
@@ -152,46 +151,24 @@
           </div>
         </div>
         <div class="rate">
-          <div class="rate__title">Total PRIME Expected</div>
+          <div class="rate__title">
+            Total PRIME shared
+            <InfoIcon class="stat__info-icon" :size="16"
+                      :tooltip="{ content: 'This PRIME will be shared with the community members from the Team allocation. Therefore it does not lead to inflation of the token.'}"></InfoIcon>
+          </div>
           <div class="rate__value">
-            {{ Number(crossChainData.totalPledged) * data[0].conversionRatio | smartRound(2, true) | formatWithSpaces}}
-            <div class="rate__value--usd">({{ Number(crossChainData.totalPledged) * data[0].conversionRatio * primePrice | smartRound(2, true) | usd}})</div></div>
+            {{ Number(crossChainData.totalPledged) * data[0].conversionRatio | smartRound(2, true) | formatWithSpaces }}
+            <div class="rate__value--usd">
+              ({{ Number(crossChainData.totalPledged) * data[0].conversionRatio * primePrice | smartRound(2, true) | usd }})
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="faq">
         <div class="faq__title">FAQ</div>
         <div class="faq__links">
-          <div class="faq__entry">
-            <div class="faq__text">
-              Some question that user may have. The question has two lines max.
-            </div>
-            <div class="faq__icon-wrapper">
-              <DeltaIcon :icon-src="'src/assets/icons/left-arrow.svg'"
-                         class="faq__icon">
-              </DeltaIcon>
-            </div>
-          </div>
-          <div class="faq__entry">
-            <div class="faq__text">
-              Some question that user may have. The question has two lines max.
-            </div>
-            <div class="faq__icon-wrapper">
-              <DeltaIcon :icon-src="'src/assets/icons/left-arrow.svg'"
-                         class="faq__icon">
-              </DeltaIcon>
-            </div>
-          </div>
-          <div class="faq__entry">
-            <div class="faq__text">
-              Some question that user may have. The question has two lines max.
-            </div>
-            <div class="faq__icon-wrapper">
-              <DeltaIcon :icon-src="'src/assets/icons/left-arrow.svg'"
-                         class="faq__icon">
-              </DeltaIcon>
-            </div>
-          </div>
+          <RTKNPanelFAQ></RTKNPanelFAQ>
         </div>
       </div>
     </div>
@@ -206,13 +183,14 @@ import DeltaIcon from './DeltaIcon.vue';
 import InfoIcon from './InfoIcon.vue';
 import PriceRangeChart from './PriceRangeChart.vue';
 import SmallBlock from './SmallBlock.vue';
+import RTKNPanelFAQ from './RTKNPanelFAQ.vue';
 
 const ethers = require('ethers');
 
 
 export default {
   name: 'RTKNPanel',
-  components: {SmallBlock, PriceRangeChart, InfoIcon, DeltaIcon, DistributionChart, FlatButton},
+  components: {RTKNPanelFAQ, SmallBlock, PriceRangeChart, InfoIcon, DeltaIcon, DistributionChart, FlatButton},
   props: {
     data: {},
     primePrice: {},
@@ -600,30 +578,6 @@ export default {
         font-size: 16px;
         font-weight: 500;
         padding-left: 50px;
-      }
-
-      .faq__links {
-        .faq__entry {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          padding: 10px 16px;
-          border-radius: 15px;
-          color: var(--rtkn-panel__faq-color);
-          border: var(--rtkn-panel__faq-border);
-          box-shadow: var(--rtkn-panel__faq-box-shadow);
-          cursor: pointer;
-          font-weight: 500;
-
-          &:not(:last-child) {
-            margin-bottom: 12px;
-          }
-        }
-
-        .faq__icon {
-          background: var(--icon-button__icon-color--default);
-          transform: rotate(180deg);
-        }
       }
     }
   }
