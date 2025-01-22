@@ -93,7 +93,7 @@ export default {
 @import "~@/styles/modal";
 
 .withdraw-queue-component {
-  margin-bottom: 30px;
+  margin: 30px 0;
 }
 
 .withdraw-accordion {
