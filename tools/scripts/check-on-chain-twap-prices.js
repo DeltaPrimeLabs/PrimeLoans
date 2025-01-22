@@ -25,12 +25,30 @@ const oracleConfig = {
 
     // Token addresses
     tokens: {
-        WETH: '0x4200000000000000000000000000000000000006',
-        AERO: '0x940181a94a35a4569e4529a3cdfb74e38fd98631',
-        BRETT: '0x532f27101965dd16442E59d40670FaF5eBB142E4',
-        AIXBT: '0x4F9Fd6Be4a90f2620860d680c0d4d5Fb53d1A825',
-        SKI: '0x768BE13e1680b5ebE0024C42c896E3dB59ec0149',
-        DRV: '0x9d0e8f5b25384c7310cb8c6ae32c8fbeb645d083'
+        WETH: {
+            address: '0x4200000000000000000000000000000000000006',
+            decimals: 18
+        },
+        AERO: {
+            address:  '0x940181a94a35a4569e4529a3cdfb74e38fd98631',
+            decimals: 18
+        },
+        BRETT: {
+            address: '0x532f27101965dd16442E59d40670FaF5eBB142E4',
+            decimals: 18
+        },
+        AIXBT: {
+            address: '0x4F9Fd6Be4a90f2620860d680c0d4d5Fb53d1A825',
+            decimals: 18
+        },
+        SKI: {
+            address: '0x768BE13e1680b5ebE0024C42c896E3dB59ec0149',
+            decimals: 9
+        },
+        DRV: {
+            address: '0x9d0e8f5b25384c7310cb8c6ae32c8fbeb645d083',
+            decimals: 18
+        }
     },
 
     // Known token prices in USD
@@ -46,12 +64,14 @@ const oracleConfig = {
                 {
                     address: '0x43BBb129b56A998732767725A183b7a566843dBA',
                     type: 'AMM',
-                    pair: 'AERO'
+                    counterToken: 'AERO',
+                    isCounterTokenFirst: false
                 },
                 {
                     address: '0x4e829F8A5213c42535AB84AA40BD4aDCCE9cBa02',
                     type: 'CL',
-                    pair: 'WETH',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: false,
                     tickSpacing: 200,
                     twapConfigs: {
                         short: { seconds: 30, required: true },    // Required for price calc
@@ -66,12 +86,14 @@ const oracleConfig = {
                 {
                     address: '0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e',
                     type: 'AMM',
-                    pair: 'WETH'
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: false
                 },
                 {
                     address: '0x22A52bB644f855ebD5ca2edB643FF70222D70C31',
                     type: 'CL',
-                    pair: 'WETH',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: false,
                     tickSpacing: 200,
                     twapConfigs: {
                         short: { seconds: 30, required: true },    // Required for price calc
@@ -86,7 +108,8 @@ const oracleConfig = {
                 {
                     address: '0xe782B72A1157b7bEa1A9452835Cce214962aD43B',
                     type: 'CL',
-                    pair: 'WETH',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: true,
                     tickSpacing: 200,
                     twapConfigs: {
                         short: { seconds: 30, required: true },    // Required for price calc
@@ -101,7 +124,8 @@ const oracleConfig = {
                 {
                     address: '0xA0e2bac96aB51c92d3284781AeE1EEc817F6F9C2',
                     type: 'CL',
-                    pair: 'WETH',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: false,
                     tickSpacing: 200,
                     twapConfigs: {
                         short: { seconds: 30, required: true },    // Required for price calc
@@ -280,7 +304,7 @@ async function analyzeTwapObservability() {
 
             const poolResult = {
                 address: pool.address,
-                pair: pool.pair,
+                counterToken: pool.counterToken,
                 observability: {},
                 standardDurations: {}
             };
@@ -397,18 +421,29 @@ async function getTwapForDuration(poolAddress, duration, provider) {
     }
 }
 
-async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice) {
+async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice, isCounterTokenFirst, tokenSymbol, counterTokenSymbol) {
     const twapResults = {
         priceForCalculation: null,
         allPrices: {}
     };
 
+    const tokenConfig = oracleConfig.tokens[tokenSymbol];
+    const counterTokenConfig = oracleConfig.tokens[counterTokenSymbol];
+
     // Process each TWAP duration independently
     const twapPromises = Object.entries(twapConfigs).map(async ([period, config]) => {
         const result = await getTwapForDuration(poolAddress, config.seconds, provider);
 
+        const decimalsDifference = isCounterTokenFirst ?
+            counterTokenConfig.decimals - tokenConfig.decimals
+            :
+            tokenConfig.decimals - counterTokenConfig.decimals;
+
+        result.price = result.price * Math.pow(10, decimalsDifference)
+
         if (result.success) {
-            const usdPrice = knownPrice / result.price;
+            let usdPrice = knownPrice / result.price;
+
             twapResults.allPrices[period] = {
                 period: `${config.seconds}s`,
                 rawPrice: result.price,
@@ -448,8 +483,8 @@ async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice) {
 }
 
 async function getQuotePrice(poolAddress, tokenInSymbol, tokenOutSymbol, amountIn, tickSpacing, provider) {
-    const tokenIn = oracleConfig.tokens[tokenInSymbol];
-    const tokenOut = oracleConfig.tokens[tokenOutSymbol];
+    const tokenIn = oracleConfig.tokens[tokenInSymbol].address;
+    const tokenOut = oracleConfig.tokens[tokenOutSymbol].address;
     const quoterContract = new ethers.Contract(
         oracleConfig.quoterAddress,
         QUOTER_ABI,
@@ -487,8 +522,8 @@ async function getQuotePrice(poolAddress, tokenInSymbol, tokenOutSymbol, amountI
 }
 
 async function getAmmPrice(poolAddress, tokenInSymbol, tokenOutSymbol, provider) {
-    const tokenIn = oracleConfig.tokens[tokenInSymbol];
-    const tokenOut = oracleConfig.tokens[tokenOutSymbol];
+    const tokenIn = oracleConfig.tokens[tokenInSymbol].address;
+    const tokenOut = oracleConfig.tokens[tokenOutSymbol].address;
 
     try {
         // Get decimals for both tokens
@@ -532,19 +567,19 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
     };
 
     for (const pool of tokenConfig.pools) {
-        const knownPrice = oracleConfig.knownPrices[pool.pair];
+        const knownPrice = oracleConfig.knownPrices[pool.counterToken];
         console.log(`\nProcessing pool: ${pool.address}`);
         console.log(`Pool type: ${pool.type}`);
-        console.log(`Known price for ${pool.pair}: ${knownPrice}`);
+        console.log(`Known price for ${pool.counterToken}: ${knownPrice}`);
 
         if (pool.type === 'CL') {
             // Run TWAP and quote calculations in parallel
             const [twapResult, quotePrice] = await Promise.all([
-                getClPoolPrice(pool.address, pool.twapConfigs, provider, knownPrice),
+                getClPoolPrice(pool.address, pool.twapConfigs, provider, knownPrice, pool.isCounterTokenFirst, tokenSymbol, pool.counterToken),
                 getQuotePrice(
                     pool.address,
                     tokenSymbol,
-                    pool.pair,
+                    pool.counterToken,
                     1,
                     pool.tickSpacing,
                     provider
@@ -581,7 +616,7 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
             const ammPrice = await getAmmPrice(
                 pool.address,
                 tokenSymbol,
-                pool.pair,
+                pool.counterToken,
                 provider
             );
 
