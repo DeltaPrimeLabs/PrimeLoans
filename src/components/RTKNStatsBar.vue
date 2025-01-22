@@ -44,7 +44,7 @@
         </div>
         <div>{{ rtknData.totalUsers }}</div>
         <div>
-          <FlatButton v-on:buttonClick="openPledgeModal(rtknData)" :active="true">Commit</FlatButton>
+          <FlatButton v-on:buttonClick="openPledgeModal(rtknData)" :active="false">Commit</FlatButton>
         </div>
       </div>
     </div>
