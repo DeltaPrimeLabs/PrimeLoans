@@ -1,6 +1,8 @@
 const { ethers } = require('ethers');
 const fs = require('fs');
 const path = require('path');
+const cmc_key = fs.readFileSync(`./.secrets/cmc`).toString().trim();
+
 
 const AMM_ABI = [
     {
@@ -27,34 +29,51 @@ const oracleConfig = {
     tokens: {
         WETH: {
             address: '0x4200000000000000000000000000000000000006',
-            decimals: 18
+            decimals: 18,
+            coinmarketCapId: 1027
         },
         AERO: {
             address:  '0x940181a94a35a4569e4529a3cdfb74e38fd98631',
-            decimals: 18
+            decimals: 18,
+            coinmarketCapId: 29270
+        },
+        USDC: {
+            address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+            decimals: 6,
+            coinmarketCapId: 3408
         },
         BRETT: {
             address: '0x532f27101965dd16442E59d40670FaF5eBB142E4',
-            decimals: 18
+            decimals: 18,
+            coinmarketCapId: 29743
         },
         AIXBT: {
             address: '0x4F9Fd6Be4a90f2620860d680c0d4d5Fb53d1A825',
-            decimals: 18
+            decimals: 18,
+            coinmarketCapId: 34103
         },
         SKI: {
             address: '0x768BE13e1680b5ebE0024C42c896E3dB59ec0149',
-            decimals: 9
+            decimals: 9,
+            coinmarketCapId: 31173
         },
         DRV: {
             address: '0x9d0e8f5b25384c7310cb8c6ae32c8fbeb645d083',
-            decimals: 18
+            decimals: 18,
+            coinmarketCapId: 35014
+        },
+        ODOS: {
+            address: '0xca73ed1815e5915489570014e024b7EbE65dE679',
+            decimals: 18,
+            coinmarketCapId: 34807
         }
     },
 
     // Known token prices in USD
     knownPrices: {
         WETH: 3328.13,
-        AERO: 1.10
+        AERO: 1.10,
+        USDC: 1
     },
 
     // Tokens to price
@@ -134,7 +153,23 @@ const oracleConfig = {
                     }
                 }
             ]
-        }
+        },
+        ODOS: {
+            pools: [
+                {
+                    address: '0xb7068556049dF8Fb3ae77CCbb9611FE0e85B2641',
+                    type: 'CL',
+                    counterToken: 'USDC',
+                    isCounterTokenFirst: true,
+                    tickSpacing: 100,
+                    twapConfigs: {
+                        short: { seconds: 30, required: true },    // Required for price calc
+                        mid: { seconds: 3600, required: false },   // Optional
+                        long: { seconds: 86400, required: false }  // Optional
+                    }
+                }
+            ]
+        },
     }
 };
 
@@ -632,6 +667,14 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
         }
     }
 
+    const coinmarketCapId = oracleConfig.tokens[tokenSymbol].coinmarketCapId;
+
+    let coinmarketPrice;
+
+    if (coinmarketCapId) {
+        coinmarketPrice = await queryPriceFromCmc(coinmarketCapId);
+    }
+
     // Calculate average price from all valid results
     const validPrices = prices.filter(p => p !== null && p !== undefined && isFinite(p));
     if (validPrices.length === 0) {
@@ -641,9 +684,33 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
     const averagePrice = validPrices.reduce((a, b) => a + b, 0) / validPrices.length;
 
     return {
-        price: averagePrice,
+        averagePrice: averagePrice,
+        coinmarketPrice: coinmarketPrice,
         priceData: allPriceData
     };
+}
+
+async function queryPriceFromCmc(id) {
+    const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?id=${id}`;
+
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-CMC_PRO_API_KEY': cmc_key,
+            'Accept': 'application/json'
+        }
+    };
+
+    try {
+        const response = await (await fetch(url, options)).json();
+
+        return response.data[id].quote.USD.price;
+
+    } catch (e) {
+        console.log(e);
+        return null;
+    }
+
 }
 
 async function main() {
@@ -655,7 +722,8 @@ async function main() {
         try {
             const priceResult = await calculateTokenPrice(token, config);
             results[token] = {
-                usdPrice: priceResult.price.toFixed(6),
+                averagePrice: priceResult.averagePrice.toFixed(6),
+                coinmarketPrice: priceResult.coinmarketPrice,
                 timestamp: new Date().toISOString(),
                 priceData: priceResult.priceData
             };
