@@ -58,6 +58,10 @@ export default {
     border: solid 1px var(--icon-button__icon-color--disabled);
     cursor: initial;
     background-color: transparent;
+
+    img {
+      opacity: 0.5;
+    }
   }
 
   .info__icon {

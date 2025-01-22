@@ -155,6 +155,7 @@ import {wrapContract} from "../utils/blockchain";
 import ClaimRewardsModal from "./ClaimRewardsModal.vue";
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import ABI_WOMBAT_DYNAMIC_POOL_V2 from "../abis/WombatDynamicPoolV2.json";
+import { ActionSection } from "../services/globalActionsDisableService";
 
 export default {
   name: 'WombatLpTableRow',
@@ -180,6 +181,7 @@ export default {
       collectedGGP: null,
       boostApy: null,
       provider: null,
+      isActionDisabledRecord: {},
     }
   },
   computed: {
@@ -189,6 +191,7 @@ export default {
       'lpBalances',
       'smartLoanContract',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'penpieLpBalances',
@@ -264,7 +267,7 @@ export default {
           {
             key: 'ADD_FROM_WALLET',
             name: 'Import existing LP position',
-            disabled: this.disableAllButtons,
+            disabled: true,
           },
           // {
           //   key: 'IMPORT_AND_STAKE',
@@ -274,7 +277,7 @@ export default {
           {
             key: 'CREATE_LP',
             name: 'Create LP position',
-            disabled: this.disableAllButtons,
+            disabled: this.disableAllButtons || this.isActionDisabledRecord['CREATE_LP'],
           },
         ]
       }
@@ -288,7 +291,7 @@ export default {
           {
             key: 'EXPORT_LP',
             name: 'Export LP position',
-            disabled: this.disableAllButtons,
+            disabled: true,
           },
           // {
           //   key: 'UNSTAKE_AND_EXPORT',
@@ -298,7 +301,7 @@ export default {
           {
             key: 'UNWIND',
             name: 'Unwind LP position',
-            disabled: this.disableAllButtons,
+            disabled: this.disableAllButtons || this.isActionDisabledRecord['UNWIND'],
           },
         ]
       }
@@ -313,7 +316,7 @@ export default {
           {
             key: 'CLAIM_REWARDS',
             name: 'Claim rewards',
-            disabled: this.disableAllButtons || !Object.values(this.wombatLpAssets).some(lpAsset => lpAsset.rewards.length !== 0),
+            disabled: this.disableAllButtons || !Object.values(this.wombatLpAssets).some(lpAsset => lpAsset.rewards.length !== 0) || this.isActionDisabledRecord['CLAIM_REWARDS'],
             disabledInfo: 'You don\'t have any claimable rewards yet.',
           }
         ]
@@ -321,7 +324,7 @@ export default {
     },
 
     actionClick(key) {
-      if (!this.disableAllButtons || this.noSmartLoan || !this.healthLoaded) {
+      if (!this.isActionDisabledRecord[key] && (!this.disableAllButtons || this.noSmartLoan || !this.healthLoaded)) {
         switch (key) {
           case 'ADD_FROM_WALLET':
             this.openAddFromWalletModal();
@@ -404,11 +407,12 @@ export default {
       modalInstance.swapDebtMode = false;
       modalInstance.slippageMargin = 0;
       modalInstance.sourceAsset = initSourceAsset;
-      modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[initSourceAsset];
       modalInstance.assets = this.assets;
       modalInstance.sourceAssets = [initSourceAsset];
       modalInstance.targetAssetsConfig = config.WOMBAT_LP_ASSETS;
       modalInstance.targetAssets = [this.lpToken.symbol];
+      modalInstance.assetBalances = this.assetAvailableBalances;
       modalInstance.assetBalances = {...this.assetBalances, ...this.wombatLpBalances};
       modalInstance.debtsPerAsset = this.debtsPerAsset;
       modalInstance.lpAssets = this.lpAssets;
@@ -657,6 +661,16 @@ export default {
       })
     },
 
+    watchActionDisabling() {
+      this.globalActionsDisableService.getSectionActions$(ActionSection.WOMBAT_LP)
+      .subscribe(isActionDisabledRecord => {
+        this.isActionDisabledRecord = isActionDisabledRecord;
+        this.setupAddActionsConfiguration();
+        this.setupRemoveActionsConfiguration();
+        this.setupMoreActionsConfiguration();
+      })
+    },
+
     watchExternalAssetBalanceUpdate() {
       this.assetBalancesExternalUpdateService.observeExternalAssetBalanceUpdate().subscribe(updateEvent => {
         if (updateEvent.assetSymbol === this.lpToken.symbol) {
@@ -710,6 +724,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {

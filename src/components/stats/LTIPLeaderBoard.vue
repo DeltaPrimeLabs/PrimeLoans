@@ -57,7 +57,7 @@ export default {
   components: {Paginator, TableHeader, StatsSectionHeader, StatsSection},
   async mounted() {
     this.setupTableHeader();
-    this.accountService.observeSmartLoanContract$().subscribe(smartLoanContract => {
+    this.accountService.observeSmartLoanContract().subscribe(smartLoanContract => {
       if (smartLoanContract) {
         console.warn(smartLoanContract);
         this.smartLoanContract = smartLoanContract;

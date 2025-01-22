@@ -150,6 +150,7 @@ import InfoIcon from './InfoIcon.vue';
 import PriceRangeChart from './PriceRangeChart.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
 import {poolQuery} from '../../lambda/utils/queries';
+import RtknPledgeModal from './RtknPledgeModal.vue';
 
 const ethers = require('ethers');
 
@@ -547,6 +548,9 @@ export default {
             this.progressBarService.emitProgressBarCancelledState()
             this.closeModal();
             break;
+          case 404:
+            this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+            break;
         }
       }
     },
@@ -569,7 +573,7 @@ export default {
       }
       if (minPrice > this.poolPrice) this.distributionType = DistributionType.LEFT_NEGATIVE;
       if (maxPrice < this.poolPrice) this.distributionType = DistributionType.RIGHT_NEGATIVE;
-    }
+    },
   },
 };
 </script>

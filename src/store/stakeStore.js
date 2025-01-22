@@ -285,7 +285,8 @@ export default {
       let assets = [
         (await smartLoanContract.getAllOwnedAssets()).map(el => fromBytes32(el)),
         (await smartLoanContract.getStakedPositions()).map(position => fromBytes32(position.symbol)),
-        Object.keys(config.POOLS_CONFIG)
+        Object.keys(config.POOLS_CONFIG),
+        [depositRequest.lpAssetToken]
       ];
 
       const loanAssets = mergeArrays(assets);
@@ -296,10 +297,12 @@ export default {
           BigNumber.from(depositRequest.decimals.toString())),
         parseUnits(String(depositRequest.minLpOut),
           BigNumber.from(depositRequest.decimals.toString())),
+        depositRequest.forceTransaction ? {gasLimit: 9999999} : {}
       ) : await (await wrapContract(smartLoanContract, loanAssets))[depositRequest.depositMethod]
       (
         parseUnits(String(depositRequest.amount),
           BigNumber.from(depositRequest.decimals.toString())),
+        depositRequest.forceTransaction ? {gasLimit: 9999999} : {}
       );
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();

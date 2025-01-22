@@ -71,7 +71,7 @@ export default class sPrimeService {
 
   async updateSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint) {
     const walletAddress = provider.provider.selectedAddress;
-    let dataFeeds = [...Object.keys(config.POOLS_CONFIG), secondAsset];
+    let dataFeeds = [...Object.keys(config.POOLS_CONFIG), secondAsset, 'PRIME'];
 
     const sPrimeContract = await wrapContract(new ethers.Contract(sPrimeAddress, SPRIME.abi, provider.getSigner()), dataFeeds);
 
@@ -89,28 +89,31 @@ export default class sPrimeService {
               }
             );
 
-            sPrimeContract.balanceOf(ownerAddress).then(
+              sPrimeContract.balanceOf(ownerAddress).then(
               async value => {
                 this.sPrimeBalance$.next(formatUnits(value))
               }
             );
 
-            sPrimeContract.getLockedBalance(ownerAddress).then(
+              sPrimeContract.getLockedBalance(ownerAddress).then(
               async value => {
                 this.sPrimeLockedBalance$.next(formatUnits(value))
+
               }
             );
 
             if (dex === 'UNISWAP') {
-              sPrimeContract['getUserValueInTokenY(address)'](ownerAddress).then(
+                sPrimeContract.getUserValueInTokenY(ownerAddress).then(
                 async value => {
                   value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
 
                   this.sPrimeValue$.next(value)
+
                 }
               );
 
               sPrimeContract.getPoolPrice().then(
+
                 poolPrice => {
                   this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
                 }
@@ -134,16 +137,16 @@ export default class sPrimeService {
             }
 
             if (dex === 'TRADERJOEV2') {
+                sPrimeContract.getUserValueInTokenY(ownerAddress).then(
+                    async value => {
+                        value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
+
+                        this.sPrimeValue$.next(value)
+                    }
+                );
+
               sPrimeContract.getPoolPrice().then(
                 poolPrice => {
-                  sPrimeContract['getUserValueInTokenY(address,uint256)'](ownerAddress, poolPrice).then(
-                    async value => {
-                      value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
-
-                      this.sPrimeValue$.next(value)
-                    }
-                  );
-
                   this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
                 }
               );

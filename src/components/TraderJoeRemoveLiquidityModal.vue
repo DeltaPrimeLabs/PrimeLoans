@@ -56,7 +56,7 @@
 
       <div class="button-wrapper">
         <Button :label="'Remove Liquidity'"
-                v-on:click="submit()"
+                @click="submit"
                 :waiting="transactionOngoing"
                 :disabled="!hasLiquidityInRange">
         </Button>
@@ -138,6 +138,7 @@ export default {
 
   methods: {
     setupSlider() {
+      console.log(this.binIds);
       this.minMaxRange = [this.binIds[0], this.binIds[this.binIds.length - 1]];
       this.selectedRange = [this.binIds[0], this.binIds[this.binIds.length - 1]];
     },
@@ -147,8 +148,10 @@ export default {
       return this.formatTokenBalance(binPrice, 8, true)
     },
 
-    submit() {
+    submit(event) {
       this.transactionOngoing = true;
+
+      console.log(event);
 
       const selectedBinIds = Array.from(
         { length: this.selectedRange[1] - this.selectedRange[0] + 1 },
@@ -158,8 +161,11 @@ export default {
       const removeLiquidityEvent = {
         binIdsToRemove: selectedBinIds.filter(binId => this.binIds.indexOf(binId) !== -1),
         remainingBinIds: this.binIds.filter((binId) => binId < this.selectedRange[0] || binId > this.selectedRange[1]),
-        allowedAmountsSlippage: this.amountsSlippage
+        allowedAmountsSlippage: this.amountsSlippage,
+        forceTransaction: Boolean(event.metaKey)
       };
+
+      console.log(removeLiquidityEvent);
 
       this.$emit('REMOVE_LIQUIDITY', removeLiquidityEvent);
     },

@@ -30,8 +30,18 @@ import sPrimeService from "../services/sPrimeService";
 import vPrimeService from "../services/vPrimeService";
 import GlobalActionsDisableService from "../services/globalActionsDisableService";
 import AvalancheBoostService from '../services/avalancheBoostService';
+import RtknService from '../services/rtknService';
+import PoolWithdrawQueueService from '../services/poolWithdrawQueueService';
+import PAWithdrawQueueService from '../services/paWithdrawQueueService';
+import FundsService from '../services/fundsService';
+import BullScoreService from "../services/bullScoreService";
 
 const accountService = new AccountService();
+const providerService = new ProviderService(accountService);
+const progressBarService = new ProgressBarService();
+const modalService = new ModalService();
+const poolService = new PoolService();
+const fundsService = new FundsService();
 
 export default {
   namespaced: true,
@@ -40,15 +50,15 @@ export default {
     assetDebtsExternalUpdateService: new AssetDebtsExternalUpdateService(),
     stakedExternalUpdateService: new StakedExternalUpdateService(),
     dataRefreshEventService: new DataRefreshEventService(),
-    progressBarService: new ProgressBarService(),
-    modalService: new ModalService(),
+    progressBarService: progressBarService,
+    modalService: modalService,
     healthService: new HealthService(),
     aprService: new AprService(),
     farmService: new FarmService(),
     lpService: new LpService(),
+    providerService: providerService,
     accountService: accountService,
-    providerService: new ProviderService(accountService),
-    poolService: new PoolService(),
+    poolService: poolService,
     priceService: new PriceService(),
     collateralService: new CollateralService(),
     debtService: new DebtService(),
@@ -68,5 +78,10 @@ export default {
     vPrimeService: new vPrimeService(),
     globalActionsDisableService: new GlobalActionsDisableService(),
     avalancheBoostService: new AvalancheBoostService(),
+    rtknService: new RtknService(providerService, accountService, progressBarService, modalService),
+    poolWithdrawQueueService: new PoolWithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
+    paWithdrawQueueService: new PAWithdrawQueueService(providerService, accountService, progressBarService, modalService, fundsService),
+    fundsService: fundsService,
+    bullScoreService: new BullScoreService(),
   },
 };

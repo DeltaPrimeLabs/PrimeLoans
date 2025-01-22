@@ -7,7 +7,13 @@
              v-bind:key="option"
              v-bind:id="`option-${option}-${uuid}`"
              v-bind:class="{'option--selected': option === selectedOption}"
-             v-on:click="clickOption(option)">{{ option }}
+             v-on:click="clickOption(option)">
+          {{ option }}
+          <div class="option__info">
+            <InfoIcon v-if="option === 'PnL'"
+                      :tooltip="{content: 'This might show collateral instead of PnL. This is currently being restored per PA, and will be restored for everyone before Friday', classes: 'info-tooltip long'}"></InfoIcon>
+          </div>
+
         </div>
       </div>
       <div ref="pointer" class="pointer"></div>
@@ -17,8 +23,11 @@
 </template>
 
 <script>
+import InfoIcon from './InfoIcon.vue';
+
 export default {
   name: 'Toggle',
+  components: {InfoIcon},
   props: {
     options: Array,
     initialOption: Number,
@@ -112,6 +121,10 @@ export default {
       z-index: 2;
 
       .option {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
         padding: 4px 10px;
         cursor: pointer;
 
@@ -122,6 +135,14 @@ export default {
 
         &:hover {
           color: var(--toggle__options-color--hover);
+        }
+
+        .option__info {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          margin-left: 5px;
         }
       }
     }

@@ -49,6 +49,7 @@ export default {
       // "SOL": {name: "SOL", symbol: "SOL", decimals: 18, address: addresses.SOL, debtCoverage: 0.83333333333, tradingViewSymbol: "BINANCE:SOLUSDT"},
     },
     RTKN_ADDRESS: "0xF3EaA614dAb459FD4E9f4BC5460BD9b965ed6c76",
+    RTKN_2_ADDRESS: "0x47f655e3B4D0b686D26FBAD9C6378f66D6388af7",
     PRIME: {hide: true, name: "PRIME", symbol: "PRIME", decimals: 18, address: addresses.PRIME},
     SPRIME_CONFIG: {
         default: "UNISWAP",
@@ -72,26 +73,21 @@ export default {
         "PNP": {name: "PNP", symbol: "PNP", logoExt: "png", decimals: 18, address: addresses.PNP},
         "SILO": {name: "SILO", symbol: "SILO", logoExt: "png", decimals: 18, address: addresses.SILO},
     },
-    AVAILABLE_ASSETS_PER_DEX: {
-        YakSwap: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'GLP', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'WOO', 'GRAIL', 'JOE'],
-        ParaSwap: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'WOO', 'GRAIL', 'JOE']
-    },
-
     SWAP_DEXS_CONFIG: {
-        ParaSwapV2: {
-            displayName: 'ParaSwap',
-            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
-            slippageMargin: 0.05
-        },
+        // ParaSwapV2: {
+        //     displayName: 'ParaSwap',
+        //         availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
+        //     slippageMargin: 0.05
+        // },
         YakSwap: {
             displayName: 'YakSwap',
-            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'GLP', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'rsETH'],
+            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
             slippageMargin: 0.02
         },
-        Level: {
-            availableAssets: [],
-            slippageMargin: 0.1
-        },
+        // Level: {
+        //     availableAssets: [],
+        //     slippageMargin: 0.1
+        // },
         GmxV2: {
             availableAssets: [],
             slippageMargin: 0.1
@@ -115,58 +111,43 @@ export default {
     WRAPPED_TOKEN_ADDRESS: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     POOLS_CONFIG: {
         USDC: {
-            address: '0x5f3DB5899a7937c9ABF0A5Fc91718E6F813e4195',
+            address: '0x8Ac9Dc27a6174a1CC30873B367A60AcdFAb965cc',
             tokenAddress: addresses.USDC
         },
         ETH: {
-            address: '0x2E2fE9Bc7904649b65B6373bAF40F9e2E0b883c5',
+            address: '0x788A8324943beb1a7A47B76959E6C1e6B87eD360',
             tokenAddress: addresses.ETH
         },
         ARB: {
-            address: '0x14c82CFc2c651700a66aBDd7dC375c9CeEFDDD72',
+            address: '0xC629E8889350F1BBBf6eD1955095C2198dDC41c2',
             tokenAddress: addresses.ARB
         },
         BTC: {
-            address: '0x275Caecf5542bF4a3CF64aa78a3f57dc9939675C',
+            address: '0x0ed7B42B74F039eda928E1AE6F44Eed5EF195Fb5',
             tokenAddress: addresses.BTC
         },
         DAI: {
-            address: '0x7Dcf909B1E4b280bEe72C6A69b3a7Ed8adfb63f0',
+            address: '0xFA354E4289db87bEB81034A3ABD6D465328378f1',
             tokenAddress: addresses.DAI,
         },
-        USDT: {
-            address: USDT_POOL_TUP.address,
-            tokenAddress: addresses.USDT,
-            disabled: true
-        },
-        FRAX: {
-            address: FRAX_POOL_TUP.address,
-            tokenAddress: addresses.FRAX,
-            disabled: true
-        },
-        LINK: {
-            address: LINK_POOL_TUP.address,
-            tokenAddress: addresses.LINK,
-            disabled: true
-        }
     },
     poolsUnlocking: true,
     TRADERJOEV2_LP_ASSETS_CONFIG: {
-        'TJLB_ARB_ETH_2_2': { primary: 'ARB', secondary: 'ETH', name: 'ARB-ETH', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_ARB_ETH_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", decimals: 18, baseFee: '0.0004', address: addresses['TJLB_ARB_ETH_2_2'], hooksSimpleRewarder: "0x17A30137F30566a1F4c53216DCa027735cbcD261", rewardToken: "ARB", binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v22/0x912ce59144191c1204e64559fe8253a0e49e6548/ETH/10"},
-        'TJLB_ETH_USDC_2_2': { primary: 'ETH', secondary: 'USDC', name: 'ETH-USDC', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDC_2_2', version: '2.2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", decimals: 18, baseFee: '0.0004', address: addresses['TJLB_ETH_USDC_2_2'], hooksSimpleRewarder: "0xe514FEDbd050f575048617F0c8219AAE386abAF8", rewardToken: "ARB", binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v22/ETH/0xaf88d065e77c8cc2239327c5edb3a432268e5831/10"},
-        'TJLB_ETH_USDT_2_2': { primary: 'ETH', secondary: 'USDT', name: 'ETH-USDT', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDT_2_2', version: '2.2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", decimals: 18, baseFee: '0.0004', address: addresses['TJLB_ETH_USDT_2_2'], hooksSimpleRewarder: "0x54A7b0ad7ed040C313c2a21376FD9EF16b33ebb0", rewardToken: "ARB", binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v22/ETH/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9/10"},
-        'TJLB_MAGIC_ETH': { primary: 'MAGIC', secondary: 'ETH', name: 'MAGIC-ETH', dex: 'TraderJoe', symbol: 'TJLB_MAGIC_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0025', address: addresses['TJLB_MAGIC_ETH'], binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0x539bdE0d7Dbd336b79148AA742883198BBF60342/ETH/25"},
-        'TJLB_GMX_ETH': { primary: 'GMX', secondary: 'ETH', name: 'GMX-ETH', dex: 'TraderJoe', symbol: 'TJLB_GMX_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.002', address: addresses['TJLB_GMX_ETH'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a/ETH/20"},
-        'TJLB_DAI_USDCe': { primary: 'DAI', secondary: 'USDC.e', name: 'DAI-USDCe', dex: 'TraderJoe', symbol: 'TJLB_DAI_USDCe', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.00005', address: addresses['TJLB_DAI_USDCe'], binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0xda10009cbd5d07dd0cecc66161fc93d7c9000da1/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8/1"},
-        'TJLB_ETH_USDT': { primary: 'ETH', secondary: 'USDT', name: 'ETH-USDT', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDT', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0015', address: addresses['TJLB_ETH_USDT'], binStep: 15, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/ETH/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9/15"},
-        'TJLB_ETH_USDCe': { primary: 'ETH', secondary: 'USDC.e', name: 'ETH-USDCe', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDCe', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0015', address: addresses['TJLB_ETH_USDCe'], binStep: 15, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/ETH/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8/15"},
-        'TJLB_ARB_ETH': { primary: 'ARB', secondary: 'ETH', name: 'ARB-ETH', dex: 'TraderJoe', symbol: 'TJLB_ARB_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.001', address: addresses['TJLB_ARB_ETH'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0x912ce59144191c1204e64559fe8253a0e49e6548/ETH/10"},
-        'TJLB_BTC_ETH': { primary: 'BTC', secondary: 'ETH', name: 'BTC-ETH', dex: 'TraderJoe', symbol: 'TJLB_BTC_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.001', address: addresses['TJLB_BTC_ETH'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f/ETH/10"},
-        'TJLB_GRAIL_ETH': { primary: 'GRAIL', secondary: 'ETH', name: 'GRAIL-ETH', dex: 'TraderJoe', symbol: 'TJLB_GRAIL_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0025', address: addresses['TJLB_GRAIL_ETH'], binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0x3d9907f9a368ad0a51be60f7da3b97cf940982d8/ETH/25"},
-        'TJLB_WOO_ETH': { primary: 'WOO', secondary: 'ETH', name: 'WOO-ETH', dex: 'TraderJoe', symbol: 'TJLB_WOO_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0025', address: addresses['TJLB_WOO_ETH'], binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0xcafcd85d8ca7ad1e1c6f82f651fa15e33aefd07b/ETH/25"},
-        'TJLB_JOE_ETH': { primary: 'JOE', secondary: 'ETH', name: 'JOE-ETH', dex: 'TraderJoe', symbol: 'TJLB_JOE_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.002', address: addresses['TJLB_JOE_ETH'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0x371c7ec6d8039ff7933a2aa28eb827ffe1f52f07/ETH/20"},
-        'TJLB_USDT_USDCe': { primary: 'USDT', secondary: 'USDC.e', name: 'USDT-USDCe', dex: 'TraderJoe', symbol: 'TJLB_USDT_USDCe', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.00005', address: addresses['TJLB_USDT_USDCe'], binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8/1"},
-        'TJLB_ETH_USDC': { primary: 'ETH', secondary: 'USDC', name: 'ETH-USDC', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDC', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0015', address: addresses['TJLB_ETH_USDC'], binStep: 15, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/arbitrum/pool/v21/ETH/0xaf88d065e77c8cc2239327c5edb3a432268e5831/15"},
+        'TJLB_ARB_ETH_2_2': { primary: 'ARB', secondary: 'ETH', name: 'ARB-ETH', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_ARB_ETH_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", decimals: 18, baseFee: '0.0004', address: addresses['TJLB_ARB_ETH_2_2'], hooksSimpleRewarder: "0x17A30137F30566a1F4c53216DCa027735cbcD261", rewardToken: "ARB", binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v22/0x912ce59144191c1204e64559fe8253a0e49e6548/ETH/10"},
+        'TJLB_ETH_USDC_2_2': { primary: 'ETH', secondary: 'USDC', name: 'ETH-USDC', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDC_2_2', version: '2.2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", decimals: 18, baseFee: '0.0004', address: addresses['TJLB_ETH_USDC_2_2'], hooksSimpleRewarder: "0xe514FEDbd050f575048617F0c8219AAE386abAF8", rewardToken: "ARB", binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v22/ETH/0xaf88d065e77c8cc2239327c5edb3a432268e5831/10"},
+        'TJLB_ETH_USDT_2_2': { primary: 'ETH', secondary: 'USDT', name: 'ETH-USDT', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDT_2_2', version: '2.2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", decimals: 18, baseFee: '0.0004', address: addresses['TJLB_ETH_USDT_2_2'], hooksSimpleRewarder: "0x54A7b0ad7ed040C313c2a21376FD9EF16b33ebb0", rewardToken: "ARB", binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v22/ETH/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9/10"},
+        'TJLB_MAGIC_ETH': { primary: 'MAGIC', secondary: 'ETH', name: 'MAGIC-ETH', dex: 'TraderJoe', symbol: 'TJLB_MAGIC_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0025', address: addresses['TJLB_MAGIC_ETH'], binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0x539bdE0d7Dbd336b79148AA742883198BBF60342/ETH/25"},
+        'TJLB_GMX_ETH': { primary: 'GMX', secondary: 'ETH', name: 'GMX-ETH', dex: 'TraderJoe', symbol: 'TJLB_GMX_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.002', address: addresses['TJLB_GMX_ETH'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a/ETH/20"},
+        'TJLB_DAI_USDCe': { primary: 'DAI', secondary: 'USDC.e', name: 'DAI-USDCe', dex: 'TraderJoe', symbol: 'TJLB_DAI_USDCe', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.00005', address: addresses['TJLB_DAI_USDCe'], binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0xda10009cbd5d07dd0cecc66161fc93d7c9000da1/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8/1"},
+        'TJLB_ETH_USDT': { primary: 'ETH', secondary: 'USDT', name: 'ETH-USDT', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDT', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0015', address: addresses['TJLB_ETH_USDT'], binStep: 15, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/ETH/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9/15"},
+        'TJLB_ETH_USDCe': { primary: 'ETH', secondary: 'USDC.e', name: 'ETH-USDCe', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDCe', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0015', address: addresses['TJLB_ETH_USDCe'], binStep: 15, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/ETH/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8/15"},
+        'TJLB_ARB_ETH': { primary: 'ARB', secondary: 'ETH', name: 'ARB-ETH', dex: 'TraderJoe', symbol: 'TJLB_ARB_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.001', address: addresses['TJLB_ARB_ETH'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0x912ce59144191c1204e64559fe8253a0e49e6548/ETH/10"},
+        'TJLB_BTC_ETH': { primary: 'BTC', secondary: 'ETH', name: 'BTC-ETH', dex: 'TraderJoe', symbol: 'TJLB_BTC_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.001', address: addresses['TJLB_BTC_ETH'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f/ETH/10"},
+        'TJLB_GRAIL_ETH': { primary: 'GRAIL', secondary: 'ETH', name: 'GRAIL-ETH', dex: 'TraderJoe', symbol: 'TJLB_GRAIL_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0025', address: addresses['TJLB_GRAIL_ETH'], binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0x3d9907f9a368ad0a51be60f7da3b97cf940982d8/ETH/25"},
+        'TJLB_WOO_ETH': { primary: 'WOO', secondary: 'ETH', name: 'WOO-ETH', dex: 'TraderJoe', symbol: 'TJLB_WOO_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0025', address: addresses['TJLB_WOO_ETH'], binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0xcafcd85d8ca7ad1e1c6f82f651fa15e33aefd07b/ETH/25"},
+        'TJLB_JOE_ETH': { primary: 'JOE', secondary: 'ETH', name: 'JOE-ETH', dex: 'TraderJoe', symbol: 'TJLB_JOE_ETH', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.002', address: addresses['TJLB_JOE_ETH'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0x371c7ec6d8039ff7933a2aa28eb827ffe1f52f07/ETH/20"},
+        'TJLB_USDT_USDCe': { primary: 'USDT', secondary: 'USDC.e', name: 'USDT-USDCe', dex: 'TraderJoe', symbol: 'TJLB_USDT_USDCe', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.00005', address: addresses['TJLB_USDT_USDCe'], binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9/0xff970a61a04b1ca14834a43f5de4533ebddb5cc8/1"},
+        'TJLB_ETH_USDC': { primary: 'ETH', secondary: 'USDC', name: 'ETH-USDC', dex: 'TraderJoe', symbol: 'TJLB_ETH_USDC', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", decimals: 18, baseFee: '0.0015', address: addresses['TJLB_ETH_USDC'], binStep: 15, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/arbitrum/pool/v21/ETH/0xaf88d065e77c8cc2239327c5edb3a432268e5831/15"},
     },
     BALANCER_LP_ASSETS_CONFIG: {},
     PENPIE_LP_ASSETS_CONFIG: {
@@ -386,11 +367,11 @@ export default {
         "arbSnrLLP": {name: "Senior", symbol: "arbSnrLLP", pid: 0, short: "Snr", decimals: 18, address: addresses.arbSnrLLP, debtCoverage: 0.83333333333, balanceMethod: "levelSnrBalance", groupIdentifier: 'STKD_SNR_LLP_GROUP', underlyingAssets: ['BTC', 'ETH', 'USDT', 'USDC'], link: 'https://app.level.finance/liquidity/senior-tranche/buy'},
     },
     GMX_V2_ASSETS_CONFIG: {
-        "GM_ETH_WETH": {minSPrimeToUnlock: 100, isGMXPlus: true, name: "ETH+", symbol: "GM_ETH_WETH", short: "GM", decimals: 18, address: addresses.GM_ETH_WETH, debtCoverage: 0.83333333333, longToken: 'ETH', shortToken: 'ETH', indexTokenAddress: addresses.ETH, link: 'https://app.gmx.io/#/stats', addMethod: 'depositEthGmxV2Plus', removeMethod: 'withdrawEthGmxV2Plus'},
-        "GM_BTC_WBTC": {minSPrimeToUnlock: 100, isGMXPlus: true, name: "BTC+", symbol: "GM_BTC_WBTC", short: "GM", logoExt: "png", decimals: 18, address: addresses.GM_BTC_WBTC, debtCoverage: 0.83333333333, longToken: 'BTC', shortToken: 'BTC', indexTokenAddress: addresses.BTC, link: 'https://app.gmx.io/#/stats', addMethod: 'depositBtcGmxV2Plus', removeMethod: 'withdrawBtcGmxV2Plus'},
-        "GM_NEAR_WETH_USDC": {minSPrimeToUnlock: 100, name: "NEAR-USDC", symbol: "GM_NEAR_WETH_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_NEAR_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'NEAR', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x1FF7F3EFBb9481Cbd7db4F932cBCD4467144237C", link: 'https://app.gmx.io/#/stats', addMethod: 'depositNearUsdcGmxV2', removeMethod: 'withdrawNearUsdcGmxV2'},
-        "GM_ATOM_WETH_USDC": {minSPrimeToUnlock: 100, name: "ATOM-USDC", symbol: "GM_ATOM_WETH_USDC", short: "GM", logoExt: 'svg', price: 1, decimals: 18, address: addresses.GM_ATOM_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'ATOM', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x7D7F1765aCbaF847b9A1f7137FE8Ed4931FbfEbA", link: 'https://app.gmx.io/#/stats', addMethod: 'depositAtomUsdcGmxV2', removeMethod: 'withdrawAtomUsdcGmxV2'},
-        "GM_GMX_GMX_USDC": {minSPrimeToUnlock: 100, name: "GMX-USDC", symbol: "GM_GMX_GMX_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_GMX_GMX_USDC, debtCoverage: 0.83333333333, longToken: 'GMX', shortToken: 'USDC', indexTokenAddress: addresses.GMX, link: 'https://app.gmx.io/#/stats'},
+        "GM_ETH_WETH": {isGMXPlus: true, name: "ETH+", symbol: "GM_ETH_WETH", short: "GM", decimals: 18, address: addresses.GM_ETH_WETH, debtCoverage: 0.83333333333, longToken: 'ETH', shortToken: 'ETH', indexTokenAddress: addresses.ETH, link: 'https://app.gmx.io/#/stats', addMethod: 'depositEthGmxV2Plus', removeMethod: 'withdrawEthGmxV2Plus'},
+        "GM_BTC_WBTC": {isGMXPlus: true, name: "BTC+", symbol: "GM_BTC_WBTC", short: "GM", logoExt: "png", decimals: 18, address: addresses.GM_BTC_WBTC, debtCoverage: 0.83333333333, longToken: 'BTC', shortToken: 'BTC', indexTokenAddress: addresses.BTC, link: 'https://app.gmx.io/#/stats', addMethod: 'depositBtcGmxV2Plus', removeMethod: 'withdrawBtcGmxV2Plus'},
+        "GM_NEAR_WETH_USDC": {name: "NEAR-USDC", symbol: "GM_NEAR_WETH_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_NEAR_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'NEAR', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x1FF7F3EFBb9481Cbd7db4F932cBCD4467144237C", link: 'https://app.gmx.io/#/stats', addMethod: 'depositNearUsdcGmxV2', removeMethod: 'withdrawNearUsdcGmxV2'},
+        "GM_ATOM_WETH_USDC": {name: "ATOM-USDC", symbol: "GM_ATOM_WETH_USDC", short: "GM", logoExt: 'svg', price: 1, decimals: 18, address: addresses.GM_ATOM_WETH_USDC, debtCoverage: 0.83333333333, iconToken: 'ATOM', longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: "0x7D7F1765aCbaF847b9A1f7137FE8Ed4931FbfEbA", link: 'https://app.gmx.io/#/stats', addMethod: 'depositAtomUsdcGmxV2', removeMethod: 'withdrawAtomUsdcGmxV2'},
+        "GM_GMX_GMX_USDC": {name: "GMX-USDC", symbol: "GM_GMX_GMX_USDC", short: "GM", logoExt: 'png', price: 1, decimals: 18, address: addresses.GM_GMX_GMX_USDC, debtCoverage: 0.83333333333, longToken: 'GMX', shortToken: 'USDC', indexTokenAddress: addresses.GMX, link: 'https://app.gmx.io/#/stats'},
         "GM_ETH_WETH_USDC": {name: "ETH-USDC", symbol: "GM_ETH_WETH_USDC", short: "GM", decimals: 18, address: addresses.GM_ETH_WETH_USDC, debtCoverage: 0.83333333333, longToken: 'ETH', shortToken: 'USDC', indexTokenAddress: addresses.ETH, link: 'https://app.gmx.io/#/stats'},
         "GM_BTC_WBTC_USDC": {name: "BTC-USDC", symbol: "GM_BTC_WBTC_USDC", short: "GM", logoExt: "png", price: 1, decimals: 18, address: addresses.GM_BTC_WBTC_USDC, debtCoverage: 0.83333333333, longToken: 'BTC', shortToken: 'USDC', indexTokenAddress: addresses.BTC, link: 'https://app.gmx.io/#/stats'},
         "GM_ARB_ARB_USDC": {name: "ARB-USDC", symbol: "GM_ARB_ARB_USDC", short: "GM", logoExt: "png", decimals: 18, address: addresses.GM_ARB_ARB_USDC, debtCoverage: 0.83333333333, longToken: 'ARB', shortToken: 'USDC', indexTokenAddress: addresses.ARB, link: 'https://app.gmx.io/#/stats'},
@@ -459,7 +440,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['USDC.e'],
                 strategy: 'Wombex',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         "USDT": [
@@ -481,7 +463,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['USDT'],
                 strategy: 'Wombex',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         "DAI": [
@@ -503,7 +486,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['DAI'],
                 strategy: 'Wombex',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         "GMX": [
@@ -547,7 +531,9 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['GLP'],
                 strategy: 'GMX',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableStakeOverride: true,
+                enableUnstakeOverride: true
             }
         ],
     },
@@ -599,7 +585,7 @@ export default {
     readRpcUrl: "https://arbitrum-mainnet.core.chainstack.com/9a30fb13b2159a76c8e143c52d5579bf",
     multicallAddress: "0x0674ee727f74752ea9dc630bd5c5d8a374187e7b",
     EMAIL_REGEX: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/,
-    refreshDelay: 2000,
+    refreshDelay: 6000,
     gmxV2RefreshDelay: 4000,
     penpieRefreshDelay: 4000,
     gmxV2IncentivesMilestone: 9000000,

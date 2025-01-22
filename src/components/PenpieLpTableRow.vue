@@ -164,6 +164,7 @@ export default {
       'lpBalances',
       'smartLoanContract',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'penpieLpBalances',
@@ -434,7 +435,7 @@ export default {
       modalInstance.swapDebtMode = false;
       modalInstance.slippageMargin = 0;
       modalInstance.sourceAsset = initSourceAsset;
-      modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[initSourceAsset];
       modalInstance.assets = {...this.assets};
       modalInstance.sourceAssets = [initSourceAsset];
       modalInstance.targetAssetsConfig = {
@@ -845,6 +846,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {

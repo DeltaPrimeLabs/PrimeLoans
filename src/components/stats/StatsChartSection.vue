@@ -7,13 +7,13 @@
       <template v-if="chartSelectedData">
         <div class="toggles">
           <div class="toggle--data">
-            <Toggle v-on:change="onOptionChange" :options="['Total Value', 'Collateral', 'Borrowed']"
+            <Toggle v-on:change="onOptionChange" :options="['Total Value', 'Collateral', 'Borrowed', 'PnL']"
                     :initial-option="0"></Toggle>
           </div>
           <div class="toggle--metadata">
-            <Toggle v-on:change="onPeriodChange" :options="['Max', '7 days', '30 days']"
-                    :initial-option="0"></Toggle>
-            <div class="toggle-metadata__separator"></div>
+<!--            <Toggle v-on:change="onPeriodChange" :options="['Max', '7 days', '30 days']"-->
+<!--                    :initial-option="0"></Toggle>-->
+<!--            <div class="toggle-metadata__separator"></div>-->
             <Toggle v-on:change="onCurrencyChange" :options="['USD']"
                     :initial-option="0"></Toggle>
           </div>
@@ -25,6 +25,24 @@
           <LineChart ref="chart" :chart-options="this.chartOptions()" :chart-data="this.chartData()"
                      :theme="theme"></LineChart>
         </div>
+        <div class="stats-chart-section__chart-range">
+          <SmallChartBeta :data-points="this.miniChartData"
+                          :is-stable-coin="false"
+                          :height="35"
+                          :width="960"
+                          :force-color="true"
+                          :line-width="2">
+          </SmallChartBeta>
+          <div class="chart-range-slider">
+            <RangeSlider
+                :min="0"
+                :max="this.selectedDataLength"
+                :value="sliderRange"
+                :track-opacity="0.35"
+                @input="updateSliderRange"
+            ></RangeSlider>
+          </div>
+        </div>
       </template>
     </div>
   </StatsSection>
@@ -33,14 +51,17 @@
 <script>
 import LineChart from "./LineChart.vue";
 import StatsSection from "./StatsSection.vue";
-import {mapState} from "vuex";
-import {getThemeVariable} from "../../utils/style-themes";
+import { mapState } from "vuex";
+import { getThemeVariable } from "../../utils/style-themes";
 import Toggle from "../Toggle.vue";
+import SmallChartBeta from "../SmallChartBeta.vue";
+import RangeSlider from "../RangeSlider.vue";
 
 const valuesNameForOptions = {
   'Total Value': 'totalValue',
   'Collateral': 'collateral',
   'Borrowed': 'borrowed',
+  'PnL': 'pnl',
 }
 
 const valuesNameForPeriod = {
@@ -55,7 +76,7 @@ const valuesNameForCurrency = {
 
 export default {
   name: "StatsChartSection",
-  components: {Toggle, StatsSection, LineChart},
+  components: {RangeSlider, SmallChartBeta, Toggle, StatsSection, LineChart},
   mounted() {
     this.themeService.observeThemeChange().subscribe(theme => {
       this.onThemeChange(theme)
@@ -77,6 +98,12 @@ export default {
         this.weekData = this.processData(loanHistory.week)
         this.monthData = this.processData(loanHistory.month)
         this.allData = this.processData(loanHistory.all)
+        this.updateSliderData()
+        this.updateChartData();
+      })
+      this.loanHistoryService.getPnLData(this.smartLoanContract.address).then(pnlData => {
+        this.pnlData = pnlData
+        this.updateSliderData()
         this.updateChartData();
       })
     },
@@ -95,6 +122,14 @@ export default {
         events: data.map(historyEntry => historyEntry.events),
       }
     },
+    updateSliderRange(event) {
+      if (event.value) {
+        this.sliderRange = event.value
+        if (event.dragging === false) {
+          this.updateChartData()
+        }
+      }
+    },
     onThemeChange(theme) {
       this.theme = theme;
       if (this.$refs.chart) {
@@ -103,8 +138,17 @@ export default {
         })
       }
     },
+    updateSliderData() {
+      if (this.selectedOption === 'pnl') {
+        this.selectedDataLength = this.pnlData.allData.length
+      } else {
+        this.selectedDataLength = this.allData.timestamps.length
+      }
+      this.sliderRange = [0, this.selectedDataLength]
+    },
     onOptionChange(dataOption) {
       this.selectedOption = valuesNameForOptions[dataOption]
+      this.updateSliderData()
       this.updateChartData()
     },
     onPeriodChange(periodOption) {
@@ -116,31 +160,59 @@ export default {
       this.updateChartData()
     },
     updateChartData() {
-      const selectedDataset = this[this.selectedPeriod];
-      this.chartSelectedData = selectedDataset.timestamps.map((timestamp, index) => {
-        const valueForTimestamp = selectedDataset[this.selectedOption][this.selectedCurrency][index];
-        if (index === 0) {
-          this.chartMin = valueForTimestamp;
-          this.chartMax = valueForTimestamp;
-        } else if (this.chartMin > valueForTimestamp) {
-          this.chartMin = valueForTimestamp
-        } else if (this.chartMax < valueForTimestamp) {
-          this.chartMax = valueForTimestamp
-        }
+      if (this.selectedOption === 'pnl') {
+        this.chartSelectedData = this.pnlData.allData.slice(this.sliderRange[0], this.sliderRange[1]).map(({timestamp, pnl}, index) => {
+          if (index === 0) {
+            this.chartMin = pnl;
+            this.chartMax = pnl;
+          } else if (this.chartMin > pnl) {
+            this.chartMin = pnl
+          } else if (this.chartMax < pnl) {
+            this.chartMax = pnl
+          }
+          return {
+            x: timestamp,
+            y: pnl
+          }
+        })
+      } else {
+        const selectedDataset = this.allData;
+        const timestampsStart = selectedDataset.timestamps[0]
+        const timestampsEnd = selectedDataset.timestamps[selectedDataset.timestamps.length - 1]
+        const timestampsLength = selectedDataset.timestamps.length
+        const timestampsRange = timestampsEnd - timestampsStart
+        const sliderStartTimestamp = timestampsStart + (this.sliderRange[0] / timestampsLength * timestampsRange)
+        const sliderEndTimestamp = timestampsStart + (this.sliderRange[1] / timestampsLength * timestampsRange)
+        const sliderStartTimestampIndex = selectedDataset.timestamps.findIndex(ts => ts >= sliderStartTimestamp)
+        const sliderEndTimestampIndex = selectedDataset.timestamps.findIndex(ts => ts >= sliderEndTimestamp)
+        this.chartSelectedData = selectedDataset.timestamps.slice(sliderStartTimestampIndex, sliderEndTimestampIndex).map((timestamp, index) => {
+          const indexAfterSlicing = index + sliderStartTimestampIndex
+          const valueForTimestamp = selectedDataset[this.selectedOption][this.selectedCurrency][indexAfterSlicing];
+          if (indexAfterSlicing === 0) {
+            this.chartMin = valueForTimestamp;
+            this.chartMax = valueForTimestamp;
+          } else if (this.chartMin > valueForTimestamp) {
+            this.chartMin = valueForTimestamp
+          } else if (this.chartMax < valueForTimestamp) {
+            this.chartMax = valueForTimestamp
+          }
 
-        return {
-          x: timestamp,
-          y: valueForTimestamp,
-          event: selectedDataset.events[index] && selectedDataset.events[index].length > 0 ? selectedDataset.events[index] : null
-        }
-      })
+          return {
+            x: timestamp,
+            y: valueForTimestamp,
+            event: selectedDataset.events[indexAfterSlicing] && selectedDataset.events[indexAfterSlicing].length > 0 ? selectedDataset.events[indexAfterSlicing] : null
+          }
+        })
+
+        this.chartPointRadius = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 4 : 0)
+        this.chartPointHoverBorderWidth = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 3 : 0)
+      }
+      if (this.sliderRange[0] === 0 && this.sliderRange[1] === this.selectedDataLength) {
+        this.miniChartData = this.chartSelectedData
+      }
       if (this.chartMin === this.chartMax) {
         this.chartMax += 1
       }
-
-      this.chartPointRadius = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 4 : 0)
-      this.chartPointRadius = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 4 : 0)
-      this.chartPointHoverBorderWidth = this.chartSelectedData.map(chartDataEntry => chartDataEntry.event ? 3 : 0)
       setTimeout(() => {
         if (this.$refs.chart) {
           this.$refs.chart.rerender();
@@ -166,6 +238,7 @@ export default {
       return {
         height: 256,
         width: 960,
+        showLineAtZeroY: this.selectedOption === 'pnl',
         hover: {
           intersect: false,
           mode: "index",
@@ -262,7 +335,7 @@ export default {
             fill: false,
             data: this.chartSelectedData,
             borderWidth: 5,
-            pointRadius: this.chartPointRadius,
+            pointRadius: this.selectedOption === 'pnl' ? 0 : this.chartPointRadius,
             pointHoverRadius: this.chartPointHoverRadius,
             pointBorderWidth: 0,
             pointHoverBorderWidth: this.chartPointHoverBorderWidth,
@@ -294,6 +367,10 @@ export default {
       selectedOption: 'totalValue',
       selectedPeriod: 'allData',
       selectedCurrency: 'usd',
+      pnlData: null,
+      sliderRange: [0, 1],
+      selectedDataLength: 0,
+      miniChartData: [],
     }
   },
   watch: {
@@ -324,6 +401,19 @@ export default {
   div {
     width: 100%;
   }
+}
+
+.stats-chart-section__chart-range {
+  width: 900px;
+  margin-left: 48px;
+  margin-top: 16px;
+  position: relative;
+}
+
+.chart-range-slider {
+  position: absolute;
+  top: 12px;
+  width: 100%;
 }
 
 .stats-chart-section__chart canvas {

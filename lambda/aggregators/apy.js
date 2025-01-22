@@ -443,7 +443,7 @@ const traderJoeApyAggregator = async (event) => {
   // fetch APYs for Avalanche and Arbitrum
   for (const [network, pools] of Object.entries(traderJoeConfig)) {
     console.log(network);
-    const URL = `https://traderjoexyz.com/${network}/pool`;
+    const URL = `https://lfj.gg/${network}/pool`;
 
     await page.setViewport({
       width: 1920,

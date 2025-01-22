@@ -6,11 +6,6 @@
         <div class="asset__info">
           <div class="asset__name">{{ pool.asset.symbol }}</div>
         </div>
-        <div v-if="pool.hasAvalancheBoost">
-          <img
-              v-tooltip="{content: `This pool is incentivized with Boost Program.`, classes: 'info-tooltip'}"
-              src="src/assets/icons/stars.png" class="stars-icon">
-        </div>
       </div>
       <div class="table__cell table__cell--double-value deposit">
         <template>
@@ -25,14 +20,6 @@
         <template v-if="pool.deposit === 0">
           <div class="no-value-dash"></div>
         </template>
-      </div>
-
-      <div class="table__cell avalanche-boost" v-if="isAvalanche">
-        <div class="avalanche-boost-unclaimed" v-if="pool.hasAvalancheBoost">
-          <LoadedValue :check="() => pool.unclaimed !== null && pool.unclaimedOld !== null"
-                       :value="(pool.hasAvalancheBoost ? Number(pool.unclaimed) + Number(pool.unclaimedOld) : 0) | smartRound(5, false)"></LoadedValue>
-          <img class="asset__icon" v-if="pool.avalancheBoostRewardToken" :src="getAssetIcon(pool.avalancheBoostRewardToken)">
-        </div>
       </div>
 
       <div class="table__cell sprime">
@@ -87,11 +74,11 @@
           v-on:iconButtonClick="actionClick">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="moreActionsConfig"
-            :config="moreActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="!pool">
+          class="actions__icon-button"
+          v-if="moreActionsConfig"
+          :config="moreActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="!pool">
         </IconButtonMenuBeta>
       </div>
     </div>
@@ -113,9 +100,11 @@ import config from '../config';
 import YAK_ROUTER_ABI from '../../test/abis/YakRouter.json';
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import InfoIcon from './InfoIcon.vue';
-import {ActionSection} from "../services/globalActionsDisableService";
-import ClaimRewardsModal from "./ClaimRewardsModal.vue";
+import {ActionSection} from '../services/globalActionsDisableService';
+import ClaimRewardsModal from './ClaimRewardsModal.vue';
 import DoubleClaimRewardsModal from './DoubleClaimRewardsModal.vue';
+import AddToWithdrawQueueModal from './AddToWithdrawQueueModal.vue';
+import QueueStatus from './AddToWithdrawQueueModal.vue';
 
 let TOKEN_ADDRESSES;
 
@@ -135,9 +124,7 @@ export default {
     this.setupPoolsAssetsData();
     this.watchLifi();
     this.watchActionDisabling();
-    setTimeout(() => {
-      console.log(this.isActionDisabledRecord);
-    }, 4000)
+    this.watchWithdrawalIntents();
   },
 
   data() {
@@ -153,6 +140,7 @@ export default {
       isArbitrum: null,
       isAvalanche: null,
       isActionDisabledRecord: {},
+      intents: null,
     };
   },
 
@@ -174,7 +162,8 @@ export default {
       'lifiService',
       'progressBarService',
       'providerService',
-      'globalActionsDisableService'
+      'globalActionsDisableService',
+      'poolWithdrawQueueService'
     ]),
   },
 
@@ -186,7 +175,6 @@ export default {
     },
 
     setupActionsConfiguration() {
-      console.warn('WITHDRAW', this.isActionDisabledRecord['WITHDRAW']);
       this.actionsConfig = [
         {
           iconSrc: 'src/assets/icons/plus.svg',
@@ -220,18 +208,19 @@ export default {
     },
 
     setupMoreActionsConfiguration() {
+      const poolsWithClaim = ['AVAX', 'USDC', 'USDT', 'BTC'];
       this.moreActionsConfig = {
         iconSrc: 'src/assets/icons/icon_a_more.svg',
         tooltip: 'More',
         menuOptions: [
           {
             iconSrc: 'src/assets/icons/swap.svg',
-            key: 'SWAP_DEPOSIT',
+            key: 'WITHDRAW',
             name: 'Swap',
             disabled: this.isActionDisabledRecord['SWAP_DEPOSIT'],
           }
           ,
-          this.pool.hasAvalancheBoost ? {
+          poolsWithClaim.includes(this.pool.asset.symbol) ? {
             key: 'CLAIM_AVALANCHE_BOOST',
             name: 'Claim rewards',
             disabled: this.isActionDisabledRecord['CLAIM_AVALANCHE_BOOST'],
@@ -240,7 +229,7 @@ export default {
       };
     },
 
-      setupWalletAssetBalances() {
+    setupWalletAssetBalances() {
       this.walletAssetBalancesService.observeWalletAssetBalances().subscribe(balances => {
         this.walletAssetBalances = balances;
       });
@@ -271,11 +260,17 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.POOLS)
-          .subscribe(isActionDisabledRecord => {
-            this.isActionDisabledRecord = isActionDisabledRecord;
-            this.setupActionsConfiguration();
-            this.setupMoreActionsConfiguration();
-          })
+        .subscribe(isActionDisabledRecord => {
+          this.isActionDisabledRecord = isActionDisabledRecord;
+          this.setupActionsConfiguration();
+          this.setupMoreActionsConfiguration();
+        })
+    },
+
+    watchWithdrawalIntents() {
+      this.poolWithdrawQueueService.observePoolIntents().subscribe(intents => {
+        this.intents = intents[this.pool.asset.symbol];
+      })
     },
 
     actionClick(key) {
@@ -325,10 +320,6 @@ export default {
       modalInstance.miningApy = this.pool.miningApy;
       modalInstance.rewardToken = this.pool.avalancheBoostRewardToken;
 
-      console.log('pool: ', this.pool)
-      console.log('this.pool.miningApy: ', this.pool.miningApy)
-      console.log('modalInstance.miningApy: ', modalInstance.miningApy)
-      console.log('modalInstance.rewardToken: ', modalInstance.rewardToken)
 
       modalInstance.$on('DEPOSIT', depositEvent => {
         const depositRequest = {
@@ -384,27 +375,25 @@ export default {
     },
 
     openWithdrawModal() {
-      console.log(this.pool.apy);
-      const modalInstance = this.openModal(PoolWithdrawModal);
-      modalInstance.pool = this.pool;
-      console.log(modalInstance.pool);
-      modalInstance.apy = this.pool.apy;
-      modalInstance.available = this.pool.asset.balance;
-      modalInstance.deposit = this.pool.deposit;
-      modalInstance.assetSymbol = this.pool.asset.name;
+      const modalInstance = this.openModal(AddToWithdrawQueueModal);
+      let queue = [];
+      let extraIntents = 0
+      if (this.intents && this.intents.length > 0) {
+        queue = this.intents.slice(0, 2).map(intent => ({
+          amount: intent.amount,
+          symbol: this.pool.asset.symbol,
+          status: intent.isPending ? 'PENDING' : 'READY',
+          date: intent.isPending ? intent.actionableAt : intent.expiresAt
+        }));
+        extraIntents = this.intents.length - queue.length;
+      }
+      modalInstance.assetBalance = this.pool.deposit;
+      modalInstance.asset = this.pool.asset;
+      modalInstance.queue = queue;
+      modalInstance.extraIntents = extraIntents;
       modalInstance.$on('WITHDRAW', withdrawEvent => {
-        const withdrawRequest = {
-          assetSymbol: this.pool.asset.symbol,
-          amount: withdrawEvent.value,
-          withdrawNativeToken: withdrawEvent.withdrawNativeToken,
-        };
-        this.handleTransaction(this.withdraw, {withdrawRequest: withdrawRequest}, () => {
-          this.pool.deposit = Number(this.pool.deposit) - withdrawRequest.amount;
-          this.$forceUpdate();
-        }, (error) => {
-          this.handleTransactionError(error);
-        }).then(() => {
-        });
+        this.poolWithdrawQueueService.createWithdrawalIntent(this.pool.asset.symbol, withdrawEvent.value)
+
       });
     },
 
@@ -448,7 +437,8 @@ export default {
         const tknFrom = TOKEN_ADDRESSES[sourceAsset];
         const tknTo = TOKEN_ADDRESSES[targetAsset];
 
-        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, provider.getSigner());
+        const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
+        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, readProvider);
 
         const maxHops = 3;
         const gasPrice = ethers.utils.parseUnits('0.2', 'gwei');
@@ -482,7 +472,6 @@ export default {
       modalInstance.header = 'Claim Boost rewards'
 
       modalInstance.$on('CLAIM', () => {
-        console.log('claim');
         const claimBoostRequest = {
           depositRewarderAddress: config.AVALANCHE_BOOST_CONFIG[this.pool.asset.symbol].depositRewarderAddress
         };
@@ -496,7 +485,6 @@ export default {
       });
 
       modalInstance.$on('CLAIM_OLD', () => {
-        console.log('claim old');
         const claimBoostRequest = {
           depositRewarderAddress: config.AVALANCHE_BOOST_CONFIG[this.pool.asset.symbol].depositRewarderOldAddress
         };
@@ -511,6 +499,9 @@ export default {
     },
 
     handleTransactionError(error, isBridge = false) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
 
@@ -547,7 +538,7 @@ export default {
 
   .table__row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr) 135px 135px 135px 135px 70px 110px 22px;
+    grid-template-columns: 1fr repeat(5, 160px) 70px 110px 22px;
     height: 60px;
     border-style: solid;
     border-width: 0 0 2px 0;

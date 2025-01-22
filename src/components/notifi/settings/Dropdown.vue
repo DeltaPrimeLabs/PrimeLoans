@@ -6,7 +6,7 @@
     >
       <input
         disabled
-        placeholder="Pool"
+        :placeholder="options[0] && options[0].name || 'Select...'"
         :value="value"
       >
       <DeltaIcon

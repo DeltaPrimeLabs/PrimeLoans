@@ -58,7 +58,7 @@ export default {
     },
 
     redirectToTraderJoe() {
-      window.open('https://traderjoexyz.com/avalanche/trade?chain=avalanche&outputCurrency=0x33C8036E99082B0C395374832FECF70c42C7F298', '_blank').focus();
+      window.open('https://lfj.gg/avalanche/trade?chain=avalanche&outputCurrency=0x33C8036E99082B0C395374832FECF70c42C7F298', '_blank').focus();
       this.$emit('CLOSE');
       this.closeModal();
     },

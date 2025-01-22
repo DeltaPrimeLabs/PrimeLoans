@@ -4,11 +4,26 @@
       <div class="main-content">
         <SPrimePanel class="sprime-panel" :is-prime-account="false" :user-address="account"
                      :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
+        <RTKNStatsBar :data="rtknData" :cross-chain-data="crossChainData">
+        </RTKNStatsBar>
+
+        <WithdrawalQueue ref="withdrawalQueue"
+                         :all-queues="poolIntents"
+                         :pending-count="queueData.totalPending"
+                         :ready-count="queueData.totalReady"
+                         :soon="queueData.soonestIntent"
+                         :mode="'POOLS'">
+        </WithdrawalQueue>
+
+        <!--        <WithdrawalQueuePerToken ref="tokenQueue" v-if="poolIntents['MCK']" :asset-symbol="'MCK'" :entries="poolIntents['MCK']"></WithdrawalQueuePerToken>-->
         <Block :bordered="true">
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
             {{ totalDeposit | usd }}
-            <span class="rtkn-balance" v-if="Number(rTKNBalance) > 0">Your rTKN balance: {{rTKNBalance | smartRound(2, true)}}</span>
+            <span class="rtkn-balance"
+                  v-if="Number(rtknData.rtknBalance) > 0 || Number(rtknData.rtkn2Balance) > 0">Your rTKN balance: {{
+                (Number(rtknData.rtknBalance) + Number(rtknData.rtkn2Balance)) | smartRound(2, true)
+              }}</span>
           </NameValueBadgeBeta>
           <div class="pools">
             <div class="pools-table">
@@ -27,6 +42,8 @@
       </div>
     </div>
   </div>
+
+
 </template>
 
 <script>
@@ -40,7 +57,11 @@ import {mapActions, mapState} from 'vuex';
 import {BehaviorSubject, combineLatest, forkJoin} from 'rxjs';
 import erc20ABI from '../../test/abis/ERC20.json';
 import ResumeBridgeModal from './ResumeBridgeModal';
-import SPrimePanel from "./SPrimePanel.vue";
+import SPrimePanel from './SPrimePanel.vue';
+import RTKNStatsBar from './RTKNStatsBar.vue';
+import WithdrawalQueuePerToken from './withdrawal-queue/WithdrawalQueuePerToken.vue';
+import WithdrawalQueue from './withdrawal-queue/WithdrawalQueue.vue';
+import Vue from 'vue';
 
 const ethers = require('ethers');
 
@@ -49,6 +70,9 @@ let TOKEN_ADDRESSES;
 export default {
   name: 'PoolsBeta',
   components: {
+    WithdrawalQueue,
+    WithdrawalQueuePerToken,
+    RTKNStatsBar,
     SPrimePanel,
     PoolsTableRowBeta,
     Block,
@@ -56,12 +80,19 @@ export default {
     TableHeader
   },
   async mounted() {
-    await this.setupFiles();
-    this.initPools();
-    this.watchPools();
-    this.initStoresWhenProviderAndAccountCreated();
-    this.lifiService.setupLifi();
-    this.watchActiveRoute();
+    window.chain$.subscribe(async chain => {
+      this.arbitrumChain = chain === 'arbitrum';
+      await this.setupFiles();
+      this.initPools();
+      this.watchPools();
+      this.initStoresWhenProviderAndAccountCreated();
+      this.lifiService.setupLifi();
+      this.watchActiveRoute();
+      this.poolWithdrawQueueService.getIntents();
+      this.watchPoolIntents();
+      this.watchQueueData();
+      this.setupRTKN();
+    });
   },
 
   data() {
@@ -71,11 +102,25 @@ export default {
       poolsList: null,
       poolsTableHeaderConfig: null,
       depositAssetsWalletBalances$: new BehaviorSubject({}),
-      rTKNBalance: 0,
+      rtknData: {},
+      crossChainData: {},
+      arbitrumChain: false,
+      poolIntents: [],
+      queueData: {},
     };
   },
   computed: {
-    ...mapState('serviceRegistry', ['providerService', 'accountService', 'poolService', 'walletAssetBalancesService', 'lifiService', 'progressBarService', 'avalancheBoostService']),
+    ...mapState('serviceRegistry', [
+      'providerService',
+      'accountService',
+      'poolService',
+      'walletAssetBalancesService',
+      'lifiService',
+      'progressBarService',
+      'avalancheBoostService',
+      'rtknService',
+      'poolWithdrawQueueService'
+    ]),
     ...mapState('network', ['account', 'accountBalance', 'provider']),
   },
 
@@ -93,9 +138,6 @@ export default {
           this.poolStoreSetup();
           this.sPrimeStoreSetup();
           this.setupPoolsTableHeaderConfig();
-          if (window.arbitrumChain) {
-            this.getRTKNBalance(provider, account)
-          }
         });
     },
 
@@ -136,46 +178,6 @@ export default {
         this.setupTotalDeposit();
         this.$forceUpdate();
         this.setupWalletDepositAssetBalances(pools);
-        if (window.chain === 'avalanche') {
-          this.watchAvalancheBoostData();
-        }
-      });
-    },
-
-    watchAvalancheBoostData() {
-      this.avalancheBoostService.observeAvalancheBoostRates().subscribe(rates => {
-        if (rates) {
-          const incentivizedPools = Object.keys(rates);
-          incentivizedPools.forEach(
-            poolAsset => {
-              const poolIndex = this.poolsList.findIndex(pool => pool.asset.symbol === poolAsset);
-              this.poolsList[poolIndex].hasAvalancheBoost = true;
-              this.poolsList[poolIndex].avalancheBoostRewardToken = config.AVALANCHE_BOOST_CONFIG[poolAsset].rewardToken;
-              let secondsInYear = 3600 * 24 * 365;
-              this.poolsList[poolIndex].miningApy = rates[poolAsset] * secondsInYear / (this.poolsList[poolIndex].tvl * this.poolsList[poolIndex].assetPrice);
-            }
-          );
-        }
-      });
-
-      this.avalancheBoostService.observeAvalancheBoostUnclaimed().subscribe(unclaimed => {
-        const incentivizedPools = Object.keys(unclaimed);
-        incentivizedPools.forEach(
-          poolAsset => {
-            const poolIndex = this.poolsList.findIndex(pool => pool.asset.symbol === poolAsset);
-            this.poolsList[poolIndex].unclaimed = unclaimed[poolAsset];
-          }
-        );
-      });
-
-      this.avalancheBoostService.observeAvalancheBoostUnclaimedOld().subscribe(unclaimedOld => {
-        const incentivizedPools = Object.keys(unclaimedOld);
-        incentivizedPools.forEach(
-          poolAsset => {
-            const poolIndex = this.poolsList.findIndex(pool => pool.asset.symbol === poolAsset);
-            this.poolsList[poolIndex].unclaimedOld = unclaimedOld[poolAsset];
-          }
-        );
       });
     },
 
@@ -306,7 +308,7 @@ export default {
           }
           :
           {
-            gridTemplateColumns: 'repeat(3, 1fr) 135px 135px 135px 135px 70px 110px 22px',
+            gridTemplateColumns: '1fr repeat(5, 160px) 70px 110px 22px',
             cells: [
               {
                 label: 'Asset',
@@ -323,13 +325,6 @@ export default {
                 id: 'DEPOSIT',
               },
               {
-                label: 'Rewards',
-                sortable: false,
-                class: 'deposit',
-                id: 'BOOST',
-                tooltip: `Your unclaimed rewards from the Boost Program`
-              },
-              {
                 label: 'sPRIME',
                 sortable: false,
                 class: 'sprime',
@@ -343,7 +338,7 @@ export default {
                 sortable: false,
                 class: 'apy',
                 id: 'APY',
-                tooltip: `Deposit interest coming from borrowers${window.arbitrumChain ? " + the LTIPP grant incentives. Grant incentives are distributed weekly, directly to your wallet.<br><a href='https://forum.arbitrum.foundation/t/deltaprime-ltipp-application-final/21938' target='_blank'>More information</a>" : ''}.`
+                tooltip: `Deposit interest coming from borrowers${window.arbitrumChain ? ' + the LTIPP grant incentives. Grant incentives are distributed weekly, directly to your wallet.<br><a href=\'https://forum.arbitrum.foundation/t/deltaprime-ltipp-application-final/21938\' target=\'_blank\'>More information</a>' : ''}.`
               },
               {
                 label: 'Pool size',
@@ -370,11 +365,40 @@ export default {
           };
     },
 
-    async getRTKNBalance(provider, account) {
-      const rTKNTokenContract = new ethers.Contract(config.RTKN_ADDRESS, erc20ABI, provider.getSigner());
-      this.rTKNBalance = await this.getWalletTokenBalance(account, 'rTKN', rTKNTokenContract, 18);
+    setupRTKN() {
+      this.rtknService.observeData().subscribe(data => {
+        console.log(data);
+        Vue.set(this, 'rtknData', data);
+        this.$forceUpdate();
+        setTimeout(() => {
+          this.$forceUpdate();
+        }, 100);
+      });
+
+      this.rtknService.observeCrossChainData().subscribe(crossChainData => {
+        Vue.set(this, 'crossChainData', crossChainData);
+        this.$forceUpdate();
+        setTimeout(() => {
+          this.$forceUpdate();
+        }, 100);
+      })
     },
 
+    watchPoolIntents() {
+      this.poolWithdrawQueueService.observePoolIntents().subscribe(poolIntents => {
+        this.poolIntents = poolIntents;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
+      })
+    },
+
+    watchQueueData() {
+      this.poolWithdrawQueueService.observeQueueData().subscribe(queueData => {
+        this.queueData = queueData;
+        this.$forceUpdate();
+        this.$refs.withdrawalQueue.refresh();
+      })
+    },
   },
 };
 </script>

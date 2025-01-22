@@ -23,6 +23,7 @@
   --account-apr-widget-component__widget-title-color: #{$dark-gray};
   --account-apr-widget-component__no-smart-loan-dash-color: #{$dark-gray};
   --account-apr-widget-component__widget-comment-color: #{$dark-gray};
+  --account-apr-widget-component__divider-background: linear-gradient(to bottom, #{$delta-pale} 41%, #{$pale-orange} 58%, #{$pale-raspberry} 77%);
   // endregion
 
   // region Wallet
@@ -36,13 +37,14 @@
   --stats-bar-beta__divider-background: linear-gradient(to bottom, #{$delta-pale} 41%, #{$pale-orange} 58%, #{$pale-raspberry} 77%);
   // endregion
 
-  // region LTIPStatsBar
-  --ltip-stats-bar__background: #{$white}4c;
-  --ltip-stats-bar__box-shadow: 7px 7px 30px 0 #{$delta-steel}80;
-  --ltip-stats-bar__divider-background: linear-gradient(to bottom, #{$delta-pale} 41%, #{$pale-orange} 58%, #{$pale-raspberry} 77%);
-  --ltip-stats-bar-text__color: #{$dark-gray};
-  --ltip-stats-bar-value__color: #{$black};
-  --ltip-stats-bar-value-icon: url("/src/assets/icons/shine_light.svg");
+  // region RTKNStatsBar
+  --rtkn-stats-bar__background: #{$white}4c;
+  --rtkn-stats-bar__box-shadow: 7px 7px 30px 0 #{$delta-steel}80;
+  --rtkn-stats-bar__divider-background: linear-gradient(to bottom, #{$delta-pale} 41%, #{$pale-orange} 58%, #{$pale-raspberry} 77%);
+  --rtkn-stats-bar-text__color: #{$dark-gray};
+  --rtkn-stats-bar-value__color: #{$black};
+  --rtkn-stats-bar-value-icon: url("/src/assets/icons/shine_light.svg");
+  --rtkn-stats-bar-cancel-icon-color: #{$medium-gray};
   // endregion
 
   // region StatsBarElementBeta
@@ -61,6 +63,8 @@
   --bar__value-background-image: linear-gradient(to right, #{$delta-cloudy} 17%, #{$washed-lilac} 91%);
   --bar__value-background-image--completion: linear-gradient(120deg, #{$lime-green} 0%, #{$pale-green} 100%);
   --bar__value-background-image--error: #{$red};
+  --bar__overflow-needle-color: #{$steel-gray};
+  --bar__overflow-color: #{$steel-gray};
   // endregion
 
   // region NameValueBadgeBeta
@@ -107,6 +111,7 @@
   // region SmallChartBeta
   --small-chart-beta__line-color--positive: #{$lime-green};
   --small-chart-beta__line-color--negative: #{$red};
+  --small-chart-beta__line-forced-color: #{$bright-lilac};
   // endregion
 
   // region Chart
@@ -710,5 +715,77 @@
 
   // region SprimeModal
   --sprime-modal__text-color: #{$persian-blue};
+  // endregion
+
+  // region AddToWithdrawQueue
+  --add-to-withdraw-queue__queue-border: linear-gradient(117deg, #{$delta-pale} 39%, #{$pale-orange} 62%, #{$pale-raspberry} 82%);
+  --add-to-withdraw-queue__queue-background: #{$white};
+  --add-to-withdraw-queue__queue-title-color: #{$light-lilac};
+  --add-to-withdraw-queue__queue-divider-background: #{$goose-gray};
+  --add-to-withdraw-queue__queue-color: #{$steel-gray};
+  --add-to-withdraw-queue__queue-status-color--ready: #{$lime-green};
+  --add-to-withdraw-queue__queue-status-color--pending: #{$old-orange};
+  --add-to-withdraw-queue__queue-cta-color: #{$persian-blue};
+  // endregion
+
+  // region WithdrawalQueuePerToken
+  --withdrawal-queue-per-token__asset-color: #{$black};
+  --withdrawal-queue-per-token__header-background: #{$delta-accent}0c;
+  --withdrawal-queue-per-token__header-border: #{$delta-light};
+  --withdrawal-queue-per-token__header-chevron-background: #{$delta-accent};
+  --withdrawal-queue-per-token__summary-label-color: #{$dark-gray};
+  --withdrawal-queue-per-token__summary-value-color: #{$black};
+  --withdrawal-queue-per-token__summary-additional-info-color: #{$medium-gray};
+  --withdrawal-queue-per-token__summary-divider-background: #{$smoke-gray};
+  --withdrawal-queue-per-token__body-background: #{$white}99;
+  --withdrawal-queue-per-token__body-border: #{$delta-light};
+  --withdrawal-queue-per-token__table-header-color: #{$dark-gray};
+  --withdrawal-queue-per-token__divider-background: linear-gradient(to right, #{$delta-pale} 43%, #{$pale-orange} 62%, #{$pale-raspberry} 79%);
+  // endregion
+
+  // region WithdrawalQueuePerTokenRow
+  --withdrawal-queue-per-token-row__status-label-background--ready: #{$green-1};
+  --withdrawal-queue-per-token-row__status-label-border--ready: #{$green-2};
+  --withdrawal-queue-per-token-row__status-label-color--ready: #{$green-3};
+  --withdrawal-queue-per-token-row__status-label-background--pending: #{$orange-1};
+  --withdrawal-queue-per-token-row__status-label-border--pending: #{$orange-2};
+  --withdrawal-queue-per-token-row__status-label-color--pending: #{$old-orange};
+  --withdrawal-queue-per-token-row__no-value-dash-background: #{$medium-gray};
+  --withdrawal-queue-per-token-row__cross-icon-background: #{$medium-gray};
+  // endregion
+
+  // region WithdrawQueue
+  --withdrawal-queue__withdraw-accordion-background: #{$white}4c;
+  --withdrawal-queue__withdraw-accordion-shadow: 7px 7px 30px 0 #{$delta-steel}80;
+  // endregion
+
+  // region Checkbox
+  --checkbox__background: #{$white};
+  --checkbox__border: #{$cloud-gray};
+  --checkbox__background--disabled: #{$mist-gray};
+  --checkbox__border--disabled: #{$pearly-gray};
+  // endregion
+
+  // region PercentageGauge
+  --percentage-gauge__gradient: conic-gradient(from -0.33turn, #{$red}, #{$lighter-raspberry} 0.13turn, #{$vivid-pink} 0.26turn, #{$smooth-pink} 0.37turn, #{$darker-pink} 0.5turn, #{$just-blue} 0.63turn, #{$red});
+  --percentage-gauge__shadow: drop-shadow(1px 1px 8px #{$delta-steel}66);
+  --percentage-gauge__number-color: #{$lighter-raspberry};
+  --percentage-gauge__indicator-color: #{$persian-blue};
+  --percentage-gauge__indicator-shadow: 0.7px 0.7px 4.1px 0 #{$black}26;
+  --percentage-gauge__labels-color: #{$steel-gray};
+  // endregion
+
+  // region MiniPercentageGauge
+  --mini-percentage-gauge__gradient-color-1: #{$red};
+  --mini-percentage-gauge__gradient-color-2: #{$lighter-raspberry};
+  --mini-percentage-gauge__gradient-color-3: #{$vivid-pink};
+  --mini-percentage-gauge__gradient-color-4: #{$smooth-pink};
+  --mini-percentage-gauge__gradient-color-5: #{$darker-pink};
+  --mini-percentage-gauge__gradient-color-6: #{$just-blue};
+  --mini-percentage-gauge__gradient-color-7: #{$red};
+  --mini-percentage-gauge__hand-pointer-shadow: 0.3px 0.3px 1.6px 0 rgba(#{$black}, 0.15);
+  --mini-percentage-gauge__shadow: drop-shadow(1px 1px 8px #{$delta-steel}66);
+  --mini-percentage-gauge__indicator-color: #{$persian-blue};
+  --mini-percentage-gauge__indicator-shadow: 0.7px 0.7px 4.1px 0 #{$black}26;
   // endregion
 }

@@ -158,6 +158,7 @@ import FlatButton from "./FlatButton.vue";
 import SmallBlock from "./SmallBlock.vue";
 import LB_TOKEN from '/artifacts/contracts/interfaces/joe-v2/ILBToken.sol/ILBToken.json'
 import {ActionSection} from "../services/globalActionsDisableService";
+import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
 const toBytes32 = require('ethers').utils.formatBytes32String;
 
@@ -241,6 +242,7 @@ export default {
       'assets',
       'health',
       'assetBalances',
+      'assetAvailableBalances',
       'smartLoanContract',
       'readSmartLoanContract',
       'debtsPerAsset',
@@ -258,7 +260,8 @@ export default {
       'priceService',
       'ltipService',
       'globalActionsDisableService',
-      'sPrimeService'
+      'sPrimeService',
+      'bullScoreService',
     ]),
 
     hasSmartLoanContract() {
@@ -359,7 +362,7 @@ export default {
         this.getUserBinsAndBalances();
       });
 
-      this.accountService.observeSmartLoanContract$().subscribe(() => {
+      this.accountService.observeSmartLoanContract().subscribe(() => {
         this.setupAddActionsConfiguration();
         this.setupRemoveActionsConfiguration();
         this.setupMoreActionsConfiguration();
@@ -387,6 +390,13 @@ export default {
 
     calculateUserValue() {
       this.userValue = this.lpToken.primaryBalance * this.firstAsset.price + this.lpToken.secondaryBalance * this.secondAsset.price;
+      this.bullScoreService.setToken(TokenType.TJV2, new AssetsEntry(
+        this.lpToken.symbol,
+        0.5,
+        { symbol: this.lpToken.primary, value: this.lpToken.primaryBalance * this.firstAsset.price },
+        { symbol: this.lpToken.secondary, value: this.lpToken.secondaryBalance * this.secondAsset.price }
+        )
+      )
     },
 
     setupButtonConfigs(hasAccess) {
@@ -516,8 +526,8 @@ export default {
       modalInstance.lpToken = this.lpToken;
       modalInstance.firstAsset = this.firstAsset;
       modalInstance.secondAsset = this.secondAsset;
-      modalInstance.firstAssetBalance = this.assetBalances[this.lpToken.primary];
-      modalInstance.secondAssetBalance = this.assetBalances[this.lpToken.secondary];
+      modalInstance.firstAssetBalance = this.assetAvailableBalances[this.lpToken.primary];
+      modalInstance.secondAssetBalance = this.assetAvailableBalances[this.lpToken.secondary];
       modalInstance.activeId = this.activeId;
       modalInstance.activePrice = this.activePrice;
       modalInstance.binStep = this.lpToken.binStep;
@@ -565,6 +575,7 @@ export default {
       modalInstance.activeId = this.activeId;
       modalInstance.binStep = this.lpToken.binStep;
       modalInstance.binIds = this.lpToken.binIds;
+      console.log(this.lpToken.binIds);
       modalInstance.$on('REMOVE_LIQUIDITY', async removeLiquidityEvent => {
         if (this.smartLoanContract) {
           const removeLiquidityInput = await this.traderJoeService.getRemoveLiquidityParameters(
@@ -586,7 +597,8 @@ export default {
             remainingBinIds: removeLiquidityEvent.remainingBinIds,
             removeLiquidityInput,
             lpToken: this.lpToken,
-            routerAddress: this.lpToken.routerAddress
+            routerAddress: this.lpToken.routerAddress,
+            forceTransaction: removeLiquidityEvent.forceTransaction
           };
 
           this.handleTransaction(this.removeLiquidityTraderJoeV2Pool, {removeLiquidityRequest}, () => {
@@ -732,6 +744,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {

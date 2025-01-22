@@ -183,6 +183,7 @@ export default {
       'smartLoanContract',
       'fullLoanStatus',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'lpAssets',
@@ -424,8 +425,8 @@ export default {
       const modalInstance = this.openModal(ProvideLiquidityModal);
       modalInstance.lpToken = this.lpToken;
       modalInstance.lpTokenBalance = Number(this.lpBalances[this.lpToken.symbol]);
-      modalInstance.firstAssetBalance = this.assetBalances[this.lpToken.primary];
-      modalInstance.secondAssetBalance = this.assetBalances[this.lpToken.secondary];
+      modalInstance.firstAssetBalance = this.assetAvailableBalances[this.lpToken.primary];
+      modalInstance.secondAssetBalance = this.assetAvailableBalances[this.lpToken.secondary];
       modalInstance.areAmountsLinked = true;
       modalInstance.$on('PROVIDE_LIQUIDITY', provideLiquidityEvent => {
         console.log(provideLiquidityEvent);
@@ -581,6 +582,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {

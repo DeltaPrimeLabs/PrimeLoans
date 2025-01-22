@@ -34,7 +34,7 @@ export default class StatsService {
     const skip = page * config.TRANSACTION_HISTORY_PAGE_SIZE;
     const query = `
     {
-      user(id: "${smartLoanAddress.toLowerCase()}") {
+      pool(id: "pool.address") {
         collateralAmount
         collateralAsset
         id

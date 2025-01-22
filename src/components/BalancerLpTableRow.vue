@@ -2,9 +2,13 @@
   <div v-if="provider" class="lp-table-row-component" :class="{'expanded': rowExpanded}">
     <div class="table__row" v-if="lpToken">
       <div class="table__cell asset">
-        <DoubleAssetIcon :primary="lpToken.reverseOrder ? lpToken.secondary : lpToken.primary" :secondary="lpToken.reverseOrder ? lpToken.primary : lpToken.secondary"></DoubleAssetIcon>
+        <DoubleAssetIcon :primary="lpToken.reverseOrder ? lpToken.secondary : lpToken.primary"
+                         :secondary="lpToken.reverseOrder ? lpToken.primary : lpToken.secondary"></DoubleAssetIcon>
         <div class="asset__info">
-          <div class="asset__name">{{ lpToken.reverseOrder ? `${lpToken.secondary} - ${lpToken.primary}` : `${lpToken.primary} - ${lpToken.secondary}` }}</div>
+          <div class="asset__name">{{
+              lpToken.reverseOrder ? `${lpToken.secondary} - ${lpToken.primary}` : `${lpToken.primary} - ${lpToken.secondary}`
+            }}
+          </div>
           <div class="asset__dex">
             by {{ lpToken.dex }}
           </div>
@@ -15,7 +19,8 @@
         <template
           v-if="balancerLpBalances">
           <div class="double-value__pieces">
-            <img v-if="hasNonStakedLp" src="src/assets/icons/error.svg" v-tooltip="{content: 'Your Prime Account has unstaked LP tokens. You can use `Stake` function to add them to your Balance or `Export unstaked LP tokens` to withdraw them to your wallet.', classes: 'info-tooltip long'}"/>
+            <img v-if="hasNonStakedLp" src="src/assets/icons/error.svg"
+                 v-tooltip="{content: 'Your Prime Account has unstaked LP tokens. You can use `Stake` function to add them to your Balance or `Export unstaked LP tokens` to withdraw them to your wallet.', classes: 'info-tooltip long'}"/>
             {{ balancerLpBalances[lpToken.symbol] | smartRound }}
           </div>
           <div class="double-value__usd">
@@ -32,13 +37,15 @@
           <div class="table__cell rewards">
             <span>
               <img class="asset__icon" :src="getAssetIcon('BAL')">
-              <img v-tooltip="{content: `Your accumulated BAL rewards will be visible soon.`, classes: 'info-tooltip'}" src="src/assets/icons/stars.png" class="stars-icon">
+              <img v-tooltip="{content: `Your accumulated BAL rewards will be visible soon.`, classes: 'info-tooltip'}"
+                   src="src/assets/icons/stars.png" class="stars-icon">
             </span>
             <span v-for="symbol in lpToken.rewardTokens">
               <img class="asset__icon" :src="getAssetIcon(symbol)">
-              <span v-if="lpToken.rewardBalances && lpToken.rewardBalances[symbol] && parseFloat(lpToken.rewardBalances[symbol]) !== null">{{
-                formatTokenBalance((lpToken.rewardBalances && lpToken.rewardBalances[symbol] && !rewardsReset) ? lpToken.rewardBalances[symbol]  : 0, 6, true)
-              }}</span>
+              <span
+                v-if="lpToken.rewardBalances && lpToken.rewardBalances[symbol] && parseFloat(lpToken.rewardBalances[symbol]) !== null">{{
+                  formatTokenBalance((lpToken.rewardBalances && lpToken.rewardBalances[symbol] && !rewardsReset) ? lpToken.rewardBalances[symbol] : 0, 6, true)
+                }}</span>
               <vue-loaders-ball-beat v-else color="#A6A3FF" scale="0.5"></vue-loaders-ball-beat>
             </span>
           </div>
@@ -79,11 +86,11 @@
           :disabled="disableAllButtons || noSmartLoan">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="moreActionsConfig"
-            :config="moreActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || !healthLoaded">
+          class="actions__icon-button"
+          v-if="moreActionsConfig"
+          :config="moreActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || !healthLoaded">
         </IconButtonMenuBeta>
       </div>
     </div>
@@ -115,14 +122,14 @@ import RemoveLiquidityModal from './RemoveLiquidityModal';
 const ethers = require('ethers');
 import erc20ABI from '../../test/abis/ERC20.json';
 import {calculateMaxApy, fromWei} from '../utils/calculate';
-import DeltaIcon from "./DeltaIcon.vue";
-import StakeBalancerV2Modal from "./StakeBalancerV2Modal.vue";
-import WithdrawBalancerV2Modal from "./WithdrawBalancerV2Modal.vue";
-import {formatUnits} from "ethers/lib/utils";
-import config from "../config";
-import BalancerUnwindLpModal from "./BalancerUnwindLpModal.vue";
-import ClaimBalancerRewardsModal from "./ClaimBalancerRewardsModal.vue";
-import {ActionSection} from "../services/globalActionsDisableService";
+import DeltaIcon from './DeltaIcon.vue';
+import StakeBalancerV2Modal from './StakeBalancerV2Modal.vue';
+import WithdrawBalancerV2Modal from './WithdrawBalancerV2Modal.vue';
+import {formatUnits} from 'ethers/lib/utils';
+import config from '../config';
+import BalancerUnwindLpModal from './BalancerUnwindLpModal.vue';
+import ClaimBalancerRewardsModal from './ClaimBalancerRewardsModal.vue';
+import {ActionSection} from '../services/globalActionsDisableService';
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -189,6 +196,7 @@ export default {
       'smartLoanContract',
       'fullLoanStatus',
       'assetBalances',
+      'assetAvailableBalances',
       'assets',
       'debtsPerAsset',
       'lpAssets',
@@ -280,7 +288,7 @@ export default {
             {
               key: 'PROVIDE_LIQUIDITY',
               name: 'Create LP position',
-            disabled: this.isActionDisabledRecord['PROVIDE_LIQUIDITY'],
+              disabled: this.isActionDisabledRecord['PROVIDE_LIQUIDITY'],
               // disabled: !this.hasSmartLoanContract,
               // disabledInfo: 'To create LP token, you need to add some funds from you wallet first'
             }
@@ -490,8 +498,8 @@ export default {
       modalInstance.lpToken = this.lpToken;
       console.log(this.balancerLpBalances);
       modalInstance.lpTokenBalance = Number(this.balancerLpBalances[this.lpToken.symbol]);
-      modalInstance.firstAssetBalance = this.assetBalances[this.lpToken.primary];
-      modalInstance.secondAssetBalance = this.assetBalances[this.lpToken.secondary];
+      modalInstance.firstAssetBalance = this.assetAvailableBalances[this.lpToken.primary];
+      modalInstance.secondAssetBalance = this.assetAvailableBalances[this.lpToken.secondary];
       modalInstance.areAmountsLinked = false;
       modalInstance.$on('PROVIDE_LIQUIDITY', provideLiquidityEvent => {
         if (this.smartLoanContract) {
@@ -667,6 +675,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {
@@ -679,12 +690,12 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.BALANCER_LP)
-          .subscribe(isActionDisabledRecord => {
-            this.isActionDisabledRecord = isActionDisabledRecord;
-            this.setupAddActionsConfiguration();
-            this.setupRemoveActionsConfiguration();
-            this.setupMoreActionsConfiguration();
-          })
+        .subscribe(isActionDisabledRecord => {
+          this.isActionDisabledRecord = isActionDisabledRecord;
+          this.setupAddActionsConfiguration();
+          this.setupRemoveActionsConfiguration();
+          this.setupMoreActionsConfiguration();
+        })
     },
   },
 };

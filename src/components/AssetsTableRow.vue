@@ -18,7 +18,11 @@
             Borrow&nbsp;APY:&nbsp;{{ borrowApyPerPool[asset.symbol] | percent }}
           </div>
           <div class="asset__loan" v-if="asset.apy">
-            APY:&nbsp;{{ asset.apy / 100 | percent }}<span v-if="asset.hasIncentives + boostApy"><br>up to {{4.5 * asset.apy / 100 + boostApy | percent}}<img v-if="boostApy" v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${asset.apy ? (4.5 * asset.apy).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}" src="src/assets/icons/stars.png" class="stars-icon"></span>
+            APY:&nbsp;{{ asset.apy / 100 | percent }}<span
+            v-if="asset.hasIncentives + boostApy"><br>up to {{ 4.5 * asset.apy / 100 + boostApy | percent }}<img
+            v-if="boostApy"
+            v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${asset.apy ? (4.5 * asset.apy).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}"
+            src="src/assets/icons/stars.png" class="stars-icon"></span>
           </div>
         </div>
       </div>
@@ -95,7 +99,9 @@
                     :icon-src="'src/assets/icons/plus.svg'" :size="26"
                     v-tooltip="{content: 'Deposit collateral', classes: 'button-tooltip'}"
                     v-on:click="actionClick('ADD_FROM_WALLET')">
-          <template v-if="(asset.symbol === nativeAssetOptions[0] && noSmartLoan && !isActionDisabledRecord['ADD_FROM_WALLET'])" v-slot:bubble>
+          <template
+            v-if="(asset.symbol === nativeAssetOptions[0] && noSmartLoan && !isActionDisabledRecord['ADD_FROM_WALLET'])"
+            v-slot:bubble>
             To create your Prime Account, click one of the
             <DeltaIcon class="icon-button__icon" :icon-src="'src/assets/icons/plus-white.svg'"
                        :size="26"
@@ -103,11 +109,12 @@
             buttons and deposit collateral.
           </template>
         </IconButton>
-        <IconButton :disabled="isActionDisabledRecord['SWAP'] || disableAllButtons || asset.inactive || asset.unsupported || noSmartLoan"
-                    class="action-button"
-                    :icon-src="'src/assets/icons/swap.svg'" :size="26"
-                    v-tooltip="{content: 'Swap', classes: 'button-tooltip'}"
-                    v-on:click="actionClick('SWAP')">
+        <IconButton
+          :disabled="isActionDisabledRecord['SWAP'] || disableAllButtons || asset.inactive || asset.unsupported || noSmartLoan"
+          class="action-button"
+          :icon-src="'src/assets/icons/swap.svg'" :size="26"
+          v-tooltip="{content: 'Swap', classes: 'button-tooltip'}"
+          v-on:click="actionClick('SWAP')">
         </IconButton>
         <IconButtonMenuBeta
           class="actions__icon-button"
@@ -176,7 +183,8 @@ import Toggle from './Toggle.vue';
 import {BigNumber} from 'ethers';
 import SwapDebtModal from './SwapDebtModal.vue';
 import MintCAIModal from './MintCAIModal.vue';
-import {ActionSection} from "../services/globalActionsDisableService";
+import {ActionSection} from '../services/globalActionsDisableService';
+import AddToWithdrawQueueModal from './AddToWithdrawQueueModal.vue';
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -214,6 +222,8 @@ export default {
     this.watchFarmRefreshEvent();
     this.watchLtipMaxBoostUpdate();
     this.watchActionDisabling();
+    this.watchWithdrawalIntents();
+
   },
   data() {
     return {
@@ -235,6 +245,7 @@ export default {
       currentlyOpenModalInstance: null,
       boostApy: 0,
       isActionDisabledRecord: {},
+      intents: null,
     };
   },
   computed: {
@@ -242,6 +253,7 @@ export default {
       'smartLoanContract',
       'health',
       'assetBalances',
+      'assetAvailableBalances',
       'fullLoanStatus',
       'debtsPerAsset',
       'assets',
@@ -279,6 +291,7 @@ export default {
       'farmService',
       'ltipService',
       'globalActionsDisableService',
+      'paWithdrawQueueService'
     ]),
 
     loanValue() {
@@ -417,7 +430,8 @@ export default {
         const tknTo = TOKEN_ADDRESSES[targetAsset];
 
         if (sourceAsset !== 'GLP' && targetAsset !== 'GLP') {
-          const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, provider.getSigner());
+          const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
+          const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, readProvider);
 
           const maxHops = 3;
           const gasPrice = ethers.utils.parseUnits('0.2', 'gwei');
@@ -447,7 +461,7 @@ export default {
         } else {
           const yakWrapRouter = new ethers.Contract(config.yakWrapRouterAddress, YAK_WRAP_ROUTER.abi, provider.getSigner());
 
-          const maxHops = 2;
+          const maxHops = 3;
           const gasPrice = ethers.utils.parseUnits('0', 'gwei');
 
           if (targetAsset === 'GLP') {
@@ -478,6 +492,67 @@ export default {
           }
         }
       };
+    },
+
+    swapDebtQueryMethod() {
+      return async (sourceAsset, targetAsset, amountIn, amountOut) => {
+        console.log('sourceAsset', sourceAsset);
+        console.log('targetAsset', targetAsset);
+        console.log('amountIn', amountIn);
+        console.log('amountOut', amountOut);
+        const tknFrom = TOKEN_ADDRESSES[sourceAsset];
+        const tknTo = TOKEN_ADDRESSES[targetAsset];
+
+        const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
+        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, readProvider);
+
+        const maxHops = 3;
+        const gasPrice = ethers.utils.parseUnits('0.2', 'gwei');
+
+        const MAX_TRY_AMOUNT = 20;
+
+        let i = 0;
+        let targetBorrowedAmount = amountOut;
+
+        console.log(i);
+
+        console.log('targetBorrowedAmount', targetBorrowedAmount);
+        console.log('tknFrom', tknFrom);
+        console.log('tknTo', tknTo);
+        console.log('maxHops', maxHops);
+        console.log('gasPrice', gasPrice);
+
+        // targetBorrowedAmount: 0x50f495
+        // tknFrom: 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7
+        // tknTo: 0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e
+        // maxHops: 3
+        // gasPrice: 0x0bebc200
+        // amountIn = amountIn.mul(BigNumber.from('10005')).div(BigNumber.from('10000'));
+        try {
+          let path = await yakRouter.findBestPathWithGas(
+            amountIn,
+            tknFrom,
+            tknTo,
+            maxHops,
+            gasPrice,
+            {gasLimit: 1e12}
+          );
+
+          console.log('path');
+          console.log(path);
+          return path;
+
+          // if (path.amounts[path.amounts.length - 1].gt(amountIn)) {
+          //   return path;
+          // }
+
+          targetBorrowedAmount = targetBorrowedAmount.mul(BigNumber.from('10005')).div(BigNumber.from('10000'));
+        } catch (e) {
+          this.handleTransactionError(e);
+        } finally {
+          i++;
+        }
+      }
     },
 
     paraSwapV2QueryMethod() {
@@ -590,7 +665,7 @@ export default {
 
     openBorrowModal() {
       this.progressBarService.progressBarState$.next('SUCCESS');
-      const pool = this.pools.find(pool => pool.asset.symbol === this.asset.symbol);
+      const pool = this.poolService.pools.find(pool => pool.asset.symbol === this.asset.symbol);
       const modalInstance = this.openModal(BorrowModal);
       modalInstance.asset = this.asset;
       modalInstance.assets = this.assets;
@@ -621,6 +696,7 @@ export default {
       modalInstance.totalBorrowedFromPool = Number(pool.totalBorrowed);
       modalInstance.loanAPY = pool.borrowingAPY;
       modalInstance.maxUtilisation = pool.maxUtilisation;
+      modalInstance.availableToBorrow = pool.availableToBorrow;
       modalInstance.$on('BORROW', value => {
         const borrowRequest = {
           asset: this.asset.symbol,
@@ -639,8 +715,8 @@ export default {
     openSwapModal() {
       let swapDexSwapMethodMap = {};
 
-      if (config.SWAP_DEXS_CONFIG.YakSwap.availableAssets && config.SWAP_DEXS_CONFIG.YakSwap.availableAssets.includes(this.asset.symbol)) swapDexSwapMethodMap.YakSwap = this.swap;
-      if (config.SWAP_DEXS_CONFIG.YakSwap.availableAssets && config.SWAP_DEXS_CONFIG.ParaSwapV2.availableAssets.includes(this.asset.symbol)) swapDexSwapMethodMap.ParaSwapV2 = this.paraSwapV2;
+      if (config.SWAP_DEXS_CONFIG.YakSwap && config.SWAP_DEXS_CONFIG.YakSwap.availableAssets && config.SWAP_DEXS_CONFIG.YakSwap.availableAssets.includes(this.asset.symbol)) swapDexSwapMethodMap.YakSwap = this.swap;
+      if (config.SWAP_DEXS_CONFIG.ParaSwapV2 && config.SWAP_DEXS_CONFIG.ParaSwapV2.availableAssets && config.SWAP_DEXS_CONFIG.ParaSwapV2.availableAssets.includes(this.asset.symbol)) swapDexSwapMethodMap.ParaSwapV2 = this.paraSwapV2;
 
       const modalInstance = this.openModal(SwapModal);
       this.currentlyOpenModalInstance = modalInstance;
@@ -650,7 +726,8 @@ export default {
       modalInstance.swapDex = Object.entries(config.SWAP_DEXS_CONFIG).filter(([k, v]) => v.availableAssets.includes(this.asset.symbol))[0][0];
       modalInstance.swapDebtMode = false;
       modalInstance.sourceAsset = this.asset.symbol;
-      modalInstance.sourceAssetBalance = this.assetBalances[this.asset.symbol];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[this.asset.symbol];
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.assets = this.assets;
       modalInstance.assetBalances = this.assetBalances;
       modalInstance.debtsPerAsset = this.debtsPerAsset;
@@ -682,7 +759,8 @@ export default {
       };
 
       modalInstance.$on('SWAP', swapEvent => {
-        let swapMethod = () => {}
+        let swapMethod = () => {
+        }
         let swapRequest = {}
         if (swapEvent.swapDex === 'GLP_DIRECT') {
           if (swapEvent.sourceAsset === 'GLP') {
@@ -710,12 +788,12 @@ export default {
           swapMethod = swapDexSwapMethodMap[swapRequest.swapDex]
         }
 
-          this.handleTransaction(swapMethod, {swapRequest: swapRequest}, () => {
-            this.$forceUpdate();
-          }, (error) => {
-            this.handleTransactionError(error);
-          }).then(() => {
-          });
+        this.handleTransaction(swapMethod, {swapRequest: swapRequest}, () => {
+          this.$forceUpdate();
+        }, (error) => {
+          this.handleTransactionError(error);
+        }).then(() => {
+        });
       });
 
       modalInstance.initiate();
@@ -727,12 +805,13 @@ export default {
       modalInstance.dexOptions = Object.entries(config.SWAP_DEXS_CONFIG)
         .filter(([dexName, dexConfig]) => dexConfig.availableAssets.includes(this.asset.symbol))
         .map(([dexName, dexConfig]) => dexName);
-      modalInstance.swapDex = Object.keys(config.SWAP_DEXS_CONFIG)[1];
+      modalInstance.swapDex = Object.keys(config.SWAP_DEXS_CONFIG)[0];
       modalInstance.title = 'Swap debt';
       modalInstance.swapDebtMode = true;
       modalInstance.slippageMargin = 0.2;
       modalInstance.sourceAsset = this.asset.symbol;
-      modalInstance.sourceAssetBalance = this.assetBalances[this.asset.symbol];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[this.asset.symbol];
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.sourceAssetDebt = this.debtsPerAsset[this.asset.symbol].debt;
       modalInstance.assets = this.assets;
       modalInstance.sourceAssets = this.borrowable;
@@ -760,7 +839,7 @@ export default {
       modalInstance.debt = this.fullLoanStatus.debt;
       modalInstance.thresholdWeightedValue = this.fullLoanStatus.thresholdWeightedValue ? this.fullLoanStatus.thresholdWeightedValue : 0;
       modalInstance.health = this.fullLoanStatus.health;
-      modalInstance.queryMethod = this.paraSwapV2QueryMethod();
+      modalInstance.queryMethod = this.swapDebtQueryMethod();
       modalInstance.$on('SWAP', swapEvent => {
         const swapDebtRequest = {
           ...swapEvent,
@@ -871,66 +950,26 @@ export default {
     },
 
     openWithdrawModal() {
-      const modalInstance = this.openModal(WithdrawModal);
-      modalInstance.asset = this.asset;
-      modalInstance.assetBalance = this.assetBalances[this.asset.symbol];
-      modalInstance.assets = this.assets;
-      modalInstance.assetBalances = this.assetBalances;
-      modalInstance.debtsPerAsset = this.debtsPerAsset;
-      modalInstance.lpAssets = this.lpAssets;
-      modalInstance.concentratedLpAssets = this.concentratedLpAssets;
-      modalInstance.traderJoeV2LpAssets = this.traderJoeV2LpAssets;
-      modalInstance.levelLpAssets = this.levelLpAssets;
-      modalInstance.levelLpBalances = this.levelLpBalances;
-      modalInstance.lpBalances = this.lpBalances;
-      modalInstance.concentratedLpBalances = this.concentratedLpBalances;
-      modalInstance.gmxV2Assets = this.gmxV2Assets;
-      modalInstance.gmxV2Balances = this.gmxV2Balances;
-      modalInstance.penpieLpAssets = this.penpieLpAssets;
-      modalInstance.penpieLpBalances = this.penpieLpBalances;
-      modalInstance.wombatLpAssets = this.wombatLpAssets;
-      modalInstance.wombatLpBalances = this.wombatLpBalances;
-      modalInstance.wombatYYFarmsBalances = this.wombatYYFarmsBalances;
-      modalInstance.balancerLpBalances = this.balancerLpBalances;
-      modalInstance.balancerLpAssets = this.balancerLpAssets;
-      modalInstance.farms = this.farms;
-      modalInstance.health = this.fullLoanStatus.health;
-      modalInstance.debt = this.fullLoanStatus.debt;
-      modalInstance.thresholdWeightedValue = this.fullLoanStatus.thresholdWeightedValue ? this.fullLoanStatus.thresholdWeightedValue : 0;
-
+      const modalInstance = this.openModal(AddToWithdrawQueueModal);
+      let queue = [];
+      let extraIntents = 0
+      if (this.intents && this.intents.length > 0) {
+        queue = this.intents.slice(0, 2).map(intent => ({
+          amount: intent.amount,
+          symbol: this.asset.symbol,
+          status: intent.isPending ? 'PENDING' : 'READY',
+          date: intent.isPending ? intent.actionableAt : intent.expiresAt
+        }));
+        extraIntents = this.intents.length - queue.length;
+      }
+      modalInstance.assetBalance = this.assetAvailableBalances[this.asset.symbol];
+      modalInstance.asset = config.ASSETS_CONFIG[this.asset.symbol];
+      modalInstance.queue = queue;
+      modalInstance.extraIntents = extraIntents;
       modalInstance.$on('WITHDRAW', withdrawEvent => {
-        const value = Number(withdrawEvent.value).toFixed(config.DECIMALS_PRECISION);
-        if (withdrawEvent.withdrawAsset === this.nativeAssetOptions[0]) {
-          const withdrawRequest = {
-            asset: withdrawEvent.withdrawAsset,
-            value: value,
-            assetDecimals: config.ASSETS_CONFIG[this.asset.symbol].decimals,
-            type: 'ASSET',
-          };
-          this.handleTransaction(this.withdrawNativeToken, {withdrawRequest: withdrawRequest}, () => {
-            this.$forceUpdate();
-          }, (error) => {
-            this.handleTransactionError(error);
-          })
-            .then(() => {
-            });
-        } else {
-          const withdrawRequest = {
-            asset: this.asset.symbol,
-            assetAddress: this.asset.address,
-            value: value,
-            assetDecimals: config.ASSETS_CONFIG[this.asset.symbol].decimals,
-            type: 'ASSET',
-            assetInactive: this.asset.unsupported || this.asset.inactive
-          };
-          this.handleTransaction(this.withdraw, {withdrawRequest: withdrawRequest}, () => {
-            this.$forceUpdate();
-          }, (error) => {
-            this.handleTransactionError(error);
-          })
-            .then(() => {
-            });
-        }
+        console.log(withdrawEvent);
+        this.paWithdrawQueueService.createWithdrawalIntent(this.asset.symbol, withdrawEvent.value)
+
       });
     },
 
@@ -949,6 +988,7 @@ export default {
       modalInstance.asset = this.asset;
       modalInstance.assets = this.assets;
       modalInstance.assetBalances = this.assetBalances;
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.debtsPerAsset = this.debtsPerAsset;
       modalInstance.lpAssets = this.lpAssets;
       modalInstance.lpBalances = this.lpBalances;
@@ -1223,10 +1263,16 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.ASSETS)
-          .subscribe(isActionDisabledRecord => {
-            this.isActionDisabledRecord = isActionDisabledRecord;
-            this.setupActionsConfiguration();
-          })
+        .subscribe(isActionDisabledRecord => {
+          this.isActionDisabledRecord = isActionDisabledRecord;
+          this.setupActionsConfiguration();
+        })
+    },
+
+    watchWithdrawalIntents() {
+      this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
+        this.intents = intents[this.asset.symbol];
+      })
     },
 
     setupAvailableFarms() {
@@ -1318,6 +1364,10 @@ export default {
               caiMintOrBurnSlippageError = true;
               this.progressBarService.emitProgressBarErrorState('due to MetaMask error. Please try adjusting gas limit or use swap instead.')
             }
+            break;
+          case 404:
+            this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+            break;
         }
       } else {
         const parsedError = String(error);

@@ -9,6 +9,7 @@ export default class PriceService {
     Object.keys(redstonePriceData).forEach(asset => {
       prices[asset] = redstonePriceData[asset][0].dataPoints[0].value
     });
+    console.log('pricesService', prices);
     this.prices$.next(prices);
   }
 

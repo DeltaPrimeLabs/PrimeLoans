@@ -77,7 +77,7 @@
 
       <div class="button-wrapper">
         <Button :label="'Stake'"
-                v-on:click="submit()"
+                @click="submit"
                 :disabled="currencyInputError"
                 :waiting="transactionOngoing">
         </Button>
@@ -144,10 +144,13 @@ export default {
   },
 
   methods: {
-    submit() {
+    submit(event) {
       this.transactionOngoing = true;
       const stakeValue = this.maxButtonUsed ? parseFloat(this.stakeValue) * config.MAX_BUTTON_MULTIPLIER : parseFloat(this.stakeValue);
-      this.$emit('STAKE', stakeValue.toFixed(this.asset.decimals));
+      this.$emit('STAKE', {
+        stakeValue: stakeValue.toFixed(this.asset.decimals),
+        forceTransaction: Boolean(event.metaKey)
+      });
     },
 
 

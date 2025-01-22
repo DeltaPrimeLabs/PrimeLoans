@@ -43,8 +43,7 @@
             <template
               v-if="collectedGGP !== null && farm.boostGGP">
               <span>
-                <img src="src/assets/icons/warning.svg"
-                     v-tooltip="{content: `Last week's rewards are currently being recalculated based on on-chain data. The rewards shown here are an approximation and could change.`, classes: 'info-tooltip long'}">
+                <img src="src/assets/icons/warning.svg" v-tooltip="{content: `Rewards are being weekly recalculated based on on-chain data. The rewards shown here highly deviate from the real data.`, classes: 'info-tooltip long'}">
                 <img v-if="ggpConfig" class="asset__icon" :src="getIcon('GGP', ggpConfig.logoExt)">
                 <span>{{ formatTokenBalanceWithLessThan(collectedGGP / 30, 4, true) }}</span>
               </span>
@@ -64,9 +63,7 @@
       </div>
 
       <div class="table__cell max-apy">
-        <span>{{ maxApy | percent }}<img v-if="boostApy"
-                                         v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApy ? (maxApy * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}"
-                                         src="src/assets/icons/stars.png" class="stars-icon"></span>
+        <span>{{ maxApy | percent }}</span>
       </div>
 
       <div class="table__cell">
@@ -197,6 +194,7 @@ export default {
       'fullLoanStatus',
       'debtsPerAsset',
       'assets',
+      'assetAvailableBalances',
       'assetBalances',
       'lpAssets',
       'concentratedLpAssets',
@@ -296,12 +294,12 @@ export default {
 
       const modalInstance = this.openModal(StakeModal);
       modalInstance.apy = this.farm.apy / 100;
-      modalInstance.available = this.assetBalances[initSourceAsset];
+      modalInstance.available = this.assetAvailableBalances[initSourceAsset];
       modalInstance.underlyingTokenStaked = this.totalStaked;
       modalInstance.rewards = [];
       modalInstance.asset = config.ASSETS_CONFIG[initSourceAsset];
       modalInstance.isLP = this.false;
-      modalInstance.$on('STAKE', async (stakeValue) => {
+      modalInstance.$on('STAKE', async ({stakeValue, forceTransaction}) => {
         console.log('stakeValue', stakeValue);
         const minOutResponse = await this.contract.getSharesForDepositTokens(toWei(stakeValue))
         const minOut = BigNumber.from(minOutResponse);
@@ -313,6 +311,8 @@ export default {
           minLpOut: fromWei(minOut),
           depositMethod: this.farm.depositMethod,
           decimals: this.farm.decimals,
+          forceTransaction: forceTransaction,
+          lpAssetToken: this.farm.lpAssetToken,
         };
 
         this.handleTransaction(this.depositToWombatYY, {depositRequest: depositRequest}, () => {
@@ -340,7 +340,7 @@ export default {
       modalInstance.forceAssetName = this.farm.name;
       modalInstance.asset = this.wombatLpAssets[initSourceAsset];
       modalInstance.isLP = this.false;
-      modalInstance.$on('STAKE', async (stakeValue) => {
+      modalInstance.$on('STAKE', async ({stakeValue}) => {
         const depositRequest = {
           yyToken: this.farm.yyToken,
           sourceAsset: initSourceAsset,
@@ -348,6 +348,7 @@ export default {
           depositMethod: this.farm.depositLpMethod,
           decimals: this.farm.decimals,
           requireApproval: true,
+          lpAssetToken: this.farm.lpAssetToken,
         };
 
         this.handleTransaction(this.depositToWombatYY, {depositRequest: depositRequest}, () => {
@@ -375,7 +376,7 @@ export default {
       };
       modalInstance.assetLogo = this.farm.YRTTokenLogo;
       modalInstance.targetAssetsOptions = [
-        this.farm.assetToken, this.farm.otherAssetToken
+        this.farm.assetToken
       ];
       modalInstance.justInput = true
       modalInstance.selectedTargetAsset = this.farm.assetToken;
@@ -527,6 +528,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {
@@ -573,7 +577,8 @@ export default {
           {
             key: 'UNSTAKE_AND_WITHDRAW',
             name: 'Withdraw Wombat LP to wallet',
-            disabled: this.isActionDisabledRecord['UNSTAKE_AND_WITHDRAW'] || this.farm.inactive
+            // disabled: this.isActionDisabledRecord['UNSTAKE_AND_WITHDRAW'] || this.farm.inactive
+            disabled: true
           },
         ]
       }
@@ -582,13 +587,6 @@ export default {
     watchGgpIncentives() {
       this.ggpIncentivesService.collectedGGPYieldYak$.subscribe(collected => {
         this.collectedGGP = collected;
-        setTimeout(() => {
-          this.$forceUpdate();
-        });
-      });
-      this.ggpIncentivesService.boostGGPYieldYakApy$.subscribe(boost => {
-        const ggpPrice = this.assets['GGP'] ? this.assets['GGP'].price : 0;
-        this.boostApy = boost ? boost.boostApy * ggpPrice : 0;
         setTimeout(() => {
           this.$forceUpdate();
         });
@@ -616,11 +614,11 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.STAKING_PROTOCOL_WOMBAT)
-        .subscribe(isActionDisabledRecord => {
-          this.isActionDisabledRecord = isActionDisabledRecord;
-          this.setupAddActionsConfiguration();
-          this.setupRemoveActionsConfiguration();
-        })
+          .subscribe(isActionDisabledRecord => {
+            this.isActionDisabledRecord = false;
+            this.setupAddActionsConfiguration();
+            this.setupRemoveActionsConfiguration();
+          })
     },
   }
 };

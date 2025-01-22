@@ -196,6 +196,7 @@ import zapLong from './zaps-tiles/ZapLong.vue';
 import {calculateGmxV2ExecutionFee, capitalize, hashData} from '../utils/blockchain';
 import Dropdown from './notifi/settings/Dropdown.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
+import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
 export default {
   name: 'GmxV2LpTableRow',
@@ -281,6 +282,7 @@ export default {
       'smartLoanContract',
       'fullLoanStatus',
       'assetBalances',
+      'assetAvailableBalances',
       'concentratedLpBalances',
       'levelLpBalances',
       'gmxV2Balances',
@@ -312,7 +314,8 @@ export default {
       'ltipService',
       'globalActionsDisableService',
       'sPrimeService',
-      'providerService'
+      'providerService',
+      'bullScoreService',
     ]),
     ...mapState('stakeStore', ['farms']),
 
@@ -464,6 +467,12 @@ export default {
 
       this.longTokenAmount = this.lpToken.isGMXPlus ? 2 * formatUnits(longTokenOut, longToken.decimals) : formatUnits(longTokenOut, longToken.decimals);
       this.shortTokenAmount = formatUnits(shortTokenOut, shortToken.decimals);
+      this.bullScoreService.setToken(TokenType.GMXV2, new AssetsEntry(
+          this.lpToken.symbol,
+          this.openInterestData ? (this.openInterestData[this.openInterestData.length - 1].y / 100) : 0.5,
+          { symbol: this.lpToken.longToken, value: Number(this.longTokenAmount) * this.assets[this.lpToken.longToken].price },
+          { symbol: this.lpToken.shortToken, value: this.lpToken.isGMXPlus ? 0 : Number(this.shortTokenAmount) * this.assets[this.lpToken.shortToken].price },
+      ))
     },
 
     toggleChart() {
@@ -710,7 +719,8 @@ export default {
       modalInstance.swapDebtMode = false;
       modalInstance.slippageMargin = 0.5;
       modalInstance.sourceAsset = initSourceAsset;
-      modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
+      modalInstance.sourceAssetBalance = this.assetAvailableBalances[initSourceAsset];
+      modalInstance.assetAvailableBalances = this.assetAvailableBalances;
       modalInstance.assets = {...this.assets};
       modalInstance.sourceAssets = this.lpToken.isGMXPlus ? [this.lpToken.longToken] : [this.lpToken.shortToken, this.lpToken.longToken];
       modalInstance.targetAssetsConfig = config.GMX_V2_ASSETS_CONFIG;
@@ -1114,6 +1124,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {

@@ -171,6 +171,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {
@@ -200,7 +203,8 @@ export default {
         const tknFrom = config.ASSETS_CONFIG[sourceAsset].address;
         const tknTo = config.ASSETS_CONFIG[targetAsset].address;
 
-        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, provider.getSigner());
+        const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
+        const yakRouter = new ethers.Contract(config.yakRouterAddress, YAK_ROUTER_ABI, readProvider);
 
         const maxHops = 3;
         const gasPrice = ethers.utils.parseUnits('0.2', 'gwei');

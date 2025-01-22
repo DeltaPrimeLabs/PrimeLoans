@@ -229,7 +229,9 @@ export default {
     },
 
     async query(sourceAsset, targetAsset, amountIn) {
-      return await this.queryMethod(sourceAsset, targetAsset, amountIn);
+      let queryResult = await this.queryMethod(sourceAsset, targetAsset, amountIn);
+      console.log('queryResult', queryResult);
+      return queryResult;
     },
 
     async chooseBestTrade(basedOnSource = true) {

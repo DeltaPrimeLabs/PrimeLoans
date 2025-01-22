@@ -179,6 +179,7 @@ export default {
       'fullLoanStatus',
       'debtsPerAsset',
       'assets',
+      'assetAvailableBalances',
       'lpAssets',
       'concentratedLpAssets',
       'concentratedLpBalances',
@@ -223,7 +224,7 @@ export default {
     actionClick(key) {
       console.log(key);
       console.log(this.isActionDisabledRecord[key]);
-      if (!this.isActionDisabledRecord[key]) {
+      if (!this.isActionDisabledRecord[key] || this.farm.enableStakeOverride || this.farm.enableUnstakeOverride) {
         switch (key) {
           case 'ADD_FROM_WALLET':
             this.openAddFromWalletModal();
@@ -348,13 +349,13 @@ export default {
 
       const modalInstance = this.openModal(StakeModal);
       modalInstance.apy = this.apy;
-      modalInstance.available = this.asset.secondary ? this.lpBalances[this.asset.symbol] : this.assetBalances[this.asset.symbol];
+      modalInstance.available = this.asset.secondary ? this.lpBalances[this.asset.symbol] : this.assetAvailableBalances[this.asset.symbol];
       modalInstance.underlyingTokenStaked = this.underlyingTokenStaked;
       modalInstance.rewards = this.rewards;
       modalInstance.asset = this.asset;
       modalInstance.protocol = this.protocol;
       modalInstance.isLP = this.isLP;
-      modalInstance.$on('STAKE', (stakeValue) => {
+      modalInstance.$on('STAKE', ({stakeValue}) => {
         const stakeRequest = {
           feedSymbol: this.farm.feedSymbol,
           assetSymbol: this.asset.symbol,
@@ -511,6 +512,9 @@ export default {
     },
 
     handleTransactionError(error) {
+      if (error.code === 404) {
+        this.progressBarService.emitProgressBarErrorState('Action is currently disabled')
+      }
       if (error.code === 4001 || error.code === -32603) {
         this.progressBarService.emitProgressBarCancelledState();
       } else {
@@ -524,7 +528,7 @@ export default {
       this.addActionsConfig =   {
         iconSrc: 'src/assets/icons/plus.svg',
         tooltip: 'Add',
-        disabled: this.farm.inactive,
+        disabled: this.farm.inactive || (this.isActionDisabledRecord['ADD_FROM_WALLET'] && (this.isActionDisabledRecord['STAKE'] && !this.farm.enableStakeOverride)),
         menuOptions: [
           {
             key: 'ADD_FROM_WALLET',
@@ -534,7 +538,7 @@ export default {
           {
             key: 'STAKE',
             name: 'Deposit into vault',
-            disabled: this.isActionDisabledRecord['STAKE']
+            disabled: this.isActionDisabledRecord['STAKE'] && !this.farm.enableStakeOverride
           },
         ]
       }
@@ -543,6 +547,7 @@ export default {
       this.removeActionsConfig =   {
         iconSrc: 'src/assets/icons/minus.svg',
         tooltip: 'Remove',
+        disabled: (this.isActionDisabledRecord['WITHDRAW'] || !this.farm.feedSymbol) && ((this.isActionDisabledRecord['UNSTAKE'] || this.farm.inactive) && !this.farm.enableUnstakeOverride),
         menuOptions: [
           {
             key: 'WITHDRAW',
@@ -553,7 +558,7 @@ export default {
           {
             key: 'UNSTAKE',
             name: 'Withdraw to assets',
-            disabled: this.isActionDisabledRecord['UNSTAKE'] || this.farm.inactive
+            disabled: (this.isActionDisabledRecord['UNSTAKE'] || this.farm.inactive) && !this.farm.enableUnstakeOverride,
           },
         ]
       }

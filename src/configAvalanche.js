@@ -45,6 +45,7 @@ export default {
       "GGP": {unsupported: true, name: "GGP", symbol: "GGP", logoExt: "png", decimals: 18, address: addresses.GGP, debtCoverage: 0, tradingViewSymbol: "TRADERJOE:GGPWAVAX_AE671E.USD", fetchPrice: true, priceEndpoint: "https://api.gogopool.com/prices", priceJsonField: "ggpInUSD"},
       "WOM": {unsupported: true, name: "WOM", symbol: "WOM", logoExt: "png", decimals: 18, address: addresses.WOM, debtCoverage: 0, tradingViewSymbol: "TRADERJOE:GGPWAVAX_AE671E.USD"},
     },
+    RTKN_2_ADDRESS: "0x0E31136cD6742B4656eD46E28306080620eD70a7",
     PRIME: {hide: true, name: "PRIME", symbol: "PRIME", decimals: 18, address: addresses.PRIME},
     SPRIME_CONFIG: {
         default: "TRADERJOEV2",
@@ -56,7 +57,7 @@ export default {
                 poolAddress: "0x8db6684838dBdA65952ae4bC576503f6eCC03864",
                 binStep: 50,
                 secondAssetDecimals: 18,
-                dexWebsite: "https://traderjoexyz.com/avalanche/trade?chain=avalanche&outputCurrency=0x33C8036E99082B0C395374832FECF70c42C7F298",
+                dexWebsite: "https://lfj.gg/avalanche/trade?chain=avalanche&outputCurrency=0x33C8036E99082B0C395374832FECF70c42C7F298",
                 revenueAwsEndpoint: "https://im34modd75.execute-api.eu-west-3.amazonaws.com/processedLiquidationsAvalanche"
             }
         }
@@ -98,14 +99,14 @@ export default {
     },
 
     SWAP_DEXS_CONFIG: {
-        ParaSwapV2: {
-            displayName: 'ParaSwap',
-            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX', 'CAI', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
-            slippageMargin: 0.05
-        },
+        // ParaSwapV2: {
+        //     displayName: 'ParaSwap',
+        //     availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
+        //     slippageMargin: 0.05
+        // },
         YakSwap: {
             displayName: 'YakSwap',
-            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'GLP', 'sAVAX', 'GMX', 'CAI', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
+            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'sAVAX', 'GMX', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
             slippageMargin: 0.02
         },
         GLP_DIRECT: {
@@ -131,8 +132,6 @@ export default {
         extreme: {value: 5, name: 'Extreme', imgSrc: 'src/assets/icons/error.svg', tooltip: 'Significant price variation expected. Recommended for use during more volatile market conditions.'},
     },
 
-    CAI_MINT_SOURCE_ASSETS: ['JOE', 'sAVAX', 'AVAX', 'QI'],
-    CAI_BURN_TARGET_ASSETS: ['JOE', 'sAVAX', 'AVAX', 'QI'],
     paraSwapDefaultSlippage: 1,
     showParaSwapWarning: true,
     ASSET_FILTER_TOKENS_OPTIONS: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX'],
@@ -141,27 +140,27 @@ export default {
     WRAPPED_TOKEN_ADDRESS: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
     POOLS_CONFIG: {
         AVAX: {
-            address: WAVAX_POOL_TUP.address,
+            address: '0xaa39f39802F8C44e48d4cc42E088C09EDF4daad4',
             tokenAddress: addresses.AVAX,
             hasAvalancheBoost: true
         },
         USDC: {
-            address: USDC_POOL_TUP.address,
+            address: '0x8027e004d80274FB320e9b8f882C92196d779CE8',
             tokenAddress: addresses.USDC,
             hasAvalancheBoost: true
         },
         USDT: {
-            address: USDT_POOL_TUP.address,
+            address: '0x1b6D7A6044fB68163D8E249Bce86F3eFbb12368e',
             tokenAddress: addresses.USDT,
             hasAvalancheBoost: true
         },
         BTC: {
-            address: BTC_POOL_TUP.address,
+            address: '0x70e80001bDbeC5b9e932cEe2FEcC8F123c98F738',
             tokenAddress: addresses.BTC,
             hasAvalancheBoost: true
         },
         ETH: {
-            address: ETH_POOL_TUP.address,
+            address: '0x2A84c101F3d45610595050a622684d5412bdf510',
             tokenAddress: addresses.ETH
         }
     },
@@ -274,10 +273,10 @@ export default {
       'WOMBAT_sAVAX_AVAX_LP_sAVAX': { decimals: 18, debtCoverage: 0.83333333333, balanceMethod: 'sAvaxBalanceAvaxSavax', pendingRewardsMethod: 'pendingRewardsForAvaxSavaxLpSavax', short: 'WOMBAT LP', logoExt: 'png', name: 'WOMBAT LP', addTokenApy: true, asset: 'sAVAX', apyKey: 'WOM_sAVAX_sAVAX' },
     },
     TRADERJOEV2_LP_ASSETS_CONFIG: {
-        'TJLB_JOE-AVAX_2_2': { primary: 'JOE', secondary: 'AVAX', name: 'JOE-AVAX', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_JOE-AVAX_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.25', address: addresses['TJLB_JOE-AVAX_2_2'], hooksSimpleRewarder: "0x0241e3cD944258e7F4658344E17669f3f85F3F43", rewardToken: 'AVAX', binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/avalanche/pool/v22/0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd/AVAX/25", isIncentivized: true},
-        'TJLB_USDT-USDC_2_2': { primary: 'USDT', secondary: 'USDC', name: 'USDT-USDC', dex: 'TraderJoe', version: '2.2',  symbol: 'TJLB_USDT-USDC_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.01', address: addresses['TJLB_USDT-USDC_2_2'], hooksSimpleRewarder: "0x90014c5E78Bd8a3E2bbBaA8e5a0Aee2C1D2131CD", rewardToken: 'AVAX', binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/avalanche/pool/v22/0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7/0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E/1", isIncentivized: true},
-        'TJLB_AVAX-USDC': { primary: 'AVAX', secondary: 'USDC', name: 'AVAX-USDC', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_AVAX-USDC', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.002', address: addresses['TJLB_AVAX-USDC'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://traderjoexyz.com/avalanche/pool/v21/AVAX/0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e/20"},
-        'TJLB_ETH-AVAX': { primary: 'ETH', secondary: 'AVAX', name: 'ETH-AVAX', dex: 'TraderJoe', symbol: 'TJLB_ETH-AVAX', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.001', address: addresses['TJLB_ETH-AVAX'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: 'https://traderjoexyz.com/avalanche/pool/v21/0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab/AVAX/10'},
+        'TJLB_JOE-AVAX_2_2': { primary: 'JOE', secondary: 'AVAX', name: 'JOE-AVAX', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_JOE-AVAX_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.25', address: addresses['TJLB_JOE-AVAX_2_2'], hooksSimpleRewarder: "0x0241e3cD944258e7F4658344E17669f3f85F3F43", rewardToken: 'AVAX', binStep: 25, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/avalanche/pool/v22/0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd/AVAX/25", isIncentivized: true},
+        'TJLB_USDT-USDC_2_2': { primary: 'USDT', secondary: 'USDC', name: 'USDT-USDC', dex: 'TraderJoe', version: '2.2',  symbol: 'TJLB_USDT-USDC_2_2', routerAddress: "0x18556DA13313f3532c54711497A8FedAC273220E", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.01', address: addresses['TJLB_USDT-USDC_2_2'], hooksSimpleRewarder: "0x90014c5E78Bd8a3E2bbBaA8e5a0Aee2C1D2131CD", rewardToken: 'AVAX', binStep: 1, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/avalanche/pool/v22/0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7/0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E/1", isIncentivized: true},
+        'TJLB_AVAX-USDC': { primary: 'AVAX', secondary: 'USDC', name: 'AVAX-USDC', dex: 'TraderJoe', version: '2.2', symbol: 'TJLB_AVAX-USDC', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.002', address: addresses['TJLB_AVAX-USDC'], binStep: 20, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: "https://lfj.gg/avalanche/pool/v21/AVAX/0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e/20"},
+        'TJLB_ETH-AVAX': { primary: 'ETH', secondary: 'AVAX', name: 'ETH-AVAX', dex: 'TraderJoe', symbol: 'TJLB_ETH-AVAX', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.001', address: addresses['TJLB_ETH-AVAX'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: 'https://lfj.gg/avalanche/pool/v21/0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab/AVAX/10'},
         'TJLB_BTC.b-AVAX': { primary: 'BTC', secondary: 'AVAX', name: 'BTC-AVAX', dex: 'TraderJoe', symbol: 'TJLB_BTCB-AVAX', routerAddress: "0xb4315e873dBcf96Ffd0acd8EA43f689D8c20fB30", debtCoverage: 0.83333333333, decimals: 18, baseFee: '0.1', address: addresses['TJLB_BTC.b-AVAX'], binStep: 10, addMethod: 'addLiquidityTraderJoeV2', removeMethod: 'removeLiquidityTraderJoeV2', link: 'https://traderjoexyz.com/avalanche/pool/v21/0x152b9d0fdc40c096757f570a51e494bd4b943e50/AVAX/10'},
     },
     LEVEL_LP_ASSETS_CONFIG: {},
@@ -341,7 +340,8 @@ export default {
                 debtCoverage: 0.83333333333,
                 rewardTokens: ['AVAX'],
                 strategy: 'AAVE',
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableUnstakeOverride: true
             },
             {
                 protocol: 'VECTOR_FINANCE',
@@ -408,6 +408,7 @@ export default {
                 strategy: 'Platypus',
                 banner: 'Due to the recent Platypus exploit, deposits in their farms have been disabled.',
                 refreshDelay: 60000,
+                enableUnstakeOverride: true
             },
             {
                 protocol: 'VECTOR_FINANCE',
@@ -530,7 +531,9 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'GMX',
                 rewardTokens: ['GLP'],
-                refreshDelay: 60000
+                refreshDelay: 60000,
+                enableStakeOverride: true,
+                enableUnstakeOverride: true
             },
         ],
         PNG_AVAX_USDC_LP: [
@@ -551,6 +554,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'Pangolin',
                 refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         PNG_AVAX_ETH_LP: [
@@ -571,6 +575,7 @@ export default {
                 debtCoverage: 0.83333333333,
                 strategy: 'Pangolin',
                 refreshDelay: 60000,
+                enableUnstakeOverride: true
             }
         ],
         // TJ_AVAX_USDC_LP: [
