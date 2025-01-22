@@ -104,7 +104,6 @@
           <div class="discount">
             <div class="discount__label">
               Distribution
-              <InfoIcon class="stat__info-icon" :size="16"></InfoIcon>
             </div>
             <div v-if="!data[1].fake" class="discount__value">
               1 rTKN = {{ data[0].conversionRatio | smartRound(3, true) }} PRIME
