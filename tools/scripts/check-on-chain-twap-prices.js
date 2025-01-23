@@ -77,7 +77,7 @@ const oracleConfig = {
     },
 
     // Tokens to price
-    tokensToPrice: {
+    tokensFetchPricesConfig: {
         BRETT: {
             pools: [
                 {
@@ -96,7 +96,8 @@ const oracleConfig = {
                         short: { seconds: 30, required: true },    // Required for price calc
                         mid: { seconds: 3600, required: false },   // Optional
                         long: { seconds: 86400, required: false }  // Optional
-                    }
+                    },
+                    quoteSizes: [1, 1200000]
                 }
             ]
         },
@@ -118,7 +119,8 @@ const oracleConfig = {
                         short: { seconds: 30, required: true },    // Required for price calc
                         mid: { seconds: 3600, required: false },   // Optional
                         long: { seconds: 86400, required: false }  // Optional
-                    }
+                    },
+                    quoteSizes: [1, 150000]
                 }
             ]
         },
@@ -134,7 +136,8 @@ const oracleConfig = {
                         short: { seconds: 30, required: true },    // Required for price calc
                         mid: { seconds: 3600, required: false },   // Optional
                         long: { seconds: 86400, required: false }  // Optional
-                    }
+                    },
+                    quoteSizes: [1, 800000]
                 }
             ]
         },
@@ -150,8 +153,9 @@ const oracleConfig = {
                         short: { seconds: 30, required: true },    // Required for price calc
                         mid: { seconds: 3600, required: false },   // Optional
                         long: { seconds: 86400, required: false }  // Optional
-                    }
-                }
+                    },
+                    quoteSizes: [1, 800000]
+                },
             ]
         },
         ODOS: {
@@ -166,8 +170,9 @@ const oracleConfig = {
                         short: { seconds: 30, required: true },    // Required for price calc
                         mid: { seconds: 3600, required: false },   // Optional
                         long: { seconds: 86400, required: false }  // Optional
-                    }
-                }
+                    },
+                    quoteSizes: [1, 4000000]
+                },
             ]
         },
     }
@@ -328,7 +333,7 @@ async function analyzeTwapObservability() {
         tokens: {}
     };
 
-    for (const [tokenSymbol, config] of Object.entries(oracleConfig.tokensToPrice)) {
+    for (const [tokenSymbol, config] of Object.entries(oracleConfig.tokensFetchPricesConfig)) {
         results.tokens[tokenSymbol] = { pools: [] };
 
         // Filter for CL pools
@@ -459,7 +464,7 @@ async function getTwapForDuration(poolAddress, duration, provider) {
 async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice, isCounterTokenFirst, tokenSymbol, counterTokenSymbol) {
     const twapResults = {
         priceForCalculation: null,
-        allPrices: {}
+        allPrices: []
     };
 
     const tokenConfig = oracleConfig.tokens[tokenSymbol];
@@ -479,11 +484,10 @@ async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice, is
         if (result.success) {
             let usdPrice = knownPrice / result.price;
 
-            twapResults.allPrices[period] = {
-                period: `${config.seconds}s`,
-                rawPrice: result.price,
+            twapResults.allPrices.push({
+                period: config.seconds,
                 usdPrice: usdPrice
-            };
+            });
 
             if (period === 'short') {
                 twapResults.priceForCalculation = result.price;
@@ -491,15 +495,15 @@ async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice, is
 
             console.log(`${period} TWAP (${config.seconds}s): ${result.price} (${usdPrice} USD)`);
         } else if (result.status === 'OLD') {
-            twapResults.allPrices[period] = {
-                period: `${config.seconds}s`,
-                status: 'OLD'
-            };
+            twapResults.allPrices.push({
+                period: config.seconds,
+                status: 'FAILED'
+            });
         } else {
-            twapResults.allPrices[period] = {
-                period: `${config.seconds}s`,
+            twapResults.allPrices.push({
+                period: config.seconds,
                 error: result.error
-            };
+            });
 
             if (config.required) {
                 return null;
@@ -549,7 +553,8 @@ async function getQuotePrice(poolAddress, tokenInSymbol, tokenOutSymbol, amountI
 
         // Calculate price ratio
         const price = parseFloat(amountOut) / parseFloat(amountIn);
-        return price;
+
+        return [amountIn, price];
     } catch (error) {
         console.error(`Error getting quote price for ${poolAddress}:`, error);
         return null;
@@ -594,12 +599,8 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
     const provider = new ethers.providers.JsonRpcProvider(oracleConfig.rpcUrl);
     const prices = [];
     let priceIndex = 0;
-    const allPriceData = {
-        prices: [],
-        twapData: [],
-        quoteData: [],
-        ammData: []
-    };
+    const allPriceData = [];
+    let timestamp = (new Date()).getTime();
 
     for (const pool of tokenConfig.pools) {
         const knownPrice = oracleConfig.knownPrices[pool.counterToken];
@@ -609,42 +610,51 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
 
         if (pool.type === 'CL') {
             // Run TWAP and quote calculations in parallel
-            const [twapResult, quotePrice] = await Promise.all([
-                getClPoolPrice(pool.address, pool.twapConfigs, provider, knownPrice, pool.isCounterTokenFirst, tokenSymbol, pool.counterToken),
-                getQuotePrice(
-                    pool.address,
-                    tokenSymbol,
-                    pool.counterToken,
-                    1,
-                    pool.tickSpacing,
-                    provider
-                )
-            ]);
+            const twapResult = await getClPoolPrice(pool.address, pool.twapConfigs, provider, knownPrice, pool.isCounterTokenFirst, tokenSymbol, pool.counterToken);
+
+            const quotePricesData = await Promise.all(pool.quoteSizes.map(
+                size =>
+                    getQuotePrice(
+                        pool.address,
+                        tokenSymbol,
+                        pool.counterToken,
+                        size,
+                        pool.tickSpacing,
+                        provider
+                    )
+            ));
+
 
             if (twapResult) {
-                allPriceData.twapData.push({
-                    poolAddress: pool.address,
-                    data: twapResult.allPrices
-                });
-
-                const twapUsdPrice = knownPrice / twapResult.priceForCalculation;
-                prices.push(twapUsdPrice);
-                allPriceData.prices.push({
-                    type: 'TWAP',
-                    poolAddress: pool.address,
-                    price: twapUsdPrice
-                });
-                console.log(`Price ${++priceIndex}: ${twapUsdPrice} (from Short TWAP)`);
+                for (let twapData of twapResult.allPrices) {
+                    const twapUsdPrice = knownPrice / twapResult.priceForCalculation;
+                    prices.push(twapUsdPrice);
+                    allPriceData.push({
+                        tokenSymbol: tokenSymbol,
+                        type: 'TWAP',
+                        poolAddress: pool.address,
+                        price: twapUsdPrice,
+                        twapDuration: twapData.period,
+                        timestamp: timestamp
+                    });
+                    console.log(`Price ${++priceIndex}: ${twapUsdPrice} (from Short TWAP)`);
+                }
             }
 
-            if (quotePrice) {
-                const quoteUsdPrice = quotePrice * knownPrice;
-                prices.push(quoteUsdPrice);
-                allPriceData.quoteData.push({
-                    poolAddress: pool.address,
-                    price: quoteUsdPrice
-                });
-                console.log(`Price ${++priceIndex}: ${quoteUsdPrice} (from Quote)`);
+            if (quotePricesData) {
+                for (let [amount, quotePrice] of quotePricesData) {
+                    const quoteUsdPrice = quotePrice * knownPrice;
+                    prices.push(quoteUsdPrice);
+                    allPriceData.push({
+                        tokenSymbol: tokenSymbol,
+                        type: 'QUOTE',
+                        quoteAmount: amount,
+                        poolAddress: pool.address,
+                        price: quoteUsdPrice,
+                        timestamp: timestamp
+                    });
+                    console.log(`Price ${++priceIndex}: ${quoteUsdPrice} (from Quote)`);
+                }
             }
 
         } else if (pool.type === 'AMM') {
@@ -658,9 +668,12 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
             if (ammPrice) {
                 const ammUsdPrice = knownPrice * ammPrice;
                 prices.push(ammUsdPrice);
-                allPriceData.ammData.push({
+                allPriceData.push({
+                    tokenSymbol: tokenSymbol,
+                    type: "AMM",
                     poolAddress: pool.address,
-                    price: ammUsdPrice
+                    price: ammUsdPrice,
+                    timestamp: timestamp
                 });
                 console.log(`Price ${++priceIndex}: ${ammUsdPrice} (from AMM)`);
             }
@@ -673,6 +686,12 @@ async function calculateTokenPrice(tokenSymbol, tokenConfig) {
 
     if (coinmarketCapId) {
         coinmarketPrice = await queryPriceFromCmc(coinmarketCapId);
+        allPriceData.push({
+            tokenSymbol: tokenSymbol,
+            type: 'CMC',
+            price: coinmarketPrice,
+            timestamp: timestamp
+        });
     }
 
     // Calculate average price from all valid results
@@ -717,14 +736,11 @@ async function main() {
     console.log('Starting price calculations...');
 
     const results = {};
-    for (const [token, config] of Object.entries(oracleConfig.tokensToPrice)) {
+    for (const [token, config] of Object.entries(oracleConfig.tokensFetchPricesConfig)) {
         console.log(`\nProcessing token: ${token}`);
         try {
             const priceResult = await calculateTokenPrice(token, config);
             results[token] = {
-                averagePrice: priceResult.averagePrice.toFixed(6),
-                coinmarketPrice: priceResult.coinmarketPrice,
-                timestamp: new Date().toISOString(),
                 priceData: priceResult.priceData
             };
         } catch (error) {
