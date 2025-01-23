@@ -689,11 +689,23 @@
   --s-prime-panel__chevron-color: #{$delta-accent};
   --s-prime-panel__chevron-color--hover: #{$persian-blue};
   --s-prime-panel__main-text-color: #{$dark-gray};
+  --s-prime-panel__sub-text-color: #{$medium-gray};
   --s-prime-panel__secondary-text-color: #{$black};
   --s-prime-panel__gauge-border: linear-gradient(to right, #{$delta-pale}, #{$pale-orange} 48%, #{$pale-raspberry});
   --s-prime-panel__gauge-box-shadow: 2px 2px 10px 0 #{$delta-steel}e5;
   --s-prime-panel__gauge-text-color: #{$delta-accent};
   --s-prime-panel__actions-info-divider-background: #{$smoke-gray};
+  // endregion
+
+  // region RTKNPanel
+  --rtkn-panel__discount-border: 2px solid #{$violet-smoke};
+  --rtkn-panel__discount-label-color: #{$delta-accent};
+  --rtkn-panel__discount-value-color: #{$persian-blue};
+  --rtkn-panel__discount-box-shadow: 2px 2px 7px 0 #{$delta-steel}40;
+  --rtkn-panel__faq-color: #{$persian-blue};
+  --rtkn-panel__faq-border: 2px solid #{$violet-smoke};
+  --rtkn-panel__faq-box-shadow: 2px 2px 7px 0 #{$delta-steel}40;
+  --rtkn-panel__value--secondary-color: #{$medium-gray};
   // endregion
 
   // region PriceRangeChart

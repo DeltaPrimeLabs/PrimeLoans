@@ -4,8 +4,8 @@
       <div class="main-content">
         <SPrimePanel class="sprime-panel" :is-prime-account="false" :user-address="account"
                      :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
-        <RTKNStatsBar :data="rtknData" :cross-chain-data="crossChainData">
-        </RTKNStatsBar>
+        <RTKNPanel v-if="rtknData" :data="rtknData" :prime-price="primePrice"
+                   :cross-chain-data="crossChainData"></RTKNPanel>
 
         <WithdrawalQueue ref="withdrawalQueue"
                          :all-queues="poolIntents"
@@ -62,6 +62,7 @@ import RTKNStatsBar from './RTKNStatsBar.vue';
 import WithdrawalQueuePerToken from './withdrawal-queue/WithdrawalQueuePerToken.vue';
 import WithdrawalQueue from './withdrawal-queue/WithdrawalQueue.vue';
 import Vue from 'vue';
+import RTKNPanel from './RTKNPanel.vue';
 
 const ethers = require('ethers');
 
@@ -70,6 +71,7 @@ let TOKEN_ADDRESSES;
 export default {
   name: 'PoolsBeta',
   components: {
+    RTKNPanel,
     WithdrawalQueue,
     WithdrawalQueuePerToken,
     RTKNStatsBar,
@@ -92,6 +94,7 @@ export default {
       this.watchPoolIntents();
       this.watchQueueData();
       this.setupRTKN();
+      this.setupPrimePrice();
     });
   },
 
@@ -107,6 +110,7 @@ export default {
       arbitrumChain: false,
       poolIntents: [],
       queueData: {},
+      primePrice: null,
     };
   },
   computed: {
@@ -119,7 +123,8 @@ export default {
       'progressBarService',
       'avalancheBoostService',
       'rtknService',
-      'poolWithdrawQueueService'
+      'poolWithdrawQueueService',
+      'priceService',
     ]),
     ...mapState('network', ['account', 'provider']),
   },
@@ -368,6 +373,15 @@ export default {
     setupRTKN() {
       this.rtknService.observeData().subscribe(data => {
         console.log(data);
+        if (!data[1]) {
+          console.log('no data for 2nd');
+          data[1] = {
+            rtknBalance: 0,
+            eligiblePrime: 0,
+            fake: true,
+          };
+        }
+        console.log(data);
         Vue.set(this, 'rtknData', data);
         this.$forceUpdate();
         setTimeout(() => {
@@ -381,6 +395,12 @@ export default {
         setTimeout(() => {
           this.$forceUpdate();
         }, 100);
+      })
+    },
+
+    setupPrimePrice() {
+      this.priceService.observePrices().subscribe(prices => {
+        this.primePrice = prices['PRIME'];
       })
     },
 
