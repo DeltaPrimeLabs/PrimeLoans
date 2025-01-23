@@ -110,7 +110,7 @@ export default {
   },
 
   computed: {
-    ...mapState('network', ['account', 'accountBalance']),
+    ...mapState('network', ['account']),
   },
 
   methods: {

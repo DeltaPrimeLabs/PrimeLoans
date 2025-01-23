@@ -67,7 +67,7 @@ export default {
       'fullLoanStatus'
     ]),
     ...mapState('stakeStore', ['farms']),
-    ...mapState('network', ['provider', 'account', 'accountBalance']),
+    ...mapState('network', ['provider', 'account']),
     ...mapState('serviceRegistry', [
       'progressBarService'
     ]),

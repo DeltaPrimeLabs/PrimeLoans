@@ -125,6 +125,7 @@ export default {
     this.watchLifi();
     this.watchActionDisabling();
     this.watchWithdrawalIntents();
+    this.watchAccountBalance();
   },
 
   data() {
@@ -141,11 +142,12 @@ export default {
       isAvalanche: null,
       isActionDisabledRecord: {},
       intents: null,
+      accountBalance: null,
     };
   },
 
   computed: {
-    ...mapState('network', ['account', 'accountBalance', 'provider']),
+    ...mapState('network', ['account', 'provider']),
     ...mapState('fundsStore', [
       'assetBalances',
       'fullLoanStatus',
@@ -163,7 +165,8 @@ export default {
       'progressBarService',
       'providerService',
       'globalActionsDisableService',
-      'poolWithdrawQueueService'
+      'poolWithdrawQueueService',
+      'accountService',
     ]),
   },
 
@@ -271,6 +274,12 @@ export default {
       this.poolWithdrawQueueService.observePoolIntents().subscribe(intents => {
         this.intents = intents[this.pool.asset.symbol];
       })
+    },
+
+    watchAccountBalance() {
+      this.accountService.observeBalance().subscribe(balance => {
+        this.accountBalance = balance;
+      });
     },
 
     actionClick(key) {

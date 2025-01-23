@@ -8,8 +8,16 @@ import redstone from 'redstone-api';
 const ethers = require('ethers');
 
 export default class PoolService {
+
+  ltipService;
+
   pools$ = new BehaviorSubject([]);
   pools = [];
+
+  constructor(ltipService) {
+    this.ltipService = ltipService;
+  }
+
 
   emitPools(pools) {
     this.pools = pools;
@@ -20,7 +28,7 @@ export default class PoolService {
     return this.pools$.asObservable();
   }
 
-  setupPools(provider, account, redstonePriceData, ltipService) {
+  setupPools(provider, account, prices) {
     console.log('PoolService.setupPools');
     const poolsFromConfig = Object.keys(config.POOLS_CONFIG);
 
@@ -34,7 +42,7 @@ export default class PoolService {
           poolContract.getBorrowingRate(),
           poolContract.totalBorrowed(),
           poolContract.getMaxPoolUtilisationForBorrowing(),
-          ltipService.observeLtipPoolData(),
+          this.ltipService.observeLtipPoolData(),
         ]).pipe(map(poolDetails => {
           const deposit = formatUnits(String(poolDetails[1]), config.ASSETS_CONFIG[poolAsset].decimals);
           const apy = fromWei(poolDetails[2]);
@@ -46,7 +54,7 @@ export default class PoolService {
           const maxUtilisation = fromWei(poolDetails[5]);
           const pool = {
             asset: config.ASSETS_CONFIG[poolAsset],
-            assetPrice: redstonePriceData[poolAsset][0].dataPoints[0].value,
+            assetPrice: prices[poolAsset],
             contract: poolContract,
             tvl: isPoolDisabled ? 0 : tvl,
             deposit: deposit,

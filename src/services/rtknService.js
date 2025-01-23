@@ -67,7 +67,6 @@ export default class RtknService {
   crossChainData$ = new BehaviorSubject({});
 
   constructor(providerService, accountService, progressBarService, modalService) {
-    console.log(config.chainSlug);
     this.progressBarService = progressBarService;
     this.modalService = modalService;
     combineLatest([providerService.observeProviderCreated(), accountService.observeAccountLoaded(), from(this.loadCrossChainPledgedData())])
@@ -75,7 +74,6 @@ export default class RtknService {
         this.provider = provider;
         this.account = account;
         this.chain = config.chainSlug;
-        console.log(this.rtknsConfig);
         this.rtknsConfig[this.chain].forEach(rtkn => {
           const converterContract = new ethers.Contract(rtkn.converterAddress, this.CONVERTER_ABI, provider);
           const tokenContract = new ethers.Contract(rtkn.tokenAddress, ERC_20_ABI, provider);
@@ -89,8 +87,6 @@ export default class RtknService {
   }
 
   async loadData(crossChainData, initialLoad = false) {
-    console.log('setup');
-    console.log(this.rtknsConfig);
     this.rtknsConfig[this.chain].forEach(rtknConfig => {
       this.getData(rtknConfig, crossChainData).then(data => {
         if (initialLoad) {
@@ -121,7 +117,6 @@ export default class RtknService {
     const eligiblePrime = rtknUtilized * rtknConfig.conversionRatio;
 
 
-    console.log(maxCap);
 
     return {
       maxCap,
@@ -170,7 +165,7 @@ export default class RtknService {
         this.loadData(this.crossChainData);
       }, 1000);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       this.handleError(error);
     }
   }

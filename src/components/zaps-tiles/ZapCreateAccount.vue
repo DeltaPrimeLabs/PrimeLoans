@@ -32,18 +32,22 @@ export default {
     disabled: null,
   },
   data() {
-    return {};
+    return {
+      accountBalance: 0,
+    };
   },
 
   computed: {
     ...mapState('fundsStore', []),
-    ...mapState('network', ['provider', 'account', 'accountBalance']),
+    ...mapState('network', ['provider', 'account']),
     ...mapState('serviceRegistry', [
-      'progressBarService'
+      'progressBarService',
+      'accountService',
     ]),
   },
 
   async mounted() {
+    this.watchAccountBalance();
   },
 
   methods: {
@@ -124,6 +128,13 @@ export default {
                 return balancesObject
               }
           ))
+    },
+
+    watchAccountBalance() {
+      this.accountService.observeBalance().subscribe(balance => {
+        console.log('received account balance', balance);
+        this.accountBalance = balance;
+      });
     },
   }
 };

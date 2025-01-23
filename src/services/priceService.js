@@ -1,6 +1,7 @@
 import {BehaviorSubject, Subject} from 'rxjs';
 
 export default class PriceService {
+  prices;
   prices$ = new BehaviorSubject({});
   refreshPrices$ = new Subject();
 
@@ -11,6 +12,8 @@ export default class PriceService {
     });
     console.log('pricesService', prices);
     this.prices$.next(prices);
+    this.prices = prices;
+    return prices;
   }
 
   emitRefreshPrices() {

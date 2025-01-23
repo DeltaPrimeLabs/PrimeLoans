@@ -44,16 +44,17 @@ export default {
       const poolService = rootState.serviceRegistry.poolService;
       const priceService = rootState.serviceRegistry.priceService;
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      // await poolService.setupPools(rootState.network.provider, rootState.network.account, priceService.prices)
+      //   .subscribe(pools => {
+      //     poolService.emitPools(pools);
+      //     commit('setPools', pools);
+      //     dispatch('setupsPrime');
+      //   });
 
-      priceService.setupPrices(redstonePriceData);
-      await poolService.setupPools(rootState.network.provider, rootState.network.account, redstonePriceData, rootState.serviceRegistry.ltipService)
-        .subscribe(pools => {
-          poolService.emitPools(pools);
-          commit('setPools', pools);
-          dispatch('setupsPrime');
-        });
+      poolService.observePools().subscribe(pools => {
+        commit('setPools', pools);
+        dispatch('setupsPrime');
+      })
 
       // Arbitrum-specific methods
       if (window.chain === 'arbitrum') {

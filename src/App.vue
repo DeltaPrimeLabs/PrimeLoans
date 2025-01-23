@@ -20,17 +20,17 @@
       </a>.
     </Banner>
     <Banner v-if="showConnectBanner">
-      You are not connected to Metamask. <a class="banner-link" @click="initNetwork"><b>Click here</b></a> to connect.
+      You are not connected to Metamask. Use wallet selector to connect.
     </Banner>
-<!--    <Banner v-if="showArbitrumDepositorBanner" background="green-accent" :closable="true">-->
-<!--      rTKN - PRIME conversion submissions close at 13th of November, 2pm CET.-->
-<!--      <a class="banner-link" href="https://discord.com/channels/889510301421166643/912702114252329060/1303715753735753780"-->
-<!--         target="_blank">-->
-<!--        <b>-->
-<!--          Read more.-->
-<!--        </b>-->
-<!--      </a>-->
-<!--    </Banner>-->
+    <!--    <Banner v-if="showArbitrumDepositorBanner" background="green-accent" :closable="true">-->
+    <!--      rTKN - PRIME conversion submissions close at 13th of November, 2pm CET.-->
+    <!--      <a class="banner-link" href="https://discord.com/channels/889510301421166643/912702114252329060/1303715753735753780"-->
+    <!--         target="_blank">-->
+    <!--        <b>-->
+    <!--          Read more.-->
+    <!--        </b>-->
+    <!--      </a>-->
+    <!--    </Banner>-->
     <Banner v-if="showInterestRateBanner" background="green-accent" :closable="true">
       Interest rate model will be updated at 12:00 CET. <a class="banner-link"
                                                            href="https://discord.com/channels/889510301421166643/912702114252329060/1180080211254050897"><b>Read
@@ -71,7 +71,8 @@
     <Banner v-if="showAvalancheDepositorBanner" :closable="true" background="green">
       Boost airdrop incoming!
     </Banner>
-    <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green" :closable="true">
+    <Banner v-if="showAvalanchePrimeAccountBanner || showArbitrumPrimeAccountBanner" background="green"
+            :closable="true">
       The Prime Account is granularly being unpaused.
       <a class="banner-link"
          href="https://discord.com/channels/889510301421166643/912702114252329060/1309493526601662484"
@@ -129,7 +130,7 @@ import {combineLatest, forkJoin, map} from 'rxjs';
 import fetch from 'node-fetch';
 import RestrictedCountryModal from './components/RestrictedCountryModal.vue';
 import SPrimeModal from './components/SPrimeModal.vue';
-import TermsService from "./services/termsService";
+import TermsService from './services/termsService';
 
 const BUY_SPRIME_MODAL_CLOSED = 'BUY_SPRIME_MODAL_CLOSED';
 
@@ -190,12 +191,13 @@ export default {
 
     await this.metamaskChecks();
 
-    if (!this.provider || !this.account) {
-      this.showConnectBanner = true;
-      return;
-    }
-
     this.initGasPrices();
+
+    setTimeout(() => {
+      this.accountService.observeAccount().subscribe(account => {
+        this.showConnectBanner = !account;
+      })
+    }, 500);
 
     if (window.location.href.includes('prime-account')) {
       this.showGlpBanner = true;
@@ -590,8 +592,8 @@ export default {
     },
 
   },
-  watch:{
-    $route (to){
+  watch: {
+    $route(to) {
       this.checkClaimTheme(to.fullPath)
     }
   },

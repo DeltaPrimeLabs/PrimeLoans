@@ -168,7 +168,7 @@ export default class TraderJoeService {
         gasLimit: this.calculateGasMargin(estimatedGasLimit)
       })
     } catch(error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -213,7 +213,6 @@ export default class TraderJoeService {
     }
 
     // To-do: set the dynamic amount slippage tolerance. for now we set it to 0.5%
-    console.log('allowedAmountsSlippage: ', allowedAmountsSlippage)
     const minTokenXAmount = totalXBalanceWithdrawn
       .mul(BigNumber.from(10000 - allowedAmountsSlippage))
       .div(BigNumber.from(10000));
@@ -248,7 +247,7 @@ export default class TraderJoeService {
 
       return rewardsInfo.data;
     } catch (error) {
-      console.log(`fetching rewards info failed. ${error}`);
+      console.error(`fetching rewards info failed. ${error}`);
     }
   }
 
@@ -258,7 +257,7 @@ export default class TraderJoeService {
 
       return lbHooksSimpleRewarder.getPendingRewards(primeAccountAddress, binIds);
     } catch (error) {
-      console.log(`fetching rewards info failed. ${error}`);
+      console.error(`fetching rewards info failed. ${error}`);
     }
   }
 }

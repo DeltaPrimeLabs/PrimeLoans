@@ -30,7 +30,7 @@ export default {
   props: {
     closable: {
       type: Boolean,
-      default: true
+      default: true,
     },
   }
 };

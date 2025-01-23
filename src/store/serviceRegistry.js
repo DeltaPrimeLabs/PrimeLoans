@@ -37,11 +37,13 @@ import FundsService from '../services/fundsService';
 import BullScoreService from "../services/bullScoreService";
 
 const accountService = new AccountService();
-const providerService = new ProviderService(accountService);
 const progressBarService = new ProgressBarService();
 const modalService = new ModalService();
-const poolService = new PoolService();
+const ltipService = new LtipService();
+const poolService = new PoolService(ltipService);
 const fundsService = new FundsService();
+const priceService = new PriceService();
+const providerService = new ProviderService(accountService, poolService, priceService);
 
 export default {
   namespaced: true,
@@ -59,7 +61,7 @@ export default {
     providerService: providerService,
     accountService: accountService,
     poolService: poolService,
-    priceService: new PriceService(),
+    priceService: priceService,
     collateralService: new CollateralService(),
     debtService: new DebtService(),
     themeService: new ThemeService(),
@@ -72,7 +74,7 @@ export default {
     uniswapV3Service: new UniswapV3Service(),
     termsService: new TermsService(),
     deprecatedAssetsService: new DeprecatedAssetsService(),
-    ltipService: new LtipService(),
+    ltipService: ltipService,
     ggpIncentivesService: new GgpIncentivesService(),
     sPrimeService: new sPrimeService(),
     vPrimeService: new vPrimeService(),

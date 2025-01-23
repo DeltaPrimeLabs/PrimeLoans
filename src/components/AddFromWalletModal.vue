@@ -186,7 +186,7 @@ export default {
   },
 
   computed: {
-    ...mapState('network', ['account', 'accountBalance']),
+    ...mapState('network', ['account']),
     getModalHeight() {
       return this.asset.symbol === this.toggleOptions[0] ? '561px' : null;
     },

@@ -298,8 +298,8 @@ export default {
     },
 
     initAccountApr() {
-      console.log('initAccountApr');
       combineLatest([
+        this.accountService.observeAccount(),
         this.poolService.observePools(),
         this.farmService.observeRefreshFarm(),
         this.dataRefreshEventService.observeAssetBalancesDataRefresh(),
@@ -310,8 +310,7 @@ export default {
         this.ltipService.observeLtipMaxBoostApy(),
         this.ggpIncentivesService.observeBoostGGPApy$(),
       ])
-        .subscribe(async ([, , , , , , eligibleTvl, maxBoostApy]) => {
-          console.log('INIT account apr');
+        .subscribe(async ([, , , , , , , eligibleTvl, maxBoostApy]) => {
           await this.getAccountApr({eligibleTvl, maxBoostApy});
         });
     },
@@ -454,7 +453,9 @@ export default {
       this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
         this.assetIntents = intents;
         this.$forceUpdate();
-        this.$refs.withdrawalQueue.refresh();
+        if(this.$refs.withdrawalQueue) {
+          this.$refs.withdrawalQueue.refresh();
+        }
       })
     },
 

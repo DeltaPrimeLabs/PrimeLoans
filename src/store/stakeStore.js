@@ -557,8 +557,6 @@ export default {
       } else {
         combineLatest(
           Object.values(config.FARMED_TOKENS_CONFIG).map(tokenFarms => {
-            console.log(tokenFarms);
-            console.log(tokenFarms.balanceMethod);
             return combineLatest(tokenFarms.map(farm => {
               const assetDecimals = config.ASSETS_CONFIG[farm.token] ? config.ASSETS_CONFIG[farm.token].decimals : 18;
               return combineLatest([
@@ -581,7 +579,6 @@ export default {
           const farmsDataPerFarm = farmsDataPerToken.flat();
 
           Object.values(config.FARMED_TOKENS_CONFIG).forEach(tokenFarms => {
-            console.log(tokenFarms);
             tokenFarms.forEach(farm => {
               const farmData = farmsDataPerFarm.find(data => data[1] === farm.protocolIdentifier);
               farm.totalBalance = farmData[3];
@@ -638,7 +635,7 @@ export default {
 
               farm.price = redstonePriceData[feedSymbol] ? redstonePriceData[feedSymbol][0].dataPoints[0].value : 0;
             } catch (e) {
-              console.log('farm price error');
+              console.error('farm price error', e);
             }
 
           }

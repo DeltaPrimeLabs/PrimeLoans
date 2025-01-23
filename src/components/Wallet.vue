@@ -1,37 +1,49 @@
 <template>
-  <div class="wallet">
-    <NetworkSelect v-if="!isClaimPage"></NetworkSelect>
-    <div class="prime-account" v-if="hasSmartLoanContract && !isClaimPage">
-      <div class="separator"></div>
-      <img class="logo" src="src/assets/logo/deltaprime.svg"/>
-      <div class="account" v-tooltip="{content: 'Your Prime Account address', classes: 'info-tooltip long'}">
-        <a :href="getPrimeAccountExplorerUrl" target="_blank">{{ smartLoanContract.address | tx(true) }}</a>
+  <div class="wallet-component">
+    <div v-if="account" class="wallet">
+      <NetworkSelect v-if="!isClaimPage"></NetworkSelect>
+      <div class="prime-account" v-if="hasSmartLoanContract && !isClaimPage">
+        <div class="separator"></div>
+        <img class="logo" src="src/assets/logo/deltaprime.svg"/>
+        <div class="account" v-tooltip="{content: 'Your Prime Account address', classes: 'info-tooltip long'}">
+          <a :href="getPrimeAccountExplorerUrl" target="_blank">{{ smartLoanContract.address | tx(true) }}</a>
+        </div>
       </div>
-    </div>
-    <div v-if="!isClaimPage" class="separator"></div>
-    <img class="logo" :src="getWalletIcon"/>
-    <div class="account" v-tooltip="{content: 'Your wallet address', classes: 'info-tooltip long'}">
-      <a :href='getWalletExplorerUrl' target="_blank">{{ account | tx(true) }}</a>
-    </div>
-    <div class="balance">{{ accountBalance | avax(3) }}</div>
-    <img class="logo" :src="tokenLogos[nativeToken]"/>
-    <div v-if="!isClaimPage" class="separator"></div>
-    <IconButton v-if="!isClaimPage"
-                :disabled="!account || !notifiScreenLoaded || !isNotifiEnabled"
-                ref="notifiBtn"
-                class="alert-icon"
-                :icon-src="'src/assets/icons/alert_icon.svg'" :size="20"
-                v-tooltip="{content: notificationTooltip, classes: 'info-tooltip'}"
-                @click="showModal = !showModal">
-    </IconButton>
-    <NotifiModal
+      <div v-if="!isClaimPage" class="separator"></div>
+      <img class="logo" :src="getWalletIcon"/>
+      <div class="account" v-tooltip="{content: 'Your wallet address', classes: 'info-tooltip long'}">
+        <a :href='getWalletExplorerUrl' target="_blank">{{ account | tx(true) }}</a>
+      </div>
+      <div class="balance">{{ accountBalance | avax(3) }}</div>
+      <img class="logo" :src="tokenLogos[nativeToken]"/>
+      <div v-if="!isClaimPage" class="separator"></div>
+      <IconButton v-if="!isClaimPage"
+                  :disabled="!account || !notifiScreenLoaded || !isNotifiEnabled"
+                  ref="notifiBtn"
+                  class="alert-icon"
+                  :icon-src="'src/assets/icons/alert_icon.svg'" :size="20"
+                  v-tooltip="{content: notificationTooltip, classes: 'info-tooltip'}"
+                  @click="showModal = !showModal">
+      </IconButton>
+      <NotifiModal
         :show="showModal"
         v-closable="{
         exclude: ['notifiBtn'],
         handler: 'handleClose'
       }"
-    >
-    </NotifiModal>
+      >
+      </NotifiModal>
+      <div v-if="!isClaimPage" class="separator"></div>
+      <IconButton ref="notifiBtn"
+                  class="alert-icon"
+                  :icon-src="'src/assets/icons/cross.svg'" :size="20"
+                  @click="resetWallet">
+      </IconButton>
+    </div>
+
+    <div v-if="!account">
+      <WalletSelect @walletSelected="connectWallet"></WalletSelect>
+    </div>
   </div>
 </template>
 
@@ -42,6 +54,8 @@ import IconButton from './IconButton.vue';
 import NetworkSelect from './NetworkSelect.vue';
 import NotifiModal from './notifi/NotifiModal.vue';
 import config from '../config';
+import Button from './Button.vue';
+import WalletSelect from './WalletSelect.vue';
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -53,17 +67,18 @@ const nativeTokesLogos = {
 export default {
   name: 'Wallet',
   components: {
+    WalletSelect,
     IconButton,
     NotifiModal,
     NetworkSelect,
+    Button
   },
   props: {
     isClaimPage: null,
   },
   computed: {
-    ...mapState('network', ['provider', 'account', 'accountBalance']),
     ...mapState('fundsStore', ['smartLoanContract', 'noSmartLoan']),
-    ...mapState('serviceRegistry', ['notifiService']),
+    ...mapState('serviceRegistry', ['notifiService', 'accountService', 'providerService']),
     network() {
       return 'Avalanche';
     },
@@ -117,11 +132,17 @@ export default {
       notifi: null,
       tokenLogos: nativeTokesLogos,
       nativeToken: config.nativeToken,
+      accountBalance: null,
+      account: null,
+      provider: null,
     };
   },
   mounted() {
     this.watchNotifi();
     this.watchNotifiCurrentScreen();
+    this.watchAccountBalance();
+    this.watchAccount();
+    this.watchProvider();
   },
   methods: {
     watchNotifi() {
@@ -141,6 +162,25 @@ export default {
       });
     },
 
+    watchAccountBalance() {
+      this.accountService.observeBalance().subscribe(balance => {
+        console.log('received account balance', balance);
+        this.accountBalance = balance;
+      });
+    },
+
+    watchAccount() {
+      this.accountService.observeAccount().subscribe(account => {
+        this.account = account;
+      });
+    },
+
+    watchProvider() {
+      this.providerService.observeProvider().subscribe(provider => {
+        this.provider = provider;
+      });
+    },
+
     notificationTooltip() {
       return this.isNotifiEnabled ?
           `
@@ -152,7 +192,25 @@ export default {
         `
           :
           `<span>Coming soon!</span>`;
-    }
+    },
+
+    connectWallet(walletId) {
+      switch (walletId) {
+        case 'RABBY': {
+          this.providerService.initMetamaskProvider();
+          break;
+        }
+
+        case 'WALLET_CONNECT': {
+          this.providerService.initWalletConnectProvider();
+          break;
+        }
+      }
+    },
+
+    resetWallet() {
+      this.providerService.resetWallet();
+    },
   }
 };
 </script>

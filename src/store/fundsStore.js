@@ -1116,8 +1116,6 @@ export default {
             levelLpBalances[key] = fromWei(result.returnData[index]);
           }
         )
-        console.warn('MULTICALL result');
-        console.log(result);
       }
 
       if (config.BALANCER_LP_ASSETS_CONFIG) {
@@ -1176,11 +1174,9 @@ export default {
       // TODO remove after removing deprecated assets
       for (let asset of Object.values(state.assets)) {
         if (asset.droppingSupport || asset.unsupported) {
-          console.log('droppingSupport', asset.symbol, balances[asset.symbol]);
           let tokenContract = new ethers.Contract(asset.address, erc20ABI, rootState.network.provider.getSigner());
           balances[asset.symbol] = formatUnits(await tokenContract.balanceOf(state.smartLoanContract.address), asset.decimals);
           if (balances[asset.symbol] === undefined || Number(balances[asset.symbol]) === 0) {
-            console.warn('deleting', asset.symbol);
             delete state.assets[asset.symbol];
           }
         }
@@ -1235,18 +1231,15 @@ export default {
 
       const response = await multicallContract.callStatic.aggregate(requests);
       console.log('MULTI RESPONSE LEVEL');
-      console.log(response);
 
 
       // noinspection ES6MissingAwait
       Object.keys(state.concentratedLpAssets).forEach(async assetSymbol => {
-        console.log(assetSymbol);
         const abi = ['function getUnderlyingAssets(uint256) public view returns (uint256, uint256)'];
         const poolContract = await new ethers.Contract(concentratedLpAssets[assetSymbol].address, abi, provider.getSigner());
         const poolBalance = toWei(state.concentratedLpBalances[assetSymbol].toString());
 
         const balances = await poolContract.getUnderlyingAssets(poolBalance);
-        console.log(balances);
 
         concentratedLpAssets[assetSymbol].primaryBalance = formatUnits(balances[0], state.assets[concentratedLpAssets[assetSymbol].primary].decimals);
         concentratedLpAssets[assetSymbol].secondaryBalance = formatUnits(balances[1], state.assets[concentratedLpAssets[assetSymbol].secondary].decimals);
@@ -1370,8 +1363,6 @@ export default {
 
       const isLiquidityValuable = Number(lpAsset.primaryBalance) > 0 || Number(lpAsset.secondaryBalance) > 0;
 
-      console.log('loan bin ids', loanBinIds);
-
       lpAsset.binIds = isLiquidityValuable ? loanBinIds : []; // bin Ids where loan has liquidity for a LB pair
       lpAsset.accountBalances = isLiquidityValuable ? accountBalances : []; // balances of account owned bins (the same order as binIds)
       lpAsset.accountBalancesPrimary = isLiquidityValuable ? accountBalancesPrimary : []; // balances of account owned bins (the same order as binIds)
@@ -1421,8 +1412,6 @@ export default {
 
       let assets = state.assets;
       const apys = state.apys;
-      console.warn('--------___---__---APYYYYYYYS___--___--___--____--');
-      console.log(apys);
 
       for (let [symbol, asset] of Object.entries(assets)) {
         // we don't use getApy method anymore, but fetch APYs from db
@@ -1475,7 +1464,6 @@ export default {
             traderJoeV2LpAssets[symbol].apy = traderJoeV2LpAssets[symbol].hardcodeApy;
           }
 
-          console.log(symbol, 'APY: ', traderJoeV2LpAssets[symbol].apy);
         }
       }
       commit('setTraderJoeV2LpAssets', traderJoeV2LpAssets);
@@ -1568,8 +1556,8 @@ export default {
           ]
         );
       } catch (e) {
-        console.log('error')
-        console.log(e)
+        console.error('error')
+        console.error(e)
       }
 
       let owned = decodeOutput(SMART_LOAN.abi, 'getAllOwnedAssets', result.returnData[0])[0];
@@ -1605,10 +1593,15 @@ export default {
       let apr = 0;
       let yearlyDebtInterest = 0;
 
-      if (rootState.poolStore.pools && state.debtsPerAsset) {
+      const pools = rootState.serviceRegistry.poolService.pools;
+      console.log('pools,', pools);
+      console.log('state.debtsPerAsset', state.debtsPerAsset);
+
+
+      if (pools && state.debtsPerAsset) {
         Object.entries(state.debtsPerAsset).forEach(
           ([symbol, debt]) => {
-            const pool = rootState.poolStore.pools.find(pool => pool.asset.symbol === symbol);
+            const pool = pools.find(pool => pool.asset.symbol === symbol);
             if (pool) {
               yearlyDebtInterest += parseFloat(debt.debt) * pool.borrowingAPY * state.assets[symbol].price;
             }

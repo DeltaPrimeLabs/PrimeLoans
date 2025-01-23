@@ -214,7 +214,6 @@ export default {
       this.dex = config.SPRIME_CONFIG.default;
       this.secondAsset = config.SPRIME_CONFIG[this.dex].default;
       this.sPrimeConfig = config.SPRIME_CONFIG[this.dex][this.secondAsset];
-      console.log(this.secondAsset);
 
       const sprimeStart = new Date();
       sprimeStart.setDate(1);

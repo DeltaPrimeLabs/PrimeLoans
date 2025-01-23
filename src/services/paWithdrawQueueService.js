@@ -28,7 +28,7 @@ export default class PAWithdrawQueueService {
     this.progressBarService = progressBarService;
     this.modalService = modalService;
     this.fundsService = fundsService;
-    combineLatest([providerService.observeProviderCreated(), accountService.observeAccountLoaded(), accountService.observeSmartLoanContract()])
+    combineLatest([providerService.observeProvider(), accountService.observeAccount(), accountService.observeSmartLoanContract()])
     .pipe(filter(([,, primeAccountContract]) => primeAccountContract))
       .subscribe(async ([provider, account, primeAccountContract]) => {
         this.provider = provider;

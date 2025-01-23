@@ -15,7 +15,7 @@
 
       <div class="table__cell table__cell--double-value lp-balance">
         <template
-            v-if="wombatLpBalances">
+          v-if="wombatLpBalances">
           <div class="double-value__pieces">
             {{ wombatLpBalances[lpToken.symbol] | smartRound }}
           </div>
@@ -32,7 +32,7 @@
 
       <div class="table__cell table__cell--double-value staked">
         <template
-            v-if="wombatLpBalances">
+          v-if="wombatLpBalances">
           <div class="double-value__pieces">
             {{
               wombatLpBalances[lpToken.symbol] * wombatLpAssets[lpToken.symbol].price / assets[lpToken.asset].price | smartRound
@@ -53,7 +53,7 @@
         <template>
           <div class="table__cell rewards">
             <template
-                v-if="wombatLpAssets && wombatLpAssets[lpToken.symbol].rewards && wombatLpAssets[lpToken.symbol].rewards.length > 0">
+              v-if="wombatLpAssets && wombatLpAssets[lpToken.symbol].rewards && wombatLpAssets[lpToken.symbol].rewards.length > 0">
               <span v-for="reward in wombatLpAssets[lpToken.symbol].rewards">
                 <img class="asset__icon" :src="getIcon(reward.asset, rewardsTokens[reward.asset].logoExt)">
                 <span>{{ formatTokenBalanceWithLessThan(reward.amountFormatted, 4, true) }}</span>
@@ -69,7 +69,7 @@
         <template>
           <div class="table__cell ggp-collected">
             <template
-                v-if="collectedGGP !== null && lpToken.boostGGP">
+              v-if="collectedGGP !== null && lpToken.boostGGP">
               <span>
                 <img class="asset__icon" :src="getIcon('GGP', rewardsTokens['GGP'].logoExt)">
                 <span>{{ formatTokenBalanceWithLessThan(collectedGGP, 4, true) }}</span>
@@ -99,8 +99,9 @@
 
       <div class="table__cell table__cell--double-value max-apr">
         <span v-if="lpToken.boostGGP">{{ (maxApr + 4.5 * boostApy) | percent }}<img v-if="boostApy"
-                                                      v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApr ? (maxApr * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (4.5 * boostApy * 100).toFixed(2) : 0}% GGP incentives`, classes: 'info-tooltip'}"
-                                                      src="src/assets/icons/stars.png" class="stars-icon"></span>
+                                                                                    v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApr ? (maxApr * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (4.5 * boostApy * 100).toFixed(2) : 0}% GGP incentives`, classes: 'info-tooltip'}"
+                                                                                    src="src/assets/icons/stars.png"
+                                                                                    class="stars-icon"></span>
         <span v-if="!lpToken.boostGGP">{{ maxApr | percent }}</span>
       </div>
 
@@ -108,25 +109,25 @@
 
       <div class="table__cell actions">
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            :config="addActionsConfig"
-            v-if="addActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
+          class="actions__icon-button"
+          :config="addActionsConfig"
+          v-if="addActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button last"
-            :config="removeActionsConfig"
-            v-if="removeActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
+          class="actions__icon-button last"
+          :config="removeActionsConfig"
+          v-if="removeActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="moreActionsConfig"
-            :config="moreActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
+          class="actions__icon-button"
+          v-if="moreActionsConfig"
+          :config="moreActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
         </IconButtonMenuBeta>
       </div>
 
@@ -136,26 +137,26 @@
 </template>
 
 <script>
-import AddFromWalletModal from "./AddFromWalletModal.vue";
+import AddFromWalletModal from './AddFromWalletModal.vue';
 
 const ethers = require('ethers');
-import DoubleAssetIcon from "./DoubleAssetIcon.vue";
-import Chart from "./Chart.vue";
-import IconButtonMenuBeta from "./IconButtonMenuBeta.vue";
-import SmallBlock from "./SmallBlock.vue";
-import {mapActions, mapState} from "vuex";
-import {calculateMaxApy, formatUnits} from "../utils/calculate";
-import erc20ABI from "../../test/abis/ERC20.json";
-import config from "../config";
-import TOKEN_ADDRESSES from "../../common/addresses/arbitrum/token_addresses.json";
-import WithdrawModal from "./WithdrawModal.vue";
-import SwapModal from "./SwapModal.vue";
-import {BigNumber} from "ethers";
-import {wrapContract} from "../utils/blockchain";
-import ClaimRewardsModal from "./ClaimRewardsModal.vue";
+import DoubleAssetIcon from './DoubleAssetIcon.vue';
+import Chart from './Chart.vue';
+import IconButtonMenuBeta from './IconButtonMenuBeta.vue';
+import SmallBlock from './SmallBlock.vue';
+import {mapActions, mapState} from 'vuex';
+import {calculateMaxApy, formatUnits} from '../utils/calculate';
+import erc20ABI from '../../test/abis/ERC20.json';
+import config from '../config';
+import TOKEN_ADDRESSES from '../../common/addresses/arbitrum/token_addresses.json';
+import WithdrawModal from './WithdrawModal.vue';
+import SwapModal from './SwapModal.vue';
+import {BigNumber} from 'ethers';
+import {wrapContract} from '../utils/blockchain';
+import ClaimRewardsModal from './ClaimRewardsModal.vue';
 import BarGaugeBeta from './BarGaugeBeta.vue';
-import ABI_WOMBAT_DYNAMIC_POOL_V2 from "../abis/WombatDynamicPoolV2.json";
-import { ActionSection } from "../services/globalActionsDisableService";
+import ABI_WOMBAT_DYNAMIC_POOL_V2 from '../abis/WombatDynamicPoolV2.json';
+import {ActionSection} from '../services/globalActionsDisableService';
 
 export default {
   name: 'WombatLpTableRow',
@@ -223,6 +224,7 @@ export default {
       'healthService',
       'providerService',
       'ggpIncentivesService',
+      'priceService'
     ]),
     maxApr() {
       return calculateMaxApy(this.pools, this.apr / 100);
@@ -329,18 +331,18 @@ export default {
           case 'ADD_FROM_WALLET':
             this.openAddFromWalletModal();
             break;
-            // case 'IMPORT_AND_STAKE':
-            //   this.openImportAndStakeModal();
-            //   break;
+          // case 'IMPORT_AND_STAKE':
+          //   this.openImportAndStakeModal();
+          //   break;
           case 'CREATE_LP':
             this.openStakeModal();
             break;
           case 'EXPORT_LP':
             this.openWithdrawModal();
             break;
-            // case 'UNSTAKE_AND_EXPORT':
-            //   this.openUnstakeAndExportModal();
-            //   break;
+          // case 'UNSTAKE_AND_EXPORT':
+          //   this.openUnstakeAndExportModal();
+          //   break;
           case 'UNWIND':
             this.openUnwindModal();
             break;
@@ -580,8 +582,8 @@ export default {
         }, (error) => {
           this.handleTransactionError(error);
         })
-            .then(() => {
-            });
+          .then(() => {
+          });
       });
     },
 
@@ -663,12 +665,12 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.WOMBAT_LP)
-      .subscribe(isActionDisabledRecord => {
-        this.isActionDisabledRecord = isActionDisabledRecord;
-        this.setupAddActionsConfiguration();
-        this.setupRemoveActionsConfiguration();
-        this.setupMoreActionsConfiguration();
-      })
+        .subscribe(isActionDisabledRecord => {
+          this.isActionDisabledRecord = isActionDisabledRecord;
+          this.setupAddActionsConfiguration();
+          this.setupRemoveActionsConfiguration();
+          this.setupMoreActionsConfiguration();
+        })
     },
 
     watchExternalAssetBalanceUpdate() {
@@ -738,23 +740,25 @@ export default {
     },
 
     async createContractObject() {
-      console.log(this.provider);
       this.contract = await new ethers.Contract(this.lpToken.poolAddress, ABI_WOMBAT_DYNAMIC_POOL_V2, this.provider.getSigner());
     },
 
     watchGgpIncentives() {
-      this.ggpIncentivesService.collectedGGP$.subscribe(collected => {
-        this.collectedGGP = collected;
-        setTimeout(() => {
-          this.$forceUpdate();
+      this.priceService.observePrices().subscribe(prices => {
+
+        this.ggpIncentivesService.collectedGGP$.subscribe(collected => {
+          this.collectedGGP = collected;
+          setTimeout(() => {
+            this.$forceUpdate();
+          });
         });
-      });
-      this.ggpIncentivesService.boostGGPApy$.subscribe(boost => {
-        this.boostApy = boost ? boost.boostApy * this.assets['GGP'].price : 0;
-        setTimeout(() => {
-          this.$forceUpdate();
+        this.ggpIncentivesService.boostGGPApy$.subscribe(boost => {
+          this.boostApy = boost ? boost.boostApy * prices['GGP'] : 0;
+          setTimeout(() => {
+            this.$forceUpdate();
+          });
         });
-      });
+      })
     }
   }
 }

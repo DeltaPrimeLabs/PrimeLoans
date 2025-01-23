@@ -4,7 +4,9 @@ export default class accountService {
 
   accountLoaded$ = new Subject();
   smartLoanContract$ = new BehaviorSubject(null);
-  account$ = new BehaviorSubject();
+  account$ = new BehaviorSubject(null);
+  balance$ = new BehaviorSubject(null);
+
 
   observeAccountLoaded() {
     return this.accountLoaded$.asObservable();
@@ -18,6 +20,10 @@ export default class accountService {
     return this.account$.asObservable();
   }
 
+  observeBalance() {
+    return this.balance$.asObservable();
+  }
+
   emitAccountLoaded(account) {
     this.accountLoaded$.next(account);
   }
@@ -28,5 +34,10 @@ export default class accountService {
 
   emitAccount(account) {
     this.account$.next(account);
+  }
+
+  emitBalance(balance) {
+    console.log('emitting account balance', balance);
+    this.balance$.next(balance);
   }
 }

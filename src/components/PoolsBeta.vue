@@ -121,7 +121,7 @@ export default {
       'rtknService',
       'poolWithdrawQueueService'
     ]),
-    ...mapState('network', ['account', 'accountBalance', 'provider']),
+    ...mapState('network', ['account', 'provider']),
   },
 
   methods: {

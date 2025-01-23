@@ -135,7 +135,7 @@ export async function vectorFinanceApy(token) {
 }
 
 export async function yieldYakRewards(stakingContractAddress, address) {
-  const tokenContract = new ethers.Contract(stakingContractAddress, erc20ABI, provider.getSigner());
+  const tokenContract = new ethers.Contract(stakingContractAddress, erc20ABI, window.provider.getSigner());
   const totalSupply = formatUnits(await tokenContract.totalSupply(), 18);
   const totalDeposits = formatUnits(await tokenContract.totalDeposits(), 18);
   const yrtToAvaxConversionRate = totalDeposits / totalSupply;
@@ -147,13 +147,12 @@ export async function yieldYakRewards(stakingContractAddress, address) {
 
 export async function yieldYakBalance(stakingContractAddress, address, decimals = 18) {
   try {
-    console.log('try yieldYakBalance')
-    const tokenContract = new ethers.Contract(stakingContractAddress, erc20ABI, provider.getSigner());
+    const tokenContract = new ethers.Contract(stakingContractAddress, erc20ABI, window.provider.getSigner());
     const stakedYrtWei = await tokenContract.balanceOf(address);
 
     return formatUnits(stakedYrtWei, decimals);
   } catch (e) {
-    console.log('yieldYakBalance error')
+    console.error('yieldYakBalance error', stakingContractAddress, e)
     return 0;
   }
 
@@ -185,7 +184,7 @@ export async function yieldYakStaked(address) {
 export async function vectorFinanceBalance(stakingContractAddress, address, decimals = 18) {
   let result = 0;
   try {
-    const tokenContract = new ethers.Contract(stakingContractAddress, IVectorFinanceStakingArtifact.abi, provider.getSigner());
+    const tokenContract = new ethers.Contract(stakingContractAddress, IVectorFinanceStakingArtifact.abi, window.provider.getSigner());
 
     result = formatUnits(await tokenContract.balance(address), BigNumber.from(decimals.toString()));
   } catch (e) {
@@ -273,7 +272,7 @@ export async function beefyMaxUnstaked(stakingContractAddress, loanAddress, deci
   try {
     const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
     const multicallContract = new ethers.Contract(config.multicallAddress, MULTICALL.abi, readProvider);
-    const stakingContract = new ethers.Contract(stakingContractAddress, IBeefyFinance.abi, provider.getSigner());
+    const stakingContract = new ethers.Contract(stakingContractAddress, IBeefyFinance.abi, window.provider.getSigner());
 
     const response = await multicallContract.callStatic.aggregate([
       {
@@ -308,7 +307,7 @@ export async function penpieMaxUnstaked(stakingContractAddress, loanAddress, dec
   try {
     const readProvider = new ethers.providers.JsonRpcProvider(config.readRpcUrl);
     const multicallContract = new ethers.Contract(config.multicallAddress, MULTICALL.abi, readProvider);
-    const stakingContract = new ethers.Contract(stakingContractAddress, erc20ABI, provider.getSigner());
+    const stakingContract = new ethers.Contract(stakingContractAddress, erc20ABI, window.provider.getSigner());
 
     const response = await multicallContract.callStatic.aggregate([
       {

@@ -49,6 +49,13 @@ export default {
         commit('setAccount', account);
       })
 
+      const priceService = rootState.serviceRegistry.priceService;
+
+      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
+      const redstonePriceData = await redstonePriceDataRequest.json();
+
+      const prices = priceService.setupPrices(redstonePriceData);
+
       rootState.serviceRegistry.providerService.initNetwork();
 
       rootState.serviceRegistry.providerService.emitProviderCreated();

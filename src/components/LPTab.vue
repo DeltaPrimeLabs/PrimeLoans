@@ -146,9 +146,6 @@ export default {
     this.fetchOpenInterestData();
     this.isAvalanche = window.chain === 'avalanche';
     this.showLevel = this.levelLpBalances;
-    setTimeout(() => {
-      console.log('gmxV2LpTokens', this.gmxV2LpTokens);
-    }, 2000)
   },
   computed: {
     ...mapState('serviceRegistry', [
@@ -807,7 +804,6 @@ export default {
     },
     setupGmIncentivesTableHeaderConfig() {
       const token = window.arbitrumChain ? 'ARB' : 'AVAX';
-      console.log(token);
       this.gmIncentivesTableHeaderConfig = {
         gridTemplateColumns: window.chain === 'avalanche' ? '160px repeat(5, 1fr) 50px' : '160px 180px 160px repeat(3, 1fr) 130px 20px',
         cells: [

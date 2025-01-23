@@ -223,7 +223,7 @@ export default {
     this.watchLtipMaxBoostUpdate();
     this.watchActionDisabling();
     this.watchWithdrawalIntents();
-
+    this.watchAccountBalance();
   },
   data() {
     return {
@@ -246,6 +246,7 @@ export default {
       boostApy: 0,
       isActionDisabledRecord: {},
       intents: null,
+      accountBalance: null,
     };
   },
   computed: {
@@ -279,7 +280,7 @@ export default {
     ]),
     ...mapState('stakeStore', ['farms']),
     ...mapState('poolStore', ['pools']),
-    ...mapState('network', ['provider', 'account', 'accountBalance']),
+    ...mapState('network', ['provider', 'account']),
     ...mapState('serviceRegistry', [
       'assetBalancesExternalUpdateService',
       'dataRefreshEventService',
@@ -291,7 +292,8 @@ export default {
       'farmService',
       'ltipService',
       'globalActionsDisableService',
-      'paWithdrawQueueService'
+      'paWithdrawQueueService',
+      'accountService'
     ]),
 
     loanValue() {
@@ -1273,6 +1275,12 @@ export default {
       this.paWithdrawQueueService.observeAssetIntents().subscribe(intents => {
         this.intents = intents[this.asset.symbol];
       })
+    },
+
+    watchAccountBalance() {
+      this.accountService.observeBalance().subscribe(balance => {
+        this.accountBalance = balance;
+      });
     },
 
     setupAvailableFarms() {
