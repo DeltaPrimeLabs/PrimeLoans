@@ -41,20 +41,6 @@ export default {
     },
 
     async setupPools({rootState, commit, dispatch}) {
-      const poolService = rootState.serviceRegistry.poolService;
-      const priceService = rootState.serviceRegistry.priceService;
-
-      // await poolService.setupPools(rootState.network.provider, rootState.network.account, priceService.prices)
-      //   .subscribe(pools => {
-      //     poolService.emitPools(pools);
-      //     commit('setPools', pools);
-      //     dispatch('setupsPrime');
-      //   });
-
-      poolService.observePools().subscribe(pools => {
-        commit('setPools', pools);
-        dispatch('setupsPrime');
-      })
 
       // Arbitrum-specific methods
       if (window.chain === 'arbitrum') {
@@ -65,25 +51,6 @@ export default {
       if (window.chain === 'avalanche') {
         rootState.serviceRegistry.avalancheBoostService.emitRefreshAvalancheBoostData(rootState.network.provider, rootState.network.account);
       }
-    },
-
-    async setupsPrime({rootState, commit, state}) {
-      const poolService = rootState.serviceRegistry.poolService;
-      let resp = {};
-
-      try {
-        resp = await (await fetch(`https://2t8c1g5jra.execute-api.us-east-1.amazonaws.com/sprime/${rootState.network.account.toLowerCase()}?network=${config.chainSlug}`)).json();
-      } catch (error) {
-        console.error('fetching sprime failed.');
-      }
-
-      let pools = state.pools;
-      for (let pool of pools) {
-        pool.sPrime = resp[pool.asset.symbol] ? resp[pool.asset.symbol].sPrime : '0';
-      }
-
-      commit('setPools', pools);
-      poolService.emitPools(pools);
     },
 
     async deposit({state, rootState, commit, dispatch}, {depositRequest}) {

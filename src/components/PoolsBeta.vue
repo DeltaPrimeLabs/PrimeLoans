@@ -20,10 +20,6 @@
           <div class="title">Savings</div>
           <NameValueBadgeBeta :name="'Your deposits'">
             {{ totalDeposit | usd }}
-            <span class="rtkn-balance"
-                  v-if="Number(rtknData.rtknBalance) > 0 || Number(rtknData.rtkn2Balance) > 0">Your rTKN balance: {{
-                (Number(rtknData.rtknBalance) + Number(rtknData.rtkn2Balance)) | smartRound(2, true)
-              }}</span>
           </NameValueBadgeBeta>
           <div class="pools">
             <div class="pools-table">
@@ -93,8 +89,10 @@ export default {
       this.poolWithdrawQueueService.getIntents();
       this.watchPoolIntents();
       this.watchQueueData();
-      this.setupRTKN();
       this.setupPrimePrice();
+      this.providerService.observeProvider().subscribe(provider => {
+        this.setupRTKN();
+      });
     });
   },
 

@@ -69,7 +69,7 @@ export default class RtknService {
   constructor(providerService, accountService, progressBarService, modalService) {
     this.progressBarService = progressBarService;
     this.modalService = modalService;
-    combineLatest([providerService.observeProviderCreated(), accountService.observeAccountLoaded(), from(this.loadCrossChainPledgedData())])
+    combineLatest([providerService.observeProvider(), accountService.observeAccount(), from(this.loadCrossChainPledgedData())])
       .subscribe(async ([provider, account, crossChainData]) => {
         this.provider = provider;
         this.account = account;

@@ -84,7 +84,10 @@ export default class ProviderService {
     this.accountService.emitBalance(accountBalance);
 
     this.saveLastUsedWallet('WALLET_CONNECT');
-    this.poolService.setupPools(ethersProvider, account[0], this.priceService.prices).subscribe(pools => {
+
+    const sprimePerPool = await (await fetch(`https://2t8c1g5jra.execute-api.us-east-1.amazonaws.com/sprime/${account[0].toLowerCase()}?network=${config.chainSlug}`)).json();
+
+    this.poolService.setupPools(ethersProvider, account[0], this.priceService.prices, sprimePerPool).subscribe(pools => {
       this.poolService.emitPools(pools);
     });
   }
@@ -112,7 +115,9 @@ export default class ProviderService {
 
     this.saveLastUsedWallet('RABBY');
 
-    this.poolService.setupPools(provider, mainAccount, this.priceService.prices).subscribe(pools => {
+    const sprimePerPool = await (await fetch(`https://2t8c1g5jra.execute-api.us-east-1.amazonaws.com/sprime/${mainAccount.toLowerCase()}?network=${config.chainSlug}`)).json();
+
+    this.poolService.setupPools(provider, mainAccount, this.priceService.prices, sprimePerPool).subscribe(pools => {
       this.poolService.emitPools(pools);
     });
   }

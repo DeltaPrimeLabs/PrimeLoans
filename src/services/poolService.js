@@ -28,7 +28,7 @@ export default class PoolService {
     return this.pools$.asObservable();
   }
 
-  setupPools(provider, account, prices) {
+  setupPools(provider, account, prices, sprimePerPool) {
     console.log('PoolService.setupPools');
     const poolsFromConfig = Object.keys(config.POOLS_CONFIG);
 
@@ -69,6 +69,7 @@ export default class PoolService {
             disabled: config.POOLS_CONFIG[poolAsset].disabled,
             poolsUnlocking: config.poolsUnlocking,
             miningApy: miningApy ? miningApy : null,
+            sPrime: sprimePerPool[poolAsset] ? sprimePerPool[poolAsset].sPrime : 0,
           };
           return pool;
         }))
