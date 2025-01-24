@@ -29,6 +29,16 @@ interface IAMM {
 }
 
 contract BaseOracle {
+    // Normalizes amount from token decimals to PRECISION
+    function normalizeAmount(
+        uint256 amount,
+        uint8 decimals
+    ) internal pure returns (uint256) {
+        if (decimals > 18) {
+            return amount / (10 ** (decimals - 18));
+        }
+        return amount * (10 ** (18 - decimals));
+    }
     struct PoolConfig {
         address poolAddress;
         bool isCL;           // true for CL pools, false for AMM
@@ -228,9 +238,8 @@ contract BaseOracle {
         uint256 amountIn = 10**decimalsIn;  // 1 token
         uint256 amountOut = ammPool.getAmountOut(amountIn, asset);
 
-        // Normalize the price to PRECISION
-        uint256 price = (amountOut * PRECISION) / 10**decimalsOut;
-        return (price * baseAssetPrice) / PRECISION;
+        uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
+        return (normalizedAmountOut * baseAssetPrice) / PRECISION;
     }
 
     function getQuotePrice(
@@ -240,10 +249,13 @@ contract BaseOracle {
         int24 tickSpacing,
         bool isToken0
     ) internal view returns (uint256) {
+        uint8 decimalsIn = IERC20(tokenIn).decimals();
+        uint8 decimalsOut = IERC20(tokenOut).decimals();
+
         IQuoter.QuoteExactInputSingleV3Params memory params = IQuoter.QuoteExactInputSingleV3Params({
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            amountIn: 10**IERC20(tokenIn).decimals(),
+            amountIn: 10**decimalsIn,
             tickSpacing: tickSpacing,
             sqrtPriceLimitX96: 0
         });
@@ -254,7 +266,7 @@ contract BaseOracle {
             uint32,
             uint256
         ) {
-            return (amountOut * PRECISION) / 10**IERC20(tokenOut).decimals();
+            return normalizeAmount(amountOut, decimalsOut);
         } catch {
             return type(uint256).max;
         }
