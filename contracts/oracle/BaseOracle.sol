@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "hardhat/console.sol";
+
 interface IUniswapV3Pool {
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -85,6 +87,10 @@ contract BaseOracle {
         _;
     }
 
+    function getFullTokenConfig(address token) external view returns (TokenConfig memory) {
+        return tokenConfigs[token];
+    }
+
     function normalizeAmount(uint256 amount, uint8 decimals) internal pure returns (uint256) {
         if (decimals > 18) {
             return amount / (10 ** (decimals - 18));
@@ -99,7 +105,11 @@ contract BaseOracle {
         tokenConfigs[token].isConfigured = true;
         for (uint i = 0; i < pools.length; i++) {
             tokenConfigs[token].pools.push(pools[i]);
+            console.log("Pool added: %s", pools[i].poolAddress);
         }
+        console.log("Pools length: %s", tokenConfigs[token].pools.length);
+
+        console.log("Token configured: %s", token);
 
         emit TokenConfigured(token);
     }
