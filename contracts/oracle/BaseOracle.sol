@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.17;
 
 interface IUniswapV3Pool {
     function token0() external view returns (address);
-
     function token1() external view returns (address);
-
     function observe(uint32[] calldata secondsAgos) external view returns (int56[] memory tickCumulatives, uint160[] memory);
 }
 
@@ -19,7 +17,7 @@ interface IQuoter {
     }
 
     function quoteExactInputSingleV3(QuoteExactInputSingleV3Params memory params)
-    external returns (uint256 amountOut, uint160, uint32, uint256);
+    external view returns (uint256 amountOut, uint160, uint32, uint256);
 }
 
 interface IERC20 {
@@ -31,33 +29,41 @@ interface IAMM {
 }
 
 contract BaseOracle {
-    // Normalizes amount from token decimals to PRECISION
-    function normalizeAmount(
-        uint256 amount,
-        uint8 decimals
-    ) internal pure returns (uint256) {
-        if (decimals > 18) {
-            return amount / (10 ** (decimals - 18));
-        }
-        return amount * (10 ** (18 - decimals));
-    }
-
     struct PoolConfig {
         address poolAddress;
-        address quoter;      // Quoter contract address for this pool
-        bool isCL;           // true for CL pools, false for AMM
-        int24 tickSpacing;   // used for CL pools
-        uint32 shortTwap;    // duration for short TWAP (e.g., 30 seconds)
-        uint32 midTwap;      // duration for mid TWAP (e.g., 1 hour)
-        uint32 longTwap;     // duration for long TWAP (e.g., 24 hours)
-        uint256 midDeviation;  // Allowed deviation for mid TWAP
-        uint256 longDeviation; // Allowed deviation for long TWAP
-        uint256 minLiquidity; // Minimum liquidity threshold
+        address quoter;
+        bool isCL;
+        int24 tickSpacing;
+        uint32 shortTwap;
+        uint32 midTwap;
+        uint32 longTwap;
+        uint256 midDeviation;
+        uint256 longDeviation;
+        uint256 minLiquidity;
     }
 
     struct TokenConfig {
         bool isConfigured;
         PoolConfig[] pools;
+    }
+
+    struct PriceParams {
+        address asset;
+        address baseAsset;
+        uint256 baseAssetPrice;
+        uint256 amount;
+        bool useMidTwap;
+        bool useLongTwap;
+    }
+
+    struct CLPriceParams {
+        address asset;
+        address baseAsset;
+        uint256 baseAssetPrice;
+        bool useMidTwap;
+        bool useLongTwap;
+        uint256 amount;
+        bool isToken0;
     }
 
     address public admin;
@@ -79,10 +85,14 @@ contract BaseOracle {
         _;
     }
 
-    function configureToken(
-        address token,
-        PoolConfig[] calldata pools
-    ) external onlyAdmin {
+    function normalizeAmount(uint256 amount, uint8 decimals) internal pure returns (uint256) {
+        if (decimals > 18) {
+            return amount / (10 ** (decimals - 18));
+        }
+        return amount * (10 ** (18 - decimals));
+    }
+
+    function configureToken(address token, PoolConfig[] calldata pools) external onlyAdmin {
         require(pools.length > 0, "Empty pools");
         delete tokenConfigs[token].pools;
 
@@ -99,90 +109,59 @@ contract BaseOracle {
         emit TokenRemoved(token);
     }
 
-    function getDollarValue(
-        address asset,
-        uint256 amount,
-        address baseAsset,
-        uint256 baseAssetPrice,
-        bool useMidTwap,
-        bool useLongTwap
-    ) external view returns (uint256) {
-        require(tokenConfigs[asset].isConfigured, "Token not configured");
+    function getDollarValue(PriceParams memory params) external view returns (uint256) {
+        require(tokenConfigs[params.asset].isConfigured, "Token not configured");
 
         uint256 minPrice = type(uint256).max;
-        PoolConfig[] memory pools = tokenConfigs[asset].pools;
+        PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
         for (uint i = 0; i < pools.length; i++) {
-            PoolConfig memory pool = pools[i];
-
-            uint256 poolPrice = calculatePoolPrice(
-                asset,
-                baseAsset,
-                baseAssetPrice,
-                pool,
-                useMidTwap,
-                useLongTwap
-            );
-
+            uint256 poolPrice = calculatePoolPrice(params, pools[i]);
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
 
         require(minPrice != type(uint256).max, "No valid price");
-        return (minPrice * amount) / PRECISION;
+        return (minPrice * params.amount) / PRECISION;
     }
 
     function calculatePoolPrice(
-        address asset,
-        address baseAsset,
-        uint256 baseAssetPrice,
-        PoolConfig memory pool,
-        bool useMidTwap,
-        bool useLongTwap,
-        uint256 amount
+        PriceParams memory params,
+        PoolConfig memory pool
     ) internal view returns (uint256) {
         if (pool.isCL) {
-            return calculateCLPrice(
-                asset,
-                baseAsset,
-                baseAssetPrice,
-                pool,
-                useMidTwap,
-                useLongTwap,
-                amount
-            );
+            return calculateCLPrice(params, pool);
         } else {
-            return calculateAMMPrice(
-                asset,
-                baseAsset,
-                baseAssetPrice,
-                pool,
-                amount
-            );
+            return calculateAMMPrice(params, pool);
         }
     }
 
     function calculateCLPrice(
-        address asset,
-        address baseAsset,
-        uint256 baseAssetPrice,
-        PoolConfig memory pool,
-        bool useMidTwap,
-        bool useLongTwap,
-        uint256 amount
+        PriceParams memory params,
+        PoolConfig memory pool
     ) internal view returns (uint256) {
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
-        bool isToken0 = uniPool.token0() == asset;
+        bool isToken0 = uniPool.token0() == params.asset;
+
+        CLPriceParams memory clParams = CLPriceParams({
+            asset: params.asset,
+            baseAsset: params.baseAsset,
+            baseAssetPrice: params.baseAssetPrice,
+            useMidTwap: params.useMidTwap,
+            useLongTwap: params.useLongTwap,
+            amount: params.amount,
+            isToken0: isToken0
+        });
 
         uint256 quotePrice = getQuotePrice(
-            asset,
-            baseAsset,
+            params.asset,
+            params.baseAsset,
             pool.poolAddress,
             pool.tickSpacing,
             isToken0,
             pool.quoter,
-            amount
+            params.amount
         );
 
         uint256 shortTwapPrice = getTwapPrice(
@@ -192,15 +171,15 @@ contract BaseOracle {
         );
 
         uint256 priceFromPool = quotePrice < shortTwapPrice ? quotePrice : shortTwapPrice;
-        priceFromPool = (priceFromPool * baseAssetPrice) / PRECISION;
+        priceFromPool = (priceFromPool * params.baseAssetPrice) / PRECISION;
 
-        if (useMidTwap) {
+        if (params.useMidTwap) {
             uint256 midTwapPrice = getTwapPrice(
                 pool.poolAddress,
                 pool.midTwap,
                 isToken0
             );
-            midTwapPrice = (midTwapPrice * baseAssetPrice) / PRECISION;
+            midTwapPrice = (midTwapPrice * params.baseAssetPrice) / PRECISION;
 
             require(
                 calculateDeviation(priceFromPool, midTwapPrice) <= pool.midDeviation,
@@ -208,13 +187,13 @@ contract BaseOracle {
             );
         }
 
-        if (useLongTwap) {
+        if (params.useLongTwap) {
             uint256 longTwapPrice = getTwapPrice(
                 pool.poolAddress,
                 pool.longTwap,
                 isToken0
             );
-            longTwapPrice = (longTwapPrice * baseAssetPrice) / PRECISION;
+            longTwapPrice = (longTwapPrice * params.baseAssetPrice) / PRECISION;
 
             require(
                 calculateDeviation(priceFromPool, longTwapPrice) <= pool.longDeviation,
@@ -226,21 +205,17 @@ contract BaseOracle {
     }
 
     function calculateAMMPrice(
-        address asset,
-        address baseAsset,
-        uint256 baseAssetPrice,
+        PriceParams memory params,
         PoolConfig memory pool
     ) internal view returns (uint256) {
         IAMM ammPool = IAMM(pool.poolAddress);
 
-        uint8 decimalsIn = IERC20(asset).decimals();
-        uint8 decimalsOut = IERC20(baseAsset).decimals();
+        uint8 decimalsIn = IERC20(params.asset).decimals();
+        uint8 decimalsOut = IERC20(params.baseAsset).decimals();
 
-        uint256 amountIn = 10 ** decimalsIn;  // 1 token
-        uint256 amountOut = ammPool.getAmountOut(amountIn, asset);
-
+        uint256 amountOut = ammPool.getAmountOut(params.amount, params.asset);
         uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
-        return (normalizedAmountOut * baseAssetPrice) / PRECISION;
+        return (normalizedAmountOut * params.baseAssetPrice) / PRECISION;
     }
 
     function getQuotePrice(
