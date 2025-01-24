@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 
 interface IUniswapV3Pool {
     function token0() external view returns (address);
+
     function token1() external view returns (address);
+
     function observe(uint32[] calldata secondsAgos) external view returns (int56[] memory tickCumulatives, uint160[] memory);
 }
 
@@ -39,8 +41,10 @@ contract BaseOracle {
         }
         return amount * (10 ** (18 - decimals));
     }
+
     struct PoolConfig {
         address poolAddress;
+        address quoter;      // Quoter contract address for this pool
         bool isCL;           // true for CL pools, false for AMM
         int24 tickSpacing;   // used for CL pools
         uint32 shortTwap;    // duration for short TWAP (e.g., 30 seconds)
@@ -57,7 +61,6 @@ contract BaseOracle {
     }
 
     address public admin;
-    address public quoter;
     mapping(address => TokenConfig) public tokenConfigs;
 
     uint256 private constant PRECISION = 1e18;
@@ -67,9 +70,8 @@ contract BaseOracle {
     event TokenConfigured(address token);
     event TokenRemoved(address token);
 
-    constructor(address _quoter) {
+    constructor() {
         admin = msg.sender;
-        quoter = _quoter;
     }
 
     modifier onlyAdmin() {
@@ -92,6 +94,7 @@ contract BaseOracle {
         emit TokenConfigured(token);
     }
 
+
     function removeToken(address token) external onlyAdmin {
         delete tokenConfigs[token];
         emit TokenRemoved(token);
@@ -110,7 +113,7 @@ contract BaseOracle {
         uint256 minPrice = type(uint256).max;
         PoolConfig[] memory pools = tokenConfigs[asset].pools;
 
-        for(uint i = 0; i < pools.length; i++) {
+        for (uint i = 0; i < pools.length; i++) {
             PoolConfig memory pool = pools[i];
 
             uint256 poolPrice = calculatePoolPrice(
@@ -177,7 +180,8 @@ contract BaseOracle {
             baseAsset,
             pool.poolAddress,
             pool.tickSpacing,
-            isToken0
+            isToken0,
+            pool.quoter
         );
 
         // Get short TWAP price
@@ -247,7 +251,8 @@ contract BaseOracle {
         address tokenOut,
         address pool,
         int24 tickSpacing,
-        bool isToken0
+        bool isToken0,
+        address poolQuoter
     ) internal view returns (uint256) {
         uint8 decimalsIn = IERC20(tokenIn).decimals();
         uint8 decimalsOut = IERC20(tokenOut).decimals();
@@ -255,12 +260,12 @@ contract BaseOracle {
         IQuoter.QuoteExactInputSingleV3Params memory params = IQuoter.QuoteExactInputSingleV3Params({
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            amountIn: 10**decimalsIn,
+            amountIn: 10 ** decimalsIn,
             tickSpacing: tickSpacing,
             sqrtPriceLimitX96: 0
         });
 
-        try IQuoter(quoter).quoteExactInputSingleV3(params) returns (
+        try IQuoter(poolQuoter).quoteExactInputSingleV3(params) returns (
             uint256 amountOut,
             uint160,
             uint32,
@@ -313,9 +318,5 @@ contract BaseOracle {
 
     function setAdmin(address newAdmin) external onlyAdmin {
         admin = newAdmin;
-    }
-
-    function setQuoter(address newQuoter) external onlyAdmin {
-        quoter = newQuoter;
     }
 }
