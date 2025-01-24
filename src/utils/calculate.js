@@ -47,8 +47,10 @@ export function calculateHealth(tokens, lbTokens) {
   }
 
   let weightedCollateral = weightedCollateralFromLBs + tokens.reduce((acc, token) => acc + token.price * ((isNaN(token.balance) ? 0 : token.balance) - token.borrowed) * token.debtCoverage, 0);
+  console.log('weightedCollateral', weightedCollateral);
   let weightedBorrowed = tokens.reduce((acc, token) => acc + token.price * token.borrowed * token.debtCoverage, 0);
   let borrowed = tokens.reduce((acc, token) => acc + token.price * token.borrowed, 0);
+  console.log('borrowed', borrowed);
 
   if (borrowed === 0) return 1;
 

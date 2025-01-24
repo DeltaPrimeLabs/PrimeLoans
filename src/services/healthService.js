@@ -158,7 +158,10 @@ export default class HealthService {
       for (const [symbol, farms] of Object.entries(stakeStoreFarms)) {
         farms.forEach(farm => {
           let feedSymbol = farm.feedSymbol ? farm.feedSymbol : symbol;
-
+          console.log('farm', farm);
+          console.log('symbol', symbol);
+          console.log('feedSymbol', feedSymbol);
+          console.log('redstonePriceData[feedSymbol]', redstonePriceData[feedSymbol]);
           tokens.push({
             price: redstonePriceData[feedSymbol] ? redstonePriceData[feedSymbol][0].dataPoints[0].value : 0,
             balance: parseFloat(farm.totalBalance),
@@ -170,6 +173,9 @@ export default class HealthService {
       }
 
       let lbTokens = Object.values(traderJoeV2LpAssets);
+
+      console.log(tokens);
+      console.log(lbTokens);
 
       const health = calculateHealth(tokens, lbTokens);
       this.health$.next(health >= 0 ? health : 0);

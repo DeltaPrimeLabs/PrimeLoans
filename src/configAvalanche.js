@@ -388,29 +388,6 @@ export default {
         ],
         sAVAX: [
             {
-                droppingSupport: true,
-                protocol: 'YIELD_YAK',
-                protocolIdentifier: 'YY_PTP_sAVAX',
-                autoCompounding: true,
-                balance: async (address) => yieldYakBalance('0xb8f531c0d3c53B1760bcb7F57d87762Fd25c4977', address),
-                stakingContractAddress: '0xb8f531c0d3c53B1760bcb7F57d87762Fd25c4977',
-                decimals: 18, //decimals of staking contract
-                stakeMethod: 'stakeSAVAXYak',
-                unstakeMethod: 'unstakeSAVAXYak',
-                feedSymbol: 'YY_PTP_sAVAX',
-                symbol: 'YRT',
-                token: 'sAVAX',
-                isTokenLp: false,
-                info: 'Uses Yield Yak strategy on Platypus. Deposit/withdrawal fees may apply. Check <a href="https://docs.platypus.finance/platypus-finance-docs/our-innovative-concepts/fees/withdrawal-fee" target="_blank">docs</a>.',
-                rewardsInfo: 'These are the rewards that you accumulated. These are staked too.',
-                debtCoverage: 0,
-                rewardTokens: ['sAVAX'],
-                strategy: 'Platypus',
-                banner: 'Due to the recent Platypus exploit, deposits in their farms have been disabled.',
-                refreshDelay: 60000,
-                enableUnstakeOverride: true
-            },
-            {
                 protocol: 'VECTOR_FINANCE',
                 protocolIdentifier: 'VF_SAVAX_MAIN',
                 balance: (address) => vectorFinanceBalance('0x91F78865b239432A1F1Cc1fFeC0Ac6203079E6D7', address),
