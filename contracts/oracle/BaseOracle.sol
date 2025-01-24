@@ -87,13 +87,12 @@ contract BaseOracle {
         delete tokenConfigs[token].pools;
 
         tokenConfigs[token].isConfigured = true;
-        for(uint i = 0; i < pools.length; i++) {
+        for (uint i = 0; i < pools.length; i++) {
             tokenConfigs[token].pools.push(pools[i]);
         }
 
         emit TokenConfigured(token);
     }
-
 
     function removeToken(address token) external onlyAdmin {
         delete tokenConfigs[token];
@@ -125,7 +124,7 @@ contract BaseOracle {
                 useLongTwap
             );
 
-            if(poolPrice < minPrice) {
+            if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
@@ -140,23 +139,26 @@ contract BaseOracle {
         uint256 baseAssetPrice,
         PoolConfig memory pool,
         bool useMidTwap,
-        bool useLongTwap
+        bool useLongTwap,
+        uint256 amount
     ) internal view returns (uint256) {
-        if(pool.isCL) {
+        if (pool.isCL) {
             return calculateCLPrice(
                 asset,
                 baseAsset,
                 baseAssetPrice,
                 pool,
                 useMidTwap,
-                useLongTwap
+                useLongTwap,
+                amount
             );
         } else {
             return calculateAMMPrice(
                 asset,
                 baseAsset,
                 baseAssetPrice,
-                pool
+                pool,
+                amount
             );
         }
     }
@@ -167,36 +169,32 @@ contract BaseOracle {
         uint256 baseAssetPrice,
         PoolConfig memory pool,
         bool useMidTwap,
-        bool useLongTwap
+        bool useLongTwap,
+        uint256 amount
     ) internal view returns (uint256) {
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
-
-        // Determine token ordering
         bool isToken0 = uniPool.token0() == asset;
 
-        // Get quote price
         uint256 quotePrice = getQuotePrice(
             asset,
             baseAsset,
             pool.poolAddress,
             pool.tickSpacing,
             isToken0,
-            pool.quoter
+            pool.quoter,
+            amount
         );
 
-        // Get short TWAP price
         uint256 shortTwapPrice = getTwapPrice(
             pool.poolAddress,
             pool.shortTwap,
             isToken0
         );
 
-        // Calculate initial price as min(quote, shortTWAP)
         uint256 priceFromPool = quotePrice < shortTwapPrice ? quotePrice : shortTwapPrice;
         priceFromPool = (priceFromPool * baseAssetPrice) / PRECISION;
 
-        // Check mid TWAP deviation if required
-        if(useMidTwap) {
+        if (useMidTwap) {
             uint256 midTwapPrice = getTwapPrice(
                 pool.poolAddress,
                 pool.midTwap,
@@ -210,8 +208,7 @@ contract BaseOracle {
             );
         }
 
-        // Check long TWAP deviation if required
-        if(useLongTwap) {
+        if (useLongTwap) {
             uint256 longTwapPrice = getTwapPrice(
                 pool.poolAddress,
                 pool.longTwap,
@@ -239,7 +236,7 @@ contract BaseOracle {
         uint8 decimalsIn = IERC20(asset).decimals();
         uint8 decimalsOut = IERC20(baseAsset).decimals();
 
-        uint256 amountIn = 10**decimalsIn;  // 1 token
+        uint256 amountIn = 10 ** decimalsIn;  // 1 token
         uint256 amountOut = ammPool.getAmountOut(amountIn, asset);
 
         uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
@@ -252,7 +249,8 @@ contract BaseOracle {
         address pool,
         int24 tickSpacing,
         bool isToken0,
-        address poolQuoter
+        address poolQuoter,
+        uint256 amount
     ) internal view returns (uint256) {
         uint8 decimalsIn = IERC20(tokenIn).decimals();
         uint8 decimalsOut = IERC20(tokenOut).decimals();
@@ -260,7 +258,7 @@ contract BaseOracle {
         IQuoter.QuoteExactInputSingleV3Params memory params = IQuoter.QuoteExactInputSingleV3Params({
             tokenIn: tokenIn,
             tokenOut: tokenOut,
-            amountIn: 10 ** decimalsIn,
+            amountIn: amount,
             tickSpacing: tickSpacing,
             sqrtPriceLimitX96: 0
         });
@@ -296,7 +294,7 @@ contract BaseOracle {
             uint160 sqrtPrice = uint160(1.0001e15 ** uint256(int256(avgTick) / 2));
             uint256 price = uint256(sqrtPrice) ** 2;
 
-            if(isToken0) {
+            if (isToken0) {
                 return PRECISION * PRECISION / price;
             } else {
                 return price;
@@ -310,7 +308,7 @@ contract BaseOracle {
         uint256 price1,
         uint256 price2
     ) internal pure returns (uint256) {
-        if(price1 > price2) {
+        if (price1 > price2) {
             return ((price1 - price2) * PRECISION) / price2;
         }
         return ((price2 - price1) * PRECISION) / price1;
