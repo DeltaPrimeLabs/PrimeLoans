@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "hardhat/console.sol";
-
 interface IUniswapV3Pool {
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -74,7 +72,6 @@ contract BaseOracle {
         for (uint i = 0; i < pools.length; i++) {
             require(pools[i].baseAsset != address(0), "Invalid base asset");
             tokenConfigs[token].pools.push(pools[i]);
-            console.log("Pool added: %s with base asset: %s", pools[i].poolAddress, pools[i].baseAsset);
         }
 
         emit TokenConfigured(token);
@@ -111,7 +108,6 @@ contract BaseOracle {
             }
             require(baseAssetPrice > 0, "Missing base asset price");
 
-            console.log("Calculating pool price for pool: %s", pools[i].poolAddress);
             uint256 poolPrice = calculatePoolPrice(
                 params.asset,
                 params.amount,
@@ -121,13 +117,11 @@ contract BaseOracle {
                 pools[i]
             );
 
-            console.log("Pool price: %s", poolPrice);
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
 
-        console.log("Min price: %s", minPrice);
         require(minPrice != type(uint256).max, "No valid price");
         return (minPrice * params.amount) / PRECISION;
     }
@@ -174,10 +168,7 @@ contract BaseOracle {
             isToken0
         );
 
-        console.log("Short TWAP price: %s", shortTwapPrice);
-
         uint256 priceFromPool = (shortTwapPrice * baseAssetPrice) / PRECISION;
-        console.log("Price from pool: %s", priceFromPool);
 
         if (useMidTwap) {
             uint256 midTwapPrice = getTwapPrice(
@@ -242,21 +233,10 @@ contract BaseOracle {
             int56 tickDiff = tickCumulatives[0] - tickCumulatives[1];
             int24 avgTick = int24(tickDiff / int56(uint56(secondsAgo)));
 
-            console.log("Tick cumulatives:");
-            console.log(uint256(uint56(tickCumulatives[0])));
-            console.log(uint256(uint56(tickCumulatives[1])));
-            console.log("Tick diff and avg:");
-            console.log(uint256(uint56(tickDiff >= 0 ? tickDiff : -tickDiff)));
-            console.log(uint256(uint24(avgTick >= 0 ? avgTick : -avgTick)));
-
             // Following Excel's calculation of POWER(1.0001, tick/2)
             int24 halfTick = avgTick / 2;
             bool isNegative = halfTick < 0;
             uint256 absTick = uint256(uint24(isNegative ? -halfTick : halfTick));
-
-            console.log("Half tick calculation:");
-            console.log(uint256(uint24(halfTick >= 0 ? halfTick : -halfTick)));
-            console.log(isNegative);
 
             // Calculate exact power using bit manipulation
             uint256 result = 1e18;  // Q18.18 fixed point
@@ -269,18 +249,10 @@ contract BaseOracle {
                 base = (base * base) / 1e12;
             }
 
-            console.log("Power calculation:");
-            console.log(result);
-
             // Invert if negative
             if (isNegative) {
                 result = (1e36 / result);
             }
-
-            console.log("After negative adjustment (SQRT price):");
-            console.log(result);
-            console.log("SQRT price as decimal:");
-            console.log(uint256((result * 1e8) / 1e18), "e-8");
 
             // Calculate final price - for token0 we want 1/(sqrtPrice^2)
             uint256 price;
@@ -292,12 +264,6 @@ contract BaseOracle {
                 // For token1, final price is sqrtPrice^2
                 price = (result * result) / 1e18;
             }
-
-            console.log("Final price:");
-            console.log(price);
-            console.log("Final price as decimal:");
-            console.log(uint256((price * 1e8) / 1e18), "e-8");
-
             return price;
         } catch {
             return type(uint256).max;
