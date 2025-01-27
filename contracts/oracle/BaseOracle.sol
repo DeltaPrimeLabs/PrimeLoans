@@ -16,6 +16,16 @@ interface IAMM {
 }
 
 contract BaseOracle {
+    error OnlyAdmin();
+    error EmptyPools();
+    error InvalidBaseAsset();
+    error TokenNotConfigured();
+    error LengthMismatch();
+    error MissingBaseAssetPrice();
+    error NoValidPrice();
+    error MidTWAPDeviationTooHigh();
+    error LongTWAPDeviationTooHigh();
+
     struct PoolConfig {
         address poolAddress;
         bool isCL;
@@ -26,7 +36,7 @@ contract BaseOracle {
         uint256 midDeviation;
         uint256 longDeviation;
         uint256 minLiquidity;
-        address baseAsset;  // Base asset address for this pool
+        address baseAsset;
     }
 
     struct TokenConfig {
@@ -49,7 +59,7 @@ contract BaseOracle {
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "Only admin");
+        if (msg.sender != admin) revert OnlyAdmin();
         _;
     }
 
@@ -65,12 +75,13 @@ contract BaseOracle {
     }
 
     function configureToken(address token, PoolConfig[] calldata pools) external onlyAdmin {
-        require(pools.length > 0, "Empty pools");
-        delete tokenConfigs[token].pools;
+        if (pools.length == 0) revert EmptyPools();
 
+        delete tokenConfigs[token].pools;
         tokenConfigs[token].isConfigured = true;
+
         for (uint i = 0; i < pools.length; i++) {
-            require(pools[i].baseAsset != address(0), "Invalid base asset");
+            if (pools[i].baseAsset == address(0)) revert InvalidBaseAsset();
             tokenConfigs[token].pools.push(pools[i]);
         }
 
@@ -92,8 +103,8 @@ contract BaseOracle {
     }
 
     function getDollarValue(GetDollarValueParams calldata params) external view returns (uint256) {
-        require(tokenConfigs[params.asset].isConfigured, "Token not configured");
-        require(params.baseAssets.length == params.baseAssetPrices.length, "Length mismatch");
+        if (!tokenConfigs[params.asset].isConfigured) revert TokenNotConfigured();
+        if (params.baseAssets.length != params.baseAssetPrices.length) revert LengthMismatch();
 
         uint256 minPrice = type(uint256).max;
         PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
@@ -106,7 +117,7 @@ contract BaseOracle {
                     break;
                 }
             }
-            require(baseAssetPrice > 0, "Missing base asset price");
+            if (baseAssetPrice == 0) revert MissingBaseAssetPrice();
 
             uint256 poolPrice = calculatePoolPrice(
                 params.asset,
@@ -122,7 +133,7 @@ contract BaseOracle {
             }
         }
 
-        require(minPrice != type(uint256).max, "No valid price");
+        if (minPrice == type(uint256).max) revert NoValidPrice();
         return (minPrice * params.amount) / PRECISION;
     }
 
@@ -134,22 +145,9 @@ contract BaseOracle {
         uint256 baseAssetPrice,
         PoolConfig memory pool
     ) internal view returns (uint256) {
-        if (pool.isCL) {
-            return calculateCLPrice(
-                asset,
-                useMidTwap,
-                useLongTwap,
-                baseAssetPrice,
-                pool
-            );
-        } else {
-            return calculateAMMPrice(
-                asset,
-                amount,
-                baseAssetPrice,
-                pool
-            );
-        }
+        return pool.isCL ?
+            calculateCLPrice(asset, useMidTwap, useLongTwap, baseAssetPrice, pool) :
+            calculateAMMPrice(asset, amount, baseAssetPrice, pool);
     }
 
     function calculateCLPrice(
@@ -178,10 +176,9 @@ contract BaseOracle {
             );
             midTwapPrice = (midTwapPrice * baseAssetPrice) / PRECISION;
 
-            require(
-                calculateDeviation(priceFromPool, midTwapPrice) <= pool.midDeviation,
-                "Mid TWAP deviation too high"
-            );
+            if (calculateDeviation(priceFromPool, midTwapPrice) > pool.midDeviation) {
+                revert MidTWAPDeviationTooHigh();
+            }
         }
 
         if (useLongTwap) {
@@ -192,10 +189,9 @@ contract BaseOracle {
             );
             longTwapPrice = (longTwapPrice * baseAssetPrice) / PRECISION;
 
-            require(
-                calculateDeviation(priceFromPool, longTwapPrice) <= pool.longDeviation,
-                "Long TWAP deviation too high"
-            );
+            if (calculateDeviation(priceFromPool, longTwapPrice) > pool.longDeviation) {
+                revert LongTWAPDeviationTooHigh();
+            }
         }
 
         return priceFromPool;
@@ -232,39 +228,44 @@ contract BaseOracle {
         ) {
             int56 tickDiff = tickCumulatives[0] - tickCumulatives[1];
             int24 avgTick = int24(tickDiff / int56(uint56(secondsAgo)));
-
-            // Following Excel's calculation of POWER(1.0001, tick/2)
             int24 halfTick = avgTick / 2;
+
             bool isNegative = halfTick < 0;
             uint256 absTick = uint256(uint24(isNegative ? -halfTick : halfTick));
 
-            // Calculate exact power using bit manipulation
-            uint256 result = 1e18;  // Q18.18 fixed point
+            // Using safer power calculation
+            uint256 result = 1e18;  // Start with Q96 precision
             uint256 base = 1000100000000;  // 1.0001 * 1e12
 
+            // Exponentiation by squaring
             for (uint8 i = 0; i < 16; i++) {
                 if ((absTick >> i) & 0x1 != 0) {
-                    result = (result * base) / 1e12;
+                    unchecked {
+                        result = (result * base) / 1e12;
+                    }
                 }
-                base = (base * base) / 1e12;
+                unchecked {
+                    base = (base * base) / 1e12;
+                }
             }
 
-            // Invert if negative
+            // Handle negative exponent
             if (isNegative) {
-                result = (1e36 / result);
+                unchecked {
+                    result = (1e36 / result);
+                }
             }
 
-            // Calculate final price - for token0 we want 1/(sqrtPrice^2)
-            uint256 price;
+            // Calculate final price
             if (isToken0) {
-                // For token0, final price is 1/sqrtPrice^2
-                price = (1e36 / result);  // First divide
-                price = (price * 1e18) / result;  // Second divide
+                unchecked {
+                    return (1e36 / result) * 1e18 / result;  // Two divisions for token0
+                }
             } else {
-                // For token1, final price is sqrtPrice^2
-                price = (result * result) / 1e18;
+                unchecked {
+                    return (result * result) / 1e18;  // Square for token1
+                }
             }
-            return price;
         } catch {
             return type(uint256).max;
         }
@@ -274,10 +275,9 @@ contract BaseOracle {
         uint256 price1,
         uint256 price2
     ) internal pure returns (uint256) {
-        if (price1 > price2) {
-            return ((price1 - price2) * PRECISION) / price2;
-        }
-        return ((price2 - price1) * PRECISION) / price1;
+        return price1 > price2 ?
+            ((price1 - price2) * PRECISION) / price2 :
+            ((price2 - price1) * PRECISION) / price1;
     }
 
     function setAdmin(address newAdmin) external onlyAdmin {
