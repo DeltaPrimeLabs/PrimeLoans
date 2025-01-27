@@ -9,19 +9,6 @@ interface IUniswapV3Pool {
     function observe(uint32[] calldata secondsAgos) external view returns (int56[] memory tickCumulatives, uint160[] memory);
 }
 
-interface IQuoter {
-    struct QuoteExactInputSingleV3Params {
-        address tokenIn;
-        address tokenOut;
-        uint256 amountIn;
-        int24 tickSpacing;
-        uint160 sqrtPriceLimitX96;
-    }
-
-    function quoteExactInputSingleV3(QuoteExactInputSingleV3Params memory params)
-    external view returns (uint256 amountOut, uint160, uint32, uint256);
-}
-
 interface IERC20 {
     function decimals() external view returns (uint8);
 }
@@ -33,7 +20,6 @@ interface IAMM {
 contract BaseOracle {
     struct PoolConfig {
         address poolAddress;
-        address quoter;
         bool isCL;
         int24 tickSpacing;
         uint32 shortTwap;
@@ -56,16 +42,6 @@ contract BaseOracle {
         uint256 amount;
         bool useMidTwap;
         bool useLongTwap;
-    }
-
-    struct CLPriceParams {
-        address asset;
-        address baseAsset;
-        uint256 baseAssetPrice;
-        bool useMidTwap;
-        bool useLongTwap;
-        uint256 amount;
-        bool isToken0;
     }
 
     address public admin;
@@ -126,12 +102,15 @@ contract BaseOracle {
         PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
         for (uint i = 0; i < pools.length; i++) {
+            console.log("Calculating pool price for pool: %s", pools[i].poolAddress);
             uint256 poolPrice = calculatePoolPrice(params, pools[i]);
+            console.log("Pool price: %s", poolPrice);
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
 
+        console.log("Min price: %s", minPrice);
         require(minPrice != type(uint256).max, "No valid price");
         return (minPrice * params.amount) / PRECISION;
     }
@@ -154,34 +133,16 @@ contract BaseOracle {
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
         bool isToken0 = uniPool.token0() == params.asset;
 
-        CLPriceParams memory clParams = CLPriceParams({
-            asset: params.asset,
-            baseAsset: params.baseAsset,
-            baseAssetPrice: params.baseAssetPrice,
-            useMidTwap: params.useMidTwap,
-            useLongTwap: params.useLongTwap,
-            amount: params.amount,
-            isToken0: isToken0
-        });
-
-        uint256 quotePrice = getQuotePrice(
-            params.asset,
-            params.baseAsset,
-            pool.poolAddress,
-            pool.tickSpacing,
-            isToken0,
-            pool.quoter,
-            params.amount
-        );
-
         uint256 shortTwapPrice = getTwapPrice(
             pool.poolAddress,
             pool.shortTwap,
             isToken0
         );
 
-        uint256 priceFromPool = quotePrice < shortTwapPrice ? quotePrice : shortTwapPrice;
-        priceFromPool = (priceFromPool * params.baseAssetPrice) / PRECISION;
+        console.log("Short TWAP price: %s", shortTwapPrice);
+
+        uint256 priceFromPool = (shortTwapPrice * params.baseAssetPrice) / PRECISION;
+        console.log("Price from pool: %s", priceFromPool);
 
         if (params.useMidTwap) {
             uint256 midTwapPrice = getTwapPrice(
@@ -228,38 +189,6 @@ contract BaseOracle {
         return (normalizedAmountOut * params.baseAssetPrice) / PRECISION;
     }
 
-    function getQuotePrice(
-        address tokenIn,
-        address tokenOut,
-        address pool,
-        int24 tickSpacing,
-        bool isToken0,
-        address poolQuoter,
-        uint256 amount
-    ) internal view returns (uint256) {
-        uint8 decimalsIn = IERC20(tokenIn).decimals();
-        uint8 decimalsOut = IERC20(tokenOut).decimals();
-
-        IQuoter.QuoteExactInputSingleV3Params memory params = IQuoter.QuoteExactInputSingleV3Params({
-            tokenIn: tokenIn,
-            tokenOut: tokenOut,
-            amountIn: amount,
-            tickSpacing: tickSpacing,
-            sqrtPriceLimitX96: 0
-        });
-
-        try IQuoter(poolQuoter).quoteExactInputSingleV3(params) returns (
-            uint256 amountOut,
-            uint160,
-            uint32,
-            uint256
-        ) {
-            return normalizeAmount(amountOut, decimalsOut);
-        } catch {
-            return type(uint256).max;
-        }
-    }
-
     function getTwapPrice(
         address poolAddress,
         uint32 secondsAgo,
@@ -276,11 +205,24 @@ contract BaseOracle {
             int56 tickDiff = tickCumulatives[1] - tickCumulatives[0];
             int24 avgTick = int24(tickDiff / int56(uint56(secondsAgo)));
 
-            uint160 sqrtPrice = uint160(1.0001e15 ** uint256(int256(avgTick) / 2));
-            uint256 price = uint256(sqrtPrice) ** 2;
+            uint256 price = uint256(1e9);
+            int24 scaledTick = avgTick / 2;
+            uint256 base = 1.0001e12;
+
+            if (scaledTick >= 0) {
+                for (int24 i = 0; i < scaledTick; i++) {
+                    price = (price * base) / 1e12;
+                }
+                price = price * price;
+            } else {
+                for (int24 i = 0; i > scaledTick; i--) {
+                    price = (price * 1e12) / base;
+                }
+                price = price * price;
+            }
 
             if (isToken0) {
-                return PRECISION * PRECISION / price;
+                return (1e18 * 1e9) / price;
             } else {
                 return price;
             }
