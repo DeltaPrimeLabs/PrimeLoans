@@ -1,8 +1,9 @@
 import chai, {expect} from "chai"
 import {ethers, waffle} from "hardhat"
-import { Signer } from "ethers";
+import {Contract, Signer} from "ethers";
 import BaseOracleArtifact from "../../artifacts/contracts/oracle/BaseOracle.sol/BaseOracle.json";
-import {BaseOracle} from "../../typechain";
+import BaseOracleTUPArtifact from "../../artifacts/contracts/proxies/tup/base/BaseOracleTUP.sol/BaseOracleTUP.json";
+import { TransparentUpgradeableProxy, BaseOracle } from "../../typechain";
 
 import {solidity} from "ethereum-waffle";
 const {deployContract} = waffle;
@@ -50,38 +51,53 @@ describe("BaseOracle", function() {
         ]
     };
 
-    let oracle: BaseOracle;
+    let oracleTUP: BaseOracle;
+    let oracleImplementation: Contract;
+    let proxyAdmin: Signer;
     let owner: Signer;
     let addr1: Signer;
-    let ownerAddress: string;
-    let addr1Address: string;
 
     beforeEach(async function() {
-        [owner, addr1] = await ethers.getSigners();
-        ownerAddress = await owner.getAddress();
-        addr1Address = await addr1.getAddress();
-        oracle = (await deployContract(owner, BaseOracleArtifact)) as BaseOracle;
+        [proxyAdmin, owner, addr1] = await ethers.getSigners();
+
+        // Deploy implementation
+        const BaseOracleFactory = await ethers.getContractFactory("BaseOracle");
+        oracleImplementation = await BaseOracleFactory.deploy();
+
+        // Prepare initialization data with explicit owner
+        const initializeData = oracleImplementation.interface.encodeFunctionData("initialize", [owner.address]);
+
+        // Deploy proxy
+        const TransparentUpgradeableProxyFactory = await ethers.getContractFactory("TransparentUpgradeableProxy");
+        const proxy = await TransparentUpgradeableProxyFactory.deploy(
+            oracleImplementation.address,
+            proxyAdmin.address,
+            initializeData
+        );
+
+        // Attach the implementation's interface to the proxy address
+        oracleTUP = BaseOracleFactory.attach(proxy.address) as BaseOracle;
     });
 
-    describe("Admin Functions", function() {
-        it("Should set admin correctly on deployment", async function() {
-            expect(await oracle.admin()).to.equal(ownerAddress);
+    describe("Owner Functions", function() {
+        it("Should set owner correctly on deployment", async function() {
+            expect(await oracleTUP.connect(addr1).owner()).to.equal(owner.address);
         });
 
-        it("Should allow admin to change admin", async function() {
-            await oracle.setAdmin(addr1Address);
-            expect(await oracle.admin()).to.equal(addr1Address);
+        it("Should allow owner to transfer ownership", async function() {
+            await oracleTUP.connect(owner).transferOwnership(addr1.address);
+            expect(await oracleTUP.connect(addr1).owner()).to.equal(addr1.address);
         });
 
-        it("Should not allow non-admin to change admin", async function() {
+        it("Should not allow non-owner to transfer ownership", async function() {
             await expect(
-                oracle.connect(addr1).setAdmin(addr1Address)
+                oracleTUP.connect(addr1).transferOwnership(addr1.address)
             ).to.be.reverted;
         });
 
         it("Should not allow configuring token with empty pools", async function() {
             await expect(
-                oracle.configureToken(TOKENS.BRETT, [])
+                oracleTUP.configureToken(TOKENS.BRETT, [])
             ).to.be.reverted;
         });
 
@@ -99,7 +115,7 @@ describe("BaseOracle", function() {
                 baseAsset: ethers.constants.AddressZero
             }];
             await expect(
-                oracle.configureToken(TOKENS.BRETT, invalidPools)
+                oracleTUP.configureToken(TOKENS.BRETT, invalidPools)
             ).to.be.reverted;
         });
     });
@@ -119,8 +135,8 @@ describe("BaseOracle", function() {
                 baseAsset: pool.baseAsset
             }));
 
-            await expect(oracle.configureToken(TOKENS.BRETT, pools))
-                .to.emit(oracle, 'TokenConfigured')
+            await expect(oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools))
+                .to.emit(oracleTUP, 'TokenConfigured')
                 .withArgs(TOKENS.BRETT);
         });
 
@@ -137,13 +153,13 @@ describe("BaseOracle", function() {
                 minLiquidity: ethers.utils.parseUnits("1000", 18),
                 baseAsset: pool.baseAsset
             }));
-            await oracle.configureToken(TOKENS.BRETT, pools);
+            await oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools);
 
-            await expect(oracle.removeToken(TOKENS.BRETT))
-                .to.emit(oracle, 'TokenRemoved')
+            await expect(oracleTUP.connect(owner).removeToken(TOKENS.BRETT))
+                .to.emit(oracleTUP, 'TokenRemoved')
                 .withArgs(TOKENS.BRETT);
 
-            const config = await oracle.getFullTokenConfig(TOKENS.BRETT);
+            const config = await oracleTUP.connect(owner).getFullTokenConfig(TOKENS.BRETT);
             expect(config.isConfigured).to.be.false;
         });
     });
@@ -163,7 +179,7 @@ describe("BaseOracle", function() {
                     minLiquidity: ethers.utils.parseUnits("1000", 18),
                     baseAsset: pool.baseAsset
                 }));
-                await oracle.configureToken(TOKENS[token], pools);
+                await oracleTUP.connect(owner).configureToken(TOKENS[token], pools);
             }
         });
 
@@ -181,7 +197,7 @@ describe("BaseOracle", function() {
                 baseAssetPrices: [wethPrice, aeroPrice]
             };
 
-            const price = await oracle.getDollarValue(priceParams);
+            const price = await oracleTUP.connect(addr1).getDollarValue(priceParams);
             expect(price).to.be.gt(0);
             console.log(`Price of BRETT: ${ethers.utils.formatUnits(price, 18)}`);
         });
@@ -199,7 +215,7 @@ describe("BaseOracle", function() {
                 baseAssetPrices: [wethPrice]
             };
 
-            const price = await oracle.getDollarValue(priceParams);
+            const price = await oracleTUP.connect(addr1).getDollarValue(priceParams);
             expect(price).to.be.gt(0);
             console.log(`Price of AIXBT: ${ethers.utils.formatUnits(price, 18)}`);
         });
@@ -218,7 +234,7 @@ describe("BaseOracle", function() {
             };
 
             await expect(
-                oracle.getDollarValue(priceParams)
+                oracleTUP.getDollarValue(priceParams)
             ).to.be.reverted;
         });
 
@@ -236,7 +252,7 @@ describe("BaseOracle", function() {
             };
 
             await expect(
-                oracle.getDollarValue(priceParams)
+                oracleTUP.getDollarValue(priceParams)
             ).to.be.reverted;
         });
 
@@ -254,7 +270,7 @@ describe("BaseOracle", function() {
             };
 
             await expect(
-                oracle.getDollarValue(priceParams)
+                oracleTUP.getDollarValue(priceParams)
             ).to.be.reverted;
         });
 
@@ -272,7 +288,7 @@ describe("BaseOracle", function() {
             };
 
             await expect(
-                oracle.getDollarValue(priceParams)
+                oracleTUP.getDollarValue(priceParams)
             ).to.be.reverted;
         });
 
@@ -290,7 +306,7 @@ describe("BaseOracle", function() {
             };
 
             await expect(
-                oracle.getDollarValue(priceParams)
+                oracleTUP.getDollarValue(priceParams)
             ).to.be.reverted;
         });
     });

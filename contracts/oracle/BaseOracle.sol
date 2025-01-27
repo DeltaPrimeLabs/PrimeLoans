@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
 interface IUniswapV3Pool {
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -15,8 +18,7 @@ interface IAMM {
     function getAmountOut(uint256 amountIn, address tokenIn) external view returns (uint256);
 }
 
-contract BaseOracle {
-    error OnlyAdmin();
+contract BaseOracle is Initializable, OwnableUpgradeable {
     error EmptyPools();
     error InvalidBaseAsset();
     error TokenNotConfigured();
@@ -44,7 +46,6 @@ contract BaseOracle {
         PoolConfig[] pools;
     }
 
-    address public admin;
     mapping(address => TokenConfig) public tokenConfigs;
 
     uint256 private constant PRECISION = 1e18;
@@ -54,17 +55,14 @@ contract BaseOracle {
     event TokenConfigured(address token);
     event TokenRemoved(address token);
 
+    /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        admin = msg.sender;
+        _disableInitializers();
     }
 
-    modifier onlyAdmin() {
-        if (msg.sender != admin) revert OnlyAdmin();
-        _;
-    }
-
-    function getFullTokenConfig(address token) external view returns (TokenConfig memory) {
-        return tokenConfigs[token];
+    function initialize(address _initialOwner) public initializer {
+        __Ownable_init();
+        transferOwnership(_initialOwner);
     }
 
     function normalizeAmount(uint256 amount, uint8 decimals) internal pure returns (uint256) {
@@ -74,7 +72,7 @@ contract BaseOracle {
         return amount * (10 ** (18 - decimals));
     }
 
-    function configureToken(address token, PoolConfig[] calldata pools) external onlyAdmin {
+    function configureToken(address token, PoolConfig[] calldata pools) external onlyOwner {
         if (pools.length == 0) revert EmptyPools();
 
         delete tokenConfigs[token].pools;
@@ -88,7 +86,7 @@ contract BaseOracle {
         emit TokenConfigured(token);
     }
 
-    function removeToken(address token) external onlyAdmin {
+    function removeToken(address token) external onlyOwner {
         delete tokenConfigs[token];
         emit TokenRemoved(token);
     }
@@ -280,7 +278,7 @@ contract BaseOracle {
             ((price2 - price1) * PRECISION) / price1;
     }
 
-    function setAdmin(address newAdmin) external onlyAdmin {
-        admin = newAdmin;
+    function getFullTokenConfig(address token) external view returns (TokenConfig memory) {
+        return tokenConfigs[token];
     }
 }
