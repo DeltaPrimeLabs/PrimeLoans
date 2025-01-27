@@ -66,7 +66,22 @@ const oracleConfig = {
             address: '0xca73ed1815e5915489570014e024b7EbE65dE679',
             decimals: 18,
             coinmarketCapId: 34807
-        }
+        },
+        GAME: {
+            address: '0x1C4CcA7C5DB003824208aDDA61Bd749e55F463a3',
+            decimals: 18,
+            coinmarketCapId: 34647
+        },
+        LUNA: {
+            address: '0x55cD6469F597452B5A7536e2CD98fDE4c1247ee4',
+            decimals: 18,
+            coinmarketCapId: 33543
+        },
+        VADER: {
+            address: '0x731814e491571a2e9ee3c5b1f7f3b962ee8f4870',
+            decimals: 18,
+            coinmarketCapId: 34648
+        },
     },
 
     // Known token prices in USD
@@ -83,12 +98,14 @@ const oracleConfig = {
                 {
                     address: '0x43BBb129b56A998732767725A183b7a566843dBA',
                     type: 'AMM',
+                    dex: 'AERODROME',
                     counterToken: 'AERO',
                     isCounterTokenFirst: false
                 },
                 {
                     address: '0x4e829F8A5213c42535AB84AA40BD4aDCCE9cBa02',
                     type: 'CL',
+                    dex: 'AERODROME',
                     counterToken: 'WETH',
                     isCounterTokenFirst: false,
                     tickSpacing: 200,
@@ -106,12 +123,14 @@ const oracleConfig = {
                 {
                     address: '0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e',
                     type: 'AMM',
+                    dex: 'AERODROME',
                     counterToken: 'WETH',
                     isCounterTokenFirst: false
                 },
                 {
                     address: '0x22A52bB644f855ebD5ca2edB643FF70222D70C31',
                     type: 'CL',
+                    dex: 'AERODROME',
                     counterToken: 'WETH',
                     isCounterTokenFirst: false,
                     tickSpacing: 200,
@@ -121,7 +140,21 @@ const oracleConfig = {
                         long: { seconds: 86400, required: false }  // Optional
                     },
                     quoteSizes: [1, 150000]
-                }
+                },
+                // {
+                //     address: '0xf1Fdc83c3A336bdbDC9fB06e318B08EadDC82FF4',
+                //     type: 'CL',
+                //     dex: 'UNISWAP',
+                //     counterToken: 'USDC',
+                //     isCounterTokenFirst: false, //something weird here, token0 is AIXBT
+                //     tickSpacing: 60,
+                //     twapConfigs: {
+                //         short: { seconds: 30, required: true },    // Required for price calc
+                //         mid: { seconds: 3600, required: false },   // Optional
+                //         long: { seconds: 86400, required: false }  // Optional
+                //     },
+                //     quoteSizes: [1, 150000]
+                // }
             ]
         },
         SKI: {
@@ -129,6 +162,7 @@ const oracleConfig = {
                 {
                     address: '0xe782B72A1157b7bEa1A9452835Cce214962aD43B',
                     type: 'CL',
+                    dex: 'AERODROME',
                     counterToken: 'WETH',
                     isCounterTokenFirst: true,
                     tickSpacing: 200,
@@ -146,6 +180,7 @@ const oracleConfig = {
                 {
                     address: '0xA0e2bac96aB51c92d3284781AeE1EEc817F6F9C2',
                     type: 'CL',
+                    dex: 'AERODROME',
                     counterToken: 'WETH',
                     isCounterTokenFirst: false,
                     tickSpacing: 200,
@@ -163,6 +198,7 @@ const oracleConfig = {
                 {
                     address: '0xb7068556049dF8Fb3ae77CCbb9611FE0e85B2641',
                     type: 'CL',
+                    dex: 'AERODROME',
                     counterToken: 'USDC',
                     isCounterTokenFirst: true,
                     tickSpacing: 100,
@@ -172,6 +208,60 @@ const oracleConfig = {
                         long: { seconds: 86400, required: false }  // Optional
                     },
                     quoteSizes: [1, 4000000]
+                },
+            ]
+        },
+        GAME: {
+            pools: [
+                {
+                    address: '0x2A36148a416cBa81699B555120Bd65f4682BDFD2',
+                    type: 'CL',
+                    dex: 'AERODROME',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: false,
+                    tickSpacing: 200,
+                    twapConfigs: {
+                        short: { seconds: 30, required: true },    // Required for price calc
+                        mid: { seconds: 3600, required: false },   // Optional
+                        long: { seconds: 86400, required: false }  // Optional
+                    },
+                    quoteSizes: [1, 1500000]
+                },
+            ]
+        },
+        LUNA: {
+            pools: [
+                {
+                    address: '0xB6b777577A05D85FFca7D9EBC7476Fb344B92445',
+                    type: 'CL',
+                    dex: 'AERODROME',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: true,
+                    tickSpacing: 200,
+                    twapConfigs: {
+                        short: { seconds: 30, required: true },    // Required for price calc
+                        mid: { seconds: 3600, required: false },   // Optional
+                        long: { seconds: 86400, required: false }  // Optional
+                    },
+                    quoteSizes: [1, 2700000]
+                },
+            ]
+        },
+        VADER: {
+            pools: [
+                {
+                    address: '0xEbaB2be57727f0165f4bB35d765377b951100B5F',
+                    type: 'CL',
+                    dex: 'UNISWAP',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: true,
+                    tickSpacing: 200,
+                    twapConfigs: {
+                        short: { seconds: 30, required: true },    // Required for price calc
+                        mid: { seconds: 3600, required: false },   // Optional
+                        long: { seconds: 86400, required: false }  // Optional
+                    },
+                    quoteSizes: [1, 2300000]
                 },
             ]
         },
