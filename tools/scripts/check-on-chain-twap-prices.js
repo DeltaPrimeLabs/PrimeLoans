@@ -414,7 +414,7 @@ async function analyzeTwapObservability() {
 }
 
 
-async function getTwapForDuration(poolAddress, duration, provider) {
+async function getTwapForDuration(poolAddress, duration, provider, isCounterTokenFirst) {
     const poolInterface = new ethers.utils.Interface(POOL_ABI);
 
     const secondsAgos = [0, duration].map(s =>
@@ -432,7 +432,13 @@ async function getTwapForDuration(poolAddress, duration, provider) {
         const decodedResult = poolInterface.decodeFunctionResult("observe", result);
         const [tickCumulatives] = decodedResult;
 
-        const tickDiff = tickCumulatives[0].sub(tickCumulatives[1]);
+        const tickDiff =
+            isCounterTokenFirst
+            ?
+            tickCumulatives[0].sub(tickCumulatives[1])
+            :
+            tickCumulatives[1].sub(tickCumulatives[0]);
+
         const avgTick = tickDiff.div(ethers.BigNumber.from(duration));
         const price = Math.pow(1.0001, avgTick);
 
@@ -472,7 +478,7 @@ async function getClPoolPrice(poolAddress, twapConfigs, provider, knownPrice, is
 
     // Process each TWAP duration independently
     const twapPromises = Object.entries(twapConfigs).map(async ([period, config]) => {
-        const result = await getTwapForDuration(poolAddress, config.seconds, provider);
+        const result = await getTwapForDuration(poolAddress, config.seconds, provider, isCounterTokenFirst);
 
         const decimalsDifference = isCounterTokenFirst ?
             counterTokenConfig.decimals - tokenConfig.decimals
