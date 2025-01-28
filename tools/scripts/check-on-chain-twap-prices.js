@@ -107,7 +107,7 @@ const oracleConfig = {
                     type: 'CL',
                     dex: 'AERODROME',
                     counterToken: 'WETH',
-                    isCounterTokenFirst: false,
+                    isCounterTokenFirst: true,
                     tickSpacing: 200,
                     twapConfigs: {
                         short: { seconds: 30, required: true },    // Required for price calc
