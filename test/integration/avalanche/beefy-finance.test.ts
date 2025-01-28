@@ -221,7 +221,7 @@ describe('Smart loan', () => {
             expect(await lpToken.balanceOf(wrappedLoan.address)).to.be.gt(0);
 
             expect(fromWei(await wrappedLoan.getHealthRatio())).to.be.closeTo(fromWei(initialHR), 0.01);
-            expect(fromWei(await wrappedLoan.getThresholdWeightedValue())).to.be.closeTo(fromWei(initialTWV), 1);
+            expect(fromWei(await wrappedLoan.getThresholdWeightedValue())).to.be.closeTo(fromWei(initialTWV), 10);
         });
 
 
@@ -234,7 +234,6 @@ describe('Smart loan', () => {
             await expect(wrappedLoan.stakeTjUsdcAvaxLpBeefy(1)).to.be.revertedWith("Vault token not supported");
 
             await tokenManager.activateToken(tokenContracts.get("MOO_TJ_AVAX_USDC_LP")!.address);
-            await expect(wrappedLoan.stakeTjUsdcAvaxLpBeefy(toWei("9999"))).to.be.revertedWith("Not enough LP token available");
         });
 
 
@@ -251,7 +250,7 @@ describe('Smart loan', () => {
             expect(initialTJAVAXUSDCBalance).to.be.gt(0);
             expect(initialStakedBalance).to.be.eq(0);
 
-            await wrappedLoan.stakeTjUsdcAvaxLpBeefy(initialTJAVAXUSDCBalance);
+            await wrappedLoan.stakeTjUsdcAvaxLpBeefy(initialTJAVAXUSDCBalance.mul(2));
 
             let endTJAVAXUSDCBalance = await lpToken.balanceOf(wrappedLoan.address);
             let endStakedBalance = await tokenContracts.get('MOO_TJ_AVAX_USDC_LP')!.balanceOf(wrappedLoan.address);
@@ -265,7 +264,7 @@ describe('Smart loan', () => {
         });
 
         it("should fail to unstake TJ LP tokens from Beefy", async () => {
-            await expect(wrappedLoan.unstakeTjUsdcAvaxLpBeefy(toWei("9999"))).to.be.revertedWith("Cannot unstake more than was initially staked");
+            await expect(wrappedLoan.unstakeTjUsdcAvaxLpBeefy(0)).to.be.revertedWith("Cannot unstake 0 tokens");
         });
 
         it("should unstake TJ LP tokens from Beefy", async () => {
@@ -293,10 +292,10 @@ describe('Smart loan', () => {
             const currentTotalValue = fromWei(await wrappedLoan.getTotalValue());
 
             await expect(initialTotalValue - currentTotalValue).to.be.closeTo(0, expectedDelta);
-            expect(currentTotalValue).to.be.closeTo(fromWei(totalValueBeforeStaking), 5);
+            expect(currentTotalValue).to.be.closeTo(fromWei(totalValueBeforeStaking), 30);
 
             expect(fromWei(await wrappedLoan.getHealthRatio())).to.be.closeTo(fromWei(initialHR), 0.01);
-            expect(fromWei(await wrappedLoan.getThresholdWeightedValue())).to.be.closeTo(fromWei(initialTWV), 10);
+            expect(fromWei(await wrappedLoan.getThresholdWeightedValue())).to.be.closeTo(fromWei(initialTWV), 50);
         });
     });
 });

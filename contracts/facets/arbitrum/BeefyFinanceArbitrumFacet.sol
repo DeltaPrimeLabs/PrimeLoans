@@ -18,29 +18,12 @@ contract BeefyFinanceArbitrumFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolven
     using TransferHelper for address;
 
     // Vaults
-    address private constant MOO_SUSHI_DPX_ETH_LP = 0x4D323f77c32EDdC62BF8eAbA11E5C573FD0a2ccd;
     address private constant MOO_GMX = 0x5B904f19fb9ccf493b623e5c8cE91603665788b0;
 
     // LPs
-    address private constant SUSHI_DPX_ETH_LP = 0x0C1Cf6883efA1B496B01f654E247B9b419873054;
     address private constant GMX = 0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a;
 
     // ----- STAKE -----
-
-    /**
-      * Stakes SUSHI_DPX_ETH_LP in the Beefy protocol
-      * @dev This function uses the redstone-evm-connector
-      * @param amount amount of SUSHI_DPX_ETH_LP to be staked
-    **/
-    function stakeSushiDpxEthLpBeefy(uint256 amount) public onlyOwnerOrInsolvent nonReentrant remainsSolvent {
-        _stakeLpBeefy(IBeefyFinance.BeefyStakingDetails({
-            lpTokenAddress: SUSHI_DPX_ETH_LP,
-            vaultAddress: MOO_SUSHI_DPX_ETH_LP,
-            lpTokenSymbol: "SUSHI_DPX_ETH_LP",
-            vaultTokenSymbol: "MOO_SUSHI_DPX_ETH_LP",
-            amount: amount
-        }));
-    }
 
     /**
       * Stakes GMX in the Beefy protocol
@@ -58,21 +41,6 @@ contract BeefyFinanceArbitrumFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolven
     }
 
     // ----- UNSTAKE -----
-
-    /**
-      * Unstakes SUSHI_DPX_ETH_LP from the Beefy protocol
-      * @dev This function uses the redstone-evm-connector
-      * @param amount amount of SUSHI_DPX_ETH_LP to be unstaked
-    **/
-    function unstakeSushiDpxEthLpBeefy(uint256 amount) public onlyOwnerOrInsolvent nonReentrant {
-            _unstakeLpBeefy(IBeefyFinance.BeefyStakingDetails({
-            lpTokenAddress: SUSHI_DPX_ETH_LP,
-            vaultAddress: MOO_SUSHI_DPX_ETH_LP,
-            lpTokenSymbol: "SUSHI_DPX_ETH_LP",
-            vaultTokenSymbol: "MOO_SUSHI_DPX_ETH_LP",
-            amount: amount
-        }));
-    }
 
     /**
       * Untakes GMX from the Beefy protocol
@@ -99,11 +67,12 @@ contract BeefyFinanceArbitrumFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolven
     function _stakeLpBeefy(IBeefyFinance.BeefyStakingDetails memory stakingDetails) private {
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
-        require(stakingDetails.amount > 0, "Cannot stake 0 tokens");
         // _ACTIVE = 2
         require(tokenManager.tokenToStatus(stakingDetails.lpTokenAddress) == 2, "LP token not supported");
         require(tokenManager.tokenToStatus(stakingDetails.vaultAddress) == 2, "Vault token not supported");
-        require(IERC20(stakingDetails.lpTokenAddress).balanceOf(address(this)) >= stakingDetails.amount, "Not enough LP token available");
+
+        stakingDetails.amount = Math.min(stakingDetails.amount, IERC20(stakingDetails.lpTokenAddress).balanceOf(address(this)));
+        require(stakingDetails.amount > 0, "Cannot stake 0 tokens");
 
         stakingDetails.lpTokenAddress.safeApprove(stakingDetails.vaultAddress, 0);
         stakingDetails.lpTokenAddress.safeApprove(stakingDetails.vaultAddress, stakingDetails.amount);
@@ -127,10 +96,12 @@ contract BeefyFinanceArbitrumFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolven
     function _unstakeLpBeefy(IBeefyFinance.BeefyStakingDetails memory stakingDetails) private {
         IBeefyFinance vaultContract = IBeefyFinance(stakingDetails.vaultAddress);
         uint256 initialStakedBalance = vaultContract.balanceOf(address(this));
+        stakingDetails.amount = Math.min(initialStakedBalance, stakingDetails.amount);
+
+        require(stakingDetails.amount > 0, "Cannot unstake 0 tokens");
+
         uint256 initialLpBalance = IERC20(stakingDetails.lpTokenAddress).balanceOf(address(this));
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-
-        require(initialStakedBalance >= stakingDetails.amount, "Cannot unstake more than was initially staked");
 
         vaultContract.withdraw(stakingDetails.amount);
 
