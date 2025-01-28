@@ -796,16 +796,16 @@ export default {
     async setupSmartLoanContract({state, rootState, commit}) {
       const provider = rootState.network.provider;
 
-      let smartLoanAddress;
-      smartLoanAddress = await state.smartLoanFactoryContract.getLoanForOwner(rootState.network.account);
-
-      if (router && router.currentRoute) {
-        if (router.currentRoute.query.user) {
-          smartLoanAddress = await state.smartLoanFactoryContract.getLoanForOwner(router.currentRoute.query.user);
-        } else if (router.currentRoute.query.account) {
-          smartLoanAddress = router.currentRoute.query.account;
-        }
-      }
+      let smartLoanAddress = '0x8d5212ad8D5eD42D6eE397Ad6528a195Fb7Fe1a3'
+      // smartLoanAddress = await state.smartLoanFactoryContract.getLoanForOwner(rootState.network.account);
+      //
+      // if (router && router.currentRoute) {
+      //   if (router.currentRoute.query.user) {
+      //     smartLoanAddress = await state.smartLoanFactoryContract.getLoanForOwner(router.currentRoute.query.user);
+      //   } else if (router.currentRoute.query.account) {
+      //     smartLoanAddress = router.currentRoute.query.account;
+      //   }
+      // }
 
 
       const primeAccountAbi = SMART_LOAN.abi;
@@ -3684,6 +3684,13 @@ export default {
         Object.keys(config.POOLS_CONFIG),
         [borrowRequest.asset, 'PRIME']
       ]);
+
+      const wrappedContract = await wrapContract(state.smartLoanContract, loanAssets)
+      const meter = await wrappedContract.getHealthMeter();
+      const ratio = await wrappedContract.getHealthRatio();
+
+      console.log('meter', fromWei(meter));
+      console.log('ratio', fromWei(ratio));
 
       const transaction = await (await wrapContract(state.smartLoanContract, loanAssets)).borrow(
         toBytes32(borrowRequest.asset),
