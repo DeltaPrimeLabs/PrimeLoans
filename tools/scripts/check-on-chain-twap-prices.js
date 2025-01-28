@@ -120,13 +120,13 @@ const oracleConfig = {
         },
         AIXBT: {
             pools: [
-                // {
-                //     address: '0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e',
-                //     type: 'AMM',
-                //     dex: 'AERODROME',
-                //     counterToken: 'WETH',
-                //     isCounterTokenFirst: false
-                // },
+                {
+                    address: '0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e',
+                    type: 'AMM',
+                    dex: 'AERODROME',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: false
+                },
                 {
                     address: '0x22A52bB644f855ebD5ca2edB643FF70222D70C31',
                     type: 'CL',
@@ -157,24 +157,24 @@ const oracleConfig = {
                 }
             ]
         },
-        // SKI: {
-        //     pools: [
-        //         {
-        //             address: '0xe782B72A1157b7bEa1A9452835Cce214962aD43B',
-        //             type: 'CL',
-        //             dex: 'AERODROME',
-        //             counterToken: 'WETH',
-        //             isCounterTokenFirst: true,
-        //             tickSpacing: 200,
-        //             twapConfigs: {
-        //                 short: { seconds: 30, required: true },    // Required for price calc
-        //                 mid: { seconds: 3600, required: false },   // Optional
-        //                 long: { seconds: 86400, required: false }  // Optional
-        //             },
-        //             quoteSizes: [1, 800000]
-        //         }
-        //     ]
-        // },
+        SKI: {
+            pools: [
+                {
+                    address: '0xe782B72A1157b7bEa1A9452835Cce214962aD43B',
+                    type: 'CL',
+                    dex: 'AERODROME',
+                    counterToken: 'WETH',
+                    isCounterTokenFirst: true,
+                    tickSpacing: 200,
+                    twapConfigs: {
+                        short: { seconds: 30, required: true },    // Required for price calc
+                        mid: { seconds: 3600, required: false },   // Optional
+                        long: { seconds: 86400, required: false }  // Optional
+                    },
+                    quoteSizes: [1, 800000]
+                }
+            ]
+        },
         DRV: {
             pools: [
                 {
