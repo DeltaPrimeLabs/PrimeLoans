@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "hardhat/console.sol";
 
 interface IUniswapV3Pool {
     function token0() external view returns (address);
@@ -126,6 +127,9 @@ contract BaseOracle is Initializable, OwnableUpgradeable {
                 pools[i]
             );
 
+            console.log("Pool: %s", pools[i].poolAddress);
+            console.log("Pool price: %s", poolPrice);
+
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
@@ -158,13 +162,22 @@ contract BaseOracle is Initializable, OwnableUpgradeable {
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
         bool isToken0 = uniPool.token0() == asset;
 
+        // Add debug logging
+        console.log("Pool address: %s", pool.poolAddress);
+        console.log("Asset: %s", asset);
+        console.log("Token0: %s", uniPool.token0());
+        console.log("Token1: %s", uniPool.token1());
+        console.log("Is Token0: %s", isToken0);
+
         uint256 shortTwapPrice = getTwapPrice(
             pool.poolAddress,
             pool.shortTwap,
             isToken0
         );
 
+        console.log("Raw TWAP price: %s", shortTwapPrice);
         uint256 priceFromPool = (shortTwapPrice * baseAssetPrice) / PRECISION;
+        console.log("Final pool price: %s", priceFromPool);
 
         if (useMidTwap) {
             uint256 midTwapPrice = getTwapPrice(
@@ -190,6 +203,19 @@ contract BaseOracle is Initializable, OwnableUpgradeable {
             if (calculateDeviation(priceFromPool, longTwapPrice) > pool.longDeviation) {
                 revert LongTWAPDeviationTooHigh();
             }
+        }
+
+        uint8 token0Decimals = IERC20(uniPool.token0()).decimals();
+        uint8 token1Decimals = IERC20(uniPool.token1()).decimals();
+        uint256 decimalAdjustment = 10 ** (token1Decimals > token0Decimals ?
+            (token1Decimals - token0Decimals) :
+            (token0Decimals - token1Decimals));
+
+        // Adjust final price based on decimal difference
+        if (token1Decimals > token0Decimals) {
+            priceFromPool = priceFromPool * decimalAdjustment;
+        } else if (token0Decimals > token1Decimals) {
+            priceFromPool = priceFromPool / decimalAdjustment;
         }
 
         return priceFromPool;
@@ -224,12 +250,17 @@ contract BaseOracle is Initializable, OwnableUpgradeable {
             int56[] memory tickCumulatives,
             uint160[] memory
         ) {
-            int56 tickDiff = tickCumulatives[0] - tickCumulatives[1];
+            int56 tickDiff = isToken0 ? tickCumulatives[1] - tickCumulatives[0]  : tickCumulatives[0] - tickCumulatives[1];
             int24 avgTick = int24(tickDiff / int56(uint56(secondsAgo)));
             int24 halfTick = avgTick / 2;
 
             bool isNegative = halfTick < 0;
-            uint256 absTick = uint256(uint24(isNegative ? -halfTick : halfTick));
+
+            console.log("Tick diff: %s", uint256(uint56(isNegative ? -tickDiff : tickDiff)));
+            console.log("Avg tick: %s", uint256(uint24(isNegative ? -avgTick : avgTick)));
+
+
+        uint256 absTick = uint256(uint24(isNegative ? -halfTick : halfTick));
 
             // Using safer power calculation
             uint256 result = 1e18;  // Start with Q96 precision
