@@ -11,4 +11,20 @@ interface IParaSwapFacet {
         bytes4 selector,
         bytes memory data
     ) external;
+
+    // Events
+    event SwapExecuted(
+        address indexed user,
+        bytes32 indexed soldAsset,
+        bytes32 indexed boughtAsset,
+        uint256 amountSold,
+        uint256 amountBought,
+        uint256 timestamp
+    );
+    event SlippageExceeded(
+        address indexed user,
+        uint256 soldTokenValue,
+        uint256 boughtTokenValue,
+        uint256 slippage
+    );
 }

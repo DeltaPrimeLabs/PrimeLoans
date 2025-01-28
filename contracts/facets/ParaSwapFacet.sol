@@ -8,9 +8,10 @@ import "../lib/DiamondStorageLib.sol";
 import "../lib/SolvencyMethods.sol";
 import "./SmartLoanLiquidationFacet.sol";
 import "../interfaces/ITokenManager.sol";
+import "../interfaces/facets/avalanche/IParaSwapFacet.sol";
 import "../lib/local/DeploymentConstants.sol";
 
-contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
+contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods, IParaSwapFacet {
     using TransferHelper for address;
 
     // Constants
@@ -34,21 +35,7 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
     address private constant EXECUTOR_4 = 0x00C600b30fb0400701010F4b080409018B9006E0;
     address private constant EXECUTOR_5 = 0xe009F00e200A090090fC70e02d70B232000c0802;
 
-    // Events
-    event SwapExecuted(
-        address indexed user,
-        bytes32 indexed soldAsset,
-        bytes32 indexed boughtAsset,
-        uint256 amountSold,
-        uint256 amountBought,
-        uint256 timestamp
-    );
-    event SlippageExceeded(
-        address indexed user,
-        uint256 soldTokenValue,
-        uint256 boughtTokenValue,
-        uint256 slippage
-    );
+    
 
     // Custom errors for gas optimization
     error InvalidExecutor();
