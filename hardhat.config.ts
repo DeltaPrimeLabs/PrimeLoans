@@ -70,9 +70,13 @@ export default {
       chainId: 43113,
       accounts: [getKey('fuji', 'deployer'), getKey('fuji', 'admin')]
     },
+    base: {
+      url: 'https://mainnet.base.org',
+      chainId: 8453,
+      accounts: [getKey('base', 'deployer'), getKey('base', 'admin')]
+    },
     avalanche: {
       url: 'https://api.avax.network/ext/bc/C/rpc',
-      // url: 'https://rpc.ankr.com/avalanche',
       gasPrice: 100000000000,
       chainId: 43114,
       accounts: [getKey('avalanche', 'deployer'), getKey('avalanche', 'admin')]
@@ -116,10 +120,21 @@ export default {
   },
   etherscan: {
     apiKey: {
+      base: "<READCETD>",
       avalanche: "8ZZX5UV18YJKIK4FNQCF3M699VU5D6AGC4",
       arbitrumOne: "XGXPCAQEJHHTZWC6YBR8JMX8HWZW61RGAQ",
       avalancheFujiTestnet: "8ZZX5UV18YJKIK4FNQCF3M699VU5D6AGC4"
-    }
+    },
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org"
+        }
+      }
+    ]
   },
   deploy: {
     skipIfAlreadyDeployed: true
