@@ -99,11 +99,11 @@ export default {
     },
 
     SWAP_DEXS_CONFIG: {
-        // ParaSwapV2: {
-        //     displayName: 'ParaSwap',
-        //     availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
-        //     slippageMargin: 0.05
-        // },
+        ParaSwapV2: {
+            displayName: 'ParaSwap',
+            availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'sAVAX', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
+            slippageMargin: 0.05
+        },
         YakSwap: {
             displayName: 'YakSwap',
             availableAssets: ['AVAX', 'USDC', 'BTC', 'ETH', 'USDT', 'EUROC', 'sAVAX', 'GMX', 'JOE', 'QI', 'PNG', 'yyAVAX', 'ggAVAX'],
@@ -818,5 +818,6 @@ export default {
         collectedGGP: 'https://2t8c1g5jra.execute-api.us-east-1.amazonaws.com/ggp-incentives-yy-for'
     },
     geolocationServiceUrl: "https://geo-service-r9helgya1-deltaprimelabs.vercel.app",
-    restrictedCountries: ['US', 'AS', 'GU', 'PR', 'MP', 'VI', 'BY', 'CU', 'KP', 'SY', 'CI', 'LR', 'SD', 'ZW', 'IQ']
+    restrictedCountries: ['US', 'AS', 'GU', 'PR', 'MP', 'VI', 'BY', 'CU', 'KP', 'SY', 'CI', 'LR', 'SD', 'ZW', 'IQ'],
+    paraSwapPartnerAddress: "0x8995d790169023Ee4fF67621948EBDFe7383f59e"
 }

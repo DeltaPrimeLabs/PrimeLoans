@@ -3859,24 +3859,23 @@ export default {
         srcToken: swapRequest.paraSwapRate.srcToken,
         destToken: swapRequest.paraSwapRate.destToken,
         srcAmount: swapRequest.paraSwapRate.srcAmount,
-        slippage: 1000,
+        slippage: 300,
         priceRoute,
+        deadline: Math.floor(Date.now() / 1000) + 300, // 500 minutes deadline
         userAddress: state.smartLoanContract.address,
-        partner: 'anon',
+        partnerAddress: "0x5e7d3d4F744378C2259bb6C52fbF247be473860D",
+        partnerFeeBps: 1,
+        partner: "deltaprime",
       }, {
         ignoreChecks: true,
       });
 
-      const selector = txParams.data.substr(0, 10);
-      const data = '0x' + txParams.data.substr(10);
+      const selector = txParams.data.slice(0, 10);
+      const data = '0x' + txParams.data.slice(10);
 
-      const transaction = await wrappedLoan.paraSwapV2(
+      const transaction = await wrappedLoan.paraSwapV6(
         selector,
-        data,
-        swapRequest.paraSwapRate.srcToken,
-        sourceAmount,
-        swapRequest.paraSwapRate.destToken,
-        targetAmount
+        data
       );
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
@@ -3884,11 +3883,8 @@ export default {
 
       const tx = await awaitConfirmation(transaction, provider, 'paraSwap');
 
-      console.log('SWAP LOG');
-      console.log(getLog(tx, SMART_LOAN.abi, 'Swap'));
-
-      const amountSold = formatUnits(getLog(tx, SMART_LOAN.abi, 'Swap').args.maximumSold, config.ASSETS_CONFIG[swapRequest.sourceAsset].decimals);
-      const amountBought = formatUnits(getLog(tx, SMART_LOAN.abi, 'Swap').args.minimumBought, config.ASSETS_CONFIG[swapRequest.targetAsset].decimals);
+      const amountSold = formatUnits(getLog(tx, SMART_LOAN.abi, 'SwapExecuted').args.amountSold, config.ASSETS_CONFIG[swapRequest.sourceAsset].decimals);
+      const amountBought = formatUnits(getLog(tx, SMART_LOAN.abi, 'SwapExecuted').args.amountBought, config.ASSETS_CONFIG[swapRequest.targetAsset].decimals);
       const sourceBalanceAfterSwap = Number(state.assetBalances[swapRequest.sourceAsset]) - Number(amountSold);
       const targetBalanceAfterSwap = Number(state.assetBalances[swapRequest.targetAsset]) + Number(amountBought);
 

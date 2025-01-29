@@ -569,7 +569,11 @@ export default {
             amount: amountIn,
             userAddress: this.smartLoanContract.address,
             side: SwapSide.SELL,
-            excludeDEXS: ['ParaSwapPool', 'ParaSwapLimitOrders'],
+            includeContractMethods: [
+              "swapExactAmountIn",
+              "swapExactAmountInOnUniswapV3",
+            ],
+            version: 6.2,
           });
 
           const sourceAmountWei = parseUnits(Number(`${swapRate.srcAmount}e-${swapRate.srcDecimals}`).toFixed(swapRate.srcDecimals), swapRate.srcDecimals);

@@ -74,11 +74,11 @@ export default {
         "SILO": {name: "SILO", symbol: "SILO", logoExt: "png", decimals: 18, address: addresses.SILO},
     },
     SWAP_DEXS_CONFIG: {
-        // ParaSwapV2: {
-        //     displayName: 'ParaSwap',
-        //         availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
-        //     slippageMargin: 0.05
-        // },
+        ParaSwapV2: {
+            displayName: 'ParaSwap',
+            availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
+            slippageMargin: 0.05
+        },
         YakSwap: {
             displayName: 'YakSwap',
             availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
@@ -602,5 +602,6 @@ export default {
     ltipProgramStart: 1717432200,
     lastMilestoneHit: 1721293803,
     geolocationServiceUrl: "https://geo-service-r9helgya1-deltaprimelabs.vercel.app",
-    restrictedCountries: ['US', 'AS', 'GU', 'PR', 'MP', 'VI', 'BY', 'CU', 'KP', 'SY', 'CI', 'LR', 'SD', 'ZW', 'IQ']
+    restrictedCountries: ['US', 'AS', 'GU', 'PR', 'MP', 'VI', 'BY', 'CU', 'KP', 'SY', 'CI', 'LR', 'SD', 'ZW', 'IQ'],
+    paraSwapPartnerAddress: "0x5e7d3d4F744378C2259bb6C52fbF247be473860D"
 }
