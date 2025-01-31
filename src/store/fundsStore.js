@@ -3863,7 +3863,7 @@ export default {
         priceRoute,
         deadline: Math.floor(Date.now() / 1000) + 300, // 500 minutes deadline
         userAddress: state.smartLoanContract.address,
-        partnerAddress: "0x5e7d3d4F744378C2259bb6C52fbF247be473860D",
+        partnerAddress: config.paraSwapPartnerAddress,
         partnerFeeBps: 1,
         partner: "deltaprime",
       }, {
