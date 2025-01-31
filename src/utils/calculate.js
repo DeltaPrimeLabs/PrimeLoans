@@ -46,8 +46,42 @@ export function calculateHealth(tokens, lbTokens) {
       })
   }
 
-  let weightedCollateral = weightedCollateralFromLBs + tokens.reduce((acc, token) => acc + token.price * ((isNaN(token.balance) ? 0 : token.balance) - token.borrowed) * token.debtCoverage, 0);
+  let weightedCollateral = weightedCollateralFromLBs;
+
+  tokens.forEach(token => {
+    let balance = isNaN(token.balance) ? 0 : token.balance;
+    let netBalance = balance - token.borrowed;
+    let contribution = token.price * netBalance * token.debtCoverage;
+
+    console.log(token.symbol, contribution);
+
+    weightedCollateral += contribution;
+  });
   let weightedBorrowed = tokens.reduce((acc, token) => acc + token.price * token.borrowed * token.debtCoverage, 0);
+  console.log('HTH tokens', tokens);
+  const data = [];
+  tokens.forEach(token => {
+    if (token.balance > 0 || token.borrowed > 0) {
+      const weightedCollateralPerToken = token.price * ((isNaN(token.balance) ? 0 : token.balance) - token.borrowed) * token.debtCoverage;
+      console.log('HTH', token.symbol, token.balance, token.price, token.debtCoverage, weightedCollateralPerToken);
+      data.push({
+        symbol: token.symbol,
+        balance: token.balance,
+        realBalance: token.balance - token.borrowed,
+        borrowed: token.borrowed,
+        price: token.price,
+        debtCoverage: token.debtCoverage,
+        netBalance: token.balance - token.borrowed,
+        netWorth: token.price * (token.balance - token.borrowed),
+        worth: (token.price * token.balance - token.borrowed),
+        weightedCollateralPerToken: weightedCollateralPerToken,
+      })
+    }
+    console.table(data);
+  })
+  console.log('HTH weightedCollateralFromLBs', weightedCollateralFromLBs);
+  console.log('HTH weightedCollateral', weightedCollateral);
+  console.log('HTH weightedBorrowed', weightedBorrowed);
   let borrowed = tokens.reduce((acc, token) => acc + token.price * token.borrowed, 0);
 
   if (borrowed === 0) return 1;

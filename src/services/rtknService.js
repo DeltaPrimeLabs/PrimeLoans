@@ -122,6 +122,13 @@ export default class RtknService {
 
 
     console.log(maxCap);
+    console.log('totalCommited', totalCommited)
+    console.log('totalPledged', totalPledged)
+    console.log('totalUsers', totalUsers)
+    console.log('yourPledge', yourPledge)
+    console.log('rtknBalance', rtknBalance)
+
+    console.log('rtknUtilized', rtknUtilized)
 
     return {
       maxCap,
