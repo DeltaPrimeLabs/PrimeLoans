@@ -13,6 +13,7 @@
     "test:prod:avalanche": "yarn hardhat test test/prod/avalanche.test.ts --network localhost",
     "fork:ethereum": "yarn hardhat node --fork https://rpc.ankr.com/eth --no-deploy",
     "fork:avalanche": "yarn hardhat node --fork https://rpc.ankr.com/avalanche --no-deploy",
+    "fork:base": "yarn hardhat node --fork <BASE_RPC_URL> --no-deploy",
     "fork:arbitrum": "yarn hardhat node --fork https://arb1.arbitrum.io/rpc --no-deploy",
     "fork:fuji": "yarn hardhat node --fork https://api.avax-test.network/ext/bc/C/rpc --no-deploy",
     "fork:celo": "yarn ganache-cli --fork https://forno.celo.org -u 0x5839Dd13ad2C78dDcF3365D54302D65764619737",
