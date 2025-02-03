@@ -34,35 +34,44 @@ interface IAMM {
 
 /**
  * @title BaseOracle
- * @dev A contract that calculates the USD value of an asset using multiple pools.
- *      It supports both centralized liquidity (CL) pools and automated market maker (AMM) pools.
- *      The contract allows configuring tokens with their respective pools and calculates the minimum USD price
- *      across all configured pools for a given asset.
+ * @dev Calculates the USD value of an asset using multiple pools.
+ *      The contract supports both centralized liquidity (CL) pools and AMM pools.
+ *
+ *      In this refactored version, each pool config stores a single short TWAP duration (used
+ *      to derive the price) and an array of TWAP deviation checks. Each deviation check
+ *      consists of a TWAP duration and a maximum allowed deviation. When enabled, the oracle
+ *      will iterate over these checks to verify that the short TWAP price does not deviate
+ *      too much from prices calculated over other durations.
  */
 contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
-    // Custom errors for better error handling
+    // Custom errors for better error handling.
     error EmptyPools();
     error InvalidBaseAsset();
     error TokenNotConfigured();
     error LengthMismatch();
     error MissingBaseAssetPrice();
     error NoValidPrice();
-    error MidTWAPDeviationTooHigh();
-    error LongTWAPDeviationTooHigh();
+    error TWAPDeviationTooHigh();
     error InvalidInput();
     error DivisionByZero();
+
+    /**
+     * @notice Represents a deviation check for a given TWAP duration.
+     * @param duration The TWAP duration (in seconds).
+     * @param maxDeviation Maximum allowed deviation (in 1e18 scale).
+     */
+    struct TWAPCheck {
+        uint32 duration;
+        uint256 maxDeviation;
+    }
 
     /**
      * @notice Configuration for a pool used in price calculation.
      * @param poolAddress The address of the pool (Uniswap V3 or AMM).
      * @param isCL Whether the pool is a centralized liquidity (CL) pool (true) or an AMM pool (false).
      * @param tickSpacing Tick spacing for CL pools (ignored for AMM pools).
-     * @param shortTwap Short TWAP period for CL pools (in seconds).
-     * @param midTwap Mid TWAP period for CL pools (in seconds).
-     * @param longTwap Long TWAP period for CL pools (in seconds).
-     * @param midDeviation Allowed deviation percentage for mid-TWAP (in 1e18 scale).
-     * @param longDeviation Allowed deviation percentage for long-TWAP (in 1e18 scale).
-     * @param minLiquidity Minimum liquidity required for the pool (ignored for AMM pools).
+     * @param shortTwap The primary (short) TWAP duration (in seconds) used for the price calculation.
+     * @param twapChecks Array of additional TWAP checks (each with its own duration and max deviation).
      * @param baseAsset The base asset of the pool (e.g., USDC, WETH).
      */
     struct PoolConfig {
@@ -70,11 +79,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         bool isCL;
         int24 tickSpacing;
         uint32 shortTwap;
-        uint32 midTwap;
-        uint32 longTwap;
-        uint256 midDeviation;
-        uint256 longDeviation;
-        uint256 minLiquidity;
+        TWAPCheck[] twapChecks;
         address baseAsset;
     }
 
@@ -88,13 +93,13 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         PoolConfig[] pools;
     }
 
-    // Mapping of token addresses to their configurations
+    // Mapping of token addresses to their configurations.
     mapping(address => TokenConfig) public tokenConfigs;
 
-    // Constant for precision (1e18)
+    // Constant for precision (1e18).
     uint256 private constant PRECISION = 1e18;
 
-    // Events for tracking configuration changes
+    // Events for tracking configuration changes.
     event PoolAdded(address indexed token, address indexed pool);
     event PoolRemoved(address indexed token, address indexed pool);
     event TokenConfigured(address indexed token);
@@ -111,7 +116,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      */
     function initialize(address _initialOwner) public initializer {
         __Ownable_init();
-        __ReentrancyGuard_init();  // Initialize reentrancy protection
+        __ReentrancyGuard_init();  // Initialize reentrancy protection.
         transferOwnership(_initialOwner);
     }
 
@@ -143,17 +148,16 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     onlyOwner
     nonReentrant
     {
-        if (pools.length == 0) revert EmptyPools(); // Ensure at least one pool is provided
-        delete tokenConfigs[token].pools; // Clear existing pools for the token
+        if (pools.length == 0) revert EmptyPools();
+        delete tokenConfigs[token].pools;
         tokenConfigs[token].isConfigured = true;
 
-        // Add each pool to the token's configuration
         for (uint i = 0; i < pools.length; i++) {
-            if (pools[i].baseAsset == address(0)) revert InvalidBaseAsset(); // Ensure base asset is valid
+            if (pools[i].baseAsset == address(0)) revert InvalidBaseAsset();
             tokenConfigs[token].pools.push(pools[i]);
         }
 
-        emit TokenConfigured(token); // Emit event to track token configuration
+        emit TokenConfigured(token);
     }
 
     /**
@@ -168,18 +172,16 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
     /**
      * @notice Parameters for calculating the USD value of an asset.
-     * @param asset The address of the asset to calculate the USD value for.
+     * @param asset The address of the asset.
      * @param amount The amount of the asset.
-     * @param useMidTwap Whether to use the mid-TWAP for deviation checks.
-     * @param useLongTwap Whether to use the long-TWAP for deviation checks.
+     * @param useTwapChecks Whether to perform TWAP deviation checks (using the pool's TWAPCheck array).
      * @param baseAssets Array of base assets for which prices are provided.
      * @param baseAssetPrices Array of USD prices for the base assets (in 1e18 scale).
      */
     struct GetDollarValueParams {
         address asset;
         uint256 amount;
-        bool useMidTwap;
-        bool useLongTwap;
+        bool useTwapChecks;
         address[] baseAssets;
         uint256[] baseAssetPrices;
     }
@@ -197,7 +199,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         if (params.baseAssets.length != params.baseAssetPrices.length) revert LengthMismatch();
         if (params.amount == 0) revert InvalidInput();
 
-        // Ensure all base asset prices are non-zero
         for (uint i = 0; i < params.baseAssetPrices.length; i++) {
             if (params.baseAssetPrices[i] == 0) revert InvalidInput();
         }
@@ -207,7 +208,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
         for (uint i = 0; i < pools.length; i++) {
             uint256 baseAssetPrice = 0;
-            // Find the USD price of the base asset for this pool
             for (uint j = 0; j < params.baseAssets.length; j++) {
                 if (params.baseAssets[j] == pools[i].baseAsset) {
                     baseAssetPrice = params.baseAssetPrices[j];
@@ -219,8 +219,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             uint256 poolPrice = calculatePoolPrice(
                 params.asset,
                 params.amount,
-                params.useMidTwap,
-                params.useLongTwap,
+                params.useTwapChecks,
                 baseAssetPrice,
                 pools[i]
             );
@@ -235,8 +234,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
         if (minPrice == type(uint256).max) revert NoValidPrice();
         console.log("FINAL MIN USD PRICE: %s", minPrice);
-
-        // Since each pool returns the full USD value, just return minPrice.
         return minPrice;
     }
 
@@ -244,36 +241,39 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @notice Calculates the USD price of an asset using a specific pool.
      * @param asset The address of the asset.
      * @param amount The amount of the asset.
-     * @param useMidTwap Whether to use the mid-TWAP for deviation checks.
-     * @param useLongTwap Whether to use the long-TWAP for deviation checks.
-     * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
+     * @param useTwapChecks Whether to perform TWAP deviation checks.
+     * @param baseAssetPrice The USD price of the pool’s base asset (in 1e18 scale).
      * @param pool The pool configuration.
      * @return The USD price of the asset (in 1e18 scale).
      */
     function calculatePoolPrice(
         address asset,
         uint256 amount,
-        bool useMidTwap,
-        bool useLongTwap,
+        bool useTwapChecks,
         uint256 baseAssetPrice,
         PoolConfig memory pool
     ) internal view returns (uint256) {
         if (pool.isCL) {
-            return calculateCLPrice(asset, amount, useMidTwap, useLongTwap, baseAssetPrice, pool);
+            return calculateCLPrice(asset, amount, useTwapChecks, baseAssetPrice, pool);
         }
         return calculateAMMPrice(asset, amount, baseAssetPrice, pool);
     }
 
     /**
      * @notice Calculates the USD price of an asset using a centralized liquidity (CL) pool.
-     *         In this updated version, after computing the unit price from TWAP data, the result is
-     *         multiplied by `amount` so that the returned value is the full USD value.
+     *         After computing the unit price from TWAP data (using the short TWAP), the function
+     *         optionally runs additional TWAP deviation checks as defined in the pool’s TWAPCheck array.
+     * @param asset The address of the asset.
+     * @param amount The amount of the asset.
+     * @param useTwapChecks Whether to run TWAP deviation checks.
+     * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
+     * @param pool The pool configuration.
+     * @return The USD price of the asset (in 1e18 scale).
      */
     function calculateCLPrice(
         address asset,
         uint256 amount,
-        bool useMidTwap,
-        bool useLongTwap,
+        bool useTwapChecks,
         uint256 baseAssetPrice,
         PoolConfig memory pool
     ) internal view returns (uint256) {
@@ -282,34 +282,31 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         address token1Addr = uniPool.token1();
         bool isToken0 = (token0Addr == asset);
 
-        // Calculate the short TWAP price and derive the unit USD price.
+        console.log("CHECKING POOOL: %s", pool.poolAddress);
+
+        // Calculate the short TWAP price.
         uint256 shortTwapPrice = getTwapPrice(pool.poolAddress, pool.shortTwap, isToken0);
         uint256 priceFromPool = FullMath.mulDiv(shortTwapPrice, baseAssetPrice, PRECISION);
 
-        // Mid-TWAP deviation check if requested.
-        if (useMidTwap) {
-            uint256 midTwapPrice = getTwapPrice(pool.poolAddress, pool.midTwap, isToken0);
-            midTwapPrice = FullMath.mulDiv(midTwapPrice, baseAssetPrice, PRECISION);
-            uint256 devMid = calculateDeviation(priceFromPool, midTwapPrice);
-            if (devMid > pool.midDeviation) {
-                revert MidTWAPDeviationTooHigh();
+        // Run additional TWAP deviation checks if enabled.
+        if (useTwapChecks) {
+            for (uint i = 0; i < pool.twapChecks.length; i++) {
+                uint32 duration = pool.twapChecks[i].duration;
+                uint256 maxDeviation = pool.twapChecks[i].maxDeviation;
+                uint256 twapPrice = getTwapPrice(pool.poolAddress, duration, isToken0);
+                twapPrice = FullMath.mulDiv(twapPrice, baseAssetPrice, PRECISION);
+                uint256 deviation = calculateDeviation(priceFromPool, twapPrice);
+                console.log("TWAP Deviation: %s", deviation);
+                console.log("Max Deviation: %s", maxDeviation);
+                if (deviation > maxDeviation) {
+                    revert TWAPDeviationTooHigh();
+                }
             }
         }
 
-        // Long-TWAP deviation check if requested.
-        if (useLongTwap) {
-            uint256 longTwapPrice = getTwapPrice(pool.poolAddress, pool.longTwap, isToken0);
-            longTwapPrice = FullMath.mulDiv(longTwapPrice, baseAssetPrice, PRECISION);
-            uint256 devLong = calculateDeviation(priceFromPool, longTwapPrice);
-            if (devLong > pool.longDeviation) {
-                revert LongTWAPDeviationTooHigh();
-            }
-        }
-
-        // Extracted function to adjust for decimal differences between token0 and token1.
+        // Adjust for decimal differences between token0 and token1.
         priceFromPool = adjustForDecimals(priceFromPool, token0Addr, token1Addr, isToken0);
 
-        // Multiply by `amount` to get the full USD value.
         return FullMath.mulDiv(priceFromPool, amount, PRECISION);
     }
 
@@ -318,7 +315,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @param price The price to adjust.
      * @param token0 The address of token0.
      * @param token1 The address of token1.
-     * @param ratioIsToken1PerToken0 Boolean indicating whether the ratio is token1 per token0.
+     * @param ratioIsToken1PerToken0 Indicates whether the ratio is token1 per token0.
      * @return The adjusted price.
      */
     function adjustForDecimals(
@@ -356,7 +353,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
     /**
      * @notice Calculates the USD price of an asset using an AMM pool.
-     *         This function now returns the full USD value for the provided `amount`.
+     *         This function returns the full USD value for the provided `amount`.
      */
     function calculateAMMPrice(
         address asset,
@@ -381,11 +378,10 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
     /**
      * @notice Calculates the TWAP price for a Uniswap V3 pool.
-     * @dev This function uses the `observe` function of the Uniswap V3 pool to calculate the average price over a specified time period.
-     *      The formula used is: price(token1_per_token0) = 1.0001^(avgTick).
-     *      If the asset is token0, the ratio represents token1_per_token0; otherwise, it represents token0_per_token1.
+     * @dev Uses the pool’s observe method to compute the average tick over a specified period,
+     *      converts the tick to a sqrt price (Q64.96), and then converts that value to a 1e18‑scaled price.
      * @param poolAddress The address of the Uniswap V3 pool.
-     * @param secondsAgo The time period for the TWAP (in seconds).
+     * @param secondsAgo The TWAP duration (in seconds).
      * @param isToken0 Whether the asset is token0 in the pool.
      * @return The TWAP price (in 1e18 scale).
      */
@@ -395,35 +391,29 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         bool isToken0
     ) internal view returns (uint256) {
         uint32[] memory secondsAgos = new uint32[](2);
-        secondsAgos[0] = secondsAgo; // Past timestamp
-        secondsAgos[1] = 0;          // Current block timestamp
+        secondsAgos[0] = secondsAgo;
+        secondsAgos[1] = 0;
 
         try IUniswapV3Pool(poolAddress).observe(secondsAgos) returns (
             int56[] memory tickCumulatives,
             uint160[] memory /* unused */
         ) {
-            // Calculate the average tick over the period.
             int24 avgTick = calculateAverageTick(tickCumulatives, secondsAgo);
             if (!isToken0) {
-                avgTick = -avgTick; // Reverse the tick if needed.
+                avgTick = -avgTick;
             }
             console.log("avgTick: %s");
             console.logInt(avgTick);
 
-            // Use TickMath to get the Q64.96 sqrt price.
             uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(avgTick);
             console.log("sqrtPriceX96: %s", sqrtPriceX96);
 
-            // Compute the price as:
-            // price = (sqrtPriceX96^2 * PRECISION) / 2^192
-            // We use FullMath.mulDiv to perform the multiplication/division with full precision.
             uint256 price = FullMath.mulDiv(
                 uint256(sqrtPriceX96),
                 uint256(sqrtPriceX96) * PRECISION,
                 FixedPoint96.Q96 * FixedPoint96.Q96
             );
             console.log("Price from TickMath: %s", price);
-
             return price;
         } catch {
             return type(uint256).max;
@@ -431,10 +421,10 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-     * @notice Calculates the average tick over a specified time period.
-     * @param tickCumulatives Cumulative tick values returned by the `observe` function.
-     * @param secondsAgo The time period for the TWAP (in seconds).
-     * @return The average tick over the specified time period.
+     * @notice Calculates the average tick over a specified period.
+     * @param tickCumulatives The cumulative tick values from the observe call.
+     * @param secondsAgo The duration (in seconds).
+     * @return The average tick over the period.
      */
     function calculateAverageTick(int56[] memory tickCumulatives, uint32 secondsAgo)
     internal
