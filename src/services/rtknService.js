@@ -118,7 +118,7 @@ export default class RtknService {
     const rtknBalance = formatUnits(await rtknConfig.tokenContract.balanceOf(this.account), 18);
 
     const rtknUtilized = maxCap < totalPledged ? (1 / (totalPledged / maxCap)) * yourPledge : yourPledge;
-    const eligiblePrime = rtknUtilized * rtknConfig.conversionRatio;
+    const eligiblePrime = Number(formatUnits(await rtknConfig.converterContract.previewFuturePrimeAmountBasedOnPledgedAmountForUser(this.account), 18))
 
 
     console.log(maxCap);
