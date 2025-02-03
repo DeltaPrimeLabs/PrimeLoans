@@ -4,7 +4,12 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol"; // For additional math utilities if needed.
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol"; // For safe downcasting.
 import "../lib/uniswap-v3/TickMath.sol";
+import "../lib/uniswap-v3/FullMath.sol"; // Uniswap V3’s full-precision multiplication/division.
+import "../lib/uniswap-v3/FixedPoint96.sol"; // Provides Q96 constant.
+
 import "hardhat/console.sol";
 
 interface IUniswapV3Pool {
@@ -122,23 +127,9 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     returns (uint256)
     {
         if (decimals > 18) {
-            return safeDiv(amount, 10 ** (decimals - 18));
+            return amount / (10 ** (decimals - 18));
         }
         return amount * (10 ** (18 - decimals));
-    }
-
-    /**
- * @notice Safely divides two numbers.
- * @dev Reverts if the denominator is zero. Uses unchecked arithmetic for efficiency.
- * @param numerator The numerator.
- * @param denominator The denominator.
- * @return The result of the division.
- */
-    function safeDiv(uint256 numerator, uint256 denominator) internal pure returns (uint256) {
-        if (denominator == 0) revert DivisionByZero();
-        unchecked {
-            return numerator / denominator;
-        }
     }
 
     /**
@@ -250,15 +241,15 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-  * @notice Calculates the USD price of an asset using a specific pool.
- * @param asset The address of the asset.
- * @param amount The amount of the asset.
- * @param useMidTwap Whether to use the mid-TWAP for deviation checks.
- * @param useLongTwap Whether to use the long-TWAP for deviation checks.
- * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
- * @param pool The pool configuration.
- * @return The USD price of the asset (in 1e18 scale).
- */
+     * @notice Calculates the USD price of an asset using a specific pool.
+     * @param asset The address of the asset.
+     * @param amount The amount of the asset.
+     * @param useMidTwap Whether to use the mid-TWAP for deviation checks.
+     * @param useLongTwap Whether to use the long-TWAP for deviation checks.
+     * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
+     * @param pool The pool configuration.
+     * @return The USD price of the asset (in 1e18 scale).
+     */
     function calculatePoolPrice(
         address asset,
         uint256 amount,
@@ -293,12 +284,12 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
         // Calculate the short TWAP price and derive the unit USD price.
         uint256 shortTwapPrice = getTwapPrice(pool.poolAddress, pool.shortTwap, isToken0);
-        uint256 priceFromPool = safeDiv(shortTwapPrice * baseAssetPrice, PRECISION);
+        uint256 priceFromPool = FullMath.mulDiv(shortTwapPrice, baseAssetPrice, PRECISION);
 
         // Mid-TWAP deviation check if requested.
         if (useMidTwap) {
             uint256 midTwapPrice = getTwapPrice(pool.poolAddress, pool.midTwap, isToken0);
-            midTwapPrice = safeDiv(midTwapPrice * baseAssetPrice, PRECISION);
+            midTwapPrice = FullMath.mulDiv(midTwapPrice, baseAssetPrice, PRECISION);
             uint256 devMid = calculateDeviation(priceFromPool, midTwapPrice);
             if (devMid > pool.midDeviation) {
                 revert MidTWAPDeviationTooHigh();
@@ -308,42 +299,59 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         // Long-TWAP deviation check if requested.
         if (useLongTwap) {
             uint256 longTwapPrice = getTwapPrice(pool.poolAddress, pool.longTwap, isToken0);
-            longTwapPrice = safeDiv(longTwapPrice * baseAssetPrice, PRECISION);
+            longTwapPrice = FullMath.mulDiv(longTwapPrice, baseAssetPrice, PRECISION);
             uint256 devLong = calculateDeviation(priceFromPool, longTwapPrice);
             if (devLong > pool.longDeviation) {
                 revert LongTWAPDeviationTooHigh();
             }
         }
 
-        // Adjust for decimal differences between token0 and token1.
-        uint8 token0Decimals = IERC20(token0Addr).decimals();
-        uint8 token1Decimals = IERC20(token1Addr).decimals();
-        bool ratioIsToken1PerToken0 = isToken0;
+        // Extracted function to adjust for decimal differences between token0 and token1.
+        priceFromPool = adjustForDecimals(priceFromPool, token0Addr, token1Addr, isToken0);
+
+        // Multiply by `amount` to get the full USD value.
+        return FullMath.mulDiv(priceFromPool, amount, PRECISION);
+    }
+
+    /**
+     * @notice Adjusts the price to account for differences in token decimals.
+     * @param price The price to adjust.
+     * @param token0 The address of token0.
+     * @param token1 The address of token1.
+     * @param ratioIsToken1PerToken0 Boolean indicating whether the ratio is token1 per token0.
+     * @return The adjusted price.
+     */
+    function adjustForDecimals(
+        uint256 price,
+        address token0,
+        address token1,
+        bool ratioIsToken1PerToken0
+    ) internal view returns (uint256) {
+        uint8 token0Decimals = IERC20(token0).decimals();
+        uint8 token1Decimals = IERC20(token1).decimals();
 
         if (ratioIsToken1PerToken0) {
             if (token0Decimals > token1Decimals) {
                 uint256 diff = token0Decimals - token1Decimals;
-                priceFromPool *= 10 ** diff;
+                price *= 10 ** diff;
             } else if (token1Decimals > token0Decimals) {
                 uint256 diff = token1Decimals - token0Decimals;
-                if (priceFromPool != 0) {
-                    priceFromPool /= 10 ** diff;
+                if (price != 0) {
+                    price /= 10 ** diff;
                 }
             }
         } else {
             if (token1Decimals > token0Decimals) {
                 uint256 diff = token1Decimals - token0Decimals;
-                priceFromPool *= 10 ** diff;
+                price *= 10 ** diff;
             } else if (token0Decimals > token1Decimals) {
                 uint256 diff = token0Decimals - token1Decimals;
-                if (priceFromPool != 0) {
-                    priceFromPool /= 10 ** diff;
+                if (price != 0) {
+                    price /= 10 ** diff;
                 }
             }
         }
-
-        // Multiply by `amount` to get the full USD value.
-        return safeDiv(priceFromPool * amount, PRECISION);
+        return price;
     }
 
     /**
@@ -368,19 +376,19 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         }
 
         uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
-        return safeDiv(normalizedAmountOut * baseAssetPrice, PRECISION);
+        return FullMath.mulDiv(normalizedAmountOut, baseAssetPrice, PRECISION);
     }
 
     /**
-  * @notice Calculates the TWAP price for a Uniswap V3 pool.
- * @dev This function uses the `observe` function of the Uniswap V3 pool to calculate the average price over a specified time period.
- *      The formula used is: price(token1_per_token0) = 1.0001^(avgTick).
- *      If the asset is token0, the ratio represents token1_per_token0; otherwise, it represents token0_per_token1.
- * @param poolAddress The address of the Uniswap V3 pool.
- * @param secondsAgo The time period for the TWAP (in seconds).
- * @param isToken0 Whether the asset is token0 in the pool.
- * @return The TWAP price (in 1e18 scale).
- */
+     * @notice Calculates the TWAP price for a Uniswap V3 pool.
+     * @dev This function uses the `observe` function of the Uniswap V3 pool to calculate the average price over a specified time period.
+     *      The formula used is: price(token1_per_token0) = 1.0001^(avgTick).
+     *      If the asset is token0, the ratio represents token1_per_token0; otherwise, it represents token0_per_token1.
+     * @param poolAddress The address of the Uniswap V3 pool.
+     * @param secondsAgo The time period for the TWAP (in seconds).
+     * @param isToken0 Whether the asset is token0 in the pool.
+     * @return The TWAP price (in 1e18 scale).
+     */
     function getTwapPrice(
         address poolAddress,
         uint32 secondsAgo,
@@ -408,8 +416,12 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
             // Compute the price as:
             // price = (sqrtPriceX96^2 * PRECISION) / 2^192
-            // That converts the Q64.96 number into a 1e18‑scaled price.
-            uint256 price = (uint256(sqrtPriceX96) * uint256(sqrtPriceX96) * PRECISION) / (1 << 192);
+            // We use FullMath.mulDiv to perform the multiplication/division with full precision.
+            uint256 price = FullMath.mulDiv(
+                uint256(sqrtPriceX96),
+                uint256(sqrtPriceX96) * PRECISION,
+                FixedPoint96.Q96 * FixedPoint96.Q96
+            );
             console.log("Price from TickMath: %s", price);
 
             return price;
@@ -418,20 +430,19 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         }
     }
 
-
-/**
- * @notice Calculates the average tick over a specified time period.
- * @param tickCumulatives Cumulative tick values returned by the `observe` function.
- * @param secondsAgo The time period for the TWAP (in seconds).
- * @return The average tick over the specified time period.
- */
+    /**
+     * @notice Calculates the average tick over a specified time period.
+     * @param tickCumulatives Cumulative tick values returned by the `observe` function.
+     * @param secondsAgo The time period for the TWAP (in seconds).
+     * @return The average tick over the specified time period.
+     */
     function calculateAverageTick(int56[] memory tickCumulatives, uint32 secondsAgo)
     internal
     pure
     returns (int24)
     {
         int56 tickDiff = tickCumulatives[1] - tickCumulatives[0];
-        return int24(tickDiff / int56(uint56(secondsAgo)));
+        return SafeCastUpgradeable.toInt24(tickDiff / int56(uint56(secondsAgo)));
     }
 
     /**
@@ -449,8 +460,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             return type(uint256).max;
         }
         return (price1 > price2)
-            ? safeDiv((price1 - price2) * PRECISION, price2)
-            : safeDiv((price2 - price1) * PRECISION, price1);
+            ? FullMath.mulDiv((price1 - price2), PRECISION, price2)
+            : FullMath.mulDiv((price2 - price1), PRECISION, price1);
     }
 
     /**
