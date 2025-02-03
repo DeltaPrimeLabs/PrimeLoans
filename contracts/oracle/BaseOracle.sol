@@ -418,40 +418,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         }
     }
 
-    /**
- * @notice Efficiently calculates 1.0001^avgTick using fixed-point arithmetic.
- * @dev This function uses an iterative approach to compute the exponentiation.
- *      The result is scaled to 1e18 precision.
- * @param avgTick The average tick over the specified time period.
- * @return The price (in 1e18 scale).
- */
-    function calculateExponentiation(int24 avgTick) internal pure returns (uint256) {
-        // Step 1: Split the average tick into two halves to avoid overflow.
-        int24 halfTick = avgTick / 2;
-        bool halfTickIsNeg = (halfTick < 0);
-        uint256 absHalfTick = uint256(uint24(halfTickIsNeg ? - halfTick : halfTick));
-
-        // Step 2: Perform fixed-point exponentiation for the first half-tick.
-        uint256 result = 1e18; // Initialize the result to 1 (scaled to 1e18)
-        uint256 base = 1000100000000; // Base = 1.0001 scaled to 1e12
-
-        for (uint8 i = 0; i < 20 && absHalfTick > 0; i++) {
-            if ((absHalfTick >> i) & 1 != 0) {
-                // Multiply the result by the base if the current bit is set.
-                result = (result * base) / 1e12;
-            }
-            // Square the base for the next iteration.
-            base = (base * base) / 1e12;
-        }
-
-        // Step 3: Handle negative half-ticks.
-        if (halfTickIsNeg) {
-            result = (1e36 / result); // Reciprocal in 1e36 scale, then scale back to 1e18
-        }
-
-        // Step 4: Square the result to account for the split into half-ticks.
-        return (result * result) / 1e18;
-    }
 
 /**
  * @notice Calculates the average tick over a specified time period.
