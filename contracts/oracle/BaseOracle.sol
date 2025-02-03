@@ -8,9 +8,7 @@ import "hardhat/console.sol";
 
 interface IUniswapV3Pool {
     function token0() external view returns (address);
-
     function token1() external view returns (address);
-
     function observe(uint32[] calldata secondsAgos)
     external
     view
@@ -30,7 +28,7 @@ interface IAMM {
 
 /**
  * @title BaseOracle
- * @dev A contract that calculates the USD value of an asset using multiple pools (Uniswap V3 or AMM-based).
+ * @dev A contract that calculates the USD value of an asset using multiple pools.
  *      It supports both centralized liquidity (CL) pools and automated market maker (AMM) pools.
  *      The contract allows configuring tokens with their respective pools and calculates the minimum USD price
  *      across all configured pools for a given asset.
@@ -90,7 +88,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     // Constant for precision (1e18)
     uint256 private constant PRECISION = 1e18;
 
-    // Events for tracking pool and token configuration changes
+    // Events for tracking configuration changes
     event PoolAdded(address indexed token, address indexed pool);
     event PoolRemoved(address indexed token, address indexed pool);
     event TokenConfigured(address indexed token);
@@ -107,6 +105,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      */
     function initialize(address _initialOwner) public initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();  // Initialize reentrancy protection
         transferOwnership(_initialOwner);
     }
 
@@ -171,8 +170,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @param token The address of the token to remove.
      */
     function removeToken(address token) external onlyOwner nonReentrant {
-        delete tokenConfigs[token]; // Remove the token's configuration
-        emit TokenRemoved(token); // Emit event to track token removal
+        delete tokenConfigs[token];
+        emit TokenRemoved(token);
     }
 
     /**
@@ -194,33 +193,28 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-   * @notice Calculates the USD value of an asset based on its configured pools.
- * @dev Logs the final USD price for each pool processed and the final (minimum) USD price returned.
- * @param params Parameters for calculating the USD value.
- * @return The USD value of the asset (in 1e18 scale).
- */
+     * @notice Calculates the USD value of an asset based on its configured pools.
+     *         Each pool returns the full USD value for the provided amount.
+     */
     function getDollarValue(GetDollarValueParams calldata params)
     external
     view
     returns (uint256)
     {
-        // Step 1: Validate inputs
         if (!tokenConfigs[params.asset].isConfigured) revert TokenNotConfigured();
         if (params.baseAssets.length != params.baseAssetPrices.length) revert LengthMismatch();
-        if (params.amount == 0) revert InvalidInput(); // Ensure the amount is non-zero
+        if (params.amount == 0) revert InvalidInput();
 
         // Ensure all base asset prices are non-zero
         for (uint i = 0; i < params.baseAssetPrices.length; i++) {
             if (params.baseAssetPrices[i] == 0) revert InvalidInput();
         }
 
-        uint256 minPrice = type(uint256).max; // Initialize minPrice to the maximum possible value
+        uint256 minPrice = type(uint256).max;
         PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
-        // Step 2: Iterate through each pool to calculate the USD price
         for (uint i = 0; i < pools.length; i++) {
             uint256 baseAssetPrice = 0;
-
             // Find the USD price of the base asset for this pool
             for (uint j = 0; j < params.baseAssets.length; j++) {
                 if (params.baseAssets[j] == pools[i].baseAsset) {
@@ -228,11 +222,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                     break;
                 }
             }
-
-            // Ensure the base asset price is provided
             if (baseAssetPrice == 0) revert MissingBaseAssetPrice();
 
-            // Calculate the USD price for this pool
             uint256 poolPrice = calculatePoolPrice(
                 params.asset,
                 params.amount,
@@ -245,18 +236,16 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             console.log("Pool: %s", pools[i].poolAddress);
             console.log("Final USD Price: %s", poolPrice);
 
-            // Update the minimum price if this pool's price is lower
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
 
-        // Step 3: Ensure at least one valid price was found
         if (minPrice == type(uint256).max) revert NoValidPrice();
         console.log("FINAL MIN USD PRICE: %s", minPrice);
 
-        // Step 4: Return the final USD value (scaled by the amount)
-        return (minPrice * params.amount) / PRECISION;
+        // Since each pool returns the full USD value, just return minPrice.
+        return minPrice;
     }
 
     /**
@@ -278,41 +267,19 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         PoolConfig memory pool
     ) internal view returns (uint256) {
         if (pool.isCL) {
-            // Use centralized liquidity (CL) logic for Uniswap V3 pools
-            return calculateCLPrice(asset, useMidTwap, useLongTwap, baseAssetPrice, pool);
+            return calculateCLPrice(asset, amount, useMidTwap, useLongTwap, baseAssetPrice, pool);
         }
-
-        // Use AMM logic for other pools
-        IAMM ammPool = IAMM(pool.poolAddress);
-
-        // Cache token decimals to avoid redundant external calls
-        uint8 decimalsIn = IERC20(asset).decimals();
-        uint8 decimalsOut = IERC20(pool.baseAsset).decimals();
-
-        // Calculate the amount out using unchecked arithmetic for efficiency
-        uint256 amountOut;
-        try ammPool.getAmountOut(amount, asset) returns (uint256 result) {
-            amountOut = result;
-        } catch {
-            revert("External call failed");
-        }
-
-        // Normalize the amount out and calculate the final price
-        uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
-        return safeDiv(normalizedAmountOut * baseAssetPrice, PRECISION);
+        return calculateAMMPrice(asset, amount, baseAssetPrice, pool);
     }
 
     /**
      * @notice Calculates the USD price of an asset using a centralized liquidity (CL) pool.
-     * @param asset The address of the asset.
-     * @param useMidTwap Whether to use the mid-TWAP for deviation checks.
-     * @param useLongTwap Whether to use the long-TWAP for deviation checks.
-     * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
-     * @param pool The pool configuration.
-     * @return The USD price of the asset (in 1e18 scale).
+     *         In this updated version, after computing the unit price from TWAP data, the result is
+     *         multiplied by `amount` so that the returned value is the full USD value.
      */
     function calculateCLPrice(
         address asset,
+        uint256 amount,
         bool useMidTwap,
         bool useLongTwap,
         uint256 baseAssetPrice,
@@ -323,45 +290,31 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         address token1Addr = uniPool.token1();
         bool isToken0 = (token0Addr == asset);
 
-        // Calculate the short TWAP price
-        uint256 shortTwapPrice = getTwapPrice(
-            pool.poolAddress,
-            pool.shortTwap,
-            isToken0
-        );
-
-        // Convert the raw ratio to USD price
+        // Calculate the short TWAP price and derive the unit USD price.
+        uint256 shortTwapPrice = getTwapPrice(pool.poolAddress, pool.shortTwap, isToken0);
         uint256 priceFromPool = safeDiv(shortTwapPrice * baseAssetPrice, PRECISION);
 
-        // Perform mid-TWAP deviation check if requested
+        // Mid-TWAP deviation check if requested.
         if (useMidTwap) {
-            uint256 midTwapPrice = getTwapPrice(
-                pool.poolAddress,
-                pool.midTwap,
-                isToken0
-            );
-            midTwapPrice = (midTwapPrice * baseAssetPrice) / PRECISION;
+            uint256 midTwapPrice = getTwapPrice(pool.poolAddress, pool.midTwap, isToken0);
+            midTwapPrice = safeDiv(midTwapPrice * baseAssetPrice, PRECISION);
             uint256 devMid = calculateDeviation(priceFromPool, midTwapPrice);
             if (devMid > pool.midDeviation) {
                 revert MidTWAPDeviationTooHigh();
             }
         }
 
-        // Perform long-TWAP deviation check if requested
+        // Long-TWAP deviation check if requested.
         if (useLongTwap) {
-            uint256 longTwapPrice = getTwapPrice(
-                pool.poolAddress,
-                pool.longTwap,
-                isToken0
-            );
-            longTwapPrice = (longTwapPrice * baseAssetPrice) / PRECISION;
+            uint256 longTwapPrice = getTwapPrice(pool.poolAddress, pool.longTwap, isToken0);
+            longTwapPrice = safeDiv(longTwapPrice * baseAssetPrice, PRECISION);
             uint256 devLong = calculateDeviation(priceFromPool, longTwapPrice);
             if (devLong > pool.longDeviation) {
                 revert LongTWAPDeviationTooHigh();
             }
         }
 
-        // Adjust for decimal differences between token0 and token1
+        // Adjust for decimal differences between token0 and token1.
         uint8 token0Decimals = IERC20(token0Addr).decimals();
         uint8 token1Decimals = IERC20(token1Addr).decimals();
         bool ratioIsToken1PerToken0 = isToken0;
@@ -388,16 +341,13 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             }
         }
 
-        return priceFromPool;
+        // Multiply by `amount` to get the full USD value.
+        return safeDiv(priceFromPool * amount, PRECISION);
     }
 
     /**
      * @notice Calculates the USD price of an asset using an AMM pool.
-     * @param asset The address of the asset.
-     * @param amount The amount of the asset.
-     * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
-     * @param pool The pool configuration.
-     * @return The USD price of the asset (in 1e18 scale).
+     *         This function now returns the full USD value for the provided `amount`.
      */
     function calculateAMMPrice(
         address asset,
@@ -408,9 +358,16 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         IAMM ammPool = IAMM(pool.poolAddress);
         uint8 decimalsIn = IERC20(asset).decimals();
         uint8 decimalsOut = IERC20(pool.baseAsset).decimals();
-        uint256 amountOut = ammPool.getAmountOut(amount, asset);
+
+        uint256 amountOut;
+        try ammPool.getAmountOut(amount, asset) returns (uint256 result) {
+            amountOut = result;
+        } catch {
+            revert("External call failed");
+        }
+
         uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
-        return (normalizedAmountOut * baseAssetPrice) / PRECISION;
+        return safeDiv(normalizedAmountOut * baseAssetPrice, PRECISION);
     }
 
     /**
@@ -428,27 +385,20 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint32 secondsAgo,
         bool isToken0
     ) internal view returns (uint256) {
-        // Step 1: Prepare the `secondsAgos` array for the `observe` function.
         uint32[] memory secondsAgos = new uint32[](2);
-        secondsAgos[0] = secondsAgo; // Time in the past
-        secondsAgos[1] = 0;          // Current block timestamp
+        secondsAgos[0] = secondsAgo; // past time
+        secondsAgos[1] = 0;          // current time
 
         try IUniswapV3Pool(poolAddress).observe(secondsAgos) returns (
             int56[] memory tickCumulatives,
             uint160[] memory /* unused */
         ) {
-            // Step 2: Calculate the average tick over the specified time period.
             int24 avgTick = calculateAverageTick(tickCumulatives, secondsAgo);
-
-            // Step 3: Adjust the sign of the average tick if the asset is not token0.
             if (!isToken0) {
-                avgTick = - avgTick; // Flip the sign of the tick to reverse the ratio
+                avgTick = -avgTick; // Reverse the ratio if needed.
             }
-
-            // Step 4: Convert the average tick to a price using fixed-point exponentiation.
             return calculateExponentiation(avgTick);
         } catch {
-            // Step 5: Handle errors gracefully.
             return type(uint256).max;
         }
     }
@@ -499,7 +449,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     pure
     returns (int24)
     {
-        int56 tickDiff = (tickCumulatives[1] - tickCumulatives[0]);
+        int56 tickDiff = tickCumulatives[1] - tickCumulatives[0];
         return int24(tickDiff / int56(uint56(secondsAgo)));
     }
 
@@ -515,7 +465,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     returns (uint256)
     {
         if (price1 == 0 || price2 == 0) {
-            return type(uint256).max; // Return max uint if either price is zero
+            return type(uint256).max;
         }
         return (price1 > price2)
             ? safeDiv((price1 - price2) * PRECISION, price2)
@@ -524,8 +474,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
     /**
      * @notice Retrieves the full configuration for a token.
-     * @param token The address of the token.
-     * @return The token's configuration.
      */
     function getFullTokenConfig(address token)
     external
