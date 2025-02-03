@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "../lib/uniswap-v3/TickMath.sol";
 import "hardhat/console.sol";
 
 interface IUniswapV3Pool {
@@ -386,18 +387,32 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         bool isToken0
     ) internal view returns (uint256) {
         uint32[] memory secondsAgos = new uint32[](2);
-        secondsAgos[0] = secondsAgo; // past time
-        secondsAgos[1] = 0;          // current time
+        secondsAgos[0] = secondsAgo; // Past timestamp
+        secondsAgos[1] = 0;          // Current block timestamp
 
         try IUniswapV3Pool(poolAddress).observe(secondsAgos) returns (
             int56[] memory tickCumulatives,
             uint160[] memory /* unused */
         ) {
+            // Calculate the average tick over the period.
             int24 avgTick = calculateAverageTick(tickCumulatives, secondsAgo);
             if (!isToken0) {
-                avgTick = -avgTick; // Reverse the ratio if needed.
+                avgTick = -avgTick; // Reverse the tick if needed.
             }
-            return calculateExponentiation(avgTick);
+            console.log("avgTick: %s");
+            console.logInt(avgTick);
+
+            // Use TickMath to get the Q64.96 sqrt price.
+            uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(avgTick);
+            console.log("sqrtPriceX96: %s", sqrtPriceX96);
+
+            // Compute the price as:
+            // price = (sqrtPriceX96^2 * PRECISION) / 2^192
+            // That converts the Q64.96 number into a 1e18‑scaled price.
+            uint256 price = (uint256(sqrtPriceX96) * uint256(sqrtPriceX96) * PRECISION) / (1 << 192);
+            console.log("Price from TickMath: %s", price);
+
+            return price;
         } catch {
             return type(uint256).max;
         }
