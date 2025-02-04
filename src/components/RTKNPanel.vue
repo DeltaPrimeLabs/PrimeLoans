@@ -1,6 +1,10 @@
 <template>
   <div class="rtkn-panel-component" v-bind:class="{'rtkn-panel-component--expanded': expanded}">
     <div class="header-actions">
+      <a>
+        <FlatButton :active="false">redeem                                                     src="src/assets/logo/prime.svg"/>
+        </FlatButton>
+      </a>
       <div v-on:click="toggleExpand()">
         <DeltaIcon class="chevron" v-bind:class="{'chevron--expanded': expanded}"
                    :icon-src="'src/assets/icons/chevron-down.svg'" :size="21"></DeltaIcon>
@@ -236,6 +240,10 @@ export default {
     align-items: center;
     gap: 20px;
     z-index: 1;
+
+    a {
+      text-decoration-color: var(--flat-button__color--hover);
+    }
 
     .chevron {
       cursor: pointer;
