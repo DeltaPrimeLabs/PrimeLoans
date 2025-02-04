@@ -2,7 +2,7 @@
   <div class="rtkn-panel-component" v-bind:class="{'rtkn-panel-component--expanded': expanded}">
     <div class="header-actions">
       <a>
-        <FlatButton :active="false">redeem                                                     src="src/assets/logo/prime.svg"/>
+        <FlatButton :active="false">redeem
         </FlatButton>
       </a>
       <div v-on:click="toggleExpand()">
