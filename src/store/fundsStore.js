@@ -22,7 +22,6 @@ import {getBinPrice, mergeArrays, removePaddedTrailingZeros} from '../utils/calc
 import router from '@/router';
 import {constructSimpleSDK} from '@paraswap/sdk';
 import axios from 'axios';
-import {getBurnData} from '../utils/caiUtils';
 import {combineLatest, from, map, tap} from 'rxjs';
 import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
@@ -31,7 +30,7 @@ const fromBytes32 = require('ethers').utils.parseBytes32String;
 const ethers = require('ethers');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-const SUCCESS_DELAY_AFTER_TRANSACTION = 1000;
+const SUCCESS_DELAY_AFTER_TRANSAC1TION = 1000;
 
 let SMART_LOAN_FACTORY_TUP;
 let DIAMOND_BEACON;
@@ -4293,130 +4292,6 @@ export default {
       setTimeout(async () => {
         await dispatch('network/updateBalance', {}, {root: true});
       }, 1000);
-
-      setTimeout(async () => {
-        await dispatch('updateFunds');
-      }, config.refreshDelay);
-    },
-
-    async mintCAI({state, rootState, commit, dispatch}, {mintCAIRequest}) {
-      console.log('window.isMetaMask', window.isMetaMask);
-      console.log('mintCAIRequest', mintCAIRequest);
-      const provider = rootState.network.provider;
-
-      const loanAssets = mergeArrays([(
-        await state.readSmartLoanContract.getAllOwnedAssets()).map(el => fromBytes32(el)),
-        (await state.readSmartLoanContract.getStakedPositions()).map(position => fromBytes32(position.symbol)),
-        Object.keys(config.POOLS_CONFIG),
-        ['CAI']
-      ]);
-
-      const assetAddress = TOKEN_ADDRESSES[mintCAIRequest.sourceAsset];
-      const assetDecimals = config.ASSETS_CONFIG[mintCAIRequest.sourceAsset].decimals;
-      const caiDecimals = config.ASSETS_CONFIG.CAI.decimals;
-
-      const wrappedLoan = await wrapContract(state.smartLoanContract, loanAssets);
-      console.log(wrappedLoan);
-      const transaction = await wrappedLoan
-        .mintCai(
-          mintCAIRequest.mintData.selector,
-          mintCAIRequest.mintData.data,
-          assetAddress,
-          parseUnits(mintCAIRequest.amount.toFixed(assetDecimals), assetDecimals),
-          parseUnits(mintCAIRequest.calculatedTargetAmount.toFixed(caiDecimals), caiDecimals),
-        );
-
-      rootState.serviceRegistry.progressBarService.requestProgressBar();
-
-      let tx = await awaitConfirmation(transaction, provider, 'mint CAI');
-      // TODO take the values from the event
-      // const caiMintedEvent = getLog(tx, SMART_LOAN.abi, 'CaiMinted');
-      // console.log('caiMintedEvent', caiMintedEvent);
-      // const caiMintedAmount = formatUnits(caiMintedEvent.args.caiBoughtAmount, caiDecimals);
-      // const fromTokenAmount = formatUnits(caiMintedEvent.args.fromAmount, assetDecimals);
-
-      const caiMintedAmount = mintCAIRequest.calculatedTargetAmount;
-      const fromTokenAmount = mintCAIRequest.amount;
-
-      const caiBalanceAfterTransaction = Number(state.assetBalances['CAI']) + Number(caiMintedAmount);
-      const assetBalanceAfterTransaction = Number(state.assetBalances[mintCAIRequest.sourceAsset]) - Number(fromTokenAmount);
-
-      rootState.serviceRegistry.assetBalancesExternalUpdateService
-        .emitExternalAssetBalanceUpdate('CAI', caiBalanceAfterTransaction, false, true);
-      rootState.serviceRegistry.assetBalancesExternalUpdateService
-        .emitExternalAssetBalanceUpdate(mintCAIRequest.sourceAsset, assetBalanceAfterTransaction, false, true);
-
-      rootState.serviceRegistry.modalService.closeModal();
-
-
-      rootState.serviceRegistry.progressBarService.emitProgressBarInProgressState();
-      setTimeout(() => {
-        rootState.serviceRegistry.progressBarService.emitProgressBarSuccessState();
-      }, SUCCESS_DELAY_AFTER_TRANSACTION);
-
-      setTimeout(async () => {
-        await dispatch('updateFunds');
-      }, config.refreshDelay);
-    },
-
-    async burnCAI({state, rootState, commit, dispatch}, {burnCAIRequest}) {
-      console.log('window.isMetaMask', window.isMetaMask);
-      console.log('burnCAIRequest', burnCAIRequest);
-      const provider = rootState.network.provider;
-
-      const loanAssets = mergeArrays([(
-        await state.readSmartLoanContract.getAllOwnedAssets()).map(el => fromBytes32(el)),
-        (await state.readSmartLoanContract.getStakedPositions()).map(position => fromBytes32(position.symbol)),
-        Object.keys(config.POOLS_CONFIG),
-        [burnCAIRequest.targetAsset]
-      ]);
-
-      const assetAddress = TOKEN_ADDRESSES[burnCAIRequest.targetAsset];
-      const assetDecimals = config.ASSETS_CONFIG[burnCAIRequest.targetAsset].decimals;
-      const caiDecimals = config.ASSETS_CONFIG.CAI.decimals;
-
-      console.log(assetAddress);
-
-      const shares = parseUnits(burnCAIRequest.amount.toFixed(caiDecimals), caiDecimals);
-
-      const burnData = await getBurnData(
-        shares,
-        assetAddress,
-        state.smartLoanContract.address,
-        burnCAIRequest.maxSlippage
-      )
-
-      const wrappedLoan = await wrapContract(state.smartLoanContract, loanAssets);
-      console.log(wrappedLoan);
-      const transaction = await wrappedLoan
-        .burnCai(
-          burnData.selector,
-          burnData.data,
-          parseUnits(burnCAIRequest.amount.toFixed(caiDecimals), caiDecimals),
-          assetAddress,
-          parseUnits(burnCAIRequest.calculatedTargetAmount.toFixed(assetDecimals), assetDecimals),
-        );
-
-      rootState.serviceRegistry.progressBarService.requestProgressBar();
-
-      let tx = await awaitConfirmation(transaction, provider, 'burn CAI');
-
-      const caiBurnedAmount = burnCAIRequest.amount;
-      const toTokenAmount = burnCAIRequest.calculatedTargetAmount;
-
-      const caiBalanceAfterTransaction = Number(state.assetBalances['CAI']) - Number(caiBurnedAmount);
-      const assetBalanceAfterTransaction = Number(state.assetBalances[burnCAIRequest.targetAsset]) + Number(toTokenAmount);
-
-      rootState.serviceRegistry.assetBalancesExternalUpdateService
-        .emitExternalAssetBalanceUpdate('CAI', caiBalanceAfterTransaction, false, true);
-      rootState.serviceRegistry.assetBalancesExternalUpdateService
-        .emitExternalAssetBalanceUpdate(burnCAIRequest.targetAsset, assetBalanceAfterTransaction, false, true);
-
-      rootState.serviceRegistry.progressBarService.emitProgressBarInProgressState();
-      rootState.serviceRegistry.modalService.closeModal();
-      setTimeout(() => {
-        rootState.serviceRegistry.progressBarService.emitProgressBarSuccessState();
-      }, SUCCESS_DELAY_AFTER_TRANSACTION);
 
       setTimeout(async () => {
         await dispatch('updateFunds');
