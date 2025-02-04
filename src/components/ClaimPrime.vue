@@ -7,25 +7,26 @@
       </div>
       <div class="claim-page__amount-text">
         <div v-if="chain === 'avalanche'">
-          Claimable amount: <span class="claim-page__amount" >{{ claimableAmount }}</span>
+          Claimable amount: <span class="claim-page__amount">{{ claimableAmount }}</span>
         </div>
       </div>
       <div class="claim-page__button" v-if="claimableAmount && claimableAmount > 0 && chain === 'avalanche'">
-        <BorderedButton :action="onClick" ><span class="claim-page__button-text">Claim</span></BorderedButton>
+        <BorderedButton :action="onClick"><span class="claim-page__button-text">Claim</span></BorderedButton>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
-import BorderedButton from "./BorderedButton.vue";
-import config from "../config";
-import {mapActions, mapState} from "vuex";
-const ethers = require('ethers');
 import VESTING_CONTRACT
-  from '../../artifacts/contracts/interfaces/IPrimeVesting.sol/IPrimeVesting.json';
-import {fromWei} from "../utils/calculate";
+  from '../abis/IPrimeVesting.json';
+
+import BorderedButton from './BorderedButton.vue';
+import config from '../config';
+import {mapActions, mapState} from 'vuex';
+
+const ethers = require('ethers');
+import {fromWei} from '../utils/calculate';
 
 export default {
   name: 'ClaimPrime',
@@ -135,6 +136,7 @@ export default {
 
   .claim-page__button {
     cursor: pointer;
+
     &.disabled {
       opacity: 30%;
       cursor: initial;

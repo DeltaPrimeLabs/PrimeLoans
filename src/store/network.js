@@ -1,7 +1,6 @@
 const ethers = require('ethers');
 let ethereum = window.ethereum;
 import Vue from "vue";
-import redstone from 'redstone-api';
 import config from "../config";
 
 export default {

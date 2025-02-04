@@ -90,8 +90,6 @@ import Button from './Button';
 import Toggle from './Toggle';
 import BarGaugeBeta from './BarGaugeBeta';
 import config from '../config';
-import erc20ABI from '../../test/abis/ERC20.json';
-import {parseUnits, formatUnits} from 'ethers/lib/utils';
 import AssetDropdown from "./AssetDropdown.vue";
 import SimpleInput from "./SimpleInput.vue";
 

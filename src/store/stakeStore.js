@@ -1,19 +1,21 @@
+import SMART_LOAN from '../abis/SmartLoanGigaChadInterface.json';
+import erc20ABI from '../abis/ERC20.json';
+
 import {awaitConfirmation, getLog, wrapContract} from '../utils/blockchain';
 import config from '../config';
 import {formatUnits, parseUnits} from 'ethers/lib/utils';
 import {BigNumber} from 'ethers';
 import {
   beefyMaxUnstaked,
-  fromWei,
-  mergeArrays, penpieMaxUnstaked, toWei,
+  mergeArrays,
+  penpieMaxUnstaked,
+  toWei,
   vectorFinanceMaxUnstaked,
-  vectorFinanceRewards, yieldYakBalance,
+  vectorFinanceRewards,
+  yieldYakBalance,
   yieldYakMaxUnstaked,
-  yieldYakStaked
 } from '../utils/calculate';
-import SMART_LOAN from '@artifacts/contracts/interfaces/SmartLoanGigaChadInterface.sol/SmartLoanGigaChadInterface.json';
-import {combineLatest, map, of, tap, from} from 'rxjs';
-import erc20ABI from "../../test/abis/ERC20.json";
+import {combineLatest, map, of, from} from 'rxjs';
 
 const ethers = require('ethers');
 const fromBytes32 = ethers.utils.parseBytes32String;
@@ -77,8 +79,8 @@ export default {
 
       const fundTransaction = await (await wrapContract(smartLoanContract, loanAssets)).fund
       (
-          toBytes32(fundRequest.farmSymbol),
-          amountInWei
+        toBytes32(fundRequest.farmSymbol),
+        amountInWei
       );
 
       let tx = await awaitConfirmation(fundTransaction, provider, 'fund');
@@ -101,16 +103,16 @@ export default {
       });
 
       rootState.serviceRegistry.stakedExternalUpdateService
-          .emitExternalStakedBalancesPerFarmUpdate(fundRequest.assetSymbol, fundRequest.protocolIdentifier, totalStakedAfterTransaction, totalBalanceAfterTransaction);
+        .emitExternalStakedBalancesPerFarmUpdate(fundRequest.assetSymbol, fundRequest.protocolIdentifier, totalStakedAfterTransaction, totalBalanceAfterTransaction);
 
       const assetBalanceBeforeStaking =
-          fundRequest.isLP ? rootState.fundsStore.lpBalances[fundRequest.assetSymbol] : rootState.fundsStore.assetBalances[fundRequest.assetSymbol];
+        fundRequest.isLP ? rootState.fundsStore.lpBalances[fundRequest.assetSymbol] : rootState.fundsStore.assetBalances[fundRequest.assetSymbol];
       const assetBalanceAfterStaking = Number(assetBalanceBeforeStaking) - Number(depositTokenAmount);
       rootState.serviceRegistry.assetBalancesExternalUpdateService
-          .emitExternalAssetBalanceUpdate(fundRequest.assetSymbol, assetBalanceAfterStaking, fundRequest.isLP, true);
+        .emitExternalAssetBalanceUpdate(fundRequest.assetSymbol, assetBalanceAfterStaking, fundRequest.isLP, true);
 
       rootState.serviceRegistry.stakedExternalUpdateService
-          .emitExternalTotalStakedUpdate(fundRequest.assetSymbol, depositTokenAmount, 'STAKE', true);
+        .emitExternalTotalStakedUpdate(fundRequest.assetSymbol, depositTokenAmount, 'STAKE', true);
 
       rootState.serviceRegistry.progressBarService.emitProgressBarInProgressState();
       setTimeout(() => {
@@ -130,7 +132,7 @@ export default {
       const amountInWei = parseUnits(withdrawRequest.value.toString(), withdrawRequest.farmDecimals);
 
       const loanAssets = mergeArrays([(
-          await smartLoanContract.getAllOwnedAssets()).map(el => fromBytes32(el)),
+        await smartLoanContract.getAllOwnedAssets()).map(el => fromBytes32(el)),
         (await smartLoanContract.getStakedPositions()).map(position => fromBytes32(position.symbol)),
         withdrawRequest.rewardTokens,
         withdrawRequest.assetSymbol,
@@ -139,8 +141,8 @@ export default {
 
       const withdrawTransaction = await (await wrapContract(smartLoanContract, loanAssets)).withdraw
       (
-          toBytes32(withdrawRequest.farmSymbol),
-          amountInWei
+        toBytes32(withdrawRequest.farmSymbol),
+        amountInWei
       );
 
       rootState.serviceRegistry.progressBarService.requestProgressBar();
@@ -167,17 +169,17 @@ export default {
       });
 
       rootState.serviceRegistry.stakedExternalUpdateService
-          .emitExternalStakedBalancesPerFarmUpdate(withdrawRequest.assetSymbol, withdrawRequest.protocolIdentifier, totalStakedAfterTransaction, totalBalanceAfterTransaction);
+        .emitExternalStakedBalancesPerFarmUpdate(withdrawRequest.assetSymbol, withdrawRequest.protocolIdentifier, totalStakedAfterTransaction, totalBalanceAfterTransaction);
 
       const assetBalanceBeforeUnstaking =
-          withdrawRequest.isLP ? rootState.fundsStore.lpBalances[withdrawRequest.assetSymbol] : rootState.fundsStore.assetBalances[withdrawRequest.assetSymbol];
+        withdrawRequest.isLP ? rootState.fundsStore.lpBalances[withdrawRequest.assetSymbol] : rootState.fundsStore.assetBalances[withdrawRequest.assetSymbol];
 
       const assetBalanceAfterUnstaking = Number(assetBalanceBeforeUnstaking) + Number(unstakedTokenAmount);
       rootState.serviceRegistry.assetBalancesExternalUpdateService
-          .emitExternalAssetBalanceUpdate(withdrawRequest.assetSymbol, assetBalanceAfterUnstaking, withdrawRequest.isLP, true);
+        .emitExternalAssetBalanceUpdate(withdrawRequest.assetSymbol, assetBalanceAfterUnstaking, withdrawRequest.isLP, true);
 
       rootState.serviceRegistry.stakedExternalUpdateService
-          .emitExternalTotalStakedUpdate(withdrawRequest.assetSymbol, unstakedTokenAmount, 'WITHDRAW', true);
+        .emitExternalTotalStakedUpdate(withdrawRequest.assetSymbol, unstakedTokenAmount, 'WITHDRAW', true);
 
 
       //TODO: LeChiffre please check
@@ -569,11 +571,11 @@ export default {
                   .pipe(map(balanceWei => formatUnits(balanceWei, assetDecimals))) : farm.balance(smartLoanContractAddress),
                 of((apys && apys[farm.token]) ? apys[farm.token][farm.protocolIdentifier] : 0),
                 farm.stakingContractAddress.toLowerCase() === '0xb8f531c0d3c53B1760bcb7F57d87762Fd25c4977'.toLowerCase() ? yieldYakBalance(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
-                farm.protocol === 'YIELD_YAK' ? yieldYakMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals, 'from stakeStore') :
-                farm.protocol === 'BEEFY_FINANCE' ? beefyMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
-                farm.protocol === 'PENPIE' ? penpieMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
-                  farm.autoCompounding ? vectorFinanceMaxUnstaked(farm.token, farm.stakingContractAddress, smartLoanContractAddress) :
-                    vectorFinanceRewards(farm.stakingContractAddress, smartLoanContractAddress)
+                  farm.protocol === 'YIELD_YAK' ? yieldYakMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals, 'from stakeStore') :
+                    farm.protocol === 'BEEFY_FINANCE' ? beefyMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
+                      farm.protocol === 'PENPIE' ? penpieMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
+                        farm.autoCompounding ? vectorFinanceMaxUnstaked(farm.token, farm.stakingContractAddress, smartLoanContractAddress) :
+                          vectorFinanceRewards(farm.stakingContractAddress, smartLoanContractAddress)
               ]);
             }));
           })
@@ -587,7 +589,7 @@ export default {
               farm.totalBalance = farmData[3];
               farm.currentApy = farmData[4];
 
-              if (['YIELD_YAK','BEEFY_FINANCE'].includes(farm.protocol)) {
+              if (['YIELD_YAK', 'BEEFY_FINANCE'].includes(farm.protocol)) {
                 farm.totalStaked = farmData[5];
                 if (farm.stakingContractAddress.toLowerCase() === '0xb8f531c0d3c53B1760bcb7F57d87762Fd25c4977'.toLowerCase()) farm.totalStaked *= 0;
               } else if (farm.protocol === 'VECTOR_FINANCE') {

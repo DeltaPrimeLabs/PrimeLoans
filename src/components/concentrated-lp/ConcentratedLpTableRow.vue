@@ -95,10 +95,8 @@ import RemoveConcentratedLiquidityModal from '../RemoveConcentratedLiquidityModa
 import WithdrawModal from '../WithdrawModal.vue';
 
 const ethers = require('ethers');
-import erc20ABI from '../../../test/abis/ERC20.json';
+import erc20ABI from '../../abis/ERC20.json';
 import {calculateMaxApy, fromWei} from '../../utils/calculate';
-import addresses from '../../../common/addresses/avalanche/token_addresses.json';
-import {formatUnits, parseUnits} from 'ethers/lib/utils';
 import ApolloClient from "apollo-boost";
 import gql from "graphql-tag";
 import DeltaIcon from '../DeltaIcon.vue';

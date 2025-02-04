@@ -97,14 +97,12 @@ import BridgeDepositModal from './BridgeDepositModal';
 const ethers = require('ethers');
 import SimpleSwapModal from './SimpleSwapModal.vue';
 import config from '../config';
-import YAK_ROUTER_ABI from '../../test/abis/YakRouter.json';
+import YAK_ROUTER_ABI from '../abis/YakRouter.json';
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import InfoIcon from './InfoIcon.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
-import ClaimRewardsModal from './ClaimRewardsModal.vue';
 import DoubleClaimRewardsModal from './DoubleClaimRewardsModal.vue';
 import AddToWithdrawQueueModal from './AddToWithdrawQueueModal.vue';
-import QueueStatus from './AddToWithdrawQueueModal.vue';
 
 let TOKEN_ADDRESSES;
 

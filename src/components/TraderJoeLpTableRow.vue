@@ -81,38 +81,41 @@
 
       <div class="table__cell apr">
         <div class="apr-warning" v-if="lpToken.aprWarning">
-          <img src="src/assets/icons/warning.svg" v-tooltip="{content: `APR value is updated twice a day. Please check TraderJoe website to find the current pool's APR.`, classes: 'info-tooltip long'}">
+          <img src="src/assets/icons/warning.svg"
+               v-tooltip="{content: `APR value is updated twice a day. Please check TraderJoe website to find the current pool's APR.`, classes: 'info-tooltip long'}">
         </div>
         {{ apr / 100 | percent }}
       </div>
 
       <div class="table__cell max-apr">
-        <span>{{ (maxApr + boostApy) | percent }}<img v-if="boostApy" v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApr ? (maxApr * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}" src="src/assets/icons/stars.png" class="stars-icon"></span>
+        <span>{{ (maxApr + boostApy) | percent }}<img v-if="boostApy"
+                                                      v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApr ? (maxApr * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}"
+                                                      src="src/assets/icons/stars.png" class="stars-icon"></span>
         <img v-if="chain === 'avalanche' && lpToken.isIncentivized" src="src/assets/icons/stars.png" class="stars-icon">
       </div>
       <div class="table__cell"></div>
 
       <div class="table__cell actions">
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="addActionsConfig"
-            :config="addActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="(lpToken.earlyAccessRequired && !hasEarlyAccess) ||inProcess || noSmartLoan">
+          class="actions__icon-button"
+          v-if="addActionsConfig"
+          :config="addActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="(lpToken.earlyAccessRequired && !hasEarlyAccess) ||inProcess || noSmartLoan">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="removeActionsConfig"
-            :config="removeActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="(lpToken.earlyAccessRequired && !hasEarlyAccess)|| inProcess || noSmartLoan">
+          class="actions__icon-button"
+          v-if="removeActionsConfig"
+          :config="removeActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="(lpToken.earlyAccessRequired && !hasEarlyAccess)|| inProcess || noSmartLoan">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="moreActionsConfig"
-            :config="moreActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="(lpToken.earlyAccessRequired && !hasEarlyAccess) || inProcess || noSmartLoan || !healthLoaded">
+          class="actions__icon-button"
+          v-if="moreActionsConfig"
+          :config="moreActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="(lpToken.earlyAccessRequired && !hasEarlyAccess) || inProcess || noSmartLoan || !healthLoaded">
         </IconButtonMenuBeta>
       </div>
     </div>
@@ -141,24 +144,25 @@
 </template>
 
 <script>
+import LB_TOKEN from '../abis/joe-v2/ILBToken.json'
+
 import DoubleAssetIcon from './DoubleAssetIcon.vue';
 import IconButtonMenuBeta from './IconButtonMenuBeta.vue';
 import config from '../config';
 import {mapActions, mapState} from 'vuex';
 import TraderJoeAddLiquidityModal from './TraderJoeAddLiquidityModal.vue';
 import TraderJoeRemoveLiquidityModal from './TraderJoeRemoveLiquidityModal.vue';
-import ClaimTraderJoeRewardsModal from "./ClaimTraderJoeRewardsModal.vue";
-import {calculateMaxApy, formatUnits, getBinPrice, parseUnits} from '../utils/calculate';
+import ClaimTraderJoeRewardsModal from './ClaimTraderJoeRewardsModal.vue';
+import {calculateMaxApy, formatUnits, getBinPrice} from '../utils/calculate';
 import DeltaIcon from './DeltaIcon.vue';
 import {ethers} from 'ethers';
-import AddTraderJoeV2FromWalletModal from "./AddTraderJoeV2FromWalletModal.vue";
-import WithdrawTraderJoeV2Modal from "./WithdrawTraderJoeV2Modal.vue";
-import LiquidityChart from "./LiquidityChart.vue";
-import FlatButton from "./FlatButton.vue";
-import SmallBlock from "./SmallBlock.vue";
-import LB_TOKEN from '/artifacts/contracts/interfaces/joe-v2/ILBToken.sol/ILBToken.json'
-import {ActionSection} from "../services/globalActionsDisableService";
-import { AssetsEntry, TokenType } from "../services/bullScoreService";
+import AddTraderJoeV2FromWalletModal from './AddTraderJoeV2FromWalletModal.vue';
+import WithdrawTraderJoeV2Modal from './WithdrawTraderJoeV2Modal.vue';
+import LiquidityChart from './LiquidityChart.vue';
+import FlatButton from './FlatButton.vue';
+import SmallBlock from './SmallBlock.vue';
+import {ActionSection} from '../services/globalActionsDisableService';
+import {AssetsEntry, TokenType} from '../services/bullScoreService';
 
 const toBytes32 = require('ethers').utils.formatBytes32String;
 
@@ -380,9 +384,9 @@ export default {
       await Promise.all(
         this.userBins.map(async (id, i) => {
           return lbToken.balanceOf(this.account, id).then(
-              res => {
-                this.userBalances[i] = res;
-              }
+            res => {
+              this.userBalances[i] = res;
+            }
           )
         })
       );
@@ -391,10 +395,10 @@ export default {
     calculateUserValue() {
       this.userValue = this.lpToken.primaryBalance * this.firstAsset.price + this.lpToken.secondaryBalance * this.secondAsset.price;
       this.bullScoreService.setToken(TokenType.TJV2, new AssetsEntry(
-        this.lpToken.symbol,
-        0.5,
-        { symbol: this.lpToken.primary, value: this.lpToken.primaryBalance * this.firstAsset.price },
-        { symbol: this.lpToken.secondary, value: this.lpToken.secondaryBalance * this.secondAsset.price }
+          this.lpToken.symbol,
+          0.5,
+          {symbol: this.lpToken.primary, value: this.lpToken.primaryBalance * this.firstAsset.price},
+          {symbol: this.lpToken.secondary, value: this.lpToken.secondaryBalance * this.secondAsset.price}
         )
       )
     },
@@ -579,14 +583,14 @@ export default {
       modalInstance.$on('REMOVE_LIQUIDITY', async removeLiquidityEvent => {
         if (this.smartLoanContract) {
           const removeLiquidityInput = await this.traderJoeService.getRemoveLiquidityParameters(
-              this.smartLoanContract.address,
-              this.lpToken.address,
-              this.provider,
-              this.tokenX,
-              this.tokenY,
-              this.lpToken.binStep,
-              removeLiquidityEvent.allowedAmountsSlippage * 100,
-              removeLiquidityEvent.binIdsToRemove
+            this.smartLoanContract.address,
+            this.lpToken.address,
+            this.provider,
+            this.tokenX,
+            this.tokenY,
+            this.lpToken.binStep,
+            removeLiquidityEvent.allowedAmountsSlippage * 100,
+            removeLiquidityEvent.binIdsToRemove
           );
           const removeLiquidityRequest = {
             symbol: this.lpToken.symbol,
@@ -633,22 +637,22 @@ export default {
       }
 
       const claimRewardsRequest =
-          this.lpToken.version === '2.2'
-              ?
-              {
-                version: this.lpToken.version,
-                pair: this.lpToken.address,
-                ids: this.lpToken.binIds
-              }
-              :
-              {
-                version: this.lpToken.version,
-                merkleEntries: merkleEntries
-              };
+        this.lpToken.version === '2.2'
+          ?
+          {
+            version: this.lpToken.version,
+            pair: this.lpToken.address,
+            ids: this.lpToken.binIds
+          }
+          :
+          {
+            version: this.lpToken.version,
+            merkleEntries: merkleEntries
+          };
 
       modalInstance.$on('CLAIM', addFromWalletEvent => {
         if (this.smartLoanContract) {
-          this.handleTransaction(this.claimTraderJoeRewards, { claimRewardsRequest: claimRewardsRequest }, () => {
+          this.handleTransaction(this.claimTraderJoeRewards, {claimRewardsRequest: claimRewardsRequest}, () => {
             this.rewards = 0;
             this.$forceUpdate();
           }, (error) => {
@@ -702,11 +706,11 @@ export default {
     watchDebtsPerAssetDataRefreshEvent() {
       this.dataRefreshEventService.debtsPerAssetDataRefreshEvent$.subscribe(() => {
         this.canRepayAllDebts = Object.values(this.debtsPerAsset).every(
-            debt => {
-              let balance = parseFloat(this.assetBalances[debt.asset]);
+          debt => {
+            let balance = parseFloat(this.assetBalances[debt.asset]);
 
-              return parseFloat(debt.debt) <= balance;
-            }
+            return parseFloat(debt.debt) <= balance;
+          }
         );
         this.$forceUpdate();
       });
@@ -726,8 +730,8 @@ export default {
       this.tokenY = tokenY;
 
       const [reserves, activeId] = await this
-          .traderJoeService
-          .getLBPairReservesAndActiveBin(this.lpToken.address, this.provider);
+        .traderJoeService
+        .getLBPairReservesAndActiveBin(this.lpToken.address, this.provider);
 
       const tokenXTVL = formatUnits(reserves[0], this.firstAsset.decimals) * this.firstAsset.price;
       const tokenYTVL = formatUnits(reserves[1], this.secondAsset.decimals) * this.secondAsset.price;
@@ -811,12 +815,12 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.TRADER_JOE_LP)
-          .subscribe(isActionDisabledRecord => {
-            this.isActionDisabledRecord = isActionDisabledRecord;
-            this.setupAddActionsConfiguration();
-            this.setupRemoveActionsConfiguration();
-            this.setupMoreActionsConfiguration();
-          })
+        .subscribe(isActionDisabledRecord => {
+          this.isActionDisabledRecord = isActionDisabledRecord;
+          this.setupAddActionsConfiguration();
+          this.setupRemoveActionsConfiguration();
+          this.setupMoreActionsConfiguration();
+        })
     },
   },
 };

@@ -1,5 +1,7 @@
 <template>
-  <ZapTile v-on:tileClick="onTileClick()" :disabled="disabled || !hasSmartLoanContract" :img-src="'src/assets/icons/chart-down.png'" :dark-img-src="'src/assets/icons/chart-down--dark.png'" :header="'Short'">
+  <ZapTile v-on:tileClick="onTileClick()" :disabled="disabled || !hasSmartLoanContract"
+           :img-src="'src/assets/icons/chart-down.png'" :dark-img-src="'src/assets/icons/chart-down--dark.png'"
+           :header="'Short'">
     <template #label>
       up to <b>5x</b>
     </template>
@@ -14,13 +16,13 @@
 <script>
 import {mapActions, mapState} from 'vuex';
 import config from '../../config';
-import erc20ABI from '../../../test/abis/ERC20.json';
+import erc20ABI from '../../abis/ERC20.json';
 import {combineLatest} from 'rxjs';
-import YAK_ROUTER_ABI from '../../../test/abis/YakRouter.json';
+import YAK_ROUTER_ABI from '../../abis/YakRouter.json';
 import {parseUnits} from '../../utils/calculate';
 import {BigNumber} from 'ethers';
 import ZapShortModal from '../zaps-modals/ZapShortModal.vue';
-import ZapTile from "./ZapTile.vue";
+import ZapTile from './ZapTile.vue';
 
 const ethers = require('ethers');
 
@@ -93,7 +95,7 @@ export default {
     },
 
     setupLogos() {
-      this.tokenIcons = Object.values(config.ASSETS_CONFIG).filter(asset => !asset.isStableCoin && config.POOLS_CONFIG[asset.symbol] && !config.POOLS_CONFIG[asset.symbol].disabled).map(asset => this.logoSrc(asset.symbol)).slice(0,6)
+      this.tokenIcons = Object.values(config.ASSETS_CONFIG).filter(asset => !asset.isStableCoin && config.POOLS_CONFIG[asset.symbol] && !config.POOLS_CONFIG[asset.symbol].disabled).map(asset => this.logoSrc(asset.symbol)).slice(0, 6)
     },
 
     async onTileClick() {
@@ -212,12 +214,12 @@ export default {
         try {
           return {
             ...(await yakRouter.findBestPathWithGas(
-                amountIn,
-                tknFrom,
-                tknTo,
-                maxHops,
-                gasPrice,
-                {gasLimit: 1e9}
+              amountIn,
+              tknFrom,
+              tknTo,
+              maxHops,
+              gasPrice,
+              {gasLimit: 1e9}
             )),
             dex: 'YAK_SWAP'
           }
@@ -232,18 +234,18 @@ export default {
 
 <style lang="scss" scoped>
 .icons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    grid-column-gap: 12px;
-    grid-row-gap: 12px;
-    width: 102px;
-    height: 64px;
-    margin-bottom: 32px;
-    user-select: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-column-gap: 12px;
+  grid-row-gap: 12px;
+  width: 102px;
+  height: 64px;
+  margin-bottom: 32px;
+  user-select: none;
 }
 
 .icon {
-    height: 100%;
+  height: 100%;
 }
 </style>

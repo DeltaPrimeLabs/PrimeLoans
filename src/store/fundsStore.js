@@ -1,3 +1,13 @@
+import SMART_LOAN from '../abis/SmartLoanGigaChadInterface.json';
+import WITHDRAWAL_FACET_ABI from '../abis/IWithdrawalFacet.json';
+import wrappedAbi from '../abis/WAVAX.json';
+import erc20ABI from '../abis/ERC20.json';
+import ABI_YY_WOMBAT_STRATEGY from "../abis/YYWombatStrategy.json";
+import LB_PAIR from '../abis/joe-v2/ILBPair.json'
+import LB_TOKEN from '../abis/joe-v2/ILBToken.json'
+import MULTICALL from '../abis/Multicall3.json'
+import IBALANCER_V2_GAUGE from '../abis/balancer-v2/IBalancerV2Gauge.json'
+
 import {
   awaitConfirmation,
   isOracleError,
@@ -5,32 +15,15 @@ import {
   loanTermsToSign,
   wrapContract, getLog, decodeOutput, capitalize
 } from '../utils/blockchain';
-import SMART_LOAN from '@artifacts/contracts/interfaces/SmartLoanGigaChadInterface.sol/SmartLoanGigaChadInterface.json';
-import ABI_WOMBAT_DYNAMIC_POOL_V2 from '../abis/WombatDynamicPoolV2.json';
-import WITHDRAWAL_FACET_ABI from '../abis/IWithdrawalFacet.json';
 import {formatUnits, fromWei, parseUnits, toWei} from '@/utils/calculate';
 import config from '@/config';
-import redstone from 'redstone-api';
-import {BigNumber, utils} from 'ethers';
-import {getBinPrice, mergeArrays, paraSwapRouteToSimpleData, removePaddedTrailingZeros} from '../utils/calculate';
-import wrappedAbi from '../../test/abis/WAVAX.json';
-import erc20ABI from '../../test/abis/ERC20.json';
+import {BigNumber} from 'ethers';
+import {getBinPrice, mergeArrays, removePaddedTrailingZeros} from '../utils/calculate';
 import router from '@/router';
-
-import LB_PAIR from '/artifacts/contracts/interfaces/joe-v2/ILBPair.sol/ILBPair.json'
-
-import {constructSimpleSDK, SimpleFetchSDK, SwapSide} from '@paraswap/sdk';
+import {constructSimpleSDK} from '@paraswap/sdk';
 import axios from 'axios';
-import LB_TOKEN from '/artifacts/contracts/interfaces/joe-v2/ILBToken.sol/ILBToken.json'
-import MULTICALL from '/artifacts/contracts/lib/Multicall3.sol/Multicall3.json'
-import IBALANCER_V2_GAUGE from '/artifacts/contracts/interfaces/balancer-v2/IBalancerV2Gauge.sol/IBalancerV2Gauge.json'
-import {decodeFunctionData} from 'viem';
-import {expect} from 'chai';
-import YAK_ROUTER_ABI from '../../test/abis/YakRouter.json';
-import {getSwapData} from '../utils/paraSwapUtils';
 import {getBurnData} from '../utils/caiUtils';
 import {combineLatest, from, map, tap} from 'rxjs';
-import ABI_YY_WOMBAT_STRATEGY from "../abis/YYWombatStrategy.json";
 import { AssetsEntry, TokenType } from "../services/bullScoreService";
 
 const toBytes32 = require('ethers').utils.formatBytes32String;

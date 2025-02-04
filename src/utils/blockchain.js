@@ -1,17 +1,19 @@
+import IDATA_STORE from '../abis/gmx-v2/IDataStore.json';
+
 import Vue from 'vue';
 import {WrapperBuilder} from '@redstone-finance/evm-connector';
 import CACHE_LAYER_URLS from '../../common/redstone-cache-layer-urls.json';
-import {utils} from "ethers";
+import {utils} from 'ethers';
 import config from '../config';
-import IDATA_STORE from "../../artifacts/contracts/interfaces/gmx-v2/IDataStore.sol/IDataStore.json";
-import {fromWei} from "./calculate";
+import {fromWei} from './calculate';
 import {
   depositGasLimitKey,
-  ESTIMATED_GAS_FEE_BASE_AMOUNT, ESTIMATED_GAS_FEE_BASE_AMOUNT_V2_1,
-  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR, ESTIMATED_GAS_FEE_PER_ORACLE_PRICE,
+  ESTIMATED_GAS_FEE_BASE_AMOUNT_V2_1,
+  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR,
+  ESTIMATED_GAS_FEE_PER_ORACLE_PRICE,
   WITHDRAWAL_GAS_LIMIT_KEY
-} from "../integrations/contracts/dataStore";
-import {formatUnits} from "ethers/lib/utils";
+} from '../integrations/contracts/dataStore';
+import {formatUnits} from 'ethers/lib/utils';
 
 const ethers = require('ethers');
 
@@ -42,7 +44,7 @@ export const switchChain = async (chainId, signer) => {
 
     await ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x' + chainId.toString(16) }],
+      params: [{chainId: '0x' + chainId.toString(16)}],
     });
   }
 }
@@ -84,7 +86,7 @@ export function getLog(tx, abi, name = '') {
   let chosenLog;
 
   tx.logs.forEach(log => {
-      try{
+      try {
         let parsed = iface.parseLog(log);
 
         if (parsed.name === name) {
@@ -107,12 +109,12 @@ export function capitalize(word) {
 }
 
 export async function calculateGmxV2ExecutionFee(
-    gmxV2DataStoreAddress,
-    gmxV2DepositCallbackGasLimit,
-    gmxV2UseMaxPriorityFeePerGas,
-    gmxV2GasPriceBuffer,
-    gmxV2GasPricePremium,
-    isDeposit
+  gmxV2DataStoreAddress,
+  gmxV2DepositCallbackGasLimit,
+  gmxV2UseMaxPriorityFeePerGas,
+  gmxV2GasPriceBuffer,
+  gmxV2GasPricePremium,
+  isDeposit
 ) {
   const dataStore = new ethers.Contract(gmxV2DataStoreAddress, IDATA_STORE.abi, provider.getSigner());
 
@@ -121,13 +123,13 @@ export async function calculateGmxV2ExecutionFee(
   //TODO: withdraw check
 
   const estimatedGasLimit = isDeposit ?
-      fromWei(await dataStore.getUint(depositGasLimitKey(true))) * 10**18 + gmxV2DepositCallbackGasLimit
-      :
-      fromWei(await dataStore.getUint(hashData(["bytes32"], [WITHDRAWAL_GAS_LIMIT_KEY]))) * 10**18 + gmxV2DepositCallbackGasLimit;
+    fromWei(await dataStore.getUint(depositGasLimitKey(true))) * 10 ** 18 + gmxV2DepositCallbackGasLimit
+    :
+    fromWei(await dataStore.getUint(hashData(['bytes32'], [WITHDRAWAL_GAS_LIMIT_KEY]))) * 10 ** 18 + gmxV2DepositCallbackGasLimit;
 
   //TODO: user the proper oracle price count
   let oraclePriceCount = 2;
-  let baseGasLimit = (fromWei(await dataStore.getUint(ESTIMATED_GAS_FEE_BASE_AMOUNT_V2_1)) + (fromWei(await dataStore.getUint(ESTIMATED_GAS_FEE_PER_ORACLE_PRICE)) * oraclePriceCount))  * 10**18;
+  let baseGasLimit = (fromWei(await dataStore.getUint(ESTIMATED_GAS_FEE_BASE_AMOUNT_V2_1)) + (fromWei(await dataStore.getUint(ESTIMATED_GAS_FEE_PER_ORACLE_PRICE)) * oraclePriceCount)) * 10 ** 18;
 
   let multiplierFactor = formatUnits(await dataStore.getUint(ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR), 30);
 
@@ -143,7 +145,7 @@ export async function calculateGmxV2ExecutionFee(
   //TODO: decrease the multiplicator
   const deltaPrimeMultiplicator = 6;
 
-  return deltaPrimeMultiplicator * adjustedGasLimit * gasPrice / 10**18;
+  return deltaPrimeMultiplicator * adjustedGasLimit * gasPrice / 10 ** 18;
 }
 
 export async function handleCall(fun, args, onSuccess, onFail) {
@@ -220,15 +222,15 @@ export function decodeOutput(abi, functionName, returnData, comment = '') {
   try {
     let outputs = abi.find(el => el.name === functionName && el.type === 'function').outputs;
     let types = outputs.map(
-        output => {
-          if (output.type === 'tuple[]') {
-            return `tuple(${output.components.map(c => c.type)})[]`
-          } else if (output.type === 'tuple') {
-            return `tuple(${output.components.map(c => c.type)})`
-          } else {
-            return output.type;
-          }
+      output => {
+        if (output.type === 'tuple[]') {
+          return `tuple(${output.components.map(c => c.type)})[]`
+        } else if (output.type === 'tuple') {
+          return `tuple(${output.components.map(c => c.type)})`
+        } else {
+          return output.type;
         }
+      }
     )
     return utils.defaultAbiCoder.decode(types, returnData);
   } catch (e) {
@@ -255,12 +257,12 @@ export async function hashData(dataTypes, dataValues) {
 }
 
 export const loanTermsToSign =
-`By entering DeltaPrime I agree to be bound by the DeltaPrime "TERMS OF USE" and herby further represent and warrant that:
+  `By entering DeltaPrime I agree to be bound by the DeltaPrime "TERMS OF USE" and herby further represent and warrant that:
 I am not a citizen of, natural and legal person, having habitual residence, location or their seat of incorporation in the country or territory where transactions with digital
 tokens or virtual assets are prohibited [full text available at https://arweave.net/yJYGxmLhSccPc3NSRGpgzolKi1YeGiVFteLeWbhPnxw].`;
 
 export const depositTermsToSign =
-`By entering DeltaPrime I agree to be bound by the DeltaPrime "TERMS OF USE" and herby further represent and warrant that:
+  `By entering DeltaPrime I agree to be bound by the DeltaPrime "TERMS OF USE" and herby further represent and warrant that:
 I am not a citizen of, natural and legal person, having habitual residence, location or their seat of incorporation in the country or territory where transactions with digital tokens or virtual assets are prohibited [full text available at https://arweave.net/9dc5BuzFYefZrL7ciUnxyeRUFh52U3UKju7AD6InsJ8].`;
 
 async function getLoanHistoryData(walletAddress) {
@@ -278,9 +280,9 @@ export async function getData(loanAddress, timestamp) {
   let historyData = await getLoanHistoryData(loanAddress);
 
   let dataPoint = historyData.find(
-      el => {
-          return el.timestamp > timestamp * 1000;
-      }
+    el => {
+      return el.timestamp > timestamp * 1000;
+    }
   );
 
   return dataPoint;

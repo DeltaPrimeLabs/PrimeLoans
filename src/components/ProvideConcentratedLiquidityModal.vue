@@ -80,10 +80,6 @@ import Button from './Button';
 import Toggle from './Toggle';
 import BarGaugeBeta from './BarGaugeBeta';
 import config from '../config';
-import erc20ABI from '../../test/abis/ERC20.json';
-import {fromWei} from '../utils/calculate';
-import {formatUnits} from "ethers/lib/utils";
-import {BigNumber} from "ethers";
 
 const ethers = require('ethers');
 

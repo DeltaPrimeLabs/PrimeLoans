@@ -1,6 +1,5 @@
 import {BehaviorSubject, combineLatest} from 'rxjs';
 import POOL from '../abis/Pool.json';
-import ERC_20_ABI from '../../test/abis/ERC20.json';
 import {formatUnits, parseUnits} from '../utils/calculate';
 import config from '../config';
 import {BigNumber} from 'ethers';

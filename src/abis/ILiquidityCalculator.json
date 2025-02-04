@@ -1,0 +1,69 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ILiquidityCalculator",
+  "sourceName": "contracts/interfaces/level/ILiquidityCalculator.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenPrice",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_valueChange",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isAdd",
+          "type": "bool"
+        }
+      ],
+      "name": "calcAddRemoveLiquidityFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_tranche",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "_max",
+          "type": "bool"
+        }
+      ],
+      "name": "getTrancheValue",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

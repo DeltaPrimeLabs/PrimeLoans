@@ -140,7 +140,7 @@ import {mapActions, mapState} from 'vuex';
 import config from '../config';
 import {combineLatest} from 'rxjs';
 import MintsPrimeModal from './MintsPrimeModal.vue';
-import erc20ABI from '../../test/abis/ERC20.json';
+import erc20ABI from '../abis/ERC20.json';
 import {getTraderJoeV2IdSlippageFromPriceSlippage, getUniswapV3SlippageFromPriceSlippage} from '../utils/calculate';
 import RedeemsPrimeModal from './RedeemsPrimeModal.vue';
 import RebalancesPrimeModal from './RebalancesPrimeModal.vue';
@@ -149,8 +149,6 @@ import DeltaIcon from './DeltaIcon.vue';
 import InfoIcon from './InfoIcon.vue';
 import PriceRangeChart from './PriceRangeChart.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
-import {poolQuery} from '../../lambda/utils/queries';
-import RtknPledgeModal from './RtknPledgeModal.vue';
 
 const ethers = require('ethers');
 

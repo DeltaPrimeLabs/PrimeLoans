@@ -149,6 +149,12 @@
 </template>
 
 <script>
+import GLP_REWARD_ROUTER from '../abis/IRewardRouterV2.json';
+import GLP_REWARD_TRACKER from '../abis/IRewardTracker.json';
+import YAK_ROUTER_ABI from '../abis/YakRouter.json';
+import YAK_WRAP_ROUTER from '../abis/IYakWrapRouter.json';
+import erc20ABI from '../abis/ERC20.json';
+
 import SmallChartBeta from './SmallChartBeta';
 import ColoredValueBeta from './ColoredValueBeta';
 import IconButtonMenuBeta from './IconButtonMenuBeta';
@@ -160,28 +166,17 @@ import {mapActions, mapState} from 'vuex';
 import BorrowModal from './BorrowModal';
 import SwapModal from './SwapModal';
 import AddFromWalletModal from './AddFromWalletModal';
-import WithdrawModal from './WithdrawModal';
 import RepayModal from './RepayModal';
-import erc20ABI from '../../test/abis/ERC20.json';
 import WrapModal from './WrapModal';
-import YAK_ROUTER_ABI
-  from '../../test/abis/YakRouter.json';
-import YAK_WRAP_ROUTER
-  from '../../artifacts/contracts/interfaces/IYakWrapRouter.sol/IYakWrapRouter.json';
-import {formatUnits, fromWei, parseUnits, smartRound} from '../utils/calculate';
-import GLP_REWARD_ROUTER
-  from '../../artifacts/contracts/interfaces/facets/avalanche/IRewardRouterV2.sol/IRewardRouterV2.json';
-import GLP_REWARD_TRACKER
-  from '../../artifacts/contracts/interfaces/facets/avalanche/IRewardTracker.sol/IRewardTracker.json';
+import {formatUnits, parseUnits, smartRound} from '../utils/calculate';
 import ClaimGLPRewardsModal from './ClaimGLPRewardsModal';
 import DeltaIcon from './DeltaIcon.vue';
 import IconButton from './IconButton.vue';
-import {constructSimpleSDK, ContractMethod, SwapSide} from '@paraswap/sdk';
+import {constructSimpleSDK, SwapSide} from '@paraswap/sdk';
 import axios from 'axios';
 import TradingViewChart from './TradingViewChart.vue';
 import Toggle from './Toggle.vue';
 import {BigNumber} from 'ethers';
-import SwapDebtModal from './SwapDebtModal.vue';
 import MintCAIModal from './MintCAIModal.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
 import AddToWithdrawQueueModal from './AddToWithdrawQueueModal.vue';
@@ -570,8 +565,8 @@ export default {
             userAddress: this.smartLoanContract.address,
             side: SwapSide.SELL,
             includeContractMethods: [
-              "swapExactAmountIn",
-              "swapExactAmountInOnUniswapV3",
+              'swapExactAmountIn',
+              'swapExactAmountInOnUniswapV3',
             ],
             version: 6.2,
           });

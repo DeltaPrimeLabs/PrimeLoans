@@ -1,12 +1,13 @@
-import {awaitConfirmation, wrapContract} from '../utils/blockchain';
-import SPRIME from '@artifacts/contracts/interfaces/ISPrime.sol/ISPrime.json';
-import SPRIME_TJV2 from '@artifacts/contracts/interfaces/ISPrimeTraderJoe.sol/ISPrimeTraderJoe.json';
-import SPRIME_UNISWAP from '@artifacts/contracts/interfaces/ISPrimeUniswap.sol/ISPrimeUniswap.json';
+import SPRIME from '../abis/sPrime/ISPrime.json';
+import SPRIME_TJV2 from '../abis/sPrime/ISPrimeTraderJoe.json';
+import SPRIME_UNISWAP from '../abis/sPrime/ISPrimeUniswap.json';
+import erc20ABI from '../abis/ERC20.json';
+import WAVAX from '../abis/WAVAX.json';
+
 import {parseUnits} from '@/utils/calculate';
-import erc20ABI from '../../test/abis/ERC20.json';
+import {awaitConfirmation, wrapContract} from '../utils/blockchain';
 import config from '@/config';
-import {fromWei, toWei} from "../utils/calculate";
-import WAVAX from '../../test/abis/WAVAX.json';
+import {toWei} from '../utils/calculate';
 
 
 const ethers = require('ethers');

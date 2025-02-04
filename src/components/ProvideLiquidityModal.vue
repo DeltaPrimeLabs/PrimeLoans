@@ -7,9 +7,9 @@
 
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
-        <div class="top-info__value"> {{firstAssetBalance}}</div>
+        <div class="top-info__value"> {{ firstAssetBalance }}</div>
         <span class="top-info__currency">
-          {{firstAsset.symbol}}
+          {{ firstAsset.symbol }}
         </span>
       </div>
       <CurrencyInput ref="firstInput"
@@ -22,9 +22,9 @@
       </CurrencyInput>
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
-        <div class="top-info__value"> {{secondAssetBalance}}</div>
+        <div class="top-info__value"> {{ secondAssetBalance }}</div>
         <span class="top-info__currency">
-          {{secondAsset.symbol}}
+          {{ secondAsset.symbol }}
         </span>
       </div>
       <CurrencyInput ref="secondInput"
@@ -97,10 +97,10 @@ import Button from './Button';
 import Toggle from './Toggle';
 import BarGaugeBeta from './BarGaugeBeta';
 import config from '../config';
-import erc20ABI from '../../test/abis/ERC20.json';
+import erc20ABI from '../abis/ERC20.json';
 import {fromWei} from '../utils/calculate';
-import {formatUnits} from "ethers/lib/utils";
-import {BigNumber} from "ethers";
+import {formatUnits} from 'ethers/lib/utils';
+import {BigNumber} from 'ethers';
 
 const ethers = require('ethers');
 
@@ -204,9 +204,9 @@ export default {
       const secondTokenBalance = formatUnits(await secondToken.balanceOf(this.lpToken.address), BigNumber.from(this.secondAsset.decimals));
 
       this.addedLiquidity =
-          (this.firstAmount ? this.firstAmount * this.firstAsset.price / this.lpToken.price : 0)
-          +
-          (this.secondAmount ? this.secondAmount * this.secondAsset.price / this.lpToken.price : 0);
+        (this.firstAmount ? this.firstAmount * this.firstAsset.price / this.lpToken.price : 0)
+        +
+        (this.secondAmount ? this.secondAmount * this.secondAsset.price / this.lpToken.price : 0);
 
       this.addedLiquidity = this.addedLiquidity.toFixed(18)
     },

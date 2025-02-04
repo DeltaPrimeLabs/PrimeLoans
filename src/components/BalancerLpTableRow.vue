@@ -120,7 +120,7 @@ import ProvideLiquidityModal from './ProvideLiquidityModal';
 import RemoveLiquidityModal from './RemoveLiquidityModal';
 
 const ethers = require('ethers');
-import erc20ABI from '../../test/abis/ERC20.json';
+import erc20ABI from '../abis/ERC20.json';
 import {calculateMaxApy, fromWei} from '../utils/calculate';
 import DeltaIcon from './DeltaIcon.vue';
 import StakeBalancerV2Modal from './StakeBalancerV2Modal.vue';

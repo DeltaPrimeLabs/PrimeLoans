@@ -17,7 +17,7 @@
 
       <div class="table__cell table__cell--double-value lp-balance">
         <template
-            v-if="penpieLpBalances">
+          v-if="penpieLpBalances">
           <div class="double-value__pieces">
             {{ penpieLpBalances[lpToken.symbol] | smartRound }}
           </div>
@@ -32,7 +32,7 @@
 
       <div class="table__cell table__cell--double-value staked">
         <template
-            v-if="penpieLpBalances">
+          v-if="penpieLpBalances">
           <div class="double-value__pieces">
             {{ penpieLpBalances[lpToken.symbol] * lpToken.price / assets[lpToken.asset].price | smartRound }}
           </div>
@@ -65,7 +65,10 @@
       </div>
 
       <div class="table__cell capacity">
-        <bar-gauge-beta v-if="lpToken.maxExposure" :min="0" :max="lpToken.maxExposure" :value="Math.max(lpToken.currentExposure, 0.001)" v-tooltip="{content: `${lpToken.currentExposure ? lpToken.currentExposure.toFixed(2) : 0} ($${lpToken.currentExposure ? (lpToken.currentExposure * this.lpToken.price).toFixed(2) : 0}) out of ${lpToken.maxExposure} ($${lpToken.maxExposure ? (lpToken.maxExposure * this.lpToken.price).toFixed(2) : 0}) is currently used.`, classes: 'info-tooltip'}" :width="80"></bar-gauge-beta>
+        <bar-gauge-beta v-if="lpToken.maxExposure" :min="0" :max="lpToken.maxExposure"
+                        :value="Math.max(lpToken.currentExposure, 0.001)"
+                        v-tooltip="{content: `${lpToken.currentExposure ? lpToken.currentExposure.toFixed(2) : 0} ($${lpToken.currentExposure ? (lpToken.currentExposure * this.lpToken.price).toFixed(2) : 0}) out of ${lpToken.maxExposure} ($${lpToken.maxExposure ? (lpToken.maxExposure * this.lpToken.price).toFixed(2) : 0}) is currently used.`, classes: 'info-tooltip'}"
+                        :width="80"></bar-gauge-beta>
       </div>
 
       <div class="table__cell table__cell--double-value apr" v-bind:class="{'apr--with-warning': lpToken.aprWarning}">
@@ -77,32 +80,34 @@
       </div>
 
       <div class="table__cell table__cell--double-value max-apr">
-        <span>{{ (maxApr + boostApy) | percent }}<img v-if="boostApy" v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApr ? (maxApr * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}" src="src/assets/icons/stars.png" class="stars-icon"></span>
+        <span>{{ (maxApr + boostApy) | percent }}<img v-if="boostApy"
+                                                      v-tooltip="{content: `This pool is incentivized!<br>⁃ up to ${maxApr ? (maxApr * 100).toFixed(2) : 0}% Pool APR<br>⁃ up to ${boostApy ? (boostApy * 100).toFixed(2) : 0}% ${chain === 'arbitrum' ? 'ARB' : 'AVAX'} incentives`, classes: 'info-tooltip'}"
+                                                      src="src/assets/icons/stars.png" class="stars-icon"></span>
       </div>
 
       <div class="table__cell"></div>
 
       <div class="table__cell actions">
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            :config="addActionsConfig"
-            v-if="addActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || noSmartLoan || !healthLoaded || isMatured(lpToken.maturity)">
+          class="actions__icon-button"
+          :config="addActionsConfig"
+          v-if="addActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || noSmartLoan || !healthLoaded || isMatured(lpToken.maturity)">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button last"
-            :config="removeActionsConfig"
-            v-if="removeActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
+          class="actions__icon-button last"
+          :config="removeActionsConfig"
+          v-if="removeActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="moreActionsConfig"
-            :config="moreActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
+          class="actions__icon-button"
+          v-if="moreActionsConfig"
+          :config="moreActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons || noSmartLoan || !healthLoaded">
         </IconButtonMenuBeta>
       </div>
 
@@ -112,23 +117,23 @@
 </template>
 
 <script>
-import AddFromWalletModal from "./AddFromWalletModal.vue";
+import AddFromWalletModal from './AddFromWalletModal.vue';
 
 const ethers = require('ethers');
-import DoubleAssetIcon from "./DoubleAssetIcon.vue";
-import Chart from "./Chart.vue";
-import IconButtonMenuBeta from "./IconButtonMenuBeta.vue";
-import SmallBlock from "./SmallBlock.vue";
-import {mapActions, mapState} from "vuex";
-import {calculateMaxApy} from "../utils/calculate";
-import erc20ABI from "../../test/abis/ERC20.json";
-import config from "../config";
-import TOKEN_ADDRESSES from "../../common/addresses/arbitrum/token_addresses.json";
-import WithdrawModal from "./WithdrawModal.vue";
-import SwapModal from "./SwapModal.vue";
-import {BigNumber} from "ethers";
-import {wrapContract} from "../utils/blockchain";
-import ClaimRewardsModal from "./ClaimRewardsModal.vue";
+import DoubleAssetIcon from './DoubleAssetIcon.vue';
+import Chart from './Chart.vue';
+import IconButtonMenuBeta from './IconButtonMenuBeta.vue';
+import SmallBlock from './SmallBlock.vue';
+import {mapActions, mapState} from 'vuex';
+import {calculateMaxApy} from '../utils/calculate';
+import erc20ABI from '../abis/ERC20.json';
+import config from '../config';
+import TOKEN_ADDRESSES from '../../common/addresses/arbitrum/token_addresses.json';
+import WithdrawModal from './WithdrawModal.vue';
+import SwapModal from './SwapModal.vue';
+import {BigNumber} from 'ethers';
+import {wrapContract} from '../utils/blockchain';
+import ClaimRewardsModal from './ClaimRewardsModal.vue';
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import InfoIcon from './InfoIcon.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
@@ -475,7 +480,7 @@ export default {
       modalInstance.queryMethods = {
         Penpie: async (sourceAsset, targetAsset, amountIn) => {
           const queryParams = new URLSearchParams({
-            chainId: "42161",
+            chainId: '42161',
             receiverAddr: this.smartLoanContract.address,
             marketAddr: this.lpToken.pendleLpAddress,
             tokenInAddr: TOKEN_ADDRESSES[this.lpToken.asset],
@@ -578,7 +583,7 @@ export default {
       modalInstance.queryMethods = {
         Penpie: async (sourceAsset, targetAsset, amountIn) => {
           const queryParams = new URLSearchParams({
-            chainId: "42161",
+            chainId: '42161',
             receiverAddr: this.smartLoanContract.address,
             marketAddr: this.lpToken.pendleLpAddress,
             tokenOutAddr: TOKEN_ADDRESSES[this.lpToken.asset],
@@ -670,8 +675,8 @@ export default {
         }, (error) => {
           this.handleTransactionError(error);
         })
-            .then(() => {
-            });
+          .then(() => {
+          });
       });
     },
 
@@ -717,8 +722,8 @@ export default {
         }, (error) => {
           this.handleTransactionError(error);
         })
-            .then(() => {
-            });
+          .then(() => {
+          });
       });
     },
 

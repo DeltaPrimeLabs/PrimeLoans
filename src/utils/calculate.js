@@ -1,20 +1,19 @@
-import config from "../config";
-import IVectorFinanceStakingArtifact
-  from '../../artifacts/contracts/interfaces/IVectorFinanceStaking.sol/IVectorFinanceStaking.json';
-import IVectorRewarder from '../../artifacts/contracts/interfaces/IVectorRewarder.sol/IVectorRewarder.json';
-import IYieldYak from '../../artifacts/contracts/interfaces/facets/avalanche/IYieldYak.sol/IYieldYak.json';
-import IBeefyFinance from '../../artifacts/contracts/interfaces/facets/IBeefyFinance.sol/IBeefyFinance.json';
-import IVectorFinanceCompounder
-  from '../../artifacts/contracts/interfaces/IVectorFinanceCompounder.sol/IVectorFinanceCompounder.json';
-import {BigNumber} from "ethers";
-import ApolloClient from "apollo-boost";
-import gql from "graphql-tag";
-import TOKEN_ADDRESSES from '../../common/addresses/avalanche/token_addresses.json';
-import erc20ABI from '../../test/abis/ERC20.json';
+import IVectorFinanceStakingArtifact from '../abis/IVectorFinanceStaking.json';
+import IVectorRewarder from '../abis/IVectorRewarder.json';
+import IYieldYak from '../abis/IYieldYak.json';
+import IBeefyFinance from '../abis/IBeefyFinance.json';
+import IVectorFinanceCompounder from '../abis/IVectorFinanceCompounder.json';
+import erc20ABI from '../abis/ERC20.json';
+import MULTICALL from '../abis/Multicall3.json'
+import IPenpieFacet from '../abis/IPenpieFacet.json';
 
-import MULTICALL from '../../artifacts/contracts/lib/Multicall3.sol/Multicall3.json'
-import {decodeOutput} from "./blockchain";
-import IPenpieFacet from "../../artifacts/contracts/interfaces/facets/arbitrum/IPenpieFacet.sol/IPenpieFacet.json";
+import config from '../config';
+import {BigNumber} from 'ethers';
+import ApolloClient from 'apollo-boost';
+import gql from 'graphql-tag';
+import TOKEN_ADDRESSES from '../../common/addresses/avalanche/token_addresses.json';
+
+import {decodeOutput} from './blockchain';
 
 const ethers = require('ethers');
 
@@ -91,7 +90,7 @@ export function parseLogs(logs) {
 
 export function roundWithPrecision(num, precision) {
   var multiplier = Math.pow(10, precision);
-  return Math.round( num * multiplier ) / multiplier;
+  return Math.round(num * multiplier) / multiplier;
 }
 
 export function round(num) {
@@ -219,7 +218,7 @@ export async function vectorFinanceRewards(stakingContractAddress, loanAddress) 
       let earned = formatUnits(await rewarderContract.earned(loanAddress, tokenAddress), await tokenContract.decimals());
 
       let token = Object.entries(TOKEN_ADDRESSES).find(([, address]) => address.toLowerCase() === tokenAddress.toLowerCase());
-      
+
       let price = redstonePriceData[token[0]] ? redstonePriceData[token[0]][0].dataPoints[0].value : 0;
 
       totalEarned += price * earned;
@@ -437,18 +436,17 @@ export async function getTraderJoeLpApr(lpAddress, assetAppreciation = 0) {
   let reserveUSD = parseFloat(response.data.pairs[0].reserveUSD);
 
 
-
   const feesUSD = volumeUSD * FEE_RATE;
 
   return ((1 + feesUSD * 365 / reserveUSD) * (1 + assetAppreciation / 100) - 1) * 100;
 }
 
 export const paraSwapRouteToSimpleData = (txParams) => {
-  const data = "0x" + txParams.data.substr(10);
+  const data = '0x' + txParams.data.substr(10);
   const [
     decoded,
   ] = ethers.utils.defaultAbiCoder.decode(
-    ["(address,address,uint256,uint256,uint256,address[],bytes,uint256[],uint256[],address,address,uint256,bytes,uint256,bytes16)"],
+    ['(address,address,uint256,uint256,uint256,address[],bytes,uint256[],uint256[],address,address,uint256,bytes,uint256,bytes16)'],
     data
   );
   return {
@@ -488,8 +486,8 @@ export function getCountdownString(countDownDate) {
   let seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
   // Display the result in the element with id="demo"
-  return hours + "h "
-      + minutes + "min";
+  return hours + 'h '
+    + minutes + 'min';
 }
 
 export function chartPoints(points) {
@@ -501,16 +499,16 @@ export function chartPoints(points) {
   let minValue = points[0].value;
 
   let dataPoints = points.map(
-      item => {
-        if (item.value > maxValue) maxValue = item.value;
+    item => {
+      if (item.value > maxValue) maxValue = item.value;
 
-        if (item.value < minValue) minValue = item.value;
+      if (item.value < minValue) minValue = item.value;
 
-        return {
-          x: item.timestamp,
-          y: item.value
-        };
-      }
+      return {
+        x: item.timestamp,
+        y: item.value
+      };
+    }
   );
 
   return [dataPoints, minValue, maxValue];
@@ -543,9 +541,9 @@ function formatTokenBalance(value, precision = 5, toFixed = false) {
   }
 }
 
-export  function getTraderJoeV2IdSlippageFromPriceSlippage(priceSlippage, binStep) {
+export function getTraderJoeV2IdSlippageFromPriceSlippage(priceSlippage, binStep) {
   return Math.floor(
-      Math.log(1 + priceSlippage) / Math.log(1 + binStep / 1e4)
+    Math.log(1 + priceSlippage) / Math.log(1 + binStep / 1e4)
   );
 }
 

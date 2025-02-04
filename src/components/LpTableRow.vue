@@ -113,11 +113,11 @@ import ProvideLiquidityModal from './ProvideLiquidityModal';
 import RemoveLiquidityModal from './RemoveLiquidityModal';
 import WithdrawModal from './WithdrawModal';
 
+import erc20ABI from '../abis/ERC20.json';
 const ethers = require('ethers');
-import erc20ABI from '../../test/abis/ERC20.json';
 import {calculateMaxApy, fromWei} from '../utils/calculate';
 import addresses from '../../common/addresses/avalanche/token_addresses.json';
-import {formatUnits, parseUnits} from 'ethers/lib/utils';
+import {formatUnits} from 'ethers/lib/utils';
 import DeltaIcon from "./DeltaIcon.vue";
 import {ActionSection} from "../services/globalActionsDisableService";
 

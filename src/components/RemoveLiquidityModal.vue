@@ -7,9 +7,9 @@
 
       <div class="modal-top-info">
         <div class="top-info__label">Available:</div>
-        <div class="top-info__value"> {{formatTokenBalance(lpTokenBalance, 10, true)}}</div>
+        <div class="top-info__value"> {{ formatTokenBalance(lpTokenBalance, 10, true) }}</div>
         <span class="top-info__currency">
-          {{lpToken.name}}
+          {{ lpToken.name }}
         </span>
       </div>
 
@@ -69,6 +69,7 @@
 </template>
 
 <script>
+import erc20ABI from '../abis/ERC20.json';
 import Modal from './Modal';
 import TransactionResultSummaryBeta from './TransactionResultSummaryBeta';
 import CurrencyInput from './CurrencyInput';
@@ -76,7 +77,6 @@ import Button from './Button';
 import Toggle from './Toggle';
 import BarGaugeBeta from './BarGaugeBeta';
 import config from '../config';
-import erc20ABI from '../../test/abis/ERC20.json';
 import {parseUnits, formatUnits} from 'ethers/lib/utils';
 
 const ethers = require('ethers');

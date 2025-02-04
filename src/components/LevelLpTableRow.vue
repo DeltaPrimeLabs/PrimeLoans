@@ -2,7 +2,8 @@
   <div class="lp-table-row-component level" :class="{'expanded': rowExpanded}">
     <div class="table__row" v-if="lpToken">
       <div class="table__cell asset">
-        <img class="asset__icon" :src="`src/assets/logo/${lpToken.symbol.toLowerCase()}.svg`" v-on:click="openProfileModal">
+        <img class="asset__icon" :src="`src/assets/logo/${lpToken.symbol.toLowerCase()}.svg`"
+             v-on:click="openProfileModal">
         <div class="asset__info">
           <a class="asset__name" :href="lpToken.link" target=”_blank”>{{ lpToken.name }}</a>
           <div class="asset__dex">
@@ -12,7 +13,8 @@
       </div>
 
       <div class="table__cell table__cell--double-value balance">
-        <template v-if="levelLpBalances && parseFloat(levelLpBalances[lpToken.symbol]) && formatTokenBalance(levelLpBalances[lpToken.symbol], 10, true) > 0">
+        <template
+          v-if="levelLpBalances && parseFloat(levelLpBalances[lpToken.symbol]) && formatTokenBalance(levelLpBalances[lpToken.symbol], 10, true) > 0">
           <div class="double-value__pieces">
             <span v-if="isLpBalanceEstimated">~</span>
             {{ formatTokenBalance(levelLpBalances[lpToken.symbol], 10, true) }}
@@ -61,13 +63,17 @@
       </div>
 
       <div class="table__cell capacity">
-        <bar-gauge-beta v-if="lpToken.maxExposure" :min="0" :max="lpToken.maxExposure" :value="Math.max(lpToken.currentExposure, 0.001)" v-tooltip="{content: `${lpToken.currentExposure ? lpToken.currentExposure.toFixed(2) : 0} ($${lpToken.currentExposure ? (lpToken.currentExposure * this.lpToken.price).toFixed(2) : 0}) out of ${lpToken.maxExposure} ($${lpToken.maxExposure ? (lpToken.maxExposure * this.lpToken.price).toFixed(2) : 0}) is currently used.`, classes: 'info-tooltip'}" :width="80"></bar-gauge-beta>
+        <bar-gauge-beta v-if="lpToken.maxExposure" :min="0" :max="lpToken.maxExposure"
+                        :value="Math.max(lpToken.currentExposure, 0.001)"
+                        v-tooltip="{content: `${lpToken.currentExposure ? lpToken.currentExposure.toFixed(2) : 0} ($${lpToken.currentExposure ? (lpToken.currentExposure * this.lpToken.price).toFixed(2) : 0}) out of ${lpToken.maxExposure} ($${lpToken.maxExposure ? (lpToken.maxExposure * this.lpToken.price).toFixed(2) : 0}) is currently used.`, classes: 'info-tooltip'}"
+                        :width="80"></bar-gauge-beta>
       </div>
 
       <div class="table__cell table__cell--double-value apr" v-bind:class="{'apr--with-warning': lpToken.aprWarning}">
         {{ apr / 100 | percent }}
         <div class="apr-warning" v-if="lpToken.aprWarning">
-          <img src="src/assets/icons/warning.svg" v-tooltip="{content: lpToken.aprWarning, classes: 'info-tooltip long'}">
+          <img src="src/assets/icons/warning.svg"
+               v-tooltip="{content: lpToken.aprWarning, classes: 'info-tooltip long'}">
         </div>
       </div>
 
@@ -79,25 +85,25 @@
 
       <div class="table__cell actions">
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            :config="addActionsConfig"
-            v-if="addActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="true">
+          class="actions__icon-button"
+          :config="addActionsConfig"
+          v-if="addActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="true">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button last"
-            :config="removeActionsConfig"
-            v-if="removeActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="true">
+          class="actions__icon-button last"
+          :config="removeActionsConfig"
+          v-if="removeActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="true">
         </IconButtonMenuBeta>
         <IconButtonMenuBeta
-            class="actions__icon-button"
-            v-if="moreActionsConfig"
-            :config="moreActionsConfig"
-            v-on:iconButtonClick="actionClick"
-            :disabled="disableAllButtons">
+          class="actions__icon-button"
+          v-if="moreActionsConfig"
+          :config="moreActionsConfig"
+          v-on:iconButtonClick="actionClick"
+          :disabled="disableAllButtons">
         </IconButtonMenuBeta>
       </div>
     </div>
@@ -117,6 +123,9 @@
 </template>
 
 <script>
+import erc20ABI from '../abis/ERC20.json';
+import LIQUIDITY_CALCULATOR from '../abis/ILiquidityCalculator.json';
+
 import DoubleAssetIcon from './DoubleAssetIcon';
 import LoadedValue from './LoadedValue';
 import SmallBlock from './SmallBlock';
@@ -127,27 +136,24 @@ import SmallChartBeta from './SmallChartBeta';
 import AddFromWalletModal from './AddFromWalletModal';
 import config from '../config';
 import {mapActions, mapState} from 'vuex';
-import ProvideLiquidityModal from './ProvideLiquidityModal';
-import RemoveLiquidityModal from './RemoveLiquidityModal';
 import WithdrawModal from './WithdrawModal';
 
+
 const ethers = require('ethers');
-import erc20ABI from '../../test/abis/ERC20.json';
-import {calculateMaxApy, chartPoints, fromWei, toWei} from '../utils/calculate';
-import addresses from '../../common/addresses/avalanche/token_addresses.json';
+import {calculateMaxApy, chartPoints, fromWei} from '../utils/calculate';
 import {formatUnits, parseUnits} from 'ethers/lib/utils';
-import DeltaIcon from "./DeltaIcon.vue";
-import SwapModal from "./SwapModal.vue";
-import redstone from "redstone-api";
-import Toggle from "./Toggle.vue";
-import TradingViewChart from "./TradingViewChart.vue";
-import LIQUIDITY_CALCULATOR from '/artifacts/contracts/interfaces/level/ILiquidityCalculator.sol/ILiquidityCalculator.json'
-import {BigNumber} from "ethers";
-import BarGaugeBeta from "./BarGaugeBeta.vue";
-import ClaimLevelRewardsModal from "./ClaimLevelRewardsModal.vue";
-import PartnerInfoModal from "./PartnerInfoModal.vue";
-import moment from "moment/moment";
-import {ActionSection} from "../services/globalActionsDisableService";
+import DeltaIcon from './DeltaIcon.vue';
+import SwapModal from './SwapModal.vue';
+import redstone from 'redstone-api';
+import Toggle from './Toggle.vue';
+import TradingViewChart from './TradingViewChart.vue';
+
+import {BigNumber} from 'ethers';
+import BarGaugeBeta from './BarGaugeBeta.vue';
+import ClaimLevelRewardsModal from './ClaimLevelRewardsModal.vue';
+import PartnerInfoModal from './PartnerInfoModal.vue';
+import moment from 'moment/moment';
+import {ActionSection} from '../services/globalActionsDisableService';
 
 const FARMING_CONTRACT_ADDRESS = '0xC18c952F800516E1eef6aB482F3d331c84d43d38';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -294,46 +300,46 @@ export default {
     ]),
     setupAddActionsConfiguration() {
       this.addActionsConfig =
-          {
-            iconSrc: 'src/assets/icons/plus.svg',
-            tooltip: 'Add',
-            menuOptions: [
-              {
-                key: 'ADD_FROM_WALLET',
-                name: 'Import existing LLP position',
-                disabled: this.isActionDisabledRecord['ADD_FROM_WALLET'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
-                disabledInfo: this.isActionDisabledRecord['ADD_FROM_WALLET'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
-              },
-              {
-                key: 'PROVIDE_LIQUIDITY',
-                name: 'Create LLP position',
-                disabled: this.isActionDisabledRecord['PROVIDE_LIQUIDITY'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
-                disabledInfo: this.isActionDisabledRecord['PROVIDE_LIQUIDITY'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
-              }
-            ]
-          }
+        {
+          iconSrc: 'src/assets/icons/plus.svg',
+          tooltip: 'Add',
+          menuOptions: [
+            {
+              key: 'ADD_FROM_WALLET',
+              name: 'Import existing LLP position',
+              disabled: this.isActionDisabledRecord['ADD_FROM_WALLET'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
+              disabledInfo: this.isActionDisabledRecord['ADD_FROM_WALLET'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
+            },
+            {
+              key: 'PROVIDE_LIQUIDITY',
+              name: 'Create LLP position',
+              disabled: this.isActionDisabledRecord['PROVIDE_LIQUIDITY'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
+              disabledInfo: this.isActionDisabledRecord['PROVIDE_LIQUIDITY'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
+            }
+          ]
+        }
     },
 
     setupRemoveActionsConfiguration() {
       this.removeActionsConfig =
-          {
-            iconSrc: 'src/assets/icons/minus.svg',
-            tooltip: 'Remove',
-            menuOptions: [
-              {
-                key: 'WITHDRAW',
-                name: 'Export LLP position',
-                disabled: this.isActionDisabledRecord['WITHDRAW'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
-                disabledInfo: this.isActionDisabledRecord['WITHDRAW'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
-              },
-              {
-                key: 'REMOVE_LIQUIDITY',
-                name: 'Remove LLP position',
-                disabled: this.isActionDisabledRecord['REMOVE_LIQUIDITY'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
-                disabledInfo: this.isActionDisabledRecord['REMOVE_LIQUIDITY'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
-              }
-            ]
-          }
+        {
+          iconSrc: 'src/assets/icons/minus.svg',
+          tooltip: 'Remove',
+          menuOptions: [
+            {
+              key: 'WITHDRAW',
+              name: 'Export LLP position',
+              disabled: this.isActionDisabledRecord['WITHDRAW'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
+              disabledInfo: this.isActionDisabledRecord['WITHDRAW'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
+            },
+            {
+              key: 'REMOVE_LIQUIDITY',
+              name: 'Remove LLP position',
+              disabled: this.isActionDisabledRecord['REMOVE_LIQUIDITY'] || !this.hasSmartLoanContract || !this.lpTokenBalances,
+              disabledInfo: this.isActionDisabledRecord['REMOVE_LIQUIDITY'] ? '' : 'To create LLP token, you need to add some funds from you wallet first'
+            }
+          ]
+        }
     },
 
     setupMoreActionsConfiguration() {
@@ -437,10 +443,10 @@ export default {
       return async (sourceAsset, targetAsset, amountIn, amountOut) => {
         const isBuyingLevel = this.lpToken.symbol === targetAsset;
         const otherAsset = config.ASSETS_CONFIG[isBuyingLevel ? sourceAsset : targetAsset];
-        const price = BigNumber.from(Math.ceil(otherAsset.price.toString() * 100000).toString() + "0".repeat(30 - otherAsset.decimals - 5)); //we multiply by 1e5 for accuracy and then remove these 5 zeroes
+        const price = BigNumber.from(Math.ceil(otherAsset.price.toString() * 100000).toString() + '0'.repeat(30 - otherAsset.decimals - 5)); //we multiply by 1e5 for accuracy and then remove these 5 zeroes
         const otherAmount = isBuyingLevel ? amountIn : amountOut;
 
-       return parseUnits((await calculator.calcAddRemoveLiquidityFee(otherAsset.address, price, otherAmount, isBuyingLevel)).toString(), 8);
+        return parseUnits((await calculator.calcAddRemoveLiquidityFee(otherAsset.address, price, otherAmount, isBuyingLevel)).toString(), 8);
       }
     },
 
@@ -548,12 +554,12 @@ export default {
       modalInstance.slippageMargin = 0.1;
       modalInstance.sourceAsset = initSourceAsset;
       modalInstance.sourceAssetBalance = this.assetBalances[initSourceAsset];
-      modalInstance.assets = { ...this.assets, ...this.levelLpAssets };
+      modalInstance.assets = {...this.assets, ...this.levelLpAssets};
       modalInstance.sourceAssets = [...this.lpToken.underlyingAssets];
       modalInstance.swapDexsConfig = swapDexsConfig;
       modalInstance.targetAssetsConfig = config.LEVEL_LP_ASSETS_CONFIG;
       modalInstance.targetAssets = [this.lpToken.symbol];
-      modalInstance.assetBalances = { ...this.assetBalances, ...this.levelLpBalances };
+      modalInstance.assetBalances = {...this.assetBalances, ...this.levelLpBalances};
       modalInstance.debtsPerAsset = this.debtsPerAsset;
       modalInstance.lpAssets = this.lpAssets;
       modalInstance.concentratedLpAssets = this.concentratedLpAssets;
@@ -620,11 +626,11 @@ export default {
       modalInstance.sourceAsset = this.lpToken.symbol;
       modalInstance.sourceAssetBalance = this.levelLpBalances[this.lpToken.symbol];
       modalInstance.sourceAssetsConfig = config.LEVEL_LP_ASSETS_CONFIG;
-      modalInstance.assets = { ...this.assets, ...this.levelLpAssets };
+      modalInstance.assets = {...this.assets, ...this.levelLpAssets};
       modalInstance.sourceAssets = [this.lpToken.symbol];
       modalInstance.targetAssets = [...this.lpToken.underlyingAssets];
       modalInstance.swapDexsConfig = swapDexsConfig;
-      modalInstance.assetBalances = { ...this.assetBalances, ...this.levelLpBalances };
+      modalInstance.assetBalances = {...this.assetBalances, ...this.levelLpBalances};
       modalInstance.debtsPerAsset = this.debtsPerAsset;
       modalInstance.lpAssets = this.lpAssets;
       modalInstance.concentratedLpAssets = this.concentratedLpAssets;
@@ -686,7 +692,7 @@ export default {
 
       modalInstance.$on('CLAIM', addFromWalletEvent => {
         if (this.smartLoanContract) {
-          this.handleTransaction(this.claimLevelRewards, { claimRewardsRequest: claimRewardsRequest }, () => {
+          this.handleTransaction(this.claimLevelRewards, {claimRewardsRequest: claimRewardsRequest}, () => {
             this.rewards = 0;
             this.$forceUpdate();
           }, (error) => {
@@ -706,26 +712,33 @@ export default {
         introduction: 'Level Finance is the only Perpetual Derivatives exchange on Arbitrum with a Tranching system. With 5.59M TVL, they are currently the 42nd biggest protocol on Arbitrum.',
         banner: 'src/assets/images/level-banner.jpg',
         mainFeatures: [
-            'Perpetual Derivative Trading',
-            'Leveraged Trading',
-            'Basket LPing'
+          'Perpetual Derivative Trading',
+          'Leveraged Trading',
+          'Basket LPing'
         ],
         securityMeasures: [
           {name: 'Upgradeability', state: 'ENABLED'},
           {name: 'Timelock (12h)', state: 'ENABLED'},
           {name: 'Multisig', state: 'ENABLED'},
-          {name: `Audits `, state: 'ENABLED', tooltip:
-                `
+          {
+            name: `Audits `, state: 'ENABLED', tooltip:
+              `
                  - <a href="https://obeliskauditing.com/audits/level-finance-trading?openPdf=true" target="_blank">Obelisk Trading</a>, Jan&nbsp;2023<br>
                  - <a href="https://obeliskauditing.com/audits/level-finance-core" target="_blank">Obelisk Core</a>,&nbsp;Jan&nbsp;2023<br>
                  - <a href="https://certificate.quantstamp.com/full/level-finance/929d1708-a464-476d-86f3-7d7942faa4d2/index.html" target="_blank">Quantstamp</a>, April 2023
-          `},
-          {name: 'Doxxed team', state: 'DISABLED', tooltip: `The team is anonymous and has not performed KYC <br>with the DeltaPrime team.<br><br>
-            Comment from the Level team: <br>"Although the team is not doxxed, <br>multiple reputable investors have taken exposure on LVL.<br> An article from one of these investors, <br>Arthur Hayes, can be found <a href="https://level-finance.medium.com/hear-ye-hear-ye-73b0423c9b98" target="_blank">here</a>."`},
+          `
+          },
+          {
+            name: 'Doxxed team', state: 'DISABLED', tooltip: `The team is anonymous and has not performed KYC <br>with the DeltaPrime team.<br><br>
+            Comment from the Level team: <br>"Although the team is not doxxed, <br>multiple reputable investors have taken exposure on LVL.<br> An article from one of these investors, <br>Arthur Hayes, can be found <a href="https://level-finance.medium.com/hear-ye-hear-ye-73b0423c9b98" target="_blank">here</a>."`
+          },
         ],
         chainImpact: 'Level Finance gives perpetual derivative traders increased control over their exposure to the DEX and underlying assets through their Tranching system, while providing traders with 0% price impact swaps.',
         yieldCalculation: 'Level Finance calculates its APY as: 7D (Trading fees + counterparty PnL + LVL minting fees + incentives) / Assets under Management * 52.',
-        chartData: [{x: new Date(), y: 5}, {x: new Date(), y: 15}, {x: new Date(), y: 25}, {x: new Date(), y: 20}, {x: new Date(), y: 15}, {x: new Date(), y: 25}, {x: new Date(), y: 5}]
+        chartData: [{x: new Date(), y: 5}, {x: new Date(), y: 15}, {x: new Date(), y: 25}, {
+          x: new Date(),
+          y: 20
+        }, {x: new Date(), y: 15}, {x: new Date(), y: 25}, {x: new Date(), y: 5}]
       }
     },
 
@@ -852,7 +865,7 @@ export default {
       });
 
       const [prices, minPrice, maxPrice] = chartPoints(
-          response
+        response
       );
 
       const priceChange = prices && (prices[prices.length - 1].y - prices[0].y) / prices[prices.length - 1].y;
@@ -876,12 +889,12 @@ export default {
 
     watchActionDisabling() {
       this.globalActionsDisableService.getSectionActions$(ActionSection.LEVEL_LP)
-          .subscribe(isActionDisabledRecord => {
-            this.isActionDisabledRecord = isActionDisabledRecord;
-            this.setupAddActionsConfiguration();
-            this.setupRemoveActionsConfiguration();
-            this.setupMoreActionsConfiguration();
-          })
+        .subscribe(isActionDisabledRecord => {
+          this.isActionDisabledRecord = isActionDisabledRecord;
+          this.setupAddActionsConfiguration();
+          this.setupRemoveActionsConfiguration();
+          this.setupMoreActionsConfiguration();
+        })
     },
   },
 };

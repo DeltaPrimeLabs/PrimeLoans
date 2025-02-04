@@ -1,8 +1,9 @@
+import DEPOSIT_SWAP from '../abis/DepositSwap.json';
+import DEPOSIT_REWARDER from '../abis/IDepositRewarder.json'
+import erc20ABI from '../abis/ERC20.json';
+
 import {awaitConfirmation, depositTermsToSign, signMessage, wrapContract} from '../utils/blockchain';
-import DEPOSIT_SWAP from '@artifacts/contracts/DepositSwap.sol/DepositSwap.json';
-import DEPOSIT_REWARDER from '/artifacts/contracts/interfaces/IDepositRewarder.sol/IDepositRewarder.json'
 import {formatUnits, fromWei, parseUnits} from '@/utils/calculate';
-import erc20ABI from '../../test/abis/ERC20.json';
 import config from '@/config';
 import {constructSimpleSDK} from "@paraswap/sdk";
 import axios from "axios";

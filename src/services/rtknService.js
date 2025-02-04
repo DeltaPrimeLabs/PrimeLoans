@@ -1,5 +1,5 @@
 import RTKN_TO_PRIME_CONVERTER from '../abis/IRtknToPrimeConverter.json';
-import ERC_20_ABI from '../../test/abis/ERC20.json';
+import ERC_20_ABI from '../abis/ERC20.json';
 import {BehaviorSubject, combineLatest, from} from 'rxjs';
 import {formatUnits, parseUnits} from '../utils/calculate';
 import {awaitConfirmation} from '../utils/blockchain';

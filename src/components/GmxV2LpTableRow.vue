@@ -45,13 +45,15 @@
             }}
             <span v-if="!lpToken.isGMXPlus">
             <img class="asset__icon" :src="getAssetIcon(lpToken.shortToken)">{{
-              formatTokenBalance(shortTokenAmount ? shortTokenAmount : 0, 6, true)
+                formatTokenBalance(shortTokenAmount ? shortTokenAmount : 0, 6, true)
               }}
             </span>
           </div>
           <div class="double-value__usd">
             <span>
-              {{ ((gmxV2Balances && gmxV2Balances[lpToken.symbol]) ? gmxV2Balances[lpToken.symbol] : 0) * lpToken.price | usd }}
+              {{
+                ((gmxV2Balances && gmxV2Balances[lpToken.symbol]) ? gmxV2Balances[lpToken.symbol] : 0) * lpToken.price | usd
+              }}
             </span>
           </div>
         </template>
@@ -149,6 +151,9 @@
 </template>
 
 <script>
+import erc20ABI from '../abis/ERC20.json';
+import IREADER_DEPOSIT_UTILS from '../abis/gmx-v2/IReaderDepositUtils.json';
+
 import DoubleAssetIcon from './DoubleAssetIcon';
 import LoadedValue from './LoadedValue';
 import SmallBlock from './SmallBlock';
@@ -159,15 +164,11 @@ import SmallChartBeta from './SmallChartBeta';
 import AddFromWalletModal from './AddFromWalletModal';
 import config from '../config';
 import {mapActions, mapState} from 'vuex';
-import ProvideLiquidityModal from './ProvideLiquidityModal';
-import RemoveLiquidityModal from './RemoveLiquidityModal';
 import WithdrawModal from './WithdrawModal';
 
 const ethers = require('ethers');
-import erc20ABI from '../../test/abis/ERC20.json';
 import {calculateMaxApy, chartPoints, fromWei, toWei} from '../utils/calculate';
-import addresses from '../../common/addresses/avalanche/token_addresses.json';
-import {formatUnits, parseUnits} from 'ethers/lib/utils';
+import {formatUnits} from 'ethers/lib/utils';
 import DeltaIcon from './DeltaIcon.vue';
 import SwapModal from './SwapModal.vue';
 import redstone from 'redstone-api';
@@ -176,25 +177,15 @@ import TradingViewChart from './TradingViewChart.vue';
 import BarGaugeBeta from './BarGaugeBeta.vue';
 import PartnerInfoModal from './PartnerInfoModal.vue';
 import moment from 'moment/moment';
-import LIQUIDITY_CALCULATOR
-  from '../../artifacts/contracts/interfaces/level/ILiquidityCalculator.sol/ILiquidityCalculator.json';
-import IREADER_DEPOSIT_UTILS
-  from '../../artifacts/contracts/interfaces/gmx-v2/IReaderDepositUtils.sol/IReaderDepositUtils.json';
-import IDATA_STORE
-  from '../../artifacts/contracts/interfaces/gmx-v2/IDataStore.sol/IDataStore.json';
 import SwapToMultipleModal from './SwapToMultipleModal.vue';
-import TOKEN_ADDRESSES from '../../common/addresses/avalanche/token_addresses.json';
 import {BigNumber} from 'ethers';
 import {
   DEPOSIT_GAS_LIMIT_KEY,
-  ESTIMATED_GAS_FEE_BASE_AMOUNT,
-  ESTIMATED_GAS_FEE_MULTIPLIER_FACTOR, WITHDRAWAL_GAS_LIMIT_KEY
 } from '../integrations/contracts/dataStore';
-import zapLong from './zaps-tiles/ZapLong.vue';
 import {calculateGmxV2ExecutionFee, capitalize, hashData} from '../utils/blockchain';
 import Dropdown from './notifi/settings/Dropdown.vue';
 import {ActionSection} from '../services/globalActionsDisableService';
-import { AssetsEntry, TokenType } from "../services/bullScoreService";
+import {AssetsEntry, TokenType} from '../services/bullScoreService';
 
 export default {
   name: 'GmxV2LpTableRow',
@@ -466,13 +457,19 @@ export default {
         config.gmxV2DataStoreAddress, marketProps, prices, toWei((this.gmxV2Balances[this.lpToken.symbol]).toString()), this.nullAddress
       );
 
-      this.longTokenAmount = this.lpToken.isGMXPlus ?  2 * formatUnits(longTokenOut, longToken.decimals) : formatUnits(longTokenOut, longToken.decimals);
+      this.longTokenAmount = this.lpToken.isGMXPlus ? 2 * formatUnits(longTokenOut, longToken.decimals) : formatUnits(longTokenOut, longToken.decimals);
       this.shortTokenAmount = formatUnits(shortTokenOut, shortToken.decimals);
       this.bullScoreService.setToken(TokenType.GMXV2, new AssetsEntry(
-          this.lpToken.symbol,
-          this.openInterestData ? (this.openInterestData[this.openInterestData.length - 1].y / 100) : 0.5,
-          { symbol: this.lpToken.longToken, value: Number(this.longTokenAmount) * this.assets[this.lpToken.longToken].price },
-          { symbol: this.lpToken.shortToken, value: this.lpToken.isGMXPlus ? 0 : Number(this.shortTokenAmount) * this.assets[this.lpToken.shortToken].price },
+        this.lpToken.symbol,
+        this.openInterestData ? (this.openInterestData[this.openInterestData.length - 1].y / 100) : 0.5,
+        {
+          symbol: this.lpToken.longToken,
+          value: Number(this.longTokenAmount) * this.assets[this.lpToken.longToken].price
+        },
+        {
+          symbol: this.lpToken.shortToken,
+          value: this.lpToken.isGMXPlus ? 0 : Number(this.shortTokenAmount) * this.assets[this.lpToken.shortToken].price
+        },
       ))
     },
 
@@ -916,7 +913,7 @@ export default {
             minLongAmount: swapEvent.targetAmounts[0],
             minShortAmount: swapEvent.targetAmounts[1],
             executionFee: executionFee,
-            method: this.lpToken.removeMethod ? this.lpToken.removeMethod :`withdraw${capitalize(this.lpToken.longToken)}${capitalize(this.lpToken.shortToken)}GmxV2`
+            method: this.lpToken.removeMethod ? this.lpToken.removeMethod : `withdraw${capitalize(this.lpToken.longToken)}${capitalize(this.lpToken.shortToken)}GmxV2`
           };
 
           this.handleTransaction(this.removeLiquidityGmxV2, {removeLiquidityRequest: removeLiquidityRequest}, () => {

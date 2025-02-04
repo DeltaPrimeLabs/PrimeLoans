@@ -100,7 +100,7 @@ import FlatButton from './FlatButton';
 import MigrateModal from './MigrateModal';
 import InfoIcon from "./InfoIcon.vue";
 import AddFromWalletModal from "./AddFromWalletModal.vue";
-import erc20ABI from "../../test/abis/ERC20.json";
+import erc20ABI from "../abis/ERC20.json";
 import WithdrawModal from "./WithdrawModal.vue";
 import {ActionSection} from "../services/globalActionsDisableService";
 

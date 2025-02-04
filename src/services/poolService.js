@@ -1,9 +1,8 @@
-import {BehaviorSubject, combineLatest, map, Subject} from 'rxjs';
-import config from '../config';
-import POOL from '@artifacts/contracts/WrappedNativeTokenPool.sol/WrappedNativeTokenPool.json';
-import {formatUnits, fromWei, parseUnits} from '@/utils/calculate';
-import redstone from 'redstone-api';
+import POOL from '../abis/WrappedNativeTokenPool.json';
 
+import {BehaviorSubject, combineLatest, map} from 'rxjs';
+import config from '../config';
+import {formatUnits, fromWei} from '@/utils/calculate';
 
 const ethers = require('ethers');
 

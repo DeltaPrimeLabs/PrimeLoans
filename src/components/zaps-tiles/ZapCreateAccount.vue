@@ -17,10 +17,10 @@
 <script>
 import {mapActions, mapState} from 'vuex';
 import config from '../../config';
-import erc20ABI from '../../../test/abis/ERC20.json';
+import erc20ABI from '../../abis/ERC20.json';
 import {combineLatest, combineLatestWith, from, map} from 'rxjs';
-import ZapTile from "./ZapTile.vue";
-import CreateAccountModal from "../CreateAccountModal.vue";
+import ZapTile from './ZapTile.vue';
+import CreateAccountModal from '../CreateAccountModal.vue';
 
 const ethers = require('ethers');
 
@@ -48,12 +48,12 @@ export default {
 
   methods: {
     ...mapActions('fundsStore',
-        [
-          'swap',
-          'fund',
-          'borrow',
-          'createAndFundLoan',
-        ]),
+      [
+        'swap',
+        'fund',
+        'borrow',
+        'createAndFundLoan',
+      ]),
     ...mapActions('network', ['updateBalance']),
 
     async onTileClick() {
@@ -101,29 +101,29 @@ export default {
       const tokens = Object.values(config.ASSETS_CONFIG).map(asset => asset.symbol);
 
       return combineLatest(tokens.map(token => {
-            const contract = new ethers.Contract(config.ASSETS_CONFIG[token].address, erc20ABI, this.provider.getSigner());
-            return this.getWalletTokenBalance(
-                this.account,
-                token,
-                contract,
-                config.ASSETS_CONFIG[token].decimals
-            );
-          }
+          const contract = new ethers.Contract(config.ASSETS_CONFIG[token].address, erc20ABI, this.provider.getSigner());
+          return this.getWalletTokenBalance(
+            this.account,
+            token,
+            contract,
+            config.ASSETS_CONFIG[token].decimals
+          );
+        }
       )).pipe(combineLatestWith(from(this.updateBalance()).pipe(map(() => this.accountBalance))))
-          .pipe(map(([balances, nativeTokenBalance]) => {
-                const balancesObject = balances.reduce((acc, current, index) => {
-                  const tokenSymbol = tokens[index]
-                  if (tokenSymbol === config.NATIVE_ASSET_TOGGLE_OPTIONS[0]) {
-                    acc[config.NATIVE_ASSET_TOGGLE_OPTIONS[1]] = current
-                  } else {
-                    acc[tokenSymbol] = current
-                  }
-                  return acc
-                }, {})
-                balancesObject[config.NATIVE_ASSET_TOGGLE_OPTIONS[0]] = nativeTokenBalance
-                return balancesObject
+        .pipe(map(([balances, nativeTokenBalance]) => {
+            const balancesObject = balances.reduce((acc, current, index) => {
+              const tokenSymbol = tokens[index]
+              if (tokenSymbol === config.NATIVE_ASSET_TOGGLE_OPTIONS[0]) {
+                acc[config.NATIVE_ASSET_TOGGLE_OPTIONS[1]] = current
+              } else {
+                acc[tokenSymbol] = current
               }
-          ))
+              return acc
+            }, {})
+            balancesObject[config.NATIVE_ASSET_TOGGLE_OPTIONS[0]] = nativeTokenBalance
+            return balancesObject
+          }
+        ))
     },
   }
 };

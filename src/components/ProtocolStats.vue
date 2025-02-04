@@ -3,42 +3,44 @@
     <div class="main-content">
       <div class="protocol-stats">
         <div class="tvl">
-          <div class="label">TVL: </div>
+          <div class="label">TVL:</div>
           <div class="number">${{ numberWithCommas(tvl.toFixed(2)) }}</div>
           <br>
-          <div  class="borrow-collateral">
+          <div class="borrow-collateral">
             <div class="borrow">
-              <div class="label">Total collateral: </div>
-              <div class="number">${{ numberWithCommas(parseFloat(protocolCollateral.toFixed(2))) }} </div>
+              <div class="label">Total collateral:</div>
+              <div class="number">${{ numberWithCommas(parseFloat(protocolCollateral.toFixed(2))) }}</div>
             </div>
             <div class="collateral">
-              <div class="label">Total borrowed: </div>
-              <div class="number">${{ numberWithCommas(parseFloat(totalBorrowed.toFixed(2))) }} </div>
+              <div class="label">Total borrowed:</div>
+              <div class="number">${{ numberWithCommas(parseFloat(totalBorrowed.toFixed(2))) }}</div>
             </div>
           </div>
         </div>
         <div class="pools">
           <Block v-for="pool of pools" v-bind:key="pool.asset.symbol">
-            <div class="title">{{pool.asset.symbol}} pool</div>
+            <div class="title">{{ pool.asset.symbol }} pool</div>
             <div class="stat">
               <div class="desc">Provided:</div>
-              <div class="value">{{pool.asset.symbol}} {{numberWithCommas(parseFloat(pool.tvl).toFixed(2))}}</div>
+              <div class="value">{{ pool.asset.symbol }} {{ numberWithCommas(parseFloat(pool.tvl).toFixed(2)) }}</div>
             </div>
             <div class="stat">
               <div class="desc">Borrowed:</div>
-              <div class="value">{{pool.asset.symbol}} {{numberWithCommas(parseFloat(pool.totalBorrowed).toFixed(2))}}</div>
+              <div class="value">{{ pool.asset.symbol }}
+                {{ numberWithCommas(parseFloat(pool.totalBorrowed).toFixed(2)) }}
+              </div>
             </div>
             <div class="stat">
               <div class="desc">Utilisation:</div>
-              <div class="value">{{pool.totalBorrowed / pool.tvl | percent}}</div>
+              <div class="value">{{ pool.totalBorrowed / pool.tvl | percent }}</div>
             </div>
             <div class="stat">
               <div class="desc">Deposit APY:</div>
-              <div class="value">{{pool.apy | percent}}</div>
+              <div class="value">{{ pool.apy | percent }}</div>
             </div>
             <div class="stat">
               <div class="desc">Borrow APY:</div>
-              <div class="value">{{pool.borrowingAPY | percent}}</div>
+              <div class="value">{{ pool.borrowingAPY | percent }}</div>
             </div>
           </Block>
         </div>
@@ -47,13 +49,14 @@
             <div class="title">Accounts</div>
             <div class="stat">
               <div class="desc">Number of loans:</div>
-              <div class="value">{{loanAddresses.length}}</div>
+              <div class="value">{{ loanAddresses.length }}</div>
             </div>
             <div class="liquidators">
               <div class="desc">Liquidators:</div>
               <div class="liquidator-info" v-for="liquidator in liquidators">
-                <div class="account"><a :href="`https://snowtrace.dev/address/${liquidator.account}`" target="_blank">{{liquidator.account | tx}}</a></div>
-                <div class="balance">{{liquidator.balance.toFixed(2)}}</div>
+                <div class="account"><a :href="`https://snowtrace.dev/address/${liquidator.account}`"
+                                        target="_blank">{{ liquidator.account | tx }}</a></div>
+                <div class="balance">{{ liquidator.balance.toFixed(2) }}</div>
               </div>
             </div>
             <div class="loan-list">
@@ -66,49 +69,51 @@
                 <div>Solvent</div>
               </div>
               <div
-                  v-for="loan of loans" v-bind:key="loan.address"
-                  class="loan"
-                  v-bind:class="{
+                v-for="loan of loans" v-bind:key="loan.address"
+                class="loan"
+                v-bind:class="{
                     'endangered': loan.health < 1.04,
                     'insolvent': loan.health <= 1 || !loan.solvent,
                   }"
               >
-                <div><a :href="`https://snowtrace.dev/address/${loan.address}`" target="_blank">{{loan.address | tx}}</a></div>
-                <div>{{parseFloat(loan.health).toFixed(3)}}</div>
-                <div>${{numberWithCommas(parseFloat(loan.totalValue).toFixed(2))}}</div>
-                <div>${{numberWithCommas(parseFloat(loan.debt).toFixed(2))}}</div>
-                <div>${{numberWithCommas(parseFloat(loan.collateral).toFixed(2))}}</div>
-                <div>{{loan.solvent ? "Yes" : "No"}}</div>
+                <div><a :href="`https://snowtrace.dev/address/${loan.address}`"
+                        target="_blank">{{ loan.address | tx }}</a></div>
+                <div>{{ parseFloat(loan.health).toFixed(3) }}</div>
+                <div>${{ numberWithCommas(parseFloat(loan.totalValue).toFixed(2)) }}</div>
+                <div>${{ numberWithCommas(parseFloat(loan.debt).toFixed(2)) }}</div>
+                <div>${{ numberWithCommas(parseFloat(loan.collateral).toFixed(2)) }}</div>
+                <div>{{ loan.solvent ? 'Yes' : 'No' }}</div>
               </div>
             </div>
           </Block>
         </div>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
+import SMART_LOAN from '../abis/SmartLoanGigaChadInterface.json';
 
 import config from '../config';
 import Block from './Block';
 import {mapActions, mapState} from 'vuex';
-import {wrapContract} from "../utils/blockchain";
+import {wrapContract} from '../utils/blockchain';
+
 const ethers = require('ethers');
-import SMART_LOAN from '@artifacts/contracts/interfaces/SmartLoanGigaChadInterface.sol/SmartLoanGigaChadInterface.json';
 import addresses from '../../common/addresses/avalanche/token_addresses.json';
-import {fromWei} from "../utils/calculate";
+import {fromWei} from '../utils/calculate';
 
 // This could be abstracted in separate store
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, query, getDocs, orderBy, where, limit } from 'firebase/firestore/lite';
+import {initializeApp} from 'firebase/app';
+import {getFirestore, collection, query, getDocs, orderBy, limit} from 'firebase/firestore/lite';
 import {combineLatest} from 'rxjs';
 // Your web app's Firebase configuration
 import firebaseConfig from '../../.secrets/firebaseConfig.json';
 
 // Initialize Firebase
 const fireStore = getFirestore(initializeApp(firebaseConfig));
-const liquidatorAccounts = ["0xe8D4E496ef28A0A6E0F2ce7805ff12482D8FdCE6","0xE091dFe40B8578FAF6FeC601686B4332Da5D43cc", "0xCD7D50FDD7481C3ffdeBc4F4d35B8C508986F5aa"];
+const liquidatorAccounts = ['0xe8D4E496ef28A0A6E0F2ce7805ff12482D8FdCE6', '0xE091dFe40B8578FAF6FeC601686B4332Da5D43cc', '0xCD7D50FDD7481C3ffdeBc4F4d35B8C508986F5aa'];
 
 export default {
   name: 'ProtocolStats',
@@ -168,16 +173,16 @@ export default {
 
     watchPools() {
       combineLatest([this.poolService.observePools(), this.priceService.observeRefreshPrices()])
-          .subscribe(async () => {
-            const avaxPool = this.pools.find(pool => pool.asset.symbol === 'AVAX');
-            const usdcPool = this.pools.find(pool => pool.asset.symbol === 'USDC');
-            const btcPool = this.pools.find(pool => pool.asset.symbol === 'BTC');
-            const ethPool = this.pools.find(pool => pool.asset.symbol === 'ETH');
-            this.poolTvl = parseFloat(avaxPool.tvl) * parseFloat(avaxPool.asset.price)
-                + parseFloat(usdcPool.tvl) * parseFloat(usdcPool.asset.price)
-                + parseFloat(btcPool.tvl) * parseFloat(btcPool.asset.price)
-                + parseFloat(ethPool.tvl) * parseFloat(ethPool.asset.price)
-          });
+        .subscribe(async () => {
+          const avaxPool = this.pools.find(pool => pool.asset.symbol === 'AVAX');
+          const usdcPool = this.pools.find(pool => pool.asset.symbol === 'USDC');
+          const btcPool = this.pools.find(pool => pool.asset.symbol === 'BTC');
+          const ethPool = this.pools.find(pool => pool.asset.symbol === 'ETH');
+          this.poolTvl = parseFloat(avaxPool.tvl) * parseFloat(avaxPool.asset.price)
+            + parseFloat(usdcPool.tvl) * parseFloat(usdcPool.asset.price)
+            + parseFloat(btcPool.tvl) * parseFloat(btcPool.asset.price)
+            + parseFloat(ethPool.tvl) * parseFloat(ethPool.asset.price)
+        });
     },
 
     async liquidatorAccountsSetup() {
@@ -190,24 +195,24 @@ export default {
     },
 
     numberWithCommas(x) {
-      let parts = x.toString().split(".");
-      parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,".");
-      return parts.join(",");
+      let parts = x.toString().split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return parts.join(',');
     },
 
     async fetchLoansFromFireBase() {
       const loansCol = collection(fireStore, 'loans');
-      
+
       //Get latest update time
       let maxTime = null;
-      const maxTimeQuery = query(loansCol, orderBy("time", "desc"), limit(1));
+      const maxTimeQuery = query(loansCol, orderBy('time', 'desc'), limit(1));
       const querySnapshot = await getDocs(maxTimeQuery);
       querySnapshot.forEach((doc) => {
         maxTime = doc.data().time;
       });
 
       //Get loans
-      const loansQuery = query(loansCol, orderBy("health", "asc"));
+      const loansQuery = query(loansCol, orderBy('health', 'asc'));
       const loansQuerySnapshot = await getDocs(loansQuery);
       this.protocolCollateral = 0;
       this.totalBorrowed = 0;
@@ -221,7 +226,7 @@ export default {
           solvent: doc.data().solvent,
         });
         this.protocolCollateral += doc.data().collateral;
-        this.totalBorrowed += doc.data().debt; 
+        this.totalBorrowed += doc.data().debt;
       });
     },
 
@@ -264,6 +269,7 @@ export default {
 
 <style lang="scss" scoped>
 @import "~@/styles/variables";
+
 .pools {
   display: flex;
   justify-content: space-between;
