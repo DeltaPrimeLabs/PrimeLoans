@@ -156,7 +156,7 @@ export default {
     async initialGetTransactionHistory() {
       this.accountService.observeAccountLoaded().subscribe(account => {
         this.account = account;
-        this.getTransactionHistory(this.account, this.page, this.pageSize);
+        // this.getTransactionHistory(this.account, this.page, this.pageSize);
       });
     },
 
