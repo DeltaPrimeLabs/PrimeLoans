@@ -30,7 +30,7 @@ const fromBytes32 = require('ethers').utils.parseBytes32String;
 const ethers = require('ethers');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-const SUCCESS_DELAY_AFTER_TRANSAC1TION = 1000;
+const SUCCESS_DELAY_AFTER_TRANSACTION = 1000;
 
 let SMART_LOAN_FACTORY_TUP;
 let DIAMOND_BEACON;
