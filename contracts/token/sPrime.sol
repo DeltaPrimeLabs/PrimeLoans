@@ -599,7 +599,41 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
     * @param share Amount to withdraw
     */
     function withdraw(uint256 share, uint256 amountXMin, uint256 amountYMin) external nonReentrant {
-        revert("Paused");
+        uint256 tokenId = getUserTokenId(_msgSender());
+        if (tokenId == 0) {
+            revert NoPosition();
+        }
+
+        (,,,, uint256 centerId, uint256[] memory liquidityMinted) = positionManager.positions(tokenId);
+        IPositionManager.DepositConfig memory depositConfig = positionManager.getDepositConfig(centerId);
+
+        uint256 lockedBalance = getLockedBalance(_msgSender());
+        if (balanceOf(_msgSender()) < share + lockedBalance) {
+            revert BalanceIsLocked();
+        }
+
+        (uint256 amountX, uint256 amountY, uint256[] memory liquidityAmounts) = _withdrawFromLB(_msgSender(), depositConfig.depositIds, liquidityMinted, share);
+        if(amountX < amountXMin || amountY < amountYMin) {
+            revert SlippageTooHigh();
+        }
+        positionManager.update(IPositionManager.UpdateParams({
+            tokenId: tokenId,
+            share: share,
+            liquidityAmounts: liquidityAmounts,
+            isAdd: false
+        }));
+
+        // Burn Position NFT
+        if(balanceOf(_msgSender()) == share) {
+            positionManager.burn(tokenId);
+        }
+
+        // Send the tokens to the user.
+        _transferTokens(address(this), _msgSender(), amountX, amountY);
+
+        _burn(_msgSender(), share);
+
+        notifyVPrimeController(_msgSender());
     }
 
     /**
