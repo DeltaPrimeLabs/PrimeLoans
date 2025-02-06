@@ -34,7 +34,7 @@ export default class sPrimeService {
   }
 
   emitRefreshSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint) {
-    this.updateSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint);
+    // this.updateSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint);
   }
 
   observeSPrimeValue() {
