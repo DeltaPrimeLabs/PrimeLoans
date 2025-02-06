@@ -555,7 +555,33 @@ contract sPrimeUniswap is
      * @param share Amount to withdraw
      */
     function withdraw(uint256 share, uint256 amountXMin, uint256 amountYMin) external nonReentrant {
-        revert("Paused");
+        address msgSender = _msgSender();
+        uint256 tokenId = userTokenId[msgSender];
+        if (tokenId == 0) {
+            revert NoPositionToWithdraw();
+        }
+
+        (, , , , , , , uint128 liquidity, , , , ) = positionManager.positions(
+            tokenId
+        );
+
+        uint256 balance = balanceOf(msgSender);
+        if (balance < share + getLockedBalance(msgSender)) {
+            revert BalanceLocked();
+        }
+
+        (amountXMin, amountYMin) = tokenSequence ? (amountYMin, amountXMin) : (amountXMin, amountYMin);
+        positionManagerRemove(tokenId, uint128((liquidity * share) / balance), msgSender, amountXMin, amountYMin);
+
+        // Burn Position NFT
+        if (balance == share) {
+            positionManager.burn(tokenId);
+            delete userTokenId[msgSender];
+        }
+
+        _burn(msgSender, share);
+
+        notifyVPrimeController(msgSender);
     }
 
     /**
