@@ -34,7 +34,7 @@ export default class sPrimeService {
   }
 
   emitRefreshSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint) {
-    // this.updateSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint);
+    this.updateSPrimeData(provider, sPrimeAddress, poolAddress, dex, secondAsset, ownerAddress, revenueAwsEndpoint);
   }
 
   observeSPrimeValue() {
@@ -74,11 +74,15 @@ export default class sPrimeService {
     let dataFeeds = [...Object.keys(config.POOLS_CONFIG), secondAsset, 'PRIME'];
 
     const sPrimeContract = await wrapContract(new ethers.Contract(sPrimeAddress, SPRIME.abi, provider.getSigner()), dataFeeds);
+    // console.log('asdfa');
+    // const x = await sPrimeContract.getUserValueInTokenY(ownerAddress)
+    // console.log('asjdbfkajsdf', x);
+    // console.log('asdfa2');
 
     fetch(config.redstoneFeedUrl).then(
       res => {
         res.json().then(
-          redstonePriceData => {
+          async redstonePriceData => {
             let secondAssetPrice = redstonePriceData[secondAsset][0].dataPoints[0].value;
 
             sPrimeContract.totalSupply().then(
@@ -89,13 +93,13 @@ export default class sPrimeService {
               }
             );
 
-              sPrimeContract.balanceOf(ownerAddress).then(
+            sPrimeContract.balanceOf(ownerAddress).then(
               async value => {
                 this.sPrimeBalance$.next(formatUnits(value))
               }
             );
 
-              sPrimeContract.getLockedBalance(ownerAddress).then(
+            sPrimeContract.getLockedBalance(ownerAddress).then(
               async value => {
                 this.sPrimeLockedBalance$.next(formatUnits(value))
 
@@ -103,7 +107,8 @@ export default class sPrimeService {
             );
 
             if (dex === 'UNISWAP') {
-                sPrimeContract.getUserValueInTokenY(ownerAddress).then(
+              const mockPrice = 24779
+              sPrimeContract.getUserValueInTokenY(ownerAddress, mockPrice).then(
                 async value => {
                   value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
 
@@ -112,12 +117,12 @@ export default class sPrimeService {
                 }
               );
 
-              sPrimeContract.getPoolPrice().then(
-
-                poolPrice => {
-                  this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
-                }
-              );
+              this.poolPrice$.next(mockPrice * secondAssetPrice / 1e8)
+              // sPrimeContract.getPoolPrice().then(
+              //   poolPrice => {
+              //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
+              //   }
+              // );
 
               sPrimeContract.userTokenId(ownerAddress).then(
                 tokenId => {
@@ -137,19 +142,25 @@ export default class sPrimeService {
             }
 
             if (dex === 'TRADERJOEV2') {
-                sPrimeContract.getUserValueInTokenY(ownerAddress).then(
-                    async value => {
-                        value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
+              const mockPoolPrice = 1385220
 
-                        this.sPrimeValue$.next(value)
-                    }
-                );
+                sPrimeContract.getUserValueInTokenY(ownerAddress, mockPoolPrice).then(
+                  async value => {
+                    console.log('getUserValueInTokenY', value);
+                    value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
 
-              sPrimeContract.getPoolPrice().then(
-                poolPrice => {
-                  this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
-                }
-              );
+                      this.sPrimeValue$.next(value)
+                  }
+                )
+
+
+              this.poolPrice$.next(mockPoolPrice * secondAssetPrice / 1e8)
+
+              // sPrimeContract.getPoolPrice().then(
+              //   poolPrice => {
+              //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
+              //   }
+              // );
 
               sPrimeContract.getUserTokenId(ownerAddress).then(
                 tokenId => {

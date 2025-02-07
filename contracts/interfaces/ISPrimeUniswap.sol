@@ -68,7 +68,7 @@ interface ISPrimeUniswap {
     function getPoolPrice() external view returns(uint256);
     function balanceOf(address account) external view returns (uint256);
     function totalSupply() external view returns(uint256);
-    function getUserValueInTokenY(address user) external view returns (uint256);
+    function getUserValueInTokenY(address user, uint256 poolPrice) external view returns (uint256);
     function getLockedBalance(address account) external view returns (uint256);
     function getFullyVestedLockedBalance(address account) external view returns(uint256);
 }

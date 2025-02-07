@@ -119,7 +119,7 @@ export default class GlobalActionsDisableService {
   sprimeActions$ = new BehaviorSubject({
     MINT: true,
     REBALANCE: true,
-    REDEEM: true,
+    REDEEM: false,
     BUY: true,
   });
 
