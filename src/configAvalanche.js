@@ -794,7 +794,7 @@ export default {
     dataProviderId: "redstone-avalanche-prod",
     dataProviderHistoricalPrices: "redstone-avalanche",
     redstoneFeedUrl: "https://oracle-gateway-2.a.redstone.finance/data-packages/latest/redstone-avalanche-prod",
-    subgraph: `https://gateway-arbitrum.network.thegraph.com/api/${subgraphConfig.apiKey}/subgraphs/id/DPjhMarRUjoC6yoLGKaCDduf9xTKhzKVXU7pFc2FCDqN`,
+    subgraph: `https://gateway.thegraph.com/api/${subgraphConfig.apiKey}/subgraphs/id/DPjhMarRUjoC6yoLGKaCDduf9xTKhzKVXU7pFc2FCDqN`,
     readRpcUrl: "https://avalanche-mainnet.core.chainstack.com/ext/bc/C/rpc/0968db18a01a90bac990ff00df6f7da1",
     fallbackRpcs: [
       'https://api.avax.network/ext/bc/C/rpc',
