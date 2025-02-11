@@ -10,8 +10,6 @@ import "../lib/uniswap-v3/TickMath.sol";
 import "../lib/uniswap-v3/FullMath.sol"; // Uniswap V3’s full-precision multiplication/division.
 import "../lib/uniswap-v3/FixedPoint96.sol"; // Provides Q96 constant.
 
-import "hardhat/console.sol";
-
 interface IUniswapV3Pool {
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -224,16 +222,12 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                 pools[i]
             );
 
-            console.log("Pool: %s", pools[i].poolAddress);
-            console.log("Final USD Price: %s", poolPrice);
-
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
 
         if (minPrice == type(uint256).max) revert NoValidPrice();
-        console.log("FINAL MIN USD PRICE: %s", minPrice);
         return minPrice;
     }
 
@@ -282,8 +276,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         address token1Addr = uniPool.token1();
         bool isToken0 = (token0Addr == asset);
 
-        console.log("CHECKING POOOL: %s", pool.poolAddress);
-
         // Calculate the short TWAP price.
         uint256 shortTwapPrice = getTwapPrice(pool.poolAddress, pool.shortTwap, isToken0);
         uint256 priceFromPool = FullMath.mulDiv(shortTwapPrice, baseAssetPrice, PRECISION);
@@ -296,8 +288,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                 uint256 twapPrice = getTwapPrice(pool.poolAddress, duration, isToken0);
                 twapPrice = FullMath.mulDiv(twapPrice, baseAssetPrice, PRECISION);
                 uint256 deviation = calculateDeviation(priceFromPool, twapPrice);
-                console.log("TWAP Deviation: %s", deviation);
-                console.log("Max Deviation: %s", maxDeviation);
+
                 if (deviation > maxDeviation) {
                     revert TWAPDeviationTooHigh();
                 }
@@ -402,18 +393,15 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             if (!isToken0) {
                 avgTick = -avgTick;
             }
-            console.log("avgTick: %s");
-            console.logInt(avgTick);
 
             uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(avgTick);
-            console.log("sqrtPriceX96: %s", sqrtPriceX96);
 
             uint256 price = FullMath.mulDiv(
                 uint256(sqrtPriceX96),
                 uint256(sqrtPriceX96) * PRECISION,
                 FixedPoint96.Q96 * FixedPoint96.Q96
             );
-            console.log("Price from TickMath: %s", price);
+
             return price;
         } catch {
             return type(uint256).max;

@@ -31,6 +31,20 @@ describe("BaseOracle", function () {
                 tickSpacing: 200,
                 baseAsset: TOKENS.WETH,
             },
+            {
+                address: "0xBA3F945812a83471d709BCe9C3CA699A19FB46f7",
+                isCL: true,
+                pair: "WETH",
+                tickSpacing: 200,
+                baseAsset: TOKENS.WETH,
+            },
+            {
+                address: "0x76Bf0abD20f1e0155Ce40A62615a90A709a6C3D8",
+                isCL: true,
+                pair: "WETH",
+                tickSpacing: 60,
+                baseAsset: TOKENS.WETH,
+            }
         ],
         AIXBT: [
             {
