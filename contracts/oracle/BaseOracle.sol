@@ -343,9 +343,15 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-     * @notice Calculates the USD price of an asset using an AMM pool.
-     *         This function returns the full USD value for the provided `amount`.
-     */
+ * @notice Calculates the USD price of an asset using an AMM pool.
+ * @dev Calls the AMM's getAmountOut function to determine the equivalent amount in the base asset,
+ *      then converts to USD using the provided base asset price.
+ * @param asset The address of the asset being priced
+ * @param amount The amount of the asset
+ * @param baseAssetPrice The USD price of the base asset (in 1e18 scale)
+ * @param pool The pool configuration
+ * @return The USD value of the asset amount (in 1e18 scale)
+ */
     function calculateAMMPrice(
         address asset,
         uint256 amount,
@@ -443,8 +449,10 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-     * @notice Retrieves the full configuration for a token.
-     */
+    * @notice Retrieves the full configuration for a token.
+    * @param token The address of the token to query
+    * @return The complete TokenConfig struct containing the token's configuration
+    */
     function getFullTokenConfig(address token)
     external
     view
