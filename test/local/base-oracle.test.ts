@@ -55,31 +55,31 @@ describe("BaseOracle", function () {
                 protocol: Protocol.UNISWAP
             }
         ],
-        // AIXBT: [
-        //     {
-        //         address: "0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e",
-        //         isCL: false,
-        //         pair: "WETH",
-        //         baseAsset: TOKENS.WETH,
-        //         protocol: Protocol.AERODROME
-        //     },
-        //     {
-        //         address: "0x22A52bB644f855ebD5ca2edB643FF70222D70C31",
-        //         isCL: true,
-        //         pair: "WETH",
-        //         tickSpacing: 200,
-        //         baseAsset: TOKENS.WETH,
-        //         protocol: Protocol.AERODROME
-        //     },
-        //     {
-        //         address: "0xf1Fdc83c3A336bdbDC9fB06e318B08EadDC82FF4",
-        //         isCL: true,
-        //         pair: "USDC",
-        //         tickSpacing: 60,
-        //         baseAsset: TOKENS.USDC,
-        //         protocol: Protocol.UNISWAP
-        //     }
-        // ]
+        AIXBT: [
+            {
+                address: "0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e",
+                isCL: false,
+                pair: "WETH",
+                baseAsset: TOKENS.WETH,
+                protocol: Protocol.AERODROME
+            },
+            {
+                address: "0x22A52bB644f855ebD5ca2edB643FF70222D70C31",
+                isCL: true,
+                pair: "WETH",
+                tickSpacing: 200,
+                baseAsset: TOKENS.WETH,
+                protocol: Protocol.AERODROME
+            },
+            {
+                address: "0xf1Fdc83c3A336bdbDC9fB06e318B08EadDC82FF4",
+                isCL: true,
+                pair: "USDC",
+                tickSpacing: 60,
+                baseAsset: TOKENS.USDC,
+                protocol: Protocol.UNISWAP
+            }
+        ]
     };
 
     let oracleTUP: BaseOracle;
@@ -115,107 +115,107 @@ describe("BaseOracle", function () {
         oracleTUP = BaseOracleFactory.attach(proxy.address) as BaseOracle;
     });
 
-    // describe("Owner Functions", function () {
-    //     it("Should set owner correctly on deployment", async function () {
-    //         expect(await oracleTUP.connect(addr1).owner()).to.equal(
-    //             await owner.getAddress()
-    //         );
-    //     });
-    //
-    //     it("Should allow owner to transfer ownership", async function () {
-    //         await oracleTUP.connect(owner).transferOwnership(await addr1.getAddress());
-    //         expect(await oracleTUP.connect(addr1).owner()).to.equal(
-    //             await addr1.getAddress()
-    //         );
-    //     });
-    //
-    //     it("Should not allow non-owner to transfer ownership", async function () {
-    //         await expect(
-    //             oracleTUP.connect(addr1).transferOwnership(await addr1.getAddress())
-    //         ).to.be.reverted;
-    //     });
-    //
-    //     it("Should not allow configuring token with empty pools", async function () {
-    //         await expect(
-    //             oracleTUP.configureToken(TOKENS.BRETT, [])
-    //         ).to.be.reverted;
-    //     });
-    //
-    //     it("Should not allow configuring pools with invalid base asset", async function () {
-    //         const invalidPools = [
-    //             {
-    //                 poolAddress: POOLS.BRETT[0].address,
-    //                 isCL: false,
-    //                 tickSpacing: 0,
-    //                 shortTwap: 30,
-    //                 twapChecks: [],
-    //                 baseAsset: ethers.constants.AddressZero,
-    //             },
-    //         ];
-    //         await expect(
-    //             oracleTUP.configureToken(TOKENS.BRETT, invalidPools)
-    //         ).to.be.reverted;
-    //     });
-    // });
-    //
-    // describe("Token Configuration", function () {
-    //     it("Should emit TokenConfigured event when configuring token", async function () {
-    //         const pools = POOLS.BRETT.map((pool) => ({
-    //             poolAddress: pool.address,
-    //             isCL: pool.isCL,
-    //             tickSpacing: pool.isCL ? pool.tickSpacing : 0,
-    //             shortTwap: 30,
-    //             // For CL pools, we include two TWAP checks.
-    //             twapChecks: pool.isCL
-    //                 ? [
-    //                     {
-    //                         duration: 3600,
-    //                         maxDeviation: ethers.utils.parseUnits("0.02", 18),
-    //                     },
-    //                     {
-    //                         duration: 86400,
-    //                         maxDeviation: ethers.utils.parseUnits("0.05", 18),
-    //                     },
-    //                 ]
-    //                 : [],
-    //             baseAsset: pool.baseAsset,
-    //         }));
-    //
-    //         await expect(oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools))
-    //             .to.emit(oracleTUP, "TokenConfigured")
-    //             .withArgs(TOKENS.BRETT);
-    //     });
-    //
-    //     it("Should allow removing token configuration", async function () {
-    //         const pools = POOLS.BRETT.map((pool) => ({
-    //             poolAddress: pool.address,
-    //             isCL: pool.isCL,
-    //             tickSpacing: pool.isCL ? pool.tickSpacing : 0,
-    //             shortTwap: 30,
-    //             twapChecks: pool.isCL
-    //                 ? [
-    //                     {
-    //                         duration: 3600,
-    //                         maxDeviation: ethers.utils.parseUnits("0.02", 18),
-    //                     },
-    //                     {
-    //                         duration: 86400,
-    //                         maxDeviation: ethers.utils.parseUnits("0.05", 18),
-    //                     },
-    //                 ]
-    //                 : [],
-    //             baseAsset: pool.baseAsset,
-    //         }));
-    //         await oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools);
-    //
-    //         await expect(oracleTUP.connect(owner).removeToken(TOKENS.BRETT))
-    //             .to.emit(oracleTUP, "TokenRemoved")
-    //             .withArgs(TOKENS.BRETT);
-    //
-    //         const config = await oracleTUP.connect(owner).getFullTokenConfig(TOKENS.BRETT);
-    //         expect(config.isConfigured).to.be.false;
-    //     });
-    // });
+    describe("Owner Functions", function () {
+        it("Should set owner correctly on deployment", async function () {
+            expect(await oracleTUP.connect(addr1).owner()).to.equal(
+                await owner.getAddress()
+            );
+        });
+
+        it("Should allow owner to transfer ownership", async function () {
+            await oracleTUP.connect(owner).transferOwnership(await addr1.getAddress());
+            expect(await oracleTUP.connect(addr1).owner()).to.equal(
+                await addr1.getAddress()
+            );
+        });
+
+        it("Should not allow non-owner to transfer ownership", async function () {
+            await expect(
+                oracleTUP.connect(addr1).transferOwnership(await addr1.getAddress())
+            ).to.be.reverted;
+        });
+
+        it("Should not allow configuring token with empty pools", async function () {
+            await expect(
+                oracleTUP.configureToken(TOKENS.BRETT, [])
+            ).to.be.reverted;
+        });
+
+        it("Should not allow configuring pools with invalid base asset", async function () {
+            const invalidPools = [
+                {
+                    poolAddress: POOLS.BRETT[0].address,
+                    isCL: false,
+                    tickSpacing: 0,
+                    shortTwap: 30,
+                    twapChecks: [],
+                    baseAsset: ethers.constants.AddressZero,
+                },
+            ];
+            await expect(
+                oracleTUP.configureToken(TOKENS.BRETT, invalidPools)
+            ).to.be.reverted;
+        });
+    });
+
+    describe("Token Configuration", function () {
+        it("Should emit TokenConfigured event when configuring token", async function () {
+            const pools = POOLS.BRETT.map((pool) => ({
+                poolAddress: pool.address,
+                isCL: pool.isCL,
+                tickSpacing: pool.isCL ? pool.tickSpacing : 0,
+                shortTwap: 30,
+                // For CL pools, we include two TWAP checks.
+                twapChecks: pool.isCL
+                    ? [
+                        {
+                            duration: 3600,
+                            maxDeviation: ethers.utils.parseUnits("0.02", 18),
+                        },
+                        {
+                            duration: 86400,
+                            maxDeviation: ethers.utils.parseUnits("0.05", 18),
+                        },
+                    ]
+                    : [],
+                baseAsset: pool.baseAsset,
+            }));
+
+            await expect(oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools))
+                .to.emit(oracleTUP, "TokenConfigured")
+                .withArgs(TOKENS.BRETT);
+        });
+
+        it("Should allow removing token configuration", async function () {
+            const pools = POOLS.BRETT.map((pool) => ({
+                poolAddress: pool.address,
+                isCL: pool.isCL,
+                tickSpacing: pool.isCL ? pool.tickSpacing : 0,
+                shortTwap: 30,
+                twapChecks: pool.isCL
+                    ? [
+                        {
+                            duration: 3600,
+                            maxDeviation: ethers.utils.parseUnits("0.02", 18),
+                        },
+                        {
+                            duration: 86400,
+                            maxDeviation: ethers.utils.parseUnits("0.05", 18),
+                        },
+                    ]
+                    : [],
+                baseAsset: pool.baseAsset,
+            }));
+            await oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools);
+
+            await expect(oracleTUP.connect(owner).removeToken(TOKENS.BRETT))
+                .to.emit(oracleTUP, "TokenRemoved")
+                .withArgs(TOKENS.BRETT);
+
+            const config = await oracleTUP.connect(owner).getFullTokenConfig(TOKENS.BRETT);
+            expect(config.isConfigured).to.be.false;
+        });
+    });
 
     describe("Price Calculations", function () {
         beforeEach(async function () {
@@ -246,7 +246,7 @@ describe("BaseOracle", function () {
         });
 
         it("Should calculate BRETT/USD price with multiple base assets", async function () {
-            const amount = ethers.utils.parseUnits("1", 18);
+            const amount = ethers.utils.parseUnits("7", 18);
             const wethPrice = ethers.utils.parseUnits("2660", 18);
             const aeroPrice = ethers.utils.parseUnits("0.8195", 18);
 
@@ -258,112 +258,75 @@ describe("BaseOracle", function () {
                 baseAssetPrices: [wethPrice, aeroPrice],
             };
 
-            const price = await oracleTUP.connect(addr1).getDollarValue(priceParams);
+            const price = await oracleTUP.connect(addr1).getTokenDollarPrice(priceParams);
             expect(price).to.be.gt(0);
             console.log(`Price of BRETT: ${ethers.utils.formatUnits(price, 18)}`);
         });
 
-        // it("Should calculate AIXBT/USD price with ETH base asset", async function () {
-        //     const amount = ethers.utils.parseUnits("1", 18);
-        //     const wethPrice = ethers.utils.parseUnits("2800", 18);
-        //     const usdcPrice = ethers.utils.parseUnits("1", 18);
-        //
-        //     const priceParams = {
-        //         asset: TOKENS.AIXBT,
-        //         amount: amount,
-        //         useTwapChecks: false,
-        //         baseAssets: [TOKENS.WETH, TOKENS.USDC],
-        //         baseAssetPrices: [wethPrice, usdcPrice],
-        //     };
-        //
-        //     const price = await oracleTUP.connect(addr1).getDollarValue(priceParams);
-        //     expect(price).to.be.gt(0);
-        //     console.log(`Price of AIXBT: ${ethers.utils.formatUnits(price, 18)}`);
-        // });
-        //
-        // it("Should fail when trying to get price for unconfigured token", async function () {
-        //     const amount = ethers.utils.parseUnits("1", 18);
-        //     const wethPrice = ethers.utils.parseUnits("2800", 18);
-        //
-        //     const priceParams = {
-        //         asset: ethers.constants.AddressZero,
-        //         amount: amount,
-        //         useTwapChecks: false,
-        //         baseAssets: [TOKENS.WETH],
-        //         baseAssetPrices: [wethPrice],
-        //     };
-        //
-        //     await expect(oracleTUP.connect(addr1).getDollarValue(priceParams)).to.be
-        //         .reverted;
-        // });
-        //
-        // it("Should fail when base asset prices array length doesn't match base assets array", async function () {
-        //     const amount = ethers.utils.parseUnits("1", 18);
-        //     const wethPrice = ethers.utils.parseUnits("2800", 18);
-        //
-        //     const priceParams = {
-        //         asset: TOKENS.BRETT,
-        //         amount: amount,
-        //         useTwapChecks: false,
-        //         baseAssets: [TOKENS.WETH, TOKENS.AERO],
-        //         baseAssetPrices: [wethPrice], // Missing AERO price.
-        //     };
-        //
-        //     await expect(oracleTUP.connect(addr1).getDollarValue(priceParams)).to.be
-        //         .reverted;
-        // });
-        //
-        // it("Should fail when required base asset price is missing", async function () {
-        //     const amount = ethers.utils.parseUnits("1", 18);
-        //     const aeroPrice = ethers.utils.parseUnits("0.9268", 18);
-        //
-        //     const priceParams = {
-        //         asset: TOKENS.BRETT,
-        //         amount: amount,
-        //         useTwapChecks: false,
-        //         baseAssets: [TOKENS.AERO], // Missing WETH.
-        //         baseAssetPrices: [aeroPrice],
-        //     };
-        //
-        //     await expect(oracleTUP.connect(addr1).getDollarValue(priceParams)).to.be
-        //         .reverted;
-        // });
-        //
-        // it("Should fail when TWAP deviation check fails", async function () {
-        //     // For this test we configure a token with a very tight TWAPCheck so that the computed deviation
-        //     // will exceed the allowed maximum.
-        //     const pools = POOLS.BRETT.map((pool) => ({
-        //         poolAddress: pool.address,
-        //         isCL: pool.isCL,
-        //         tickSpacing: pool.isCL ? pool.tickSpacing : 0,
-        //         shortTwap: 60,
-        //         twapChecks: pool.isCL
-        //             ? [
-        //                 {
-        //                     duration: 3600,
-        //                     // Set an extremely low maxDeviation to trigger a revert.
-        //                     maxDeviation: ethers.utils.parseUnits("0.0001", 18),
-        //                 },
-        //             ]
-        //             : [],
-        //         baseAsset: pool.baseAsset,
-        //     }));
-        //     await oracleTUP.connect(owner).configureToken(TOKENS.BRETT, pools);
-        //
-        //     const amount = ethers.utils.parseUnits("1", 18);
-        //     const wethPrice = ethers.utils.parseUnits("2800", 18);
-        //     const aeroPrice = ethers.utils.parseUnits("0.9268", 18);
-        //
-        //     const priceParams = {
-        //         asset: TOKENS.BRETT,
-        //         amount: amount,
-        //         useTwapChecks: true, // enable deviation checks
-        //         baseAssets: [TOKENS.WETH, TOKENS.AERO],
-        //         baseAssetPrices: [wethPrice, aeroPrice],
-        //     };
-        //
-        //     await expect(oracleTUP.connect(addr1).getDollarValue(priceParams)).to.be
-        //         .reverted;
-        // });
+        it("Should calculate AIXBT/USD price with ETH base asset", async function () {
+            const amount = ethers.utils.parseUnits("1", 18);
+            const wethPrice = ethers.utils.parseUnits("2800", 18);
+            const usdcPrice = ethers.utils.parseUnits("1", 18);
+
+            const priceParams = {
+                asset: TOKENS.AIXBT,
+                amount: amount,
+                useTwapChecks: false,
+                baseAssets: [TOKENS.WETH, TOKENS.USDC],
+                baseAssetPrices: [wethPrice, usdcPrice],
+            };
+
+            const price = await oracleTUP.connect(addr1).getTokenDollarPrice(priceParams);
+            expect(price).to.be.gt(0);
+            console.log(`Price of AIXBT: ${ethers.utils.formatUnits(price, 18)}`);
+        });
+
+        it("Should fail when trying to get price for unconfigured token", async function () {
+            const amount = ethers.utils.parseUnits("1", 18);
+            const wethPrice = ethers.utils.parseUnits("2800", 18);
+
+            const priceParams = {
+                asset: ethers.constants.AddressZero,
+                amount: amount,
+                useTwapChecks: false,
+                baseAssets: [TOKENS.WETH],
+                baseAssetPrices: [wethPrice],
+            };
+
+            await expect(oracleTUP.connect(addr1).getTokenDollarPrice(priceParams)).to.be
+                .reverted;
+        });
+
+        it("Should fail when base asset prices array length doesn't match base assets array", async function () {
+            const amount = ethers.utils.parseUnits("1", 18);
+            const wethPrice = ethers.utils.parseUnits("2800", 18);
+
+            const priceParams = {
+                asset: TOKENS.BRETT,
+                amount: amount,
+                useTwapChecks: false,
+                baseAssets: [TOKENS.WETH, TOKENS.AERO],
+                baseAssetPrices: [wethPrice], // Missing AERO price.
+            };
+
+            await expect(oracleTUP.connect(addr1).getTokenDollarPrice(priceParams)).to.be
+                .reverted;
+        });
+
+        it("Should fail when required base asset price is missing", async function () {
+            const amount = ethers.utils.parseUnits("1", 18);
+            const aeroPrice = ethers.utils.parseUnits("0.9268", 18);
+
+            const priceParams = {
+                asset: TOKENS.BRETT,
+                amount: amount,
+                useTwapChecks: false,
+                baseAssets: [TOKENS.AERO], // Missing WETH.
+                baseAssetPrices: [aeroPrice],
+            };
+
+            await expect(oracleTUP.connect(addr1).getTokenDollarPrice(priceParams)).to.be
+                .reverted;
+        });
     });
 });
