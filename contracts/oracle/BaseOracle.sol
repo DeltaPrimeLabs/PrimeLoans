@@ -1,14 +1,61 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol"; // For additional math utilities if needed.
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol"; // For safe downcasting.
+import "../lib/uniswap-v3/FixedPoint96.sol";
+import "../lib/uniswap-v3/FullMath.sol";
 import "../lib/uniswap-v3/TickMath.sol";
-import "../lib/uniswap-v3/FullMath.sol"; // Uniswap V3’s full-precision multiplication/division.
-import "../lib/uniswap-v3/FixedPoint96.sol"; // Provides Q96 constant.
+import "./interfaces/IQuoter.sol"; // For additional math utilities if needed.
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"; // For safe downcasting.
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol"; // Uniswap V3’s full-precision multiplication/division.
+import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol"; // Provides Q96 constant.
+
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
+import "hardhat/console.sol";
+
+// QuoterV1 and V2 core params structs
+
+
+
+
+// Minimal ABIs
+interface IQuoterV2 {
+    struct QuoteExactInputSingleParams {
+        address tokenIn;
+        address tokenOut;
+        uint256 amountIn;
+        uint24 fee;
+        uint160 sqrtPriceLimitX96;
+    }
+
+    function quoteExactInputSingle(QuoteExactInputSingleParams memory params)
+    external
+    view
+    returns (
+        uint256 amountOut,
+        uint160 sqrtPriceX96After,
+        uint32 initializedTicksCrossed,
+        uint256 gasEstimate
+    );
+}
+
+interface IUniswapV2Router02 {
+    function factory() external pure returns (address);
+}
+
+interface IUniswapV2Factory {
+    function getPair(address tokenA, address tokenB) external view returns (address pair);
+}
+
+interface IUniswapV2Pair {
+    function token0() external view returns (address);
+    function token1() external view returns (address);
+    function getReserves() external view returns (
+        uint112 reserve0,
+        uint112 reserve1,
+        uint32 blockTimestampLast
+    );
+}
 
 interface IUniswapV3Pool {
     function token0() external view returns (address);
@@ -17,6 +64,7 @@ interface IUniswapV3Pool {
     external
     view
     returns (int56[] memory tickCumulatives, uint160[] memory);
+    function fee() external view returns (uint24);
 }
 
 interface IERC20 {
@@ -53,6 +101,15 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     error InvalidInput();
     error DivisionByZero();
 
+    enum Protocol {
+        UNISWAP,
+        AERODROME
+    }
+
+    struct QuoterConfig {
+        address clQuoter;
+    }
+
     /**
      * @notice Represents a deviation check for a given TWAP duration.
      * @param duration The TWAP duration (in seconds).
@@ -71,6 +128,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @param shortTwap The primary (short) TWAP duration (in seconds) used for the price calculation.
      * @param twapChecks Array of additional TWAP checks (each with its own duration and max deviation).
      * @param baseAsset The base asset of the pool (e.g., USDC, WETH).
+     * @param protocol The protocol this pool belongs to (Uniswap or Aerodrome).
      */
     struct PoolConfig {
         address poolAddress;
@@ -79,6 +137,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint32 shortTwap;
         TWAPCheck[] twapChecks;
         address baseAsset;
+        Protocol protocol;
     }
 
     /**
@@ -93,6 +152,10 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
     // Mapping of token addresses to their configurations.
     mapping(address => TokenConfig) public tokenConfigs;
+
+    // Mapping of protocols to their quoter configurations.
+    mapping(Protocol => QuoterConfig) public quoterConfigs;
+
 
     // Constant for precision (1e18).
     uint256 private constant PRECISION = 1e18;
@@ -116,6 +179,15 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         __Ownable_init();
         __ReentrancyGuard_init();  // Initialize reentrancy protection.
         transferOwnership(_initialOwner);
+
+        // Initialize quoter configs
+        quoterConfigs[Protocol.AERODROME] = QuoterConfig({
+            clQuoter: 0x66828E953cb2Ef164ef1E40653D864534251CFCB
+        });
+
+        quoterConfigs[Protocol.UNISWAP] = QuoterConfig({
+            clQuoter: 0x222cA98F00eD15B1faE10B61c277703a194cf5d2
+        });
     }
 
     /**
@@ -222,12 +294,16 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                 pools[i]
             );
 
+            console.log("Pool: %s", pools[i].poolAddress);
+            console.log("Final USD Price: %s", poolPrice);
+
             if (poolPrice < minPrice) {
                 minPrice = poolPrice;
             }
         }
 
         if (minPrice == type(uint256).max) revert NoValidPrice();
+        console.log("FINAL MIN USD PRICE: %s", minPrice);
         return minPrice;
     }
 
@@ -247,24 +323,92 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint256 baseAssetPrice,
         PoolConfig memory pool
     ) internal view returns (uint256) {
+        uint256 quotePrice;
+        uint256 twapPrice;
+
+        console.log('X poolAddress: %s', pool.poolAddress);
+        console.log('X isCL: %s', pool.isCL);
         if (pool.isCL) {
-            return calculateCLPrice(asset, amount, useTwapChecks, baseAssetPrice, pool);
+            quotePrice = calculateCLQuotePrice(asset, amount, baseAssetPrice, pool);
+            console.log('X quotePrice: %s', quotePrice);
+            twapPrice = calculateCLTwapPrice(asset, amount, useTwapChecks, baseAssetPrice, pool);
+            console.log('X twapPrice: %s', twapPrice);
+            return MathUpgradeable.min(quotePrice, twapPrice);
+        } else {
+            return calculateAMMQuotePrice(asset, amount, baseAssetPrice, pool);
         }
-        return calculateAMMPrice(asset, amount, baseAssetPrice, pool);
     }
 
-    /**
-     * @notice Calculates the USD price of an asset using a centralized liquidity (CL) pool.
-     *         After computing the unit price from TWAP data (using the short TWAP), the function
-     *         optionally runs additional TWAP deviation checks as defined in the pool’s TWAPCheck array.
-     * @param asset The address of the asset.
-     * @param amount The amount of the asset.
-     * @param useTwapChecks Whether to run TWAP deviation checks.
-     * @param baseAssetPrice The USD price of the base asset (in 1e18 scale).
-     * @param pool The pool configuration.
-     * @return The USD price of the asset (in 1e18 scale).
-     */
-    function calculateCLPrice(
+    function calculateCLQuotePrice(
+        address asset,
+        uint256 amount,
+        uint256 baseAssetPrice,
+        PoolConfig memory pool
+    ) internal view returns (uint256) {
+        address quoter = quoterConfigs[pool.protocol].clQuoter;
+
+        // Determine tokens from the pool (assume pool is Uniswap V3-like)
+        IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
+        address token0 = uniPool.token0();
+        address token1 = uniPool.token1();
+        // Use the same ordering as your off-chain call:
+        bool isToken0 = (token0 == asset);
+
+        IQuoter.QuoteExactInputSingleWithPoolParams memory params =
+                            IQuoter.QuoteExactInputSingleWithPoolParams({
+                tokenIn: asset,
+                tokenOut: isToken0 ? token1 : token0,
+                amountIn: amount,
+                pool: pool.poolAddress,
+                fee: uniPool.fee(),
+                sqrtPriceLimitX96: 0
+            });
+
+        (uint256 amountOut, /* uint160 sqrtPriceX96After */, /* int24 tickAfter */, /* uint256 gasEstimate */) = IQuoter(quoter).quoteExactInputSingleWithPool(params);
+
+        uint256 normalizedAmountOut = normalizeAmount(amountOut, IERC20(isToken0 ? token1 : token0).decimals());
+        return FullMath.mulDiv(normalizedAmountOut, baseAssetPrice, PRECISION);
+    }
+
+    function calculateAMMQuotePrice(
+        address asset,
+        uint256 amount,
+        uint256 baseAssetPrice,
+        PoolConfig memory poolConfig
+    ) internal view returns (uint256) {
+        try IUniswapV2Pair(poolConfig.poolAddress).getReserves() returns (
+            uint112 reserve0,
+            uint112 reserve1,
+            uint32 /* blockTimestampLast */
+        ) {
+            // Check for zero reserves
+            if (reserve0 == 0 || reserve1 == 0) return type(uint256).max;
+
+            address token0 = IUniswapV2Pair(poolConfig.poolAddress).token0();
+            (uint256 reserveIn, uint256 reserveOut) = token0 == asset
+                ? (uint256(reserve0), uint256(reserve1))
+                : (uint256(reserve1), uint256(reserve0));
+
+
+            uint256 denominator = (reserveIn * 1000) + amount * 997;
+            uint256 amountOut = amount * 997 * reserveOut / denominator;
+
+            // Check for minimum output amount
+            if (amountOut == 0) return type(uint256).max;
+
+            uint256 normalizedAmountOut;
+            {
+                uint8 decimalsOut = IERC20(poolConfig.baseAsset).decimals();
+                normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
+            }
+            return FullMath.mulDiv(normalizedAmountOut, baseAssetPrice, PRECISION);
+        } catch {
+            return type(uint256).max;
+        }
+    }
+
+
+    function calculateCLTwapPrice(
         address asset,
         uint256 amount,
         bool useTwapChecks,
@@ -272,31 +416,30 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         PoolConfig memory pool
     ) internal view returns (uint256) {
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
-        address token0Addr = uniPool.token0();
-        address token1Addr = uniPool.token1();
-        bool isToken0 = (token0Addr == asset);
+        address token0 = uniPool.token0();
+        bool isToken0 = (token0 == asset);
 
-        // Calculate the short TWAP price.
         uint256 shortTwapPrice = getTwapPrice(pool.poolAddress, pool.shortTwap, isToken0);
         uint256 priceFromPool = FullMath.mulDiv(shortTwapPrice, baseAssetPrice, PRECISION);
 
-        // Run additional TWAP deviation checks if enabled.
         if (useTwapChecks) {
             for (uint i = 0; i < pool.twapChecks.length; i++) {
                 uint32 duration = pool.twapChecks[i].duration;
                 uint256 maxDeviation = pool.twapChecks[i].maxDeviation;
                 uint256 twapPrice = getTwapPrice(pool.poolAddress, duration, isToken0);
                 twapPrice = FullMath.mulDiv(twapPrice, baseAssetPrice, PRECISION);
-                uint256 deviation = calculateDeviation(priceFromPool, twapPrice);
-
-                if (deviation > maxDeviation) {
+                if (calculateDeviation(priceFromPool, twapPrice) > maxDeviation) {
                     revert TWAPDeviationTooHigh();
                 }
             }
         }
 
-        // Adjust for decimal differences between token0 and token1.
-        priceFromPool = adjustForDecimals(priceFromPool, token0Addr, token1Addr, isToken0);
+        priceFromPool = adjustForDecimals(
+            priceFromPool,
+            token0,
+            uniPool.token1(),
+            isToken0
+        );
 
         return FullMath.mulDiv(priceFromPool, amount, PRECISION);
     }
@@ -342,36 +485,17 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         return price;
     }
 
-    /**
- * @notice Calculates the USD price of an asset using an AMM pool.
- * @dev Calls the AMM's getAmountOut function to determine the equivalent amount in the base asset,
- *      then converts to USD using the provided base asset price.
- * @param asset The address of the asset being priced
- * @param amount The amount of the asset
- * @param baseAssetPrice The USD price of the base asset (in 1e18 scale)
- * @param pool The pool configuration
- * @return The USD value of the asset amount (in 1e18 scale)
- */
-    function calculateAMMPrice(
-        address asset,
-        uint256 amount,
-        uint256 baseAssetPrice,
-        PoolConfig memory pool
-    ) internal view returns (uint256) {
-        IAMM ammPool = IAMM(pool.poolAddress);
-        uint8 decimalsIn = IERC20(asset).decimals();
-        uint8 decimalsOut = IERC20(pool.baseAsset).decimals();
-
-        uint256 amountOut;
-        try ammPool.getAmountOut(amount, asset) returns (uint256 result) {
-            amountOut = result;
-        } catch {
-            revert("External call failed");
+    // Helper function to convert bytes to hex string
+    function toHex(bytes memory data) internal pure returns (string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(2 * data.length);
+        for (uint i = 0; i < data.length; i++) {
+            str[2*i] = alphabet[uint8(data[i] >> 4)];
+            str[2*i+1] = alphabet[uint8(data[i] & 0x0f)];
         }
-
-        uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
-        return FullMath.mulDiv(normalizedAmountOut, baseAssetPrice, PRECISION);
+        return string(str);
     }
+
 
     /**
      * @notice Calculates the TWAP price for a Uniswap V3 pool.
@@ -399,15 +523,18 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             if (!isToken0) {
                 avgTick = -avgTick;
             }
+            console.log("avgTick: %s");
+            console.logInt(avgTick);
 
             uint160 sqrtPriceX96 = TickMath.getSqrtRatioAtTick(avgTick);
+            console.log("sqrtPriceX96: %s", sqrtPriceX96);
 
             uint256 price = FullMath.mulDiv(
                 uint256(sqrtPriceX96),
                 uint256(sqrtPriceX96) * PRECISION,
                 FixedPoint96.Q96 * FixedPoint96.Q96
             );
-
+            console.log("Price from TickMath: %s", price);
             return price;
         } catch {
             return type(uint256).max;
@@ -449,10 +576,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-    * @notice Retrieves the full configuration for a token.
-    * @param token The address of the token to query
-    * @return The complete TokenConfig struct containing the token's configuration
-    */
+     * @notice Retrieves the full configuration for a token.
+     */
     function getFullTokenConfig(address token)
     external
     view
