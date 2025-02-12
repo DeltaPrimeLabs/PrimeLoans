@@ -266,14 +266,17 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-     * @notice Calculates the USD dollar price per one token (1e18 scale) of an asset based on its configured pools.
-     *
-     * The function uses the provided amount (after converting it to native units)
-     * to obtain a total USD value, then divides that total by the native amount,
-     * so the returned result is the unit (per token) USD value.
-     *
-     * If the standardized input is 1e18 and the token has 18 decimals, then the result is the unit price.
-     */
+ * @notice Calculates the USD dollar price per one token (1e18 scale) of an asset based on its configured pools.
+ *
+ * @param params GetDollarValueParams struct containing:
+ *        - asset: The asset token address
+ *        - amount: The amount in token's native decimals (e.g., 1000000 for 1 USDC)
+ *        - useTwapChecks: Whether to perform TWAP deviation checks
+ *        - baseAssets: Array of base asset addresses
+ *        - baseAssetPrices: Array of USD prices for the base assets (1e18 scale)
+ *
+ * @return The USD price per one token in 1e18 scale (e.g., 1e18 represents $1.00)
+ */
     function getTokenDollarPrice(GetDollarValueParams calldata params)
     external
     view
@@ -286,10 +289,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         for (uint256 i = 0; i < params.baseAssetPrices.length; i++) {
             if (params.baseAssetPrices[i] == 0) revert InvalidInput();
         }
-
-        // Convert standardized (1e18) input amount to the token's native units.
-        uint8 assetDecimals = IERC20(params.asset).decimals();
-        uint256 nativeAmount = denormalizeAmount(params.amount, assetDecimals);
 
         uint256 minTotalDollarValue = type(uint256).max;
         PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
@@ -306,7 +305,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
             uint256 poolDollarValue = calculatePoolPrice(
                 params.asset,
-                nativeAmount,
+                params.amount,
                 params.useTwapChecks,
                 baseAssetPrice,
                 pools[i]
@@ -318,9 +317,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         }
 
         if (minTotalDollarValue == type(uint256).max) revert NoValidPrice();
-        // Divide the total dollar value by the native amount to obtain the unit USD price.
-        uint256 unitDollarValue = FullMath.mulDiv(minTotalDollarValue, PRECISION, nativeAmount);
-        return unitDollarValue;
+        return FullMath.mulDiv(minTotalDollarValue, PRECISION, params.amount);
     }
 
     /**
