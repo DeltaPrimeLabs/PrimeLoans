@@ -265,8 +265,12 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint256[] baseAssetPrices;
     }
 
-    /**
+/**
  * @notice Calculates the USD dollar price per one token (1e18 scale) of an asset based on its configured pools.
+ * The final price is determined by:
+ * 1. Finding maximum price among all pool quotes (both AMM and CL)
+ * 2. Finding minimum price among all CL pool TWAPs
+ * 3. Taking the minimum between (1) and (2)
  *
  * @param params GetDollarValueParams struct containing:
  *        - asset: The asset token address
@@ -276,6 +280,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
  *        - baseAssetPrices: Array of USD prices for the base assets (1e18 scale)
  *
  * @return The USD price per one token in 1e18 scale (e.g., 1e18 represents $1.00)
+ * @dev Reverts if no valid quote prices are found or if no valid TWAP prices are available
  */
     function getTokenDollarPrice(GetDollarValueParams calldata params)
     external
@@ -290,7 +295,10 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             if (params.baseAssetPrices[i] == 0) revert InvalidInput();
         }
 
-        uint256 minTotalDollarValue = type(uint256).max;
+        uint256 maxQuotePrice = 0; // Track maximum of all quotes (AMM or CL)
+        uint256 minTwapPrice = type(uint256).max; // Track minimum of CL TWAPs
+        bool hasTwapPrice = false;
+
         PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
         for (uint256 i = 0; i < pools.length; i++) {
@@ -303,49 +311,43 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             }
             if (baseAssetPrice == 0) revert MissingBaseAssetPrice();
 
-            uint256 poolDollarValue = calculatePoolPrice(
-                params.asset,
-                params.amount,
-                params.useTwapChecks,
-                baseAssetPrice,
-                pools[i]
-            );
+            // Get quote price (either AMM or CL)
+            uint256 quotePrice = pools[i].isCL ?
+                calculateCLQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i]) :
+                calculateAMMQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i]);
 
-            if (poolDollarValue < minTotalDollarValue) {
-                minTotalDollarValue = poolDollarValue;
+            // Update max quote price if valid
+            if (quotePrice != type(uint256).max && quotePrice > maxQuotePrice) {
+                maxQuotePrice = quotePrice;
+            }
+
+            // For CL pools, also get TWAP price
+            if (pools[i].isCL) {
+                uint256 twapPrice = calculateCLTwapPrice(
+                    params.asset,
+                    params.amount,
+                    params.useTwapChecks,
+                    baseAssetPrice,
+                    pools[i]
+                );
+
+                // Update min TWAP price if valid
+                if (twapPrice != type(uint256).max && twapPrice < minTwapPrice) {
+                    minTwapPrice = twapPrice;
+                    hasTwapPrice = true;
+                }
             }
         }
 
-        if (minTotalDollarValue == type(uint256).max) revert NoValidPrice();
-        return FullMath.mulDiv(minTotalDollarValue, PRECISION, params.amount);
-    }
+        // If we don't have valid prices, revert
+        if (maxQuotePrice == 0) revert NoValidPrice();
+        if (!hasTwapPrice) revert NoValidPrice(); // Must have at least one valid TWAP
 
-    /**
-     * @notice Calculates the total USD dollar value (1e18 scale) for a given native amount using a specific pool.
-     * @param asset The asset token address.
-     * @param amount The asset amount in native units.
-     * @param useTwapChecks Whether to perform TWAP deviation checks.
-     * @param baseAssetPrice The USD price of the pool's base asset (1e18 scale).
-     * @param pool The pool configuration.
-     * @return The total USD dollar value (1e18 scale) for the provided amount.
-     */
-    function calculatePoolPrice(
-        address asset,
-        uint256 amount,
-        bool useTwapChecks,
-        uint256 baseAssetPrice,
-        PoolConfig memory pool
-    ) internal view returns (uint256) {
-        uint256 quoteDollarValue;
-        uint256 twapDollarValue;
+        // Take minimum between max quote price and min TWAP price
+        uint256 finalDollarValue = MathUpgradeable.min(maxQuotePrice, minTwapPrice);
 
-        if (pool.isCL) {
-            quoteDollarValue = calculateCLQuotePrice(asset, amount, baseAssetPrice, pool);
-            twapDollarValue = calculateCLTwapPrice(asset, amount, useTwapChecks, baseAssetPrice, pool);
-            return MathUpgradeable.min(quoteDollarValue, twapDollarValue);
-        } else {
-            return calculateAMMQuotePrice(asset, amount, baseAssetPrice, pool);
-        }
+        // Convert to per-token price in 1e18 scale
+        return FullMath.mulDiv(finalDollarValue, PRECISION, params.amount);
     }
 
     /**
