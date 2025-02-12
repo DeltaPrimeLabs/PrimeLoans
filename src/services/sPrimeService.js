@@ -74,7 +74,8 @@ export default class sPrimeService {
     let dataFeeds = [...Object.keys(config.POOLS_CONFIG), secondAsset, 'PRIME'];
 
     const sPrimeContract = await wrapContract(new ethers.Contract(sPrimeAddress, SPRIME.abi, provider.getSigner()), dataFeeds);
-    // console.log('asdfa');
+    const primePrice = (await (await fetch('https://dixoer78sjin3.cloudfront.net/primeprice.json')).json()).price
+    // console.log('asdfa', primePrice);
     // const x = await sPrimeContract.getUserValueInTokenY(ownerAddress)
     // console.log('asjdbfkajsdf', x);
     // console.log('asdfa2');
@@ -107,8 +108,8 @@ export default class sPrimeService {
             );
 
             if (dex === 'UNISWAP') {
-              const mockPrice = 24779
-              sPrimeContract.getUserValueInTokenY(ownerAddress, mockPrice).then(
+              const sprimePriceInSecondAsset = Math.floor(primePrice / secondAssetPrice)
+              sPrimeContract.getUserValueInTokenY(ownerAddress, sprimePriceInSecondAsset).then(
                 async value => {
                   value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
 
@@ -117,7 +118,7 @@ export default class sPrimeService {
                 }
               );
 
-              this.poolPrice$.next(mockPrice * secondAssetPrice / 1e8)
+              this.poolPrice$.next(primePrice / 1e8)
               // sPrimeContract.getPoolPrice().then(
               //   poolPrice => {
               //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
@@ -142,9 +143,8 @@ export default class sPrimeService {
             }
 
             if (dex === 'TRADERJOEV2') {
-              const mockPoolPrice = 1385220
-
-                sPrimeContract.getUserValueInTokenY(ownerAddress, mockPoolPrice).then(
+              const sprimePriceInSecondAsset = Math.floor(primePrice / secondAssetPrice)
+              sPrimeContract.getUserValueInTokenY(ownerAddress, sprimePriceInSecondAsset).then(
                   async value => {
                     console.log('getUserValueInTokenY', value);
                     value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
@@ -154,7 +154,7 @@ export default class sPrimeService {
                 )
 
 
-              this.poolPrice$.next(mockPoolPrice * secondAssetPrice / 1e8)
+              this.poolPrice$.next(primePrice / 1e8)
 
               // sPrimeContract.getPoolPrice().then(
               //   poolPrice => {
