@@ -4,7 +4,6 @@ pragma solidity 0.8.17;
 import "./facets/avalanche/IYieldYakFacet.sol";
 import "./facets/avalanche/IYieldYakSwapFacet.sol";
 import "./facets/avalanche/IParaSwapFacet.sol";
-import "./facets/avalanche/ICaiFacet.sol";
 import "./facets/avalanche/IGLPFacet.sol";
 import "./facets/avalanche/IPangolinDEXFacet.sol";
 import "./facets/avalanche/ITraderJoeDEXFacet.sol";
@@ -40,7 +39,6 @@ interface SmartLoanGigaChadInterface is
     IGLPFacet,
     IYieldYakSwapFacet,
     IParaSwapFacet,
-    ICaiFacet,
     IDiamondLoupe,
     IBeefyFinanceFacet,
     IBeefyFinanceArbitrumFacet,

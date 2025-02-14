@@ -934,27 +934,9 @@ export const deployAllFacets = async function (diamondAddress: any, mock: boolea
         if (mock) {
             await deployFacet("UniswapV3FacetMock", diamondAddress, ['mintLiquidityUniswapV3', 'increaseLiquidityUniswapV3', 'decreaseLiquidityUniswapV3', 'burnLiquidityUniswapV3', 'getOwnedUniswapV3TokenIds'], hardhatConfig)
 
-            await deployFacet(
-                "CaiFacetMock",
-                diamondAddress,
-                [
-                    'mintCai',
-                    'burnCai',
-                ],
-                hardhatConfig
-            );
         } else {
             await deployFacet("UniswapV3Facet", diamondAddress, ['mintLiquidityUniswapV3', 'increaseLiquidityUniswapV3', 'decreaseLiquidityUniswapV3', 'burnLiquidityUniswapV3', 'getOwnedUniswapV3TokenIds'], hardhatConfig)
 
-            await deployFacet(
-                "CaiFacet",
-                diamondAddress,
-                [
-                    'mintCai',
-                    'burnCai',
-                ],
-                hardhatConfig
-            );
         }
     }
     if (chain == 'ARBITRUM') {
