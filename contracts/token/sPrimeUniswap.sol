@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@redstone-finance/evm-connector/contracts/core/ProxyConnector.sol";
+import "@redstone-finance/evm-connector/contracts/core/RedstoneConsumerNumericBase.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol";
 
 // SPrime contract declaration
@@ -25,7 +26,8 @@ contract sPrimeUniswap is
     PendingOwnableUpgradeable,
     ERC20Upgradeable,
     ERC721HolderUpgradeable,
-    ProxyConnector
+    ProxyConnector,
+    RedstoneConsumerNumericBase
 {
     using SafeERC20 for IERC20Metadata; // Using SafeERC20 for IERC20 for safe token transfers
     using PositionValue for INonfungiblePositionManager;
@@ -61,6 +63,32 @@ contract sPrimeUniswap is
 
     constructor() {
         _disableInitializers();
+    }
+
+    function getDataServiceId() public view virtual override returns (string memory) {
+        return "redstone-arbitrum-prod";
+    }
+
+    function getUniqueSignersThreshold() public view virtual override returns (uint8) {
+        return 3;
+    }
+
+    function getAuthorisedSignerIndex(
+        address signerAddress
+    ) public view virtual override returns (uint8) {
+        if (signerAddress == 0x345Efd26098e173F811e3B9Af1B0e0a11872B38b) {
+            return 0;
+        } else if (signerAddress == 0xbD0c5ccd85D5831B10E3e49527B8Cd67e2EFAf39) {
+            return 1;
+        } else if (signerAddress == 0x2F3E8EC88C01593d10ca9461c807660fF2D8DB28) {
+            return 2;
+        } else if (signerAddress == 0xb7f154bB5491565D215F4EB1c3fe3e84960627aF) {
+            return 3;
+        } else if (signerAddress == 0xE6b0De8F4B31F137d3c59b5a0A71e66e7D504Ef9) {
+            return 4;
+        } else {
+            revert SignerNotAuthorised(signerAddress);
+        }
     }
 
     /**
@@ -267,19 +295,10 @@ contract sPrimeUniswap is
     }
 
     function getPoolPrice() public view returns (uint256) {
-        (, int24 tick, , , , , ) = pool.slot0();
-        uint256 price = OracleLibrary.getQuoteAtTick(
-            tick,
-            uint128(10 ** tokenX.decimals()),
-            address(tokenX),
-            address(tokenY)
-        );
-        return
-            FullMath.mulDiv(
-                price,
-                1e8,
-                10 ** tokenY.decimals()
-            );
+        uint256 tokenYPrice = getOracleNumericValueFromTxMsg("ETH");
+        uint256 primePrice = getOracleNumericValueFromTxMsg("PRIME");
+        uint256 primeToTokenYPrice = primePrice * 1e8 / tokenYPrice; // both tokenYPrice and primePrice have 8 decimals
+        return primeToTokenYPrice;
     }
 
     /**
@@ -300,24 +319,24 @@ contract sPrimeUniswap is
             (amountY * _REBALANCE_MARGIN) / 100 < diff &&
             (amountXToY > 0 || amountX == 0)
         ) {
+            uint256 poolPrice = getPoolPrice();
             uint256 amountIn;
             {
-                (, int24 tick, , , , , ) = pool.slot0();
-                amountIn = OracleLibrary.getQuoteAtTick(
-                    tick,
-                    uint128(diff / 2),
-                    address(tokenY),
-                    address(tokenX)
-                );
+                if(swapTokenX){
+                    amountIn = FullMath.mulDiv(diff / 2, 1e8, poolPrice);
+                } else {
+                    amountIn = diff / 2;
+                }
             }
-            uint256 amountOut = diff / 2;
+            uint256 amountOut;
+            if(swapTokenX){
+                amountOut = diff / 2;
+            } else {
+                amountOut = diff / 2 * 1e8 / poolPrice;
+            }
 
             address tokenIn;
             address tokenOut;
-
-            (amountIn, amountOut) = swapTokenX
-                ? (amountIn, amountOut)
-                : (amountOut, amountIn);
 
             if (swapTokenX) {
                 tokenIn = address(tokenX);
