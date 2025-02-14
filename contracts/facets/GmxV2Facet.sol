@@ -23,6 +23,7 @@ abstract contract GmxV2Facet is GmxV2FacetCommon {
         uint256 minGmAmount,
         uint256 executionFee
     ) internal nonReentrant noBorrowInTheSameBlock onlyOwner {
+        require(executionFee == msg.value, "Invalid execution fee");
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
         tokenAmount = IERC20(depositedToken).balanceOf(address(this)) < tokenAmount
@@ -128,6 +129,7 @@ abstract contract GmxV2Facet is GmxV2FacetCommon {
         noBorrowInTheSameBlock
         onlyOwnerNoStaySolventOrInsolventPayable
     {
+        require(executionFee == msg.value, "Invalid execution fee");
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
         gmAmount = IERC20(gmToken).balanceOf(address(this)) < gmAmount
