@@ -18,9 +18,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@redstone-finance/evm-connector/contracts/core/ProxyConnector.sol";
+import "@redstone-finance/evm-connector/contracts/core/RedstoneConsumerNumericBase.sol";
+
 
 // SPrime contract declaration
-contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableUpgradeable, ERC20Upgradeable, ProxyConnector {
+contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableUpgradeable, ERC20Upgradeable, ProxyConnector, RedstoneConsumerNumericBase {
     using SafeERC20 for IERC20Metadata; // Using SafeERC20 for IERC20Metadata for safe token transfers
     using PackedUint128Math for bytes32;
 
@@ -54,6 +56,33 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
 
     constructor() {
         _disableInitializers();
+    }
+
+
+    function getDataServiceId() public view virtual override returns (string memory) {
+        return "redstone-avalanche-prod";
+    }
+
+    function getUniqueSignersThreshold() public view virtual override returns (uint8) {
+        return 3;
+    }
+
+    function getAuthorisedSignerIndex(
+        address signerAddress
+    ) public view virtual override returns (uint8) {
+        if (signerAddress == 0x1eA62d73EdF8AC05DfceA1A34b9796E937a29EfF) {
+            return 0;
+        } else if (signerAddress == 0x2c59617248994D12816EE1Fa77CE0a64eEB456BF) {
+            return 1;
+        } else if (signerAddress == 0x12470f7aBA85c8b81D63137DD5925D6EE114952b) {
+            return 2;
+        } else if (signerAddress == 0x109B4a318A4F5ddcbCA6349B45f881B4137deaFB) {
+            return 3;
+        } else if (signerAddress == 0x83cbA8c619fb629b81A65C2e67fE15cf3E3C9747) {
+            return 4;
+        } else {
+            revert SignerNotAuthorised(signerAddress);
+        }
     }
 
     /**
@@ -260,15 +289,11 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
         weight = amountY + amountXToY;
     }
 
-    function getPoolPrice() public view returns(uint256) {
-        uint256 price = PriceHelper.convert128x128PriceToDecimal(lbPair.getPriceFromId(lbPair.getActiveId()));
-        // price * 1e8 * 1edx / 1edy / 1e18
-        if (tokenXDecimals >= 10 + tokenYDecimals) {
-            price = price * 10 ** (tokenXDecimals - 10 - tokenYDecimals);
-        } else {
-            price = price / 10 ** (10 + tokenYDecimals - tokenXDecimals);
-        }
-        return price;
+    function getPoolPrice() public view returns (uint256) {
+        uint256 tokenYPrice = getOracleNumericValueFromTxMsg("AVAX");
+        uint256 primePrice = getOracleNumericValueFromTxMsg("PRIME");
+        uint256 primeToTokenYPrice = primePrice * 1e8 / tokenYPrice; // both tokenYPrice and primePrice have 8 decimals
+        return primeToTokenYPrice;
     }
 
     /**
@@ -277,14 +302,8 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
      * @return amountY Token Y Amount to return.
      */
     function _getTokenYFromTokenX(uint256 amountX) internal view returns(uint256 amountY) {
-        (uint128 reserveA, uint128 reserveB) = lbPair.getReserves();
-        if(reserveA > 0 || reserveB > 0) {
-            uint256 price = PriceHelper.convert128x128PriceToDecimal(lbPair.getPriceFromId(lbPair.getActiveId()));
-            // Swap For Y : Convert token X to token Y
-            amountY = amountX * price / 1e18;
-        } else {
-            amountY = 0;
-        }
+        uint256 poolPrice = getPoolPrice();
+        return amountX * poolPrice / 1e8;
     }
 
     /**
@@ -299,15 +318,18 @@ contract SPrime is ISPrimeTraderJoe, ReentrancyGuardUpgradeable, PendingOwnableU
         // (amountXToY != 0 || amountX == 0) for excluding the initial LP deposit
         if(FullMath.mulDiv(amountY, _REBALANCE_MARGIN, _DENOMINATOR) < diff && (amountXToY > 0 || amountX == 0)) {
             uint256 amountIn;
+            uint256 amountOut;
             {
-                uint256 price = PriceHelper.convert128x128PriceToDecimal(lbPair.getPriceFromId(lbPair.getActiveId()));
-                // Swap For X : Convert token Y to token X
-                amountIn = FullMath.mulDiv(diff / 2, 1e18, price);
+                uint256 poolPrice = getPoolPrice();
+                if(swapTokenX) {
+                    amountIn = FullMath.mulDiv(diff / 2, 1e8, poolPrice);
+                    amountOut = diff / 2;
+                } else {
+                    amountIn = diff / 2;
+                    amountOut = diff / 2 * 1e8 / poolPrice;
+                }
             }
 
-            uint256 amountOut = diff / 2; 
-
-            (amountIn, amountOut) = swapTokenX ? (amountIn, amountOut) : (amountOut, amountIn);
             IERC20[] memory tokenPathDynamic = new IERC20[](2);
             if (swapTokenX) {
                 tokenPathDynamic[0] = tokenX;
