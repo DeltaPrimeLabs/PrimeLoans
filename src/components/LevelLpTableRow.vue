@@ -251,6 +251,7 @@ export default {
       'lpService',
       'healthService',
       'globalActionsDisableService',
+      'priceService',
     ]),
     ...mapState('stakeStore', ['farms']),
 
@@ -748,8 +749,7 @@ export default {
     },
 
     async setupLevelPriceAndRewards() {
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await this.priceService.fetchPrices()
 
       this.lvlPrice = redstonePriceData['LVL'][0].dataPoints[0].value;
 

@@ -5,6 +5,11 @@ import config from '../config';
 export default class HealthService {
   refreshHealth$ = new Subject();
   health$ = new Subject();
+  priceService;
+
+  constructor(priceService) {
+    this.priceService = priceService;
+  }
 
   emitRefreshHealth() {
     this.refreshHealth$.next(null);
@@ -45,8 +50,7 @@ export default class HealthService {
       return;
     }
 
-    const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-    const redstonePriceData = await redstonePriceDataRequest.json();
+    const redstonePriceData = await this.priceService.fetchPrices();
 
     if (debtsPerAsset && assets && assetBalances && lpAssets && lpBalances && stakeStoreFarms) {
       let tokens = [];

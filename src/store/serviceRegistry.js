@@ -42,6 +42,7 @@ const progressBarService = new ProgressBarService();
 const modalService = new ModalService();
 const poolService = new PoolService();
 const fundsService = new FundsService();
+const priceService = new PriceService();
 
 export default {
   namespaced: true,
@@ -52,14 +53,14 @@ export default {
     dataRefreshEventService: new DataRefreshEventService(),
     progressBarService: progressBarService,
     modalService: modalService,
-    healthService: new HealthService(),
+    healthService: new HealthService(priceService),
     aprService: new AprService(),
     farmService: new FarmService(),
     lpService: new LpService(),
     providerService: providerService,
     accountService: accountService,
     poolService: poolService,
-    priceService: new PriceService(),
+    priceService: priceService,
     collateralService: new CollateralService(),
     debtService: new DebtService(),
     themeService: new ThemeService(),
@@ -74,10 +75,10 @@ export default {
     deprecatedAssetsService: new DeprecatedAssetsService(),
     ltipService: new LtipService(),
     ggpIncentivesService: new GgpIncentivesService(),
-    sPrimeService: new sPrimeService(),
+    sPrimeService: new sPrimeService(priceService),
     vPrimeService: new vPrimeService(),
     globalActionsDisableService: new GlobalActionsDisableService(),
-    avalancheBoostService: new AvalancheBoostService(),
+    avalancheBoostService: new AvalancheBoostService(priceService),
     rtknService: new RtknService(providerService, accountService, progressBarService, modalService),
     poolWithdrawQueueService: new PoolWithdrawQueueService(providerService, accountService, progressBarService, modalService, poolService),
     paWithdrawQueueService: new PAWithdrawQueueService(providerService, accountService, progressBarService, modalService, fundsService),

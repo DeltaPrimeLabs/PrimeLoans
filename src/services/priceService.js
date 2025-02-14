@@ -1,4 +1,5 @@
 import {BehaviorSubject, Subject} from 'rxjs';
+import config from "../config";
 
 export default class PriceService {
   prices$ = new BehaviorSubject({});
@@ -23,5 +24,10 @@ export default class PriceService {
 
   observePrices() {
     return this.prices$.asObservable();
+  }
+
+  async fetchPrices() {
+    const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
+    return await redstonePriceDataRequest.json()
   }
 };

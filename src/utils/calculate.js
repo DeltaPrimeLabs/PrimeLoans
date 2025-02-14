@@ -196,7 +196,7 @@ export async function vectorFinanceBalance(stakingContractAddress, address, deci
 
 }
 
-export async function vectorFinanceRewards(stakingContractAddress, loanAddress) {
+export async function vectorFinanceRewards(stakingContractAddress, loanAddress, fetchPricesMethod) {
   const stakingContract = new ethers.Contract(stakingContractAddress, IVectorFinanceStakingArtifact.abi, provider.getSigner());
   const rewarderAddress = await stakingContract.rewarder();
 
@@ -208,8 +208,7 @@ export async function vectorFinanceRewards(stakingContractAddress, loanAddress) 
   let iterate = true;
 
   //TODO: get prices from store
-  const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-  const redstonePriceData = await redstonePriceDataRequest.json();
+  const redstonePriceData = await fetchPricesMethod()
 
   while (iterate) {
     try {

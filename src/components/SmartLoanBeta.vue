@@ -203,6 +203,7 @@ export default {
       'ltipService',
       'paWithdrawQueueService',
       'bullScoreService',
+      'priceService',
     ]),
     ...mapState('network', ['account']),
     primeAccountsBlocked() {
@@ -319,8 +320,7 @@ export default {
         const assets = config.ASSETS_CONFIG;
         const assetSymbols = Object.keys(assets);
 
-        const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-        const redstonePriceData = await redstonePriceDataRequest.json();
+        const redstonePriceData = await this.priceService.fetchPrices()
 
         const yesterdayPrices = await redstone.getHistoricalPrice(assetSymbols, {date: Date.now() - 1000 * 3600 * 24});
         assetSymbols.forEach((symbol, index) => {

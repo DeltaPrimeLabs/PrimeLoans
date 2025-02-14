@@ -573,7 +573,7 @@ export default {
                 farm.protocol === 'BEEFY_FINANCE' ? beefyMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
                 farm.protocol === 'PENPIE' ? penpieMaxUnstaked(farm.stakingContractAddress, smartLoanContractAddress, assetDecimals) :
                   farm.autoCompounding ? vectorFinanceMaxUnstaked(farm.token, farm.stakingContractAddress, smartLoanContractAddress) :
-                    vectorFinanceRewards(farm.stakingContractAddress, smartLoanContractAddress)
+                    vectorFinanceRewards(farm.stakingContractAddress, smartLoanContractAddress, rootState.serviceRegistry.priceService.fetchPrices)
               ]);
             }));
           })
@@ -616,8 +616,7 @@ export default {
 
     async updateStakedPrices({state, rootState, commit}) {
       //TODO: optimize, it's used in other place as well
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       let farms;
       if (!state.farms) {

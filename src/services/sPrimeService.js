@@ -24,6 +24,11 @@ export default class sPrimeService {
   poolPrice$ = new BehaviorSubject(null);
   revenueReceived$ = new BehaviorSubject(null);
   totalRevenueReceived$ = new BehaviorSubject(null);
+  priceService;
+
+  constructor(priceService) {
+    this.priceService = priceService;
+  }
 
   emitRefreshSPrimeDataWithDefault(provider, ownerAddress) {
     //needs to be updated when more than one sPRIME per chain
@@ -80,119 +85,115 @@ export default class sPrimeService {
     // console.log('asjdbfkajsdf', x);
     // console.log('asdfa2');
 
-    fetch(config.redstoneFeedUrl).then(
-      res => {
-        res.json().then(
-          async redstonePriceData => {
-            let secondAssetPrice = redstonePriceData[secondAsset][0].dataPoints[0].value;
+    this.priceService.fetchPrices().then(
+        async redstonePriceData => {
+          let secondAssetPrice = redstonePriceData[secondAsset][0].dataPoints[0].value;
 
-            sPrimeContract.totalSupply().then(
+        sPrimeContract.totalSupply().then(
+          async value => {
+            value = formatUnits(value) * secondAssetPrice;
+
+            this.sPrimeTotalValue$.next(value)
+          }
+        );
+
+        sPrimeContract.balanceOf(ownerAddress).then(
+          async value => {
+            this.sPrimeBalance$.next(formatUnits(value))
+          }
+        );
+
+        sPrimeContract.getLockedBalance(ownerAddress).then(
+          async value => {
+            this.sPrimeLockedBalance$.next(formatUnits(value))
+
+          }
+        );
+
+        if (dex === 'UNISWAP') {
+          const sprimePriceInSecondAsset = Math.floor(primePrice / secondAssetPrice)
+          sPrimeContract.getUserValueInTokenY(ownerAddress, sprimePriceInSecondAsset).then(
+            async value => {
+              value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
+
+              this.sPrimeValue$.next(value)
+
+            }
+          );
+
+          this.poolPrice$.next(primePrice / 1e8)
+          // sPrimeContract.getPoolPrice().then(
+          //   poolPrice => {
+          //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
+          //   }
+          // );
+
+          sPrimeContract.userTokenId(ownerAddress).then(
+            tokenId => {
+              let positionManager = new ethers.Contract(config.SPRIME_CONFIG[dex][secondAsset].positionManagerAddress, UNI_V3_POSITION_MANAGER.abi, provider.getSigner());
+
+              positionManager.positions(tokenId).then(
+                res => {
+                  this.sPrimePositionInfo$.next(
+                    {
+                      priceMin: uniswapV3TickToPrice(res.tickLower) * secondAssetPrice,
+                      priceMax: uniswapV3TickToPrice(res.tickUpper) * secondAssetPrice
+                    });
+                }
+              )
+            }
+          )
+        }
+
+        if (dex === 'TRADERJOEV2') {
+          const sprimePriceInSecondAsset = Math.floor(primePrice / secondAssetPrice)
+          sPrimeContract.getUserValueInTokenY(ownerAddress, sprimePriceInSecondAsset).then(
               async value => {
-                value = formatUnits(value) * secondAssetPrice;
-
-                this.sPrimeTotalValue$.next(value)
-              }
-            );
-
-            sPrimeContract.balanceOf(ownerAddress).then(
-              async value => {
-                this.sPrimeBalance$.next(formatUnits(value))
-              }
-            );
-
-            sPrimeContract.getLockedBalance(ownerAddress).then(
-              async value => {
-                this.sPrimeLockedBalance$.next(formatUnits(value))
-
-              }
-            );
-
-            if (dex === 'UNISWAP') {
-              const sprimePriceInSecondAsset = Math.floor(primePrice / secondAssetPrice)
-              sPrimeContract.getUserValueInTokenY(ownerAddress, sprimePriceInSecondAsset).then(
-                async value => {
-                  value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
+                console.log('getUserValueInTokenY', value);
+                value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
 
                   this.sPrimeValue$.next(value)
+              }
+            )
 
-                }
-              );
 
-              this.poolPrice$.next(primePrice / 1e8)
-              // sPrimeContract.getPoolPrice().then(
-              //   poolPrice => {
-              //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
-              //   }
-              // );
+          this.poolPrice$.next(primePrice / 1e8)
 
-              sPrimeContract.userTokenId(ownerAddress).then(
-                tokenId => {
-                  let positionManager = new ethers.Contract(config.SPRIME_CONFIG[dex][secondAsset].positionManagerAddress, UNI_V3_POSITION_MANAGER.abi, provider.getSigner());
+          // sPrimeContract.getPoolPrice().then(
+          //   poolPrice => {
+          //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
+          //   }
+          // );
 
-                  positionManager.positions(tokenId).then(
-                    res => {
-                      this.sPrimePositionInfo$.next(
-                        {
-                          priceMin: uniswapV3TickToPrice(res.tickLower) * secondAssetPrice,
-                          priceMax: uniswapV3TickToPrice(res.tickUpper) * secondAssetPrice
-                        });
-                    }
-                  )
-                }
-              )
-            }
+          sPrimeContract.getUserTokenId(ownerAddress).then(
+            tokenId => {
+              let positionManager = new ethers.Contract(config.SPRIME_CONFIG[dex][secondAsset].positionManagerAddress, TRADERJOE_V2_POSITION_MANAGER.abi, provider.getSigner());
 
-            if (dex === 'TRADERJOEV2') {
-              const sprimePriceInSecondAsset = Math.floor(primePrice / secondAssetPrice)
-              sPrimeContract.getUserValueInTokenY(ownerAddress, sprimePriceInSecondAsset).then(
-                  async value => {
-                    console.log('getUserValueInTokenY', value);
-                    value = formatUnits(value, config.ASSETS_CONFIG[secondAsset].decimals) * secondAssetPrice;
+              positionManager.positions(tokenId).then(
+                res => {
+                  let centerId = res.centerId;
+                  let numberOfBins = res.liquidityMinted.length;
+                  if (numberOfBins > 0) {
+                    let binsArray = fillBinsArray(centerId, numberOfBins);
+                    binsArray = binsArray.map(
+                      binId => secondAssetPrice * getBinPrice(binId, config.SPRIME_CONFIG[dex][secondAsset].binStep, 18, config.SPRIME_CONFIG[dex][secondAsset].secondAssetDecimals)
+                    )
 
-                      this.sPrimeValue$.next(value)
+                    this.sPrimePositionInfo$.next(
+                      {
+                        binsArray: binsArray
+                      });
                   }
-                )
-
-
-              this.poolPrice$.next(primePrice / 1e8)
-
-              // sPrimeContract.getPoolPrice().then(
-              //   poolPrice => {
-              //     this.poolPrice$.next(poolPrice * secondAssetPrice / 1e8)
-              //   }
-              // );
-
-              sPrimeContract.getUserTokenId(ownerAddress).then(
-                tokenId => {
-                  let positionManager = new ethers.Contract(config.SPRIME_CONFIG[dex][secondAsset].positionManagerAddress, TRADERJOE_V2_POSITION_MANAGER.abi, provider.getSigner());
-
-                  positionManager.positions(tokenId).then(
-                    res => {
-                      let centerId = res.centerId;
-                      let numberOfBins = res.liquidityMinted.length;
-                      if (numberOfBins > 0) {
-                        let binsArray = fillBinsArray(centerId, numberOfBins);
-                        binsArray = binsArray.map(
-                          binId => secondAssetPrice * getBinPrice(binId, config.SPRIME_CONFIG[dex][secondAsset].binStep, 18, config.SPRIME_CONFIG[dex][secondAsset].secondAssetDecimals)
-                        )
-
-                        this.sPrimePositionInfo$.next(
-                          {
-                            binsArray: binsArray
-                          });
-                      }
-                    }
-                  )
                 }
               )
             }
+          )
+        }
 
-            let revenueReceived;
-            const revenueReceivedJson = config.chainSlug === 'arbitrum' ? ARBITRUM_REVENUE_DISTRIBUTION_EPOCH_0 : AVALANCHE_REVENUE_DISTRIBUTION_EPOCH_0;
-            revenueReceived = revenueReceivedJson[walletAddress] ? revenueReceivedJson[walletAddress].amount * secondAssetPrice : 0;
-            this.revenueReceived$.next(revenueReceived);
-          }
-        )
+        let revenueReceived;
+        const revenueReceivedJson = config.chainSlug === 'arbitrum' ? ARBITRUM_REVENUE_DISTRIBUTION_EPOCH_0 : AVALANCHE_REVENUE_DISTRIBUTION_EPOCH_0;
+        revenueReceived = revenueReceivedJson[walletAddress] ? revenueReceivedJson[walletAddress].amount * secondAssetPrice : 0;
+        this.revenueReceived$.next(revenueReceived);
       }
     );
 

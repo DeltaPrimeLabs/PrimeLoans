@@ -44,8 +44,7 @@ export default {
       const poolService = rootState.serviceRegistry.poolService;
       const priceService = rootState.serviceRegistry.priceService;
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await priceService.fetchPrices();
 
       priceService.setupPrices(redstonePriceData);
       await poolService.setupPools(rootState.network.provider, rootState.network.account, redstonePriceData, rootState.serviceRegistry.ltipService)

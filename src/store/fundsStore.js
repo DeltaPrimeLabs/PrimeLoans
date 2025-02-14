@@ -420,12 +420,11 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
-      console.log('redstonePriceData', redstonePriceData);
+      const priceData = await rootState.serviceRegistry.priceService.fetchPrices()
+      console.log('redstonePriceData', priceData);
       Object.keys(assets).forEach(assetSymbol => {
-        if (redstonePriceData[assetSymbol]) {
-          assets[assetSymbol].price = redstonePriceData[assetSymbol][0].dataPoints[0].value;
+        if (priceData[assetSymbol]) {
+          assets[assetSymbol].price = priceData[assetSymbol][0].dataPoints[0].value;
         } else {
           assets[assetSymbol].price = 0
         }
@@ -519,8 +518,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -542,8 +540,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -563,8 +560,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -632,8 +628,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -704,8 +699,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -728,8 +722,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -751,8 +744,7 @@ export default {
         }
       );
 
-      const redstonePriceDataRequest = await fetch(config.redstoneFeedUrl);
-      const redstonePriceData = await redstonePriceDataRequest.json();
+      const redstonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
 
       Object.keys(lpTokens).forEach(async assetSymbol => {
         lpTokens[assetSymbol].price = redstonePriceData[assetSymbol] ? redstonePriceData[assetSymbol][0].dataPoints[0].value : 0;
@@ -4218,8 +4210,7 @@ export default {
         .emitExternalAssetBalanceUpdate('GLP', glpAfterDeposit, false, true);
 
       const smartLoanGlpAmount = await glpToken.balanceOf(state.smartLoanContract.address);
-
-      const redStonePriceData = await (await fetch(config.redstoneFeedUrl)).json();
+      const redStonePriceData = await rootState.serviceRegistry.priceService.fetchPrices();
       const glpPrice = redStonePriceData.GLP[0].dataPoints[0].value;
       const usdcPrice = redStonePriceData.USDC[0].dataPoints[0].value;
       const gmPrice = redStonePriceData[convertRequest.targetMarketSymbol][0].dataPoints[0].value;
