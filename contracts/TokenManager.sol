@@ -157,24 +157,28 @@ contract TokenManager is OwnableUpgradeable {
         bytes32 group = identifierToExposureGroup[assetIdentifier];
         if(group != ""){
             Exposure storage exposure = groupToExposure[group];
-            if(exposure.max != 0){
-                exposure.current += exposureIncrease;
+            exposure.current += exposureIncrease;
+            if(exposure.max != 0) {
                 require(exposure.current <= exposure.max, "Max asset exposure breached");
-                emit ProtocolExposureChanged(msg.sender, group, exposure.current, block.timestamp);
             }
+            emit ProtocolExposureChanged(msg.sender, group, exposure.current, block.timestamp);
         }
     }
+
 
     function decreaseProtocolExposure(bytes32 assetIdentifier, uint256 exposureDecrease) public onlyPrimeAccountOrOwner {
         bytes32 group = identifierToExposureGroup[assetIdentifier];
         if(group != ""){
             Exposure storage exposure = groupToExposure[group];
-            if(exposure.max != 0){
-                exposure.current = exposure.current <= exposureDecrease ? 0 : exposure.current - exposureDecrease;
-                emit ProtocolExposureChanged(msg.sender, group, exposure.current, block.timestamp);
+            if(exposure.current <= exposureDecrease) {
+                exposure.current = 0;
+            } else {
+                exposure.current -= exposureDecrease;
             }
+            emit ProtocolExposureChanged(msg.sender, group, exposure.current, block.timestamp);
         }
     }
+
 
     function setCurrentProtocolExposure(bytes32[] memory groupIdentifiers, uint256[] memory currentExposures) external onlyOwner {
         require(groupIdentifiers.length == currentExposures.length, "Arrays lengths mismatch");
