@@ -227,6 +227,34 @@ contract UniswapV3Facet is IUniswapV3Facet, AvalancheDataServiceConsumerBase, Re
         }
     }
 
+    /**
+     * @notice Allows prime accounts to claim accumulated fees from a Uniswap V3 position.
+     * @param tokenId The ID of the Uniswap V3 NFT position for which fees should be collected.
+     */
+    function collectFeesUniswapV3(uint256 tokenId) external nonReentrant onlyOwner {
+        (
+            ,,
+            address token0Address,
+            address token1Address,
+            uint24 fee,
+            ,,,,,,
+        ) = INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER_ADDRESS).positions(tokenId);
+
+        INonfungiblePositionManager.CollectParams memory collectParams = INonfungiblePositionManager.CollectParams({
+            tokenId: tokenId,
+            recipient: address(this),
+            amount0Max: type(uint128).max,
+            amount1Max: type(uint128).max
+        });
+
+        (uint256 collected0, uint256 collected1) = INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER_ADDRESS).collect(collectParams);
+
+        _increaseExposure(DeploymentConstants.getTokenManager(), token0Address, collected0);
+        _increaseExposure(DeploymentConstants.getTokenManager(), token1Address, collected1);
+
+        emit CollectFeesUniswapV3(msg.sender, tokenId, collected0, collected1, block.timestamp);
+    }
+
     modifier onlyOwner() {
         DiamondStorageLib.enforceIsContractOwner();
         _;
@@ -286,5 +314,21 @@ contract UniswapV3Facet is IUniswapV3Facet, AvalancheDataServiceConsumerBase, Re
      * @param timestamp time of the transaction
      **/
     event BurnLiquidityUniswapV3(address indexed user, uint256 tokenId, uint256 timestamp);
+
+    /**
+     * @dev Emitted after fee collection.
+     * @param user the address of the user who claimed fees.
+     * @param tokenId the id of the NFT LP position.
+     * @param collected0 the amount of token0 fees collected.
+     * @param collected1 the amount of token1 fees collected.
+     * @param timestamp time of the fee collection.
+     **/
+    event CollectFeesUniswapV3(
+        address indexed user,
+        uint256 indexed tokenId,
+        uint256 collected0,
+        uint256 collected1,
+        uint256 timestamp
+    );
 
 }
