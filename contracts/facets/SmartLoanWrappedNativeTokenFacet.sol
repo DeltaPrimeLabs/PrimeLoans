@@ -39,7 +39,6 @@ contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent, ReentrancyGua
     function unwrapAndWithdraw(uint256 _amount) onlyOwner remainsSolvent canRepayDebtFully public payable virtual {
         IWrappedNativeToken wrapped = IWrappedNativeToken(DeploymentConstants.getNativeToken());
         _amount = Math.min(wrapped.balanceOf(address(this)), _amount);
-        require(wrapped.balanceOf(address(this)) >= _amount, "Not enough native token to unwrap and withdraw");
 
         wrapped.withdraw(_amount);
 
