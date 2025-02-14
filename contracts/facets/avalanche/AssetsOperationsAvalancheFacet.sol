@@ -3,7 +3,6 @@
 pragma solidity 0.8.17;
 
 import "../AssetsOperationsFacet.sol";
-import "../SmartLoanLiquidationFacet.sol";
 
 contract AssetsOperationsAvalancheFacet is AssetsOperationsFacet {
     using TransferHelper for address payable;
