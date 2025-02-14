@@ -71,7 +71,6 @@ contract GLPFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 glpOutputAmount = glpRewarder.mintAndStakeGlp(_token, _amount, _minUsdg, _minGlp);
 
         require((glpToken.balanceOf(address(this)) - glpInitialBalance) == glpOutputAmount, "GLP minted and balance difference mismatch");
-        require(glpOutputAmount >=_minGlp, "Insufficient output amount");
 
         _syncExposure(tokenManager, GLP_TOKEN_ADDRESS);
         _syncExposure(tokenManager, _token);
