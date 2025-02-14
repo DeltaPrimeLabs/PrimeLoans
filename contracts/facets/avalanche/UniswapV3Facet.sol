@@ -100,8 +100,8 @@ contract UniswapV3Facet is IUniswapV3Facet, AvalancheDataServiceConsumerBase, Re
             tokenIds.push(tokenId);
         }
 
-        _decreaseExposure(tokenManager, params.token0, amount0);
-        _decreaseExposure(tokenManager, params.token1, amount1);
+        _syncExposure(tokenManager, params.token0);
+        _syncExposure(tokenManager, params.token1);
 
         emit AddLiquidityUniswapV3(msg.sender, poolAddress, tokenId, token0, token1, liquidity, amount0, amount1, block.timestamp);
     }
@@ -156,8 +156,8 @@ contract UniswapV3Facet is IUniswapV3Facet, AvalancheDataServiceConsumerBase, Re
         uint256 amount1
         ) = INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER_ADDRESS).increaseLiquidity(params);
 
-        _decreaseExposure(tokenManager, token0Address, amount0);
-        _decreaseExposure(tokenManager, token1Address, amount1);
+        _syncExposure(tokenManager, token0Address);
+        _syncExposure(tokenManager, token1Address);
 
         emit IncreaseLiquidityUniswapV3(msg.sender, poolAddress, params.tokenId, token0, token1, amount0, amount1, block.timestamp);
     }
@@ -207,8 +207,8 @@ contract UniswapV3Facet is IUniswapV3Facet, AvalancheDataServiceConsumerBase, Re
 
         INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER_ADDRESS).collect(collectParams);
 
-        _increaseExposure(tokenManager, token0Address, amount0);
-        _increaseExposure(tokenManager, token1Address, amount1);
+        _syncExposure(tokenManager, token0Address);
+        _syncExposure(tokenManager, token1Address);
 
         emit DecreaseLiquidityUniswapV3(msg.sender, poolAddress, params.tokenId, token0, token1, amount0, amount1, block.timestamp);
     }
@@ -249,8 +249,8 @@ contract UniswapV3Facet is IUniswapV3Facet, AvalancheDataServiceConsumerBase, Re
 
         (uint256 collected0, uint256 collected1) = INonfungiblePositionManager(NONFUNGIBLE_POSITION_MANAGER_ADDRESS).collect(collectParams);
 
-        _increaseExposure(DeploymentConstants.getTokenManager(), token0Address, collected0);
-        _increaseExposure(DeploymentConstants.getTokenManager(), token1Address, collected1);
+        _syncExposure(DeploymentConstants.getTokenManager(), token0Address);
+        _syncExposure(DeploymentConstants.getTokenManager(), token1Address);
 
         emit CollectFeesUniswapV3(msg.sender, tokenId, collected0, collected1, block.timestamp);
     }

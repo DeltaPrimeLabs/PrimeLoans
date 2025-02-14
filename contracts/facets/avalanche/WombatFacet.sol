@@ -404,7 +404,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         );
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _decreaseExposure(tokenManager, address(vars.stakeToken), vars.amount);
+        _syncExposure(tokenManager, address(vars.stakeToken));
 
         _addStakingPosition(vars.lpToken, lpAsset, balanceSelector, unstakeSelector);
     }
@@ -466,7 +466,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, address(tokensDetails.toToken), amountOut);
+        _syncExposure(tokenManager, address(tokensDetails.toToken));
         handleRewards(pid, reward, additionalRewards, snapshots);
     }
 
@@ -498,7 +498,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         );
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _decreaseExposure(tokenManager, address(wrapped), amount);
+        _syncExposure(tokenManager, address(wrapped));
 
         _addStakingPosition(lpToken, lpAsset, balanceSelector, unstakeSelector);
     }
@@ -572,7 +572,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, address(tokensDetailsWithNative.wrapped), amountOut);
+        _syncExposure(tokenManager, address(tokensDetailsWithNative.wrapped));
         handleRewards(pid, reward, additionalRewards, snapshots);
     }
 
@@ -745,7 +745,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
 
         if (tokenManager.isTokenAssetActive(WOM_TOKEN)) {
-            _increaseExposure(tokenManager, WOM_TOKEN, actualReward);
+            _syncExposure(tokenManager, WOM_TOKEN);
         }
     }
 
@@ -780,7 +780,7 @@ contract WombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             }
 
             if (tokenManager.isTokenAssetActive(rewardToken)) {
-                _increaseExposure(tokenManager, rewardToken, actualReward);
+                _syncExposure(tokenManager, rewardToken);
             }
         }
 

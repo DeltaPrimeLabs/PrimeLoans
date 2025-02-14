@@ -69,9 +69,9 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         uint256[] memory amounts = exchange.swap(address(soldToken), address(boughtToken), _exactSold, _minimumBought);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        
-        _decreaseExposure(tokenManager, address(soldToken), initialSellTokenBalance - soldToken.balanceOf(address(this)));
-        _increaseExposure(tokenManager, address(boughtToken), boughtToken.balanceOf(address(this)) - initialBuyTokenBalance);
+
+        _syncExposure(tokenManager, address(soldToken));
+        _syncExposure(tokenManager, address(boughtToken));
 
         emit Swap(msg.sender, _soldAsset, _boughtAsset, amounts[0], amounts[amounts.length - 1], block.timestamp);
 
@@ -103,10 +103,10 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
           = exchange.addLiquidity(address(tokenA), address(tokenB), amountA, amountB, amountAMin, amountBMin);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        
-        _decreaseExposure(tokenManager, address(tokenA), amountA);
-        _decreaseExposure(tokenManager, address(tokenB), amountB);
-        _increaseExposure(tokenManager, lpTokenAddress, liquidity);
+
+        _syncExposure(tokenManager, address(tokenA));
+        _syncExposure(tokenManager, address(tokenB));
+        _syncExposure(tokenManager, lpTokenAddress);
 
         emit AddLiquidity(msg.sender, lpTokenAddress, _assetA, _assetB, liquidity, amountA, amountB, block.timestamp);
     }
@@ -130,9 +130,9 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
 
         (uint amountA, uint amountB) = exchange.removeLiquidity(address(tokenA), address(tokenB), liquidity, amountAMin, amountBMin);
 
-        _decreaseExposure(tokenManager, lpTokenAddress, liquidity);
-        _increaseExposure(tokenManager, address(tokenA), amountA);
-        _increaseExposure(tokenManager, address(tokenB), amountB);
+        _syncExposure(tokenManager, lpTokenAddress);
+        _syncExposure(tokenManager, address(tokenA));
+        _syncExposure(tokenManager, address(tokenB));
 
         emit RemoveLiquidity(msg.sender, lpTokenAddress, _assetA, _assetB, liquidity, amountA, amountB, block.timestamp);
     }

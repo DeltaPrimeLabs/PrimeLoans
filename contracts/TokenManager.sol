@@ -6,6 +6,7 @@ import "./lib/Bytes32EnumerableMap.sol";
 import "./interfaces/IBorrowersRegistry.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "./lib/local/DeploymentConstants.sol";
 
 contract TokenManager is OwnableUpgradeable {
@@ -58,6 +59,10 @@ contract TokenManager is OwnableUpgradeable {
     mapping(bytes32 => uint256) public pendingProtocolExposure;
 
     address public vPrimeControllerAddress;
+
+    // Mapping for recording per-user per-token (normalized) exposure
+    mapping(address => mapping(bytes32 => uint256)) public recordedUserExposure;
+
 
     /**
     * Returns the address of the vPrimeController contract
@@ -113,6 +118,39 @@ contract TokenManager is OwnableUpgradeable {
         require(assetAddress != address(0), "Pool asset not supported.");
 
         return assetAddress;
+    }
+
+    /**
+     * @notice Synchronizes the recorded exposure for a given user and token by reading the current on‐chain balance.
+     * It compares the normalized balance with the last recorded value (recordedUserExposure).
+     * If there is a difference, the global protocol exposure is adjusted accordingly.
+     * @param user The PrimeAccount address.
+     * @param token The ERC20 token address.
+     */
+        function updateUserExposure(address user, address token) public onlyPrimeAccountOrOwner {
+        bytes32 symbol = tokenAddressToSymbol[token];
+        require(symbol != bytes32(0), "Token not supported");
+
+        // Get current token balance of the user and normalize it to 1e18.
+        uint256 currentBalance = IERC20Metadata(token).balanceOf(user);
+        uint256 decimals = IERC20Metadata(token).decimals();
+        uint256 normalizedCurrent = currentBalance * 1e18 / (10 ** decimals);
+
+        // Get the last recorded exposure from our new mapping.
+        uint256 lastRecorded = recordedUserExposure[user][symbol];
+
+        if (normalizedCurrent > lastRecorded) {
+            uint256 diff = normalizedCurrent - lastRecorded;
+            recordedUserExposure[user][symbol] = normalizedCurrent;
+            // Increase the global exposure by the positive difference.
+            increaseProtocolExposure(symbol, diff);
+        } else if (lastRecorded > normalizedCurrent) {
+            uint256 diff = lastRecorded - normalizedCurrent;
+            recordedUserExposure[user][symbol] = normalizedCurrent;
+            // Decrease the global exposure by the negative difference.
+            decreaseProtocolExposure(symbol, diff);
+        }
+        // If they are equal, nothing changes.
     }
 
     function increaseProtocolExposure(bytes32 assetIdentifier, uint256 exposureIncrease) public onlyPrimeAccountOrOwner {

@@ -96,8 +96,8 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         IPendleDepositHelper(DEPOSIT_HELPER).depositMarket(market, netLpOut);
 
-        _increaseExposure(tokenManager, lpToken, netLpOut);
-        _decreaseExposure(tokenManager, address(token), amount);
+        _syncExposure(tokenManager, lpToken);
+        _syncExposure(tokenManager, address(token));
 
         emit Staked(msg.sender, asset, lpToken, amount, netLpOut, block.timestamp);
     }
@@ -154,8 +154,8 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
             require(token == output.tokenOut, "Invalid input token");
 
-            _increaseExposure(tokenManager, token, netTokenOut);
-            _decreaseExposure(tokenManager, lpToken, amount);
+            _syncExposure(tokenManager, token);
+            _syncExposure(tokenManager, lpToken);
         }
 
         emit Unstaked(
@@ -187,7 +187,7 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         IPendleDepositHelper(DEPOSIT_HELPER).depositMarket(market, amount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, lpToken, amount);
+        _syncExposure(tokenManager, lpToken);
 
         emit PendleLpStaked(msg.sender, lpToken, amount, block.timestamp);
     }
@@ -227,7 +227,7 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         market.safeTransfer(msg.sender, amount);
 
-        _decreaseExposure(tokenManager, lpToken, amount);
+        _syncExposure(tokenManager, lpToken);
 
         emit PendleLpUnstaked(msg.sender, lpToken, amount, block.timestamp);
 
@@ -312,7 +312,7 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address owner = DiamondStorageLib.contractOwner();
 
         if (pendingPenpie > 0 && tokenManager.isTokenAssetActive(PNP)) {
-            _increaseExposure(tokenManager, PNP, pendingPenpie);
+            _syncExposure(tokenManager, PNP);
         }
 
         uint256 len = bonusTokenAddresses.length;
@@ -324,7 +324,7 @@ contract PenpieFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
             }
 
             if (tokenManager.isTokenAssetActive(bonusToken)) {
-                _increaseExposure(tokenManager, bonusToken, pendingReward);
+                _syncExposure(tokenManager, bonusToken);
             }
         }
     }

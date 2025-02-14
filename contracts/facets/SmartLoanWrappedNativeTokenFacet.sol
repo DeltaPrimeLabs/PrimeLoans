@@ -21,7 +21,7 @@ contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent, ReentrancyGua
         wrapped.deposit{value : amount}();
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, address(wrapped), amount);
+        _syncExposure(tokenManager, address(wrapped));
 
         emit WrapNative(msg.sender, amount, block.timestamp);
     }
@@ -31,7 +31,7 @@ contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent, ReentrancyGua
         wrapped.deposit{value : msg.value}();
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, address(wrapped), msg.value);
+        _syncExposure(tokenManager, address(wrapped));
 
         emit DepositNative(msg.sender, msg.value, block.timestamp);
     }
@@ -48,7 +48,7 @@ contract SmartLoanWrappedNativeTokenFacet is OnlyOwnerOrInsolvent, ReentrancyGua
         }
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _decreaseExposure(tokenManager, address(wrapped), _amount);
+        _syncExposure(tokenManager, address(wrapped));
 
         payable(msg.sender).safeTransferETH(_amount);
 

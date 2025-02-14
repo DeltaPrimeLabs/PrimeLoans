@@ -140,7 +140,7 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
             // Add staked position
             DiamondStorageLib.addStakedPosition(position);
 
-            _increaseExposure(tokenManager, address(pool), IERC20(gauge).balanceOf(address(this)) - initialGaugeBalance);
+            _syncExposure(tokenManager, address(pool));
         }
 
         bytes32[] memory stakedAssets = new bytes32[](stakedTokensLength);
@@ -149,7 +149,7 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
         // Remove deposit tokens if empty and prepare arrays for the event
         for (uint256 i; i < stakedTokensLength; ++i ) {
             if (request.stakedAmounts[i] > 0) {
-                _decreaseExposure(tokenManager, request.stakedTokens[i], request.stakedAmounts[i]);
+                _syncExposure(tokenManager, request.stakedTokens[i]);
 
                 stakedAssets[i] = tokenManager.tokenAddressToSymbol(request.stakedTokens[i]);
                 stakedAmounts[i] = initialDepositTokenBalances[i] - IERC20Metadata(request.stakedTokens[i]).balanceOf(address(this));
@@ -287,8 +287,8 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
         unstakedAmounts[0] = IERC20(request.unstakedToken).balanceOf(address(this)) - initialDepositTokenBalance;
         uint256 newGaugeBalance = IERC20(gauge).balanceOf(address(this));
 
-        _increaseExposure(tokenManager, request.unstakedToken, unstakedAmounts[0]);
-        _decreaseExposure(tokenManager, address(pool), initialGaugeBalance - newGaugeBalance);
+        _syncExposure(tokenManager, request.unstakedToken);
+        _syncExposure(tokenManager, address(pool));
 
 
         if (newGaugeBalance == 0) {
@@ -385,7 +385,7 @@ contract BalancerV2Facet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent, IBalanc
                 rewardToken = tokenManager.getAssetAddress(_rewardTokens[i], false);
                 uint256 claimedAmount = IERC20(rewardToken).balanceOf(address(this)) - initialBalances[i];
                 if(claimedAmount > 0) {
-                    _increaseExposure(tokenManager, rewardToken, claimedAmount);
+                    _syncExposure(tokenManager, rewardToken);
                     emit RewardClaimed(
                         msg.sender,
                         rewardToken,

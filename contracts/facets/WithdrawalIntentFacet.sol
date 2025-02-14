@@ -64,7 +64,7 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
         address(token).safeTransfer(msg.sender, finalAmount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _decreaseExposure(tokenManager, tokenAddress, finalAmount);
+        _syncExposure(tokenManager, tokenAddress);
 
         emit WithdrawalIntentExecuted(_asset, finalAmount, block.timestamp);
     }

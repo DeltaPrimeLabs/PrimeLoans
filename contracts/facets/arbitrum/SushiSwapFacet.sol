@@ -110,7 +110,7 @@ contract SushiSwapFacet is
         DiamondStorageLib.addStakedPosition(position);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _decreaseExposure(tokenManager, address(stakedToken), amount);
+        _syncExposure(tokenManager, address(stakedToken));
 
         emit Staked(
             msg.sender,
@@ -167,7 +167,7 @@ contract SushiSwapFacet is
         }
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, address(unstakedToken), newBalance - balance);
+        _syncExposure(tokenManager, address(unstakedToken));
 
         emit Unstaked(
             msg.sender,

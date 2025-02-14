@@ -260,27 +260,15 @@ contract SolvencyMethods is DiamondHelper, ProxyConnector {
         return IERC20Metadata(DeploymentConstants.getTokenManager().getAssetAddress(_asset, allowInactive));
     }
 
-    function _decreaseExposure(ITokenManager tokenManager, address _token, uint256 _amount) internal {
-        if(_amount > 0) {
-            tokenManager.decreaseProtocolExposure(
-                tokenManager.tokenAddressToSymbol(_token),
-                _amount * 1e18 / 10**IERC20Metadata(_token).decimals()
-            );
-            if(IERC20Metadata(_token).balanceOf(address(this)) == 0){
-                DiamondStorageLib.removeOwnedAsset(tokenManager.tokenAddressToSymbol(_token));
-            }
-        }
-    }
+    function _syncExposure(ITokenManager tokenManager, address _token) internal {
+        // Tell TokenManager to update the exposure based on current on-chain balance.
+        tokenManager.updateUserExposure(address(this), _token);
 
-    function _increaseExposure(ITokenManager tokenManager, address _token, uint256 _amount) internal {
-        if(_amount > 0) {
-            tokenManager.increaseProtocolExposure(
-                tokenManager.tokenAddressToSymbol(_token),
-                _amount * 1e18 / 10**IERC20Metadata(_token).decimals()
-            );
-            if(IERC20Metadata(_token).balanceOf(address(this)) > 0){
-                DiamondStorageLib.addOwnedAsset(tokenManager.tokenAddressToSymbol(_token), _token);
-            }
+        // Optionally update local bookkeeping – e.g. add or remove the asset
+        if (IERC20Metadata(_token).balanceOf(address(this)) > 0) {
+            DiamondStorageLib.addOwnedAsset(tokenManager.tokenAddressToSymbol(_token), _token);
+        } else {
+            DiamondStorageLib.removeOwnedAsset(tokenManager.tokenAddressToSymbol(_token));
         }
     }
 

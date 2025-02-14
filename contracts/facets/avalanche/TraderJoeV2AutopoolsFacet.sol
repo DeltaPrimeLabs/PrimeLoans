@@ -82,11 +82,11 @@ contract TraderJoeV2AutopoolsFacet is ITraderJoeV2AutopoolsFacet, ReentrancyGuar
         //TODO: difference to Steakhut
         require(amount0Actual >= stakingDetails.amount0Min && amount1Actual >= stakingDetails.amount1Min, "Staked less tokens than expected");
 
-        _decreaseExposure(tokenManager, address(token0), amount0Actual);
-        _decreaseExposure(tokenManager, address(token1), amount1Actual);
+        _syncExposure(tokenManager, address(token0));
+        _syncExposure(tokenManager, address(token1));
 
         uint256 vaultTokenReceived = vaultToken.balanceOf(address(this)) - initialVaultBalance;
-        _increaseExposure(tokenManager, address(vaultToken), vaultTokenReceived);
+        _syncExposure(tokenManager, address(vaultToken));
 
         emit Staked(
             msg.sender,
@@ -126,12 +126,12 @@ contract TraderJoeV2AutopoolsFacet is ITraderJoeV2AutopoolsFacet, ReentrancyGuar
                 amount1Unstaked = depositToken1.balanceOf(address(this)) - initialDepositTokenBalance1;
                 require(amount0Unstaked >= unstakingDetails.amount0Min && amount1Unstaked >= unstakingDetails.amount1Min, "Unstaked less tokens than expected");
             }
-            _increaseExposure(tokenManager, address(depositToken0), amount0Unstaked);
-            _increaseExposure(tokenManager, address(depositToken1), amount1Unstaked);
+            _syncExposure(tokenManager, address(depositToken0));
+            _syncExposure(tokenManager, address(depositToken1));
         }
         uint256 newVaultTokenBalance = IERC20(vaultAddress).balanceOf(address(this));
 
-        _decreaseExposure(tokenManager, vaultAddress, vaultTokenBalance - newVaultTokenBalance);
+        _syncExposure(tokenManager, vaultAddress);
 
         emit Unstaked(
             msg.sender,

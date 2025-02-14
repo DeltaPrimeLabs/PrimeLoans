@@ -119,8 +119,8 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         uint256 soldTokenFinalAmount = swapTokensDetails.initialSoldTokenBalance - swapTokensDetails.soldToken.balanceOf(address(this));
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _increaseExposure(tokenManager, address(swapTokensDetails.boughtToken), boughtTokenFinalAmount);
-        _decreaseExposure(tokenManager, address(swapTokensDetails.soldToken), soldTokenFinalAmount);
+        _syncExposure(tokenManager, address(swapTokensDetails.boughtToken));
+        _syncExposure(tokenManager, address(swapTokensDetails.soldToken));
 
         emit Swap(
             msg.sender,

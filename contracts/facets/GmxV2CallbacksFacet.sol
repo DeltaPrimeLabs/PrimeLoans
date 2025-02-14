@@ -52,7 +52,7 @@ abstract contract GmxV2CallbacksFacet is IDepositCallbackReceiver, IWithdrawalCa
             IWrappedNativeToken nativeToken = IWrappedNativeToken(DeploymentConstants.getNativeToken());
             nativeToken.deposit{value : balance}();
             ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-            _increaseExposure(tokenManager, address(nativeToken), balance);
+            _syncExposure(tokenManager, address(nativeToken));
         }
     }
 
