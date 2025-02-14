@@ -155,12 +155,15 @@ contract UniswapV2Intermediary is TokenListOwnableUpgreadable, IAssetsExchange, 
     /**
      * Returns the maximum _boughtToken amount that will be obtained in the event of selling _amountIn of _soldToken token.
      **/
-    function getMaximumTokensReceived(uint256 _amountIn, address _soldToken, address _boughtToken) public view override returns (uint256) {
+    function getMaximumTokensReceived(
+        uint256 _amountIn,
+        address _soldToken,
+        address _boughtToken
+    ) public view override returns (uint256) {
         address[] memory path = getPath(_soldToken, _boughtToken);
-
-        return router.getAmountsOut(_amountIn, path)[1];
+        uint256[] memory amounts = router.getAmountsOut(_amountIn, path);
+        return amounts[amounts.length - 1];
     }
-
     /**
      * Returns a path containing tokens' addresses
      * @param _token1 ERC20 token's address
