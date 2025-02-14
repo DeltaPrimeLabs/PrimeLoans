@@ -42,17 +42,22 @@ abstract contract vPrimeController is PendingOwnableUpgradeable, RedstoneConsume
         _disableInitializers();
     }
 
-
     /* ========== INITIALIZER ========== */
 
-    function initialize(ISPrime[] memory _whitelistedSPrimeContracts, ITokenManager _tokenManager, vPrime _vPrime, bool _useOraclePrimeFeed) external initializer {
+    function initialize(
+        ISPrime[] memory _whitelistedSPrimeContracts,
+        ITokenManager _tokenManager,
+        vPrime _vPrime,
+        bool _useOraclePrimeFeed
+    ) external initializer {
+        // Check for duplicate sPrime contracts to avoid double-counting issues.
+        _checkForDuplicates(_whitelistedSPrimeContracts);
         whitelistedSPrimeContracts = _whitelistedSPrimeContracts;
         tokenManager = _tokenManager;
         vPrimeContract = _vPrime;
         useOraclePrimeFeed = _useOraclePrimeFeed;
         __PendingOwnable_init();
     }
-
 
     /* ========== MUTATIVE EXTERNAL FUNCTIONS ========== */
 
@@ -72,13 +77,11 @@ abstract contract vPrimeController is PendingOwnableUpgradeable, RedstoneConsume
         vPrimeContract.setUserNeedsUpdate(userAddress);
     }
 
-
     function updateVPrimeSnapshotsForAccounts(address[] memory accounts) public {
         for (uint i = 0; i < accounts.length; i++) {
             updateVPrimeSnapshot(accounts[i]);
         }
     }
-
 
     /* ========== SETTERS ========== */
 
@@ -116,6 +119,8 @@ abstract contract vPrimeController is PendingOwnableUpgradeable, RedstoneConsume
     * @param newWhitelistedSPrimeContracts An array of addresses representing the new list of whitelisted sPrime contracts.
     */
     function updateWhitelistedSPrimeContracts(ISPrime[] memory newWhitelistedSPrimeContracts) external onlyOwner {
+        // Check for duplicate sPrime contracts before updating.
+        _checkForDuplicates(newWhitelistedSPrimeContracts);
         whitelistedSPrimeContracts = newWhitelistedSPrimeContracts;
         emit WhitelistedSPrimeContractsUpdated(newWhitelistedSPrimeContracts, msg.sender, block.timestamp);
     }
@@ -144,8 +149,6 @@ abstract contract vPrimeController is PendingOwnableUpgradeable, RedstoneConsume
     function updateBorrowersRegistry(IBorrowersRegistry newBorrowersRegistry) external onlyOwner {
         borrowersRegistry = newBorrowersRegistry;
     }
-
-
 
     /* ========== VIEW EXTERNAL FUNCTIONS ========== */
 
@@ -259,7 +262,6 @@ abstract contract vPrimeController is PendingOwnableUpgradeable, RedstoneConsume
             vPrimeCalculations.primeAccountBorrowedDollarValue = _primeAccountBorrowedDollarValue;
         }
 
-
         // How many pairs can be created based on the sPrime
         uint256 maxSPrimePairsCount = (vPrimeCalculations.userSPrimeDollarValueFullyVested + vPrimeCalculations.userSPrimeDollarValueNonVested) / 1e18;
         // How many pairs can be created based on the deposits
@@ -312,6 +314,19 @@ abstract contract vPrimeController is PendingOwnableUpgradeable, RedstoneConsume
         }
     }
 
+    /* ========== INTERNAL HELPERS ========== */
+
+    /**
+     * @dev Checks for duplicate sPrime contract addresses in the provided array.
+     * Reverts if any duplicate is found.
+     */
+    function _checkForDuplicates(ISPrime[] memory arr) internal pure {
+        for (uint256 i = 0; i < arr.length; i++) {
+            for (uint256 j = i + 1; j < arr.length; j++) {
+                require(address(arr[i]) != address(arr[j]), "Duplicate sPrime contract detected");
+            }
+        }
+    }
 
     // EVENTS
     event WhitelistedSPrimeContractsUpdated(ISPrime[] newWhitelistedSPrimeContracts, address userAddress, uint256 timestamp);
