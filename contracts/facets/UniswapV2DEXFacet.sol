@@ -52,7 +52,7 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     * @param _exactSold exact amount of asset to be sold
     * @param _minimumBought minimum amount of asset to be bought
     **/
-    function swapAssets(bytes32 _soldAsset, bytes32 _boughtAsset, uint256 _exactSold, uint256 _minimumBought) internal remainsSolvent returns (uint256[] memory) {
+    function swapAssets(bytes32 _soldAsset, bytes32 _boughtAsset, uint256 _exactSold, uint256 _minimumBought) internal remainsSolvent nonReentrant returns (uint256[] memory) {
         require(_getAvailableBalance(_soldAsset) >= _exactSold, "Insufficient balance");
 
         IERC20Metadata soldToken = getERC20TokenInstance(_soldAsset, true);
@@ -81,7 +81,7 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     /**
     * Adds liquidity
     **/
-    function addLiquidity(bytes32 _assetA, bytes32 _assetB, uint amountA, uint amountB, uint amountAMin, uint amountBMin) internal remainsSolvent {
+    function addLiquidity(bytes32 _assetA, bytes32 _assetB, uint amountA, uint amountB, uint amountAMin, uint amountBMin) internal remainsSolvent nonReentrant {
         require(_getAvailableBalance(_assetA) >= amountA, "Insufficient balance");
         require(_getAvailableBalance(_assetB) >= amountB, "Insufficient balance");
 
@@ -114,7 +114,7 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     /**
     * Removes liquidity
     **/
-    function removeLiquidity(bytes32 _assetA, bytes32 _assetB, uint liquidity, uint amountAMin, uint amountBMin) internal onlyOwnerOrInsolvent{
+    function removeLiquidity(bytes32 _assetA, bytes32 _assetB, uint liquidity, uint amountAMin, uint amountBMin) internal onlyOwnerOrInsolvent nonReentrant{
         IERC20Metadata tokenA = getERC20TokenInstance(_assetA, true);
         IERC20Metadata tokenB = getERC20TokenInstance(_assetB, true);
 

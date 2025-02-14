@@ -2,7 +2,6 @@
 // Last deployed from commit: 58540cc393d0ec84985be9436eb892d71bb3b0c6;
 pragma solidity 0.8.17;
 
-import "../ReentrancyGuardKeccak.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "../lib/SolvencyMethods.sol";
 import "../Pool.sol";
@@ -12,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 //This path is updated during deployment
 import "../lib/local/DeploymentConstants.sol";
 
-contract SmartLoanViewFacet is ReentrancyGuardKeccak, SolvencyMethods {
+contract SmartLoanViewFacet is SolvencyMethods {
     using TransferHelper for address payable;
     using TransferHelper for address;
 
