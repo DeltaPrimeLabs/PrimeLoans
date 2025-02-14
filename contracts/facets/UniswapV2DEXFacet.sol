@@ -102,11 +102,13 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         (lpTokenAddress, amountA, amountB, liquidity)
           = exchange.addLiquidity(address(tokenA), address(tokenB), amountA, amountB, amountAMin, amountBMin);
 
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        {
+            ITokenManager tokenManager = DeploymentConstants.getTokenManager();
 
-        _syncExposure(tokenManager, address(tokenA));
-        _syncExposure(tokenManager, address(tokenB));
-        _syncExposure(tokenManager, lpTokenAddress);
+            _syncExposure(tokenManager, address(tokenA));
+            _syncExposure(tokenManager, address(tokenB));
+            _syncExposure(tokenManager, lpTokenAddress);
+        }
 
         emit AddLiquidity(msg.sender, lpTokenAddress, _assetA, _assetB, liquidity, amountA, amountB, block.timestamp);
     }
@@ -123,16 +125,15 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         address lpTokenAddress = exchange.getPair(address(tokenA), address(tokenB));
         liquidity = Math.min(liquidity, IERC20(lpTokenAddress).balanceOf(address(this)));
 
-        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(lpTokenAddress)) >= liquidity, "Insufficient balance");
+        require(_getAvailableBalance(DeploymentConstants.getTokenManager().tokenAddressToSymbol(lpTokenAddress)) >= liquidity, "Insufficient balance");
 
         lpTokenAddress.safeTransfer(getExchangeIntermediaryContract(), liquidity);
 
         (uint amountA, uint amountB) = exchange.removeLiquidity(address(tokenA), address(tokenB), liquidity, amountAMin, amountBMin);
 
-        _syncExposure(tokenManager, lpTokenAddress);
-        _syncExposure(tokenManager, address(tokenA));
-        _syncExposure(tokenManager, address(tokenB));
+        _syncExposure(DeploymentConstants.getTokenManager(), lpTokenAddress);
+        _syncExposure(DeploymentConstants.getTokenManager(), address(tokenA));
+        _syncExposure(DeploymentConstants.getTokenManager(), address(tokenB));
 
         emit RemoveLiquidity(msg.sender, lpTokenAddress, _assetA, _assetB, liquidity, amountA, amountB, block.timestamp);
     }
