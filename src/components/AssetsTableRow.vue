@@ -1353,7 +1353,11 @@ export default {
             if (caiMintOrBurnSlippageError) {
               this.progressBarService.emitProgressBarErrorState('Insufficient slippage. Please try again later with higher slippage.')
             } else {
-              this.progressBarService.emitProgressBarErrorState('Could not estimate gas for transaction. Please switch aggregator, or try again later.')
+              if (error.message.includes('YakRouter: Insufficient output amount')) {
+                this.progressBarService.emitProgressBarErrorState('Insufficient slippage. Please try again later with higher slippage.')
+              } else {
+                this.progressBarService.emitProgressBarErrorState('Could not estimate gas for transaction. Please switch aggregator, or try again later.')
+              }
             }
             break;
           case 4001:
