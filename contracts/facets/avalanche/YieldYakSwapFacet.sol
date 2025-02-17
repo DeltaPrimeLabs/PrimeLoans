@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 70b36afc5a8b248fa8852d29a59352bc4fdd0209;
+// Last deployed from commit: b520d4af3a004034727dae0a3cdaca12c561e67d;
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -62,7 +62,7 @@ contract YieldYakSwapFacet is ReentrancyGuardKeccak, SolvencyMethods {
         if (adapter == 0x3f314530a4964acCA1f20dad2D35275C23Ed7F5d) return true;  // UnilikeAdapter
         if (adapter == 0xA05A3ebE5D0Ab59E449Fe34014f51948cb9F31dF) return true;  // VelodromeAdapter
         if (adapter == 0xaFb5aE9934266a131F44F2A80c783d6a827A3d1a) return true;  // CurveLikeAdapter
-        if (adapter == 0x491dc06178CAF5b962DB53576a8A1456a8476232) return true;  // Curve1Adapter
+        if (adapter == 0x02a60ff0b14cf8a0955379900df6c7dc1c7E2FbA) return true;  // Curve1Adapter
         if (adapter == 0xd0f6e66113A6D6Cca238371948F4Ce2893D62881) return true;  // CurvePlainAdapter
         if (adapter == 0x5083fC22c18771609fA661fc6304a611613A6068) return true;  // CurvePlainAdapter
         if (adapter == 0x77fc17D927eBcEaEA2c4704BaB1AEebB0547ea42) return true;  // Curve2Adapter

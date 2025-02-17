@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-// Last deployed from commit: 59a88715535c304ec9a5c035f3e455606a3c9d7a;
+// Last deployed from commit: b520d4af3a004034727dae0a3cdaca12c561e67d;
 pragma solidity 0.8.17;
 
 import "../avalanche/YieldYakSwapFacet.sol";
@@ -17,7 +17,7 @@ contract YieldYakSwapArbitrumFacet is YieldYakSwapFacet {
         if (adapter == 0x784E00Cd961a994eff675E889AF6CA564689BF39) return true;  // ?
         if (adapter == 0xb60CE5bF2A231EDA70825f9cdcD0795102218ab0) return true;  // ?
         if (adapter == 0x3b2378a29F9CbDb1f20A72611C0f000aF05630cb) return true;  // ?
-        if (adapter == 0xc5b9041F9748A9A4437Ba90f9806cE8c3F9085Fc) return true;  // ?
+        if (adapter == 0xfaE8D5fF29eE5Ced2Fb213544093C09C1a39124E) return true;  // UniswapV3Adapter
         if (adapter == 0x9d8D45Ad3388846e6F0062196e24df4c7654098b) return true;  // LB22Adapter
         if (adapter == 0xc37c9Db4e84163b29996Aa96ADFeC21683aBA017) return true;  // LB22Adapter
         if (adapter == 0x8D82023cA60B904304033E6f990EAbcEDCF9630E) return true;  // WoofiV2Adapter
