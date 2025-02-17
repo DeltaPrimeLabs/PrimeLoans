@@ -61,7 +61,8 @@ contract WithdrawalIntentFacet is IWithdrawalIntentFacet, ReentrancyGuardKeccak,
             intents.pop();
         }
 
-        address(token).safeTransfer(msg.sender, finalAmount);
+        address tokenTransferAddress = tokenAddress == 0x9e295B5B976a184B14aD8cd72413aD846C299660 ? 0xaE64d55a6f09E4263421737397D1fdFA71896a69 : tokenAddress; // fsGLP -> sGLP translation for transfer
+        tokenTransferAddress.safeTransfer(msg.sender, finalAmount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         _decreaseExposure(tokenManager, tokenAddress, finalAmount);
