@@ -84,6 +84,12 @@ export default {
             availableAssets: ['ETH', 'USDC', 'USDT', 'USDC.e', 'ARB', 'BTC', 'GMX', 'DAI', 'FRAX', 'LINK', 'UNI', 'wstETH', 'GRAIL', 'WOO', 'MAGIC', 'JOE', 'ezETH', 'weETH', 'rsETH'],
             slippageMargin: 0.02
         },
+        GLP_DIRECT: {
+            displayName: 'Direct',
+            availableAssets: ['GLP', 'ETH', 'USDC', 'USDT', 'DAI', 'BTC', 'LINK', 'UNI', 'FRAX'],
+            coreAsset: 'GLP',
+            slippageMargin: 0.02
+        },
         // Level: {
         //     availableAssets: [],
         //     slippageMargin: 0.1
