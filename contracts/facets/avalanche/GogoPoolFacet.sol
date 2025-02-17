@@ -39,8 +39,8 @@ contract GogoPoolFacet is ReentrancyGuardKeccak, SolvencyMethods {
         IGgAvax ggAvax = IGgAvax(GG_AVAX);
         ggAvax.depositAVAX{value: _amount}();
 
-        _syncExposure(tokenManager, GG_AVAX);
-        _syncExposure(tokenManager, address(wrapped));
+        _increaseExposure(tokenManager, GG_AVAX, IERC20(GG_AVAX).balanceOf(address(this)) - initialGgAvaxBalance);
+        _decreaseExposure(tokenManager, address(wrapped), _amount);
     }
 
     modifier onlyOwner() {

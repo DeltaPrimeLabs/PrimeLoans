@@ -146,8 +146,8 @@ contract BeefyFinanceAvalancheFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolve
 
         vaultContract.deposit(stakingDetails.amount);
 
-        _syncExposure(tokenManager, stakingDetails.vaultAddress);
-        _syncExposure(tokenManager, stakingDetails.lpTokenAddress);
+        _increaseExposure(tokenManager, stakingDetails.vaultAddress, vaultContract.balanceOf(address(this)) - initialVaultToken);
+        _decreaseExposure(tokenManager, stakingDetails.lpTokenAddress, stakingDetails.amount);
 
         emit Staked(msg.sender, stakingDetails.lpTokenSymbol, stakingDetails.vaultAddress, stakingDetails.amount, block.timestamp);
     }
@@ -167,8 +167,8 @@ contract BeefyFinanceAvalancheFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolve
 
         vaultContract.withdraw(stakingDetails.amount);
 
-        _syncExposure(tokenManager, stakingDetails.vaultAddress);
-        _syncExposure(tokenManager, stakingDetails.lpTokenAddress);
+        _decreaseExposure(tokenManager, stakingDetails.vaultAddress, stakingDetails.amount);
+        _increaseExposure(tokenManager, stakingDetails.lpTokenAddress, IERC20(stakingDetails.lpTokenAddress).balanceOf(address(this)) - initialLpBalance);
 
         emit Unstaked(msg.sender, stakingDetails.lpTokenSymbol, stakingDetails.vaultAddress, stakingDetails.amount, block.timestamp);
     }

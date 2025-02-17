@@ -52,7 +52,7 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     * @param _exactSold exact amount of asset to be sold
     * @param _minimumBought minimum amount of asset to be bought
     **/
-    function swapAssets(bytes32 _soldAsset, bytes32 _boughtAsset, uint256 _exactSold, uint256 _minimumBought) internal remainsSolvent nonReentrant returns (uint256[] memory) {
+    function swapAssets(bytes32 _soldAsset, bytes32 _boughtAsset, uint256 _exactSold, uint256 _minimumBought) internal remainsSolvent returns (uint256[] memory) {
         require(_getAvailableBalance(_soldAsset) >= _exactSold, "Insufficient balance");
 
         IERC20Metadata soldToken = getERC20TokenInstance(_soldAsset, true);
@@ -69,9 +69,9 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         uint256[] memory amounts = exchange.swap(address(soldToken), address(boughtToken), _exactSold, _minimumBought);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-
-        _syncExposure(tokenManager, address(soldToken));
-        _syncExposure(tokenManager, address(boughtToken));
+        
+        _decreaseExposure(tokenManager, address(soldToken), initialSellTokenBalance - soldToken.balanceOf(address(this)));
+        _increaseExposure(tokenManager, address(boughtToken), boughtToken.balanceOf(address(this)) - initialBuyTokenBalance);
 
         emit Swap(msg.sender, _soldAsset, _boughtAsset, amounts[0], amounts[amounts.length - 1], block.timestamp);
 
@@ -81,7 +81,7 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     /**
     * Adds liquidity
     **/
-    function addLiquidity(bytes32 _assetA, bytes32 _assetB, uint amountA, uint amountB, uint amountAMin, uint amountBMin) internal remainsSolvent nonReentrant {
+    function addLiquidity(bytes32 _assetA, bytes32 _assetB, uint amountA, uint amountB, uint amountAMin, uint amountBMin) internal remainsSolvent {
         require(_getAvailableBalance(_assetA) >= amountA, "Insufficient balance");
         require(_getAvailableBalance(_assetB) >= amountB, "Insufficient balance");
 
@@ -102,13 +102,11 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         (lpTokenAddress, amountA, amountB, liquidity)
           = exchange.addLiquidity(address(tokenA), address(tokenB), amountA, amountB, amountAMin, amountBMin);
 
-        {
-            ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-
-            _syncExposure(tokenManager, address(tokenA));
-            _syncExposure(tokenManager, address(tokenB));
-            _syncExposure(tokenManager, lpTokenAddress);
-        }
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        
+        _decreaseExposure(tokenManager, address(tokenA), amountA);
+        _decreaseExposure(tokenManager, address(tokenB), amountB);
+        _increaseExposure(tokenManager, lpTokenAddress, liquidity);
 
         emit AddLiquidity(msg.sender, lpTokenAddress, _assetA, _assetB, liquidity, amountA, amountB, block.timestamp);
     }
@@ -116,7 +114,7 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
     /**
     * Removes liquidity
     **/
-    function removeLiquidity(bytes32 _assetA, bytes32 _assetB, uint liquidity, uint amountAMin, uint amountBMin) internal onlyOwnerOrInsolvent nonReentrant{
+    function removeLiquidity(bytes32 _assetA, bytes32 _assetB, uint liquidity, uint amountAMin, uint amountBMin) internal onlyOwnerOrInsolvent{
         IERC20Metadata tokenA = getERC20TokenInstance(_assetA, true);
         IERC20Metadata tokenB = getERC20TokenInstance(_assetB, true);
 
@@ -125,15 +123,16 @@ contract UniswapV2DEXFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         address lpTokenAddress = exchange.getPair(address(tokenA), address(tokenB));
         liquidity = Math.min(liquidity, IERC20(lpTokenAddress).balanceOf(address(this)));
 
-        require(_getAvailableBalance(DeploymentConstants.getTokenManager().tokenAddressToSymbol(lpTokenAddress)) >= liquidity, "Insufficient balance");
+        ITokenManager tokenManager = DeploymentConstants.getTokenManager();
+        require(_getAvailableBalance(tokenManager.tokenAddressToSymbol(lpTokenAddress)) >= liquidity, "Insufficient balance");
 
         lpTokenAddress.safeTransfer(getExchangeIntermediaryContract(), liquidity);
 
         (uint amountA, uint amountB) = exchange.removeLiquidity(address(tokenA), address(tokenB), liquidity, amountAMin, amountBMin);
 
-        _syncExposure(DeploymentConstants.getTokenManager(), lpTokenAddress);
-        _syncExposure(DeploymentConstants.getTokenManager(), address(tokenA));
-        _syncExposure(DeploymentConstants.getTokenManager(), address(tokenB));
+        _decreaseExposure(tokenManager, lpTokenAddress, liquidity);
+        _increaseExposure(tokenManager, address(tokenA), amountA);
+        _increaseExposure(tokenManager, address(tokenB), amountB);
 
         emit RemoveLiquidity(msg.sender, lpTokenAddress, _assetA, _assetB, liquidity, amountA, amountB, block.timestamp);
     }

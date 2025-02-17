@@ -184,8 +184,8 @@ contract YieldYakFacetArbi is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
 
         uint256 yrtTokenReceived = yrtToken.balanceOf(address(this)) - initialYRTBalance;
 
-        _syncExposure(tokenManager, stakingDetails.tokenAddress);
-        _syncExposure(tokenManager, stakingDetails.vaultAddress);
+        _decreaseExposure(tokenManager, stakingDetails.tokenAddress, stakingDetails.amount);
+        _increaseExposure(tokenManager, stakingDetails.vaultAddress, yrtTokenReceived);
 
         emit Staked(
             msg.sender,
@@ -214,8 +214,8 @@ contract YieldYakFacetArbi is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerO
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         uint256 depositTokenReceived = depositToken.balanceOf(address(this)) - initialDepositTokenBalance;
 
-        _syncExposure(tokenManager, stakingDetails.tokenAddress);
-        _syncExposure(tokenManager, stakingDetails.vaultAddress);
+        _increaseExposure(tokenManager, stakingDetails.tokenAddress, depositTokenReceived);
+        _decreaseExposure(tokenManager, stakingDetails.vaultAddress, stakingDetails.amount);
 
         emit Unstaked(
             msg.sender,

@@ -180,9 +180,9 @@ contract SmartLoanLiquidationFacet is ReentrancyGuardKeccak, SolvencyMethods {
 
             pool.repay(repayAmount);
             if (repayAmount > supplyAmount) {
-                _syncExposure(tokenManager, address(token));
+                _decreaseExposure(tokenManager, address(token), repayAmount - supplyAmount);
             } else {
-                _syncExposure(tokenManager, address(token));
+                _increaseExposure(tokenManager, address(token), supplyAmount - repayAmount);
             }
 
             emit LiquidationRepay(msg.sender, config.assetsToRepay[i], repayAmount, block.timestamp);
@@ -236,7 +236,7 @@ contract SmartLoanLiquidationFacet is ReentrancyGuardKeccak, SolvencyMethods {
                     address(token).safeTransfer(DeploymentConstants.getFeesRedistributionAddress(), transferAmount);
                     emit LiquidationFeesRedistributionTransfer(DeploymentConstants.getFeesRedistributionAddress(), assetsOwned[i], transferAmount, block.timestamp);
 
-                    _syncExposure(tokenManager, address(token));
+                    _decreaseExposure(tokenManager, address(token), transferAmount*3);
 
                 }
 

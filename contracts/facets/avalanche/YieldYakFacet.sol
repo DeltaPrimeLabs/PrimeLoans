@@ -70,8 +70,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
         uint256 yrtTokenReceived = yrtToken.balanceOf(address(this)) - initialYRTBalance;
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, AVAX_TOKEN);
-        _syncExposure(tokenManager, YY_AAVE_AVAX);
+        _decreaseExposure(tokenManager, AVAX_TOKEN, amount);
+        _increaseExposure(tokenManager, YY_AAVE_AVAX, yrtTokenReceived);
 
         emit Staked(
             msg.sender,
@@ -212,8 +212,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
         IWrappedNativeToken(AVAX_TOKEN).deposit{value: depositTokenBalanceAfterWithdrawal}();
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, AVAX_TOKEN);
-        _syncExposure(tokenManager, YY_AAVE_AVAX);
+        _increaseExposure(tokenManager, AVAX_TOKEN, depositTokenBalanceAfterWithdrawal);
+        _decreaseExposure(tokenManager, YY_AAVE_AVAX, amount);
 
         emit Unstaked(
             msg.sender,
@@ -355,8 +355,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
         IYieldYak(stakingDetails.vaultAddress).deposit(stakingDetails.amount);
 
         uint256 yrtTokenReceived = yrtToken.balanceOf(address(this)) - initialYRTBalance;
-        _syncExposure(tokenManager, stakingDetails.vaultAddress);
-        _syncExposure(tokenManager, stakingDetails.tokenAddress);
+        _increaseExposure(tokenManager, stakingDetails.vaultAddress, yrtTokenReceived);
+        _decreaseExposure(tokenManager, stakingDetails.tokenAddress, stakingDetails.amount);
 
         emit Staked(
             msg.sender,
@@ -384,8 +384,8 @@ contract YieldYakFacet is ReentrancyGuardKeccak, SolvencyMethods, OnlyOwnerOrIns
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
         uint256 depositTokenReceived = depositToken.balanceOf(address(this)) - initialDepositTokenBalance;
-        _syncExposure(tokenManager, stakingDetails.tokenAddress);
-        _syncExposure(tokenManager, stakingDetails.vaultAddress);
+        _increaseExposure(tokenManager, stakingDetails.tokenAddress, depositTokenReceived);
+        _decreaseExposure(tokenManager, stakingDetails.vaultAddress, stakingDetails.amount);
 
         emit Unstaked(
             msg.sender,

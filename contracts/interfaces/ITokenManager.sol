@@ -14,7 +14,6 @@ interface ITokenManager {
     }
 
     function activateToken ( address token ) external;
-    function updateUserExposure( address user, address token) external;
     function addPoolAssets ( poolAsset[] memory poolAssets ) external;
     function addTokenAssets ( Asset[] memory tokenAssets ) external;
     function deactivateToken ( address token ) external;

@@ -192,7 +192,7 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods, IParaSwapFacet
 
         // Update state before external calls
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(details.soldToken));
+        _decreaseExposure(tokenManager, address(details.soldToken), swapData.fromAmount);
 
         // Approve tokens
         address(details.soldToken).safeApprove(PARA_ROUTER, 0);
@@ -222,7 +222,7 @@ contract ParaSwapFacet is ReentrancyGuardKeccak, SolvencyMethods, IParaSwapFacet
         checkSlippage(details, soldAmount, boughtAmount, isLiquidation);
 
         // Update bought token exposure
-        _syncExposure(tokenManager, address(details.boughtToken));
+        _increaseExposure(tokenManager, address(details.boughtToken), boughtAmount);
 
         emit SwapExecuted(
             msg.sender,

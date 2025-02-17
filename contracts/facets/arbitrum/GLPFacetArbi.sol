@@ -42,7 +42,7 @@ contract GLPFacetArbi is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         uint256 postClaimingWethBalance = wethToken.balanceOf(address(this));
         uint256 wethClaimed = postClaimingWethBalance - initialWethBalance;
 
-        _syncExposure(tokenManager, address(wethToken));
+        _increaseExposure(tokenManager, address(wethToken), wethClaimed);
 
         emit GLPFeesClaim(msg.sender, wethClaimed, block.timestamp);
     }
@@ -74,8 +74,8 @@ contract GLPFacetArbi is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         require((glpToken.balanceOf(address(this)) - glpInitialBalance) == glpOutputAmount, "GLP minted and balance difference mismatch");
 
-        _syncExposure(tokenManager, GLP_TOKEN_ADDRESS);
-        _syncExposure(tokenManager, _token);
+        _increaseExposure(tokenManager, GLP_TOKEN_ADDRESS, glpOutputAmount);
+        _decreaseExposure(tokenManager, _token, _amount);
 
         emit GLPMint(
             msg.sender,
@@ -107,8 +107,8 @@ contract GLPFacetArbi is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         require((redeemedToken.balanceOf(address(this)) - redeemedTokenInitialBalance) == redeemedAmount, "Redeemed token amount and balance difference mismatch");
         require(redeemedAmount >= _minOut, "Insufficient output amount");
 
-        _syncExposure(tokenManager, GLP_TOKEN_ADDRESS);
-        _syncExposure(tokenManager, _tokenOut);
+        _decreaseExposure(tokenManager, GLP_TOKEN_ADDRESS, _glpAmount);
+        _increaseExposure(tokenManager, _tokenOut, redeemedAmount);
 
         emit GLPRedemption(
             msg.sender,

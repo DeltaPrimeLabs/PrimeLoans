@@ -101,7 +101,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address(token).safeTransferFrom(msg.sender, address(this), _amount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(token));
+        _increaseExposure(tokenManager, address(token), _amount);
 
         emit Funded(msg.sender, _fundedAsset, _amount, block.timestamp);
     }
@@ -119,7 +119,11 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         fromToken.safeApprove(address(fromAssetPool), repayAmount);
         fromAssetPool.repay(repayAmount);
 
-        _syncExposure(tokenManager, fromToken);
+        if(receivedRepayTokenAmount > repayAmount) {
+            _increaseExposure(tokenManager, fromToken, receivedRepayTokenAmount - repayAmount);
+        }  else {
+            _decreaseExposure(tokenManager, fromToken, repayAmount - receivedRepayTokenAmount);
+        }
     }
 
     /**
@@ -133,7 +137,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         address(stakedGlpToken).safeTransferFrom(msg.sender, address(this), _amount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(stakedGlpToken));
+        _increaseExposure(tokenManager, address(stakedGlpToken), _amount);
 
         emit Funded(msg.sender, "GLP", _amount, block.timestamp);
     }
@@ -190,7 +194,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         pool.borrow(_amount);
 
         IERC20Metadata token = getERC20TokenInstance(_asset, false);
-        _syncExposure(tokenManager, address(token));
+        _increaseExposure(tokenManager, address(token), _amount);
 
         notifyVPrimeController(DiamondStorageLib.contractOwner(), tokenManager);
         emit Borrowed(msg.sender, _asset, _amount, block.timestamp);
@@ -222,7 +226,7 @@ contract AssetsOperationsFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
 
         pool.repay(_amount);
 
-        _syncExposure(tokenManager, address(token));
+        _decreaseExposure(tokenManager, address(token), _amount);
 
         emit Repaid(msg.sender, _asset, _amount, block.timestamp);
 

@@ -336,7 +336,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         IYYWombatPool(yyLpToken).deposit(wombatLpAmount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(stakeToken));
+        _decreaseExposure(tokenManager, address(stakeToken), amount);
 
         IStakingPositions.StakedPosition memory position = IStakingPositions
             .StakedPosition({
@@ -397,7 +397,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(toToken));
+        _increaseExposure(tokenManager, address(toToken), amountOut);
     }
 
     function _depositNative(
@@ -437,7 +437,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         IYYWombatPool(yyLpToken).deposit(wombatLpAmount);
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(wrapped));
+        _decreaseExposure(tokenManager, address(wrapped), amount);
 
         IStakingPositions.StakedPosition memory position = IStakingPositions
             .StakedPosition({
@@ -502,7 +502,7 @@ contract YieldYakWombatFacet is ReentrancyGuardKeccak, OnlyOwnerOrInsolvent {
         }
 
         ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-        _syncExposure(tokenManager, address(wrapped));
+        _increaseExposure(tokenManager, address(wrapped), amountOut);
     }
 
     function _depositAndStakeWombatLPYY(

@@ -75,7 +75,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
             IWrappedNativeToken nativeToken = IWrappedNativeToken(DeploymentConstants.getNativeToken());
             nativeToken.deposit{value : balance}();
             ITokenManager tokenManager = DeploymentConstants.getTokenManager();
-            _syncExposure(tokenManager, address(nativeToken));
+            _increaseExposure(tokenManager, address(nativeToken), balance);
         }
     }
 
@@ -110,7 +110,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
                 if (newBalance > beforeBalances[i]) {
                     ITokenManager tokenManager = DeploymentConstants.getTokenManager();
                     if(tokenManager.isTokenAssetActive(address(tokens[i]))) {
-                        _syncExposure(tokenManager, address(tokens[i]));
+                        _increaseExposure(tokenManager, address(tokens[i]), newBalance - beforeBalances[i]);
                     }
                 }
             }
@@ -140,7 +140,7 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
             } else {
                 ITokenManager tokenManager = DeploymentConstants.getTokenManager();
                 if(tokenManager.isTokenAssetActive(rewardToken)){
-                    _syncExposure(tokenManager, rewardToken);
+                    _increaseExposure(tokenManager, rewardToken, reward);
                 }
             }
         }
@@ -247,8 +247,8 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
             }
         }
 
-        _syncExposure(tokenManager, address(liquidityParameters.tokenX));
-        _syncExposure(tokenManager, address(liquidityParameters.tokenY));
+        _decreaseExposure(tokenManager, address(liquidityParameters.tokenX), amountXAdded);
+        _decreaseExposure(tokenManager, address(liquidityParameters.tokenY), amountYAdded);
 
         if (maxBinsPerPrimeAccount() > 0 && ownedBins.length > maxBinsPerPrimeAccount()) revert TooManyBins();
 
@@ -282,8 +282,8 @@ abstract contract TraderJoeV2Facet is ITraderJoeV2Facet, ReentrancyGuardKeccak, 
         bytes32 tokenX = tokenManager.tokenAddressToSymbol(address(parameters.tokenX));
         bytes32 tokenY = tokenManager.tokenAddressToSymbol(address(parameters.tokenY));
 
-        _syncExposure(tokenManager, address(parameters.tokenX));
-        _syncExposure(tokenManager, address(parameters.tokenY));
+        _increaseExposure(tokenManager, address(parameters.tokenX), amountXReceived);
+        _increaseExposure(tokenManager, address(parameters.tokenY), amountYReceived);
 
         emit RemoveLiquidityTraderJoeV2(msg.sender, address(lbPair), parameters.ids, parameters.amounts, tokenX, tokenY, block.timestamp);
     }
