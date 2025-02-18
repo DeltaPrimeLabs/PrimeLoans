@@ -455,6 +455,128 @@ const Protocol = {
 // Configuration object for all tokens
 const tokenConfigurations = [
     {
+        address: "0x4F9Fd6Be4a90f2620860d680c0d4d5Fb53d1A825",  // AIXBT
+        pools: [
+            {
+                poolAddress: "0xF3E7E359b75a7223BA9D71065C57DDd4F5D8747e",
+                isCL: false,
+                tickSpacing: 0,
+                shortTwap: 0,
+                twapChecks: [
+                    {
+                        duration: 0,
+                        maxDeviation: 0
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.AERODROME
+            },
+            {
+                poolAddress: "0x22A52bB644f855ebD5ca2edB643FF70222D70C31",
+                isCL: true,
+                tickSpacing: 200,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.AERODROME
+            },
+            {
+                poolAddress: "0xf1Fdc83c3A336bdbDC9fB06e318B08EadDC82FF4",
+                isCL: true,
+                tickSpacing: 60,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                protocol: Protocol.UNISWAP
+            },
+            {
+                poolAddress: "0x47808DdBC91646b21B307FeFBaF7ee200B004CcC",
+                isCL: true,
+                tickSpacing: 200,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.UNISWAP
+            }
+        ]
+    },
+    {
+        address: "0x532f27101965dd16442E59d40670FaF5eBB142E4",  // BRETT
+        pools: [
+            {
+                poolAddress: "0x43BBb129b56A998732767725A183b7a566843dBA",
+                isCL: false,
+                tickSpacing: 0,
+                shortTwap: 0,
+                twapChecks: [
+                    {
+                        duration: 0,
+                        maxDeviation: 0
+                    }
+                ],
+                baseAsset: "0x940181a94a35a4569e4529a3cdfb74e38fd98631",
+                protocol: Protocol.AERODROME
+            },
+            {
+                poolAddress: "0x4e829F8A5213c42535AB84AA40BD4aDCCE9cBa02",
+                isCL: true,
+                tickSpacing: 200,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.AERODROME
+            },
+            {
+                poolAddress: "0xBA3F945812a83471d709BCe9C3CA699A19FB46f7",
+                isCL: true,
+                tickSpacing: 200,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.UNISWAP
+            },
+            {
+                poolAddress: "0x76Bf0abD20f1e0155Ce40A62615a90A709a6C3D8",
+                isCL: true,
+                tickSpacing: 60,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.UNISWAP
+            }
+        ]
+    },
+    {
         address: "0x768be13e1680b5ebe0024c42c896e3db59ec0149", //SKI
         pools: [
             {
