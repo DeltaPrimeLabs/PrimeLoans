@@ -1,4 +1,4 @@
-const jsonRPC = "https://rpc.ankr.com/arbitrum";
+const jsonRPC = "https://arbitrum-mainnet.core.chainstack.com/9a30fb13b2159a76c8e143c52d5579bf";
 const fetch = require("node-fetch");
 
 const FACTORY_ARTIFACT = require("../../artifacts/contracts/SmartLoansFactory.sol/SmartLoansFactory.json");
