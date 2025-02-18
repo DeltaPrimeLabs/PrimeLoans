@@ -829,9 +829,37 @@ const tokenConfigurations = [
                 protocol: Protocol.AERODROME
             },
             {
+                poolAddress: "0xb909F567c5c2Bb1A4271349708CC4637D7318b4A",
+                isCL: false,
+                tickSpacing: 0,
+                shortTwap: 0,
+                twapChecks: [
+                    {
+                        duration: 0,
+                        maxDeviation: 0
+                    }
+                ],
+                baseAsset: "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+                protocol: Protocol.AERODROME
+            },
+            {
                 poolAddress: "0x9c087Eb773291e50CF6c6a90ef0F4500e349B903",
                 isCL: true,
                 tickSpacing: 10,
+                shortTwap: 60,
+                twapChecks: [
+                    {
+                        duration: 3600,
+                        maxDeviation: ethers.utils.parseUnits("0.05", 18)
+                    }
+                ],
+                baseAsset: "0x4200000000000000000000000000000000000006",
+                protocol: Protocol.UNISWAP
+            },
+            {
+                poolAddress: "0x1D4daB3f27C7F656b6323C1D6Ef713b48A8f72F1",
+                isCL: true,
+                tickSpacing: 60,
                 shortTwap: 60,
                 twapChecks: [
                     {
