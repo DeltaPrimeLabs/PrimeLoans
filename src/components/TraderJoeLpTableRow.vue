@@ -732,7 +732,7 @@ export default {
       const tokenXTVL = formatUnits(reserves[0], this.firstAsset.decimals) * this.firstAsset.price;
       const tokenYTVL = formatUnits(reserves[1], this.secondAsset.decimals) * this.secondAsset.price;
 
-      this.lpToken.tvl = tokenXTVL + tokenYTVL;
+      // this.lpToken.tvl = tokenXTVL + tokenYTVL;
       this.activeId = activeId;
       this.activePrice = getBinPrice(activeId, this.lpToken.binStep, this.firstAsset.decimals, this.secondAsset.decimals);
       this.hasBinsInPool = this.lpToken.binIds && this.lpToken.binIds.length > 0;

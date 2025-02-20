@@ -7,7 +7,7 @@
       <div class="apr-widget__value">
         <template>
           <div class="value">
-            328
+            3289
           </div>
         </template>
       </div>

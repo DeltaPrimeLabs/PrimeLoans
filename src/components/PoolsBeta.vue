@@ -2,8 +2,6 @@
   <div class="pools-beta-component">
     <div class="container">
       <div class="main-content">
-        <SPrimePanel class="sprime-panel" :is-prime-account="false" :user-address="account"
-                     :total-deposits-or-borrows="totalDeposit"></SPrimePanel>
 
         <WithdrawalQueue ref="withdrawalQueue"
                          :all-queues="poolIntents"
