@@ -454,9 +454,9 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         if (price1 == 0 || price2 == 0) {
             return type(uint256).max;
         }
-        return (price1 > price2)
-            ? FullMath.mulDiv((price1 - price2), PRECISION, price2)
-            : FullMath.mulDiv((price2 - price1), PRECISION, price1);
+        uint256 diff = (price1 > price2) ? price1 - price2 : price2 - price1;
+        uint256 average = (price1 + price2) / 2;
+        return FullMath.mulDiv(diff, PRECISION, average);
     }
 
     /**
