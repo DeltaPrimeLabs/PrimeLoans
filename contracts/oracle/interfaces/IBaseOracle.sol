@@ -8,6 +8,8 @@ pragma solidity ^0.8.17;
 interface IBaseOracle {
     // Custom errors
     error EmptyPools();
+    error InvalidPoolTokens();
+    error NoCLPoolProvided();
     error InvalidBaseAsset();
     error TokenNotConfigured();
     error LengthMismatch();

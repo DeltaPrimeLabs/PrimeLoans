@@ -118,13 +118,39 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         delete tokenConfigs[token].pools;
         tokenConfigs[token].isConfigured = true;
 
+        bool hasCLPool = false;
+
         for (uint256 i = 0; i < pools.length; i++) {
             if (pools[i].baseAsset == address(0)) revert IBaseOracle.InvalidBaseAsset();
+
+            // Validate that the pool actually contains the token and its baseAsset.
+            if (pools[i].isCL) {
+                // Use the Uniswap V3 pool interface.
+                address poolToken0 = IUniswapV3Pool(pools[i].poolAddress).token0();
+                address poolToken1 = IUniswapV3Pool(pools[i].poolAddress).token1();
+                bool validPair =
+                    (token == poolToken0 && pools[i].baseAsset == poolToken1) ||
+                    (token == poolToken1 && pools[i].baseAsset == poolToken0);
+                if (!validPair) revert IBaseOracle.InvalidPoolTokens();
+                hasCLPool = true;
+            } else {
+                // Use the Uniswap V2 pool interface.
+                address poolToken0 = IUniswapV2Pair(pools[i].poolAddress).token0();
+                address poolToken1 = IUniswapV2Pair(pools[i].poolAddress).token1();
+                bool validPair =
+                    (token == poolToken0 && pools[i].baseAsset == poolToken1) ||
+                    (token == poolToken1 && pools[i].baseAsset == poolToken0);
+                if (!validPair) revert IBaseOracle.InvalidPoolTokens();
+            }
+
             tokenConfigs[token].pools.push(pools[i]);
         }
 
+        if (!hasCLPool) revert IBaseOracle.NoCLPoolProvided();
+
         emit TokenConfigured(token);
     }
+
 
     /**
      * @notice Removes a token and its associated pools from the configuration.
