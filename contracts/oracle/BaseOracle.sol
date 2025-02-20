@@ -194,8 +194,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             if (params.baseAssetPrices[i] == 0) revert IBaseOracle.InvalidInput();
         }
 
-        uint256 maxQuotePrice = 0; // Maximum USD value (18 decimals) among all quotes.
-        uint256 minTwapPrice = type(uint256).max; // Minimum TWAP-based USD value from CL pools.
+        uint256 maxSpotUsdValue = 0; // Maximum USD value (18 decimals) among all quotes.
+        uint256 minTwapUsdValue = type(uint256).max; // Minimum TWAP-based USD value from CL pools.
         bool hasTwapPrice = false;
         uint256 validPoolCount = 0; // Count of pools that returned a nonzero valid quote.
 
@@ -222,8 +222,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
             // Only consider nonzero quotes.
             if (quotePrice > 0) {
-                if (quotePrice > maxQuotePrice) {
-                    maxQuotePrice = quotePrice;
+                if (quotePrice > maxSpotUsdValue) {
+                    maxSpotUsdValue = quotePrice;
                 }
                 valid = true;
             }
@@ -232,8 +232,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             if (pools[i].isCL) {
                 uint256 twapPrice = calculateCLTwapPrice(params.asset, params.amount, params.useTwapChecks, baseAssetPrice, pools[i]);
                 if (twapPrice > 0) {
-                    if (twapPrice < minTwapPrice) {
-                        minTwapPrice = twapPrice;
+                    if (twapPrice < minTwapUsdValue) {
+                        minTwapUsdValue = twapPrice;
                     }
                     hasTwapPrice = true;
                     valid = true;
@@ -247,11 +247,11 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
         // Require at least two pools to provide a valid quote.
         if (validPoolCount < 2) revert IBaseOracle.NoValidPrice();
-        if (maxQuotePrice == 0) revert IBaseOracle.NoValidPrice();
+        if (maxSpotUsdValue == 0) revert IBaseOracle.NoValidPrice();
         if (!hasTwapPrice) revert IBaseOracle.NoValidPrice();
 
         // Select the lower (more conservative) of the spot and TWAP quotes.
-        uint256 finalDollarValue = MathUpgradeable.min(maxQuotePrice, minTwapPrice);
+        uint256 finalDollarValue = MathUpgradeable.min(maxSpotUsdValue, minTwapUsdValue);
 
         // Normalize params.amount to 1e18 scale based on the asset's decimals.
         uint8 tokenDecimals = IERC20(params.asset).decimals();
