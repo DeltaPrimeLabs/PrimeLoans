@@ -104,25 +104,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     }
 
     /**
-     * @notice Converts an amount from standardized (1e18) scale to the token’s native units.
-     * @param amount The standardized amount (1e18 scale).
-     * @param decimals The token's decimals.
-     * @return The amount in the token’s native representation.
-     */
-    function denormalizeAmount(uint256 amount, uint8 decimals)
-    internal
-    pure
-    returns (uint256)
-    {
-        if (decimals > 18) {
-            return amount * (10 ** (decimals - 18));
-        } else if (decimals < 18) {
-            return amount / (10 ** (18 - decimals));
-        }
-        return amount;
-    }
-
-    /**
      * @notice Configures a token with its associated pools.
      * @dev Only callable by the owner. Reverts if no pools are provided or if a base asset is invalid.
      * @param token The token address.
