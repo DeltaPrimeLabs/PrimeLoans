@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "./interfaces/IBaseOracle.sol";
 import "../lib/uniswap-v3/FixedPoint96.sol";
 import "../lib/uniswap-v3/FullMath.sol";
 import "../lib/uniswap-v3/TickMath.sol";
@@ -36,7 +37,6 @@ interface IERC20 {
     function decimals() external view returns (uint8);
 }
 
-
 /**
  * @title BaseOracle
  * @dev Calculates the USD value of an asset using multiple liquidity pools.
@@ -49,86 +49,10 @@ interface IERC20 {
  * by that native amount.
  */
 contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
-    // Custom errors for better error handling.
-    error EmptyPools();
-    error InvalidBaseAsset();
-    error TokenNotConfigured();
-    error LengthMismatch();
-    error MissingBaseAssetPrice();
-    error NoValidPrice();
-    error TWAPDeviationTooHigh();
-    error InvalidInput();
-    error DivisionByZero();
-
-    enum Protocol {
-        UNISWAP,
-        AERODROME
-    }
-
-    struct QuoterConfig {
-        address clQuoter;
-    }
-
-    /**
-     * @notice Represents a deviation check for a given TWAP duration.
-     * @param duration The TWAP duration (in seconds).
-     * @param maxDeviation Maximum allowed deviation (in 1e18 scale).
-     */
-    struct TWAPCheck {
-        uint32 duration;
-        uint256 maxDeviation;
-    }
-
-    /**
-     * @notice Configuration for a pool used in price calculation.
-     * @param poolAddress The address of the pool (Uniswap V3 or AMM).
-     * @param isCL Whether the pool is a centralized liquidity (CL) pool (true) or an AMM pool (false).
-     * @param tickSpacing Tick spacing for CL pools (ignored for AMM pools).
-     * @param shortTwap The primary (short) TWAP duration (in seconds) used for the price calculation.
-     * @param twapChecks Array of additional TWAP checks.
-     * @param baseAsset The base asset of the pool (e.g. USDC, WETH).
-     * @param protocol The protocol this pool belongs to (Uniswap or Aerodrome).
-     */
-    struct PoolConfig {
-        address poolAddress;
-        bool isCL;
-        int24 tickSpacing;
-        uint32 shortTwap;
-        TWAPCheck[] twapChecks;
-        address baseAsset;
-        Protocol protocol;
-    }
-
-    /**
-     * @notice Configuration for a token, including its associated pools.
-     * @param isConfigured Indicates whether the token is configured.
-     * @param pools Array of pools used to calculate the token's price.
-     */
-    struct TokenConfig {
-        bool isConfigured;
-        PoolConfig[] pools;
-    }
-
-    /**
-     * @notice Parameters for calculating the USD dollar price of an asset.
-     * @param asset The asset token address.
-     * @param amount The amount of the asset in standardized 1e18 scale.
-     * @param useTwapChecks Whether to perform TWAP deviation checks.
-     * @param baseAssets Array of base asset addresses.
-     * @param baseAssetPrices Array of USD prices for the base assets (1e18 scale).
-     */
-    struct GetDollarValueParams {
-        address asset;
-        uint256 amount;
-        bool useTwapChecks;
-        address[] baseAssets;
-        uint256[] baseAssetPrices;
-    }
-
     // Mapping from token addresses to their configurations.
-    mapping(address => TokenConfig) public tokenConfigs;
+    mapping(address => IBaseOracle.TokenConfig) public tokenConfigs;
     // Mapping from protocols to their quoter configurations.
-    mapping(Protocol => QuoterConfig) public quoterConfigs;
+    mapping(IBaseOracle.Protocol => IBaseOracle.QuoterConfig) public quoterConfigs;
     // Constant for precision (1e18).
     uint256 private constant PRECISION = 1e18;
 
@@ -153,11 +77,11 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         transferOwnership(_initialOwner);
 
         // Initialize quoter configurations.
-        quoterConfigs[Protocol.AERODROME] = QuoterConfig({
+        quoterConfigs[IBaseOracle.Protocol.AERODROME] = IBaseOracle.QuoterConfig({
             clQuoter: 0x66828E953cb2Ef164ef1E40653D864534251CFCB
         });
 
-        quoterConfigs[Protocol.UNISWAP] = QuoterConfig({
+        quoterConfigs[IBaseOracle.Protocol.UNISWAP] = IBaseOracle.QuoterConfig({
             clQuoter: 0x222cA98F00eD15B1faE10B61c277703a194cf5d2
         });
     }
@@ -204,17 +128,17 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @param token The token address.
      * @param pools Array of pool configurations for the token.
      */
-    function configureToken(address token, PoolConfig[] calldata pools)
+    function configureToken(address token, IBaseOracle.PoolConfig[] calldata pools)
     external
     onlyOwner
     nonReentrant
     {
-        if (pools.length == 0) revert EmptyPools();
+        if (pools.length == 0) revert IBaseOracle.EmptyPools();
         delete tokenConfigs[token].pools;
         tokenConfigs[token].isConfigured = true;
 
         for (uint256 i = 0; i < pools.length; i++) {
-            if (pools[i].baseAsset == address(0)) revert InvalidBaseAsset();
+            if (pools[i].baseAsset == address(0)) revert IBaseOracle.InvalidBaseAsset();
             tokenConfigs[token].pools.push(pools[i]);
         }
 
@@ -249,24 +173,24 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
  * @return The USD price per one token in 1e18 scale (e.g., 1e18 represents $1.00)
  * @dev Reverts if no valid quote prices are found or if no valid TWAP prices are available
  */
-    function getTokenDollarPrice(GetDollarValueParams calldata params)
+    function getTokenDollarPrice(IBaseOracle.GetDollarValueParams calldata params)
     external
     view
     returns (uint256)
     {
-        if (!tokenConfigs[params.asset].isConfigured) revert TokenNotConfigured();
-        if (params.baseAssets.length != params.baseAssetPrices.length) revert LengthMismatch();
-        if (params.amount == 0) revert InvalidInput();
+        if (!tokenConfigs[params.asset].isConfigured) revert IBaseOracle.TokenNotConfigured();
+        if (params.baseAssets.length != params.baseAssetPrices.length) revert IBaseOracle.LengthMismatch();
+        if (params.amount == 0) revert IBaseOracle.InvalidInput();
 
         for (uint256 i = 0; i < params.baseAssetPrices.length; i++) {
-            if (params.baseAssetPrices[i] == 0) revert InvalidInput();
+            if (params.baseAssetPrices[i] == 0) revert IBaseOracle.InvalidInput();
         }
 
         uint256 maxQuotePrice = 0; // Track maximum of all quotes (AMM or CL)
         uint256 minTwapPrice = type(uint256).max; // Track minimum of CL TWAPs
         bool hasTwapPrice = false;
 
-        PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
+        IBaseOracle.PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
         for (uint256 i = 0; i < pools.length; i++) {
             uint256 baseAssetPrice = 0;
@@ -276,7 +200,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                     break;
                 }
             }
-            if (baseAssetPrice == 0) revert MissingBaseAssetPrice();
+            if (baseAssetPrice == 0) revert IBaseOracle.MissingBaseAssetPrice();
 
             // Get quote price (either AMM or CL)
             uint256 quotePrice = pools[i].isCL ?
@@ -307,8 +231,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         }
 
         // If we don't have valid prices, revert
-        if (maxQuotePrice == 0) revert NoValidPrice();
-        if (!hasTwapPrice) revert NoValidPrice(); // Must have at least one valid TWAP
+        if (maxQuotePrice == 0) revert IBaseOracle.NoValidPrice();
+        if (!hasTwapPrice) revert IBaseOracle.NoValidPrice(); // Must have at least one valid TWAP
 
         // Take minimum between max quote price and min TWAP price
         uint256 finalDollarValue = MathUpgradeable.min(maxQuotePrice, minTwapPrice);
@@ -329,7 +253,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         address asset,
         uint256 amount,
         uint256 baseAssetPrice,
-        PoolConfig memory pool
+        IBaseOracle.PoolConfig memory pool
     ) internal view returns (uint256) {
         address quoter = quoterConfigs[pool.protocol].clQuoter;
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
@@ -367,7 +291,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         address asset,
         uint256 amount,
         uint256 baseAssetPrice,
-        PoolConfig memory poolConfig
+        IBaseOracle.PoolConfig memory poolConfig
     ) internal view returns (uint256) {
         try IUniswapV2Pair(poolConfig.poolAddress).getReserves() returns (
             uint112 reserve0,
@@ -411,7 +335,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint256 amount,
         bool useTwapChecks,
         uint256 baseAssetPrice,
-        PoolConfig memory pool
+        IBaseOracle.PoolConfig memory pool
     ) internal view returns (uint256) {
         IUniswapV3Pool uniPool = IUniswapV3Pool(pool.poolAddress);
         address token0 = uniPool.token0();
@@ -427,7 +351,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                 uint256 twapPrice = getTwapPrice(pool.poolAddress, duration, isToken0);
                 twapPrice = FullMath.mulDiv(twapPrice, baseAssetPrice, PRECISION);
                 if (calculateDeviation(priceFromPool, twapPrice) > maxDeviation) {
-                    revert TWAPDeviationTooHigh();
+                    revert IBaseOracle.TWAPDeviationTooHigh();
                 }
             }
         }
@@ -562,7 +486,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
     function getFullTokenConfig(address token)
     external
     view
-    returns (TokenConfig memory)
+    returns (IBaseOracle.TokenConfig memory)
     {
         return tokenConfigs[token];
     }
