@@ -170,10 +170,12 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint256 maxQuotePrice = 0; // Track maximum of all quotes (AMM or CL)
         uint256 minTwapPrice = type(uint256).max; // Track minimum of CL TWAPs
         bool hasTwapPrice = false;
+        uint256 validPoolCount = 0; // Count of pools that returned at least one valid price
 
         IBaseOracle.PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
         for (uint256 i = 0; i < pools.length; i++) {
+            bool valid = false;
             uint256 baseAssetPrice = 0;
             for (uint256 j = 0; j < params.baseAssets.length; j++) {
                 if (params.baseAssets[j] == pools[i].baseAsset) {
@@ -183,37 +185,39 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             }
             if (baseAssetPrice == 0) revert IBaseOracle.MissingBaseAssetPrice();
 
-            // Get quote price (either AMM or CL)
-            uint256 quotePrice = pools[i].isCL ?
-                calculateCLQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i]) :
-                calculateAMMQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i]);
+            // Get quote price (either from CL or AMM pool)
+            uint256 quotePrice = pools[i].isCL
+                ? calculateCLQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i])
+                : calculateAMMQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i]);
 
-            // Update max quote price if valid
-            if (quotePrice != type(uint256).max && quotePrice > maxQuotePrice) {
-                maxQuotePrice = quotePrice;
+            if (quotePrice != type(uint256).max) {
+                if (quotePrice > maxQuotePrice) {
+                    maxQuotePrice = quotePrice;
+                }
+                valid = true;
             }
 
             // For CL pools, also get TWAP price
             if (pools[i].isCL) {
-                uint256 twapPrice = calculateCLTwapPrice(
-                    params.asset,
-                    params.amount,
-                    params.useTwapChecks,
-                    baseAssetPrice,
-                    pools[i]
-                );
-
-                // Update min TWAP price if valid
-                if (twapPrice != type(uint256).max && twapPrice < minTwapPrice) {
-                    minTwapPrice = twapPrice;
+                uint256 twapPrice = calculateCLTwapPrice(params.asset, params.amount, params.useTwapChecks, baseAssetPrice, pools[i]);
+                if (twapPrice != type(uint256).max) {
+                    if (twapPrice < minTwapPrice) {
+                        minTwapPrice = twapPrice;
+                    }
                     hasTwapPrice = true;
+                    valid = true;
                 }
+            }
+
+            if (valid) {
+                validPoolCount++;
             }
         }
 
-        // If we don't have valid prices, revert
+        // Require at least two distinct pools provided valid prices.
+        if (validPoolCount < 2) revert IBaseOracle.NoValidPrice();
         if (maxQuotePrice == 0) revert IBaseOracle.NoValidPrice();
-        if (!hasTwapPrice) revert IBaseOracle.NoValidPrice(); // Must have at least one valid TWAP
+        if (!hasTwapPrice) revert IBaseOracle.NoValidPrice();
 
         // Take minimum between max quote price and min TWAP price
         uint256 finalDollarValue = MathUpgradeable.min(maxQuotePrice, minTwapPrice);
@@ -221,6 +225,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         // Convert to per-token price in 1e18 scale
         return FullMath.mulDiv(finalDollarValue, PRECISION, params.amount);
     }
+
 
     /**
      * @notice Obtains the total USD dollar value using a CL (centralized liquidity) pool quote.
