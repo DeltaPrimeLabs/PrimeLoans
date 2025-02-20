@@ -90,6 +90,13 @@ describe("BaseOracle", function () {
                 baseAsset: TOKENS.WETH,
                 protocol: Protocol.AERODROME
             },
+            {
+                address: "0x6d6391B9bD02Eefa00FA711fB1Cb828A6471d283",
+                isCL: false,
+                tickSpacing: 0,
+                baseAsset: TOKENS.WETH,
+                protocol: Protocol.UNISWAP
+            },
         ]
     };
 
@@ -257,7 +264,7 @@ describe("BaseOracle", function () {
         });
 
         it("Should calculate SKI/USD price with multiple base assets", async function () {
-            const amount = ethers.utils.parseUnits("1", 9);
+            const amount = ethers.utils.parseUnits("3", 9);
             const wethPrice = ethers.utils.parseUnits("2633", 18);
 
             const priceParams = {

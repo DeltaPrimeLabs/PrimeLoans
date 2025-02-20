@@ -223,7 +223,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         uint256 finalDollarValue = MathUpgradeable.min(maxQuotePrice, minTwapPrice);
 
         // Convert to per-token price in 1e18 scale
-        return FullMath.mulDiv(finalDollarValue, PRECISION, params.amount);
+        uint256 normalizedAmount = normalizeAmount(params.amount, IERC20(params.asset).decimals());
+        return FullMath.mulDiv(finalDollarValue, PRECISION, normalizedAmount);
     }
 
 
@@ -349,7 +350,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             isToken0
         );
 
-        return FullMath.mulDiv(priceFromPool, amount, PRECISION);
+        uint256 normalizedAmount = normalizeAmount(amount, IERC20(asset).decimals());
+        return FullMath.mulDiv(priceFromPool, normalizedAmount, PRECISION);
     }
 
     /**
