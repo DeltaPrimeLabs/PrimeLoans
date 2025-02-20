@@ -12,15 +12,6 @@ import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 
 // Minimal ABIs
-
-interface IUniswapV2Router02 {
-    function factory() external pure returns (address);
-}
-
-interface IUniswapV2Factory {
-    function getPair(address tokenA, address tokenB) external view returns (address pair);
-}
-
 interface IUniswapV2Pair {
     function token0() external view returns (address);
     function token1() external view returns (address);
@@ -45,12 +36,6 @@ interface IERC20 {
     function decimals() external view returns (uint8);
 }
 
-interface IAMM {
-    function getAmountOut(uint256 amountIn, address tokenIn)
-    external
-    view
-    returns (uint256);
-}
 
 /**
  * @title BaseOracle
