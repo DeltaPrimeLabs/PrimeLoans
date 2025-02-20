@@ -3,6 +3,7 @@ import config from '../config';
 import POOL from '@artifacts/contracts/WrappedNativeTokenPool.sol/WrappedNativeTokenPool.json';
 import {formatUnits, fromWei, parseUnits} from '@/utils/calculate';
 import redstone from 'redstone-api';
+import {aprToApy} from '../utils/calculate';
 
 
 const ethers = require('ethers');
@@ -50,7 +51,7 @@ export default class PoolService {
             contract: poolContract,
             tvl: isPoolDisabled ? 0 : tvl,
             deposit: deposit,
-            apy: isPoolDisabled ? 0 : apy,
+            apy: isPoolDisabled ? 0 : aprToApy(apy),
             borrowingAPY: isPoolDisabled ? 0 : fromWei(poolDetails[3]),
             totalBorrowed: isPoolDisabled ? 0 : totalBorrowed,
             interest: isPoolDisabled ? 0 : deposit * apy / 365,

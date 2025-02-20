@@ -1145,8 +1145,9 @@ export default {
           let tokenContract = new ethers.Contract(asset.address, erc20ABI, provider.getSigner());
           balances[asset.symbol] = formatUnits(await tokenContract.balanceOf(state.smartLoanContract.address), asset.decimals);
           if (balances[asset.symbol] === undefined || Number(balances[asset.symbol]) === 0) {
-            console.warn('deleting', asset.symbol);
-            delete state.assets[asset.symbol];
+            console.warn('deprecated', asset.symbol);
+          } else {
+            state.assets[asset.symbol].showUnsupported = true;
           }
         }
       }

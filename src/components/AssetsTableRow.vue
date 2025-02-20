@@ -1,6 +1,6 @@
 <template>
   <div class="fund-table-row-component"
-       :class="{'expanded': rowExpanded, 'expanded--trading-view': selectedChart === 'TradingView'}">
+       :class="{'expanded': rowExpanded, 'expanded--trading-view': selectedChart === 'TradingView', 'hidden': asset.unsupported && !asset.showUnsupported}">
     <div class="table__row" v-if="asset" :class="{'inactive': asset.inactive}">
       <div class="table__cell asset">
         <img class="asset__icon" :src="getAssetIcon(asset.symbol)">
@@ -1447,6 +1447,10 @@ export default {
     &.expanded--trading-view {
       height: 715px;
     }
+  }
+
+  &.hidden {
+    display: none;
   }
 
   .table__row {
