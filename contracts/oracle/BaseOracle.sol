@@ -109,6 +109,22 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         PoolConfig[] pools;
     }
 
+    /**
+     * @notice Parameters for calculating the USD dollar price of an asset.
+     * @param asset The asset token address.
+     * @param amount The amount of the asset in standardized 1e18 scale.
+     * @param useTwapChecks Whether to perform TWAP deviation checks.
+     * @param baseAssets Array of base asset addresses.
+     * @param baseAssetPrices Array of USD prices for the base assets (1e18 scale).
+     */
+    struct GetDollarValueParams {
+        address asset;
+        uint256 amount;
+        bool useTwapChecks;
+        address[] baseAssets;
+        uint256[] baseAssetPrices;
+    }
+
     // Mapping from token addresses to their configurations.
     mapping(address => TokenConfig) public tokenConfigs;
     // Mapping from protocols to their quoter configurations.
@@ -215,21 +231,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         emit TokenRemoved(token);
     }
 
-    /**
-     * @notice Parameters for calculating the USD dollar price of an asset.
-     * @param asset The asset token address.
-     * @param amount The amount of the asset in standardized 1e18 scale.
-     * @param useTwapChecks Whether to perform TWAP deviation checks.
-     * @param baseAssets Array of base asset addresses.
-     * @param baseAssetPrices Array of USD prices for the base assets (1e18 scale).
-     */
-    struct GetDollarValueParams {
-        address asset;
-        uint256 amount;
-        bool useTwapChecks;
-        address[] baseAssets;
-        uint256[] baseAssetPrices;
-    }
 
 /**
  * @notice Calculates the USD dollar price per one token (1e18 scale) of an asset based on its configured pools.
