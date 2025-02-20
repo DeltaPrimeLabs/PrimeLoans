@@ -189,20 +189,22 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         if (params.baseAssets.length != params.baseAssetPrices.length) revert IBaseOracle.LengthMismatch();
         if (params.amount == 0) revert IBaseOracle.InvalidInput();
 
+        // Ensure all provided base asset prices are nonzero.
         for (uint256 i = 0; i < params.baseAssetPrices.length; i++) {
             if (params.baseAssetPrices[i] == 0) revert IBaseOracle.InvalidInput();
         }
 
-        uint256 maxQuotePrice = 0; // Track maximum of all quotes (AMM or CL)
-        uint256 minTwapPrice = type(uint256).max; // Track minimum of CL TWAPs
+        uint256 maxQuotePrice = 0; // Maximum USD value (18 decimals) among all quotes.
+        uint256 minTwapPrice = type(uint256).max; // Minimum TWAP-based USD value from CL pools.
         bool hasTwapPrice = false;
-        uint256 validPoolCount = 0; // Count of pools that returned at least one valid price
+        uint256 validPoolCount = 0; // Count of pools that returned a nonzero valid quote.
 
         IBaseOracle.PoolConfig[] memory pools = tokenConfigs[params.asset].pools;
 
         for (uint256 i = 0; i < pools.length; i++) {
             bool valid = false;
             uint256 baseAssetPrice = 0;
+            // Find the base asset price corresponding to the pool's baseAsset.
             for (uint256 j = 0; j < params.baseAssets.length; j++) {
                 if (params.baseAssets[j] == pools[i].baseAsset) {
                     baseAssetPrice = params.baseAssetPrices[j];
@@ -211,22 +213,25 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             }
             if (baseAssetPrice == 0) revert IBaseOracle.MissingBaseAssetPrice();
 
-            // Get quote price (either from CL or AMM pool)
-            uint256 quotePrice = pools[i].isCL
-                ? quoteUsdValueFromCLPool(params.asset, params.amount, baseAssetPrice, pools[i])
-                : quoteUsdValueFromAMMPool(params.asset, params.amount, baseAssetPrice, pools[i]);
+            uint256 quotePrice;
+            if (pools[i].isCL) {
+                quotePrice = quoteUsdValueFromCLPool(params.asset, params.amount, baseAssetPrice, pools[i]);
+            } else {
+                quotePrice = quoteUsdValueFromAMMPool(params.asset, params.amount, baseAssetPrice, pools[i]);
+            }
 
-            if (quotePrice != type(uint256).max) {
+            // Only consider nonzero quotes.
+            if (quotePrice > 0) {
                 if (quotePrice > maxQuotePrice) {
                     maxQuotePrice = quotePrice;
                 }
                 valid = true;
             }
 
-            // For CL pools, also get TWAP price
+            // For CL pools, also try to get a TWAP-based quote.
             if (pools[i].isCL) {
                 uint256 twapPrice = calculateCLTwapPrice(params.asset, params.amount, params.useTwapChecks, baseAssetPrice, pools[i]);
-                if (twapPrice != type(uint256).max) {
+                if (twapPrice > 0) {
                     if (twapPrice < minTwapPrice) {
                         minTwapPrice = twapPrice;
                     }
@@ -240,16 +245,17 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             }
         }
 
-        // Require at least two distinct pools provided valid prices.
+        // Require at least two pools to provide a valid quote.
         if (validPoolCount < 2) revert IBaseOracle.NoValidPrice();
         if (maxQuotePrice == 0) revert IBaseOracle.NoValidPrice();
         if (!hasTwapPrice) revert IBaseOracle.NoValidPrice();
 
-        // Take minimum between max quote price and min TWAP price
+        // Select the lower (more conservative) of the spot and TWAP quotes.
         uint256 finalDollarValue = MathUpgradeable.min(maxQuotePrice, minTwapPrice);
 
-        // Convert to per-token price in 1e18 scale
-        uint256 normalizedAmount = normalizeAmount(params.amount, IERC20(params.asset).decimals());
+        // Normalize params.amount to 1e18 scale based on the asset's decimals.
+        uint8 tokenDecimals = IERC20(params.asset).decimals();
+        uint256 normalizedAmount = normalizeAmount(params.amount, tokenDecimals);
         return FullMath.mulDiv(finalDollarValue, PRECISION, normalizedAmount);
     }
 
@@ -311,7 +317,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             uint112 reserve1,
             uint32 /* blockTimestampLast */
         ) {
-            if (reserve0 == 0 || reserve1 == 0) return type(uint256).max;
+            // If reserves are empty, consider the USD value as zero.
+            if (reserve0 == 0 || reserve1 == 0) return 0;
 
             address token0 = IUniswapV2Pair(poolConfig.poolAddress).token0();
             (uint256 reserveIn, uint256 reserveOut) = token0 == asset
@@ -321,16 +328,15 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             uint256 denominator = (reserveIn * 1000) + amount * 997;
             uint256 amountOut = amount * 997 * reserveOut / denominator;
 
-            if (amountOut == 0) return type(uint256).max;
+            // If the swap would produce 0 output, return 0 USD value.
+            if (amountOut == 0) return 0;
 
-            uint256 normalizedAmountOut;
-            {
-                uint8 decimalsOut = IERC20(poolConfig.baseAsset).decimals();
-                normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
-            }
+            uint8 decimalsOut = IERC20(poolConfig.baseAsset).decimals();
+            uint256 normalizedAmountOut = normalizeAmount(amountOut, decimalsOut);
             return FullMath.mulDiv(normalizedAmountOut, baseAssetPrice, PRECISION);
         } catch {
-            return type(uint256).max;
+            // Revert if an error occurs in fetching reserves.
+            revert("AMM pool quote error");
         }
     }
 
@@ -454,7 +460,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
             );
             return unitPrice;
         } catch {
-            return type(uint256).max;
+            revert("TWAP price calculation failed");
         }
     }
 
