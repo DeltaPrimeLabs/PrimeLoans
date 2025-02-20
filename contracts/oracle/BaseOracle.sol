@@ -187,8 +187,8 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
 
             // Get quote price (either from CL or AMM pool)
             uint256 quotePrice = pools[i].isCL
-                ? calculateCLQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i])
-                : calculateAMMQuotePrice(params.asset, params.amount, baseAssetPrice, pools[i]);
+                ? quoteUsdValueFromCLPool(params.asset, params.amount, baseAssetPrice, pools[i])
+                : quoteUsdValueFromAMMPool(params.asset, params.amount, baseAssetPrice, pools[i]);
 
             if (quotePrice != type(uint256).max) {
                 if (quotePrice > maxQuotePrice) {
@@ -236,7 +236,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @param pool The pool configuration.
      * @return The total USD dollar value (1e18 scale) for the provided amount.
      */
-    function calculateCLQuotePrice(
+    function quoteUsdValueFromCLPool(
         address asset,
         uint256 amount,
         uint256 baseAssetPrice,
@@ -274,7 +274,7 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
      * @param poolConfig The pool configuration.
      * @return The total USD dollar value (1e18 scale) for the provided amount.
      */
-    function calculateAMMQuotePrice(
+    function quoteUsdValueFromAMMPool(
         address asset,
         uint256 amount,
         uint256 baseAssetPrice,
