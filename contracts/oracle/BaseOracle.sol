@@ -31,6 +31,15 @@ interface IUniswapV3Pool {
     view
     returns (int56[] memory tickCumulatives, uint160[] memory);
     function fee() external view returns (uint24);
+    function tickSpacing() external view returns (int24);
+}
+
+interface IUniswapV3Factory {
+    function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address);
+}
+
+interface IAerodromeFactory {
+    function getPool(address tokenA, address tokenB, int24 tickSpacing) external view returns (address);
 }
 
 interface IERC20 {
@@ -103,6 +112,16 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         return amount * (10 ** (18 - decimals));
     }
 
+    function dexProtocolToFactoryAddressMapping(IBaseOracle.Protocol protocol) internal pure returns (address) {
+        if (protocol == IBaseOracle.Protocol.AERODROME) {
+            return 0x5e7BB104d84c7CB9B682AaC2F3d509f5F406809A; // Aerodrome PoolFactory
+        } else if (protocol == IBaseOracle.Protocol.UNISWAP) {
+            return 0x33128a8fC17869897dcE68Ed026d694621f6FDfD; // UniswapV3 PoolFactory
+        } else {
+            revert IBaseOracle.InvalidProtocol();
+        }
+    }
+
     /**
      * @notice Configures a token with its associated pools.
      * @dev Only callable by the owner. Reverts if no pools are provided or if a base asset is invalid.
@@ -123,7 +142,6 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
         for (uint256 i = 0; i < pools.length; i++) {
             if (pools[i].baseAsset == address(0)) revert IBaseOracle.InvalidBaseAsset();
 
-            // Validate that the pool actually contains the token and its baseAsset.
             if (pools[i].isCL) {
                 // Use the Uniswap V3 pool interface.
                 address poolToken0 = IUniswapV3Pool(pools[i].poolAddress).token0();
@@ -132,6 +150,22 @@ contract BaseOracle is Initializable, OwnableUpgradeable, ReentrancyGuardUpgrade
                     (token == poolToken0 && pools[i].baseAsset == poolToken1) ||
                     (token == poolToken1 && pools[i].baseAsset == poolToken0);
                 if (!validPair) revert IBaseOracle.InvalidPoolTokens();
+
+                // Validate that the pool was created by the proper factory.
+                address factoryAddress = dexProtocolToFactoryAddressMapping(pools[i].protocol);
+                address validPool;
+                if (pools[i].protocol == IBaseOracle.Protocol.UNISWAP) {
+                    uint24 fee = IUniswapV3Pool(pools[i].poolAddress).fee();
+                    validPool = IUniswapV3Factory(factoryAddress).getPool(poolToken0, poolToken1, fee);
+                } else if (pools[i].protocol == IBaseOracle.Protocol.AERODROME) {
+                    int24 tickSpacing = IUniswapV3Pool(pools[i].poolAddress).tickSpacing();
+                    validPool = IAerodromeFactory(factoryAddress).getPool(poolToken0, poolToken1, tickSpacing);
+                } else {
+                    revert IBaseOracle.InvalidProtocol();
+                }
+                if (validPool != pools[i].poolAddress) {
+                    revert("Invalid pool address");
+                }
                 hasCLPool = true;
             } else {
                 // Use the Uniswap V2 pool interface.
