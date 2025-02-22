@@ -506,12 +506,14 @@ export default {
         if (this.provider.provider.isRabby) {
           window.isRabby = true;
           window.isMetaMask = false;
+          this.showNoWalletBanner = false;
           return;
         }
 
         if (this.provider.provider.isMetaMask && !this.provider.provider.isRabby) {
           window.isMetaMask = true;
           window.isRabby = false;
+          this.showNoWalletBanner = false;
           return;
         }
       }
