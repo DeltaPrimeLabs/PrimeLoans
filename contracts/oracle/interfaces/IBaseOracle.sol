@@ -39,7 +39,6 @@ interface IBaseOracle {
     struct PoolConfig {
         address poolAddress;
         bool isCL;
-        int24 tickSpacing;
         uint32 shortTwap;
         TWAPCheck[] twapChecks;
         address baseAsset;
