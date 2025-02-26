@@ -125,13 +125,10 @@ import AppToggle from './components/AppToggle.vue';
 import ProtectedByBar from './components/ProtectedByBar.vue';
 import InfoIcon from './components/InfoIcon.vue';
 import TermsModal from './components/TermsModal.vue';
-import {combineLatest, forkJoin, map} from 'rxjs';
+import {combineLatest, forkJoin} from 'rxjs';
 import fetch from 'node-fetch';
 import RestrictedCountryModal from './components/RestrictedCountryModal.vue';
-import SPrimeModal from './components/SPrimeModal.vue';
 import TermsService from "./services/termsService";
-
-const BUY_SPRIME_MODAL_CLOSED = 'BUY_SPRIME_MODAL_CLOSED';
 
 export default {
   components: {
@@ -171,7 +168,6 @@ export default {
       signingTermsInProgress: false,
       showDeprecatedAssetsBanner: false,
       restrictModalOpen: false,
-      buySPrimeModalOpened: false,
       showWarningBanner: false,
     };
   },
@@ -428,7 +424,6 @@ export default {
                   if (isCountryRestricted) {
                     this.restrictApp(false);
                   } else {
-                    this.openBuySPrimeModal();
                   }
                 } else {
                   // console.log('SAVINGS PAGE - some deposit - checking terms');
@@ -443,7 +438,6 @@ export default {
                           this.handleTermsSign(walletAddress, true);
                         }
                       } else {
-                        this.openBuySPrimeModal();
                       }
                     })
                   }
@@ -456,7 +450,6 @@ export default {
               if (isCountryRestricted) {
                 this.restrictApp(false);
               } else {
-                this.openBuySPrimeModal();
               }
             } else {
               // console.log('PA PAGE - account created - checking terms');
@@ -473,7 +466,6 @@ export default {
                     }
                   } else {
                     // console.log('PA PAGE - account created - terms signed');
-                    this.openBuySPrimeModal();
                   }
                 });
               }
@@ -572,20 +564,6 @@ export default {
         const wasDark = localStorage.getItem('PA_VIEW_THEME') === 'DARK'
         document.documentElement.classList.remove(wasDark ? 'theme--light' : 'theme--dark')
         document.documentElement.classList.add(wasDark ? 'theme--dark' : 'theme--light')
-      }
-    },
-
-    openBuySPrimeModal() {
-      const now = new Date().getTime();
-      if (now > LAUNCH_TIME) {
-        const buySPrimeModalClosedOnce = localStorage.getItem(BUY_SPRIME_MODAL_CLOSED);
-        if (!this.buySPrimeModalOpened && !buySPrimeModalClosedOnce) {
-          const sprimeModalInstance = this.openModal(SPrimeModal);
-          this.buySPrimeModalOpened = true;
-          sprimeModalInstance.$on('CLOSE', () => {
-            localStorage.setItem(BUY_SPRIME_MODAL_CLOSED, 'true');
-          })
-        }
       }
     },
 
